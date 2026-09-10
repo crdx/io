@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/key"
+	"crdx.org/io/cmd/oh/style"
 )
 
 type fakeList struct {
@@ -622,5 +623,286 @@ func TestRemovingFromTheEndPullsTheViewportBackToFillTheScreen(t *testing.T) {
 	}
 	if self.cursor != 10 {
 		t.Errorf("expected the cursor to fall back a row, got %d", self.cursor)
+	}
+}
+
+type previewableList struct {
+	fakeList
+
+	read    map[string][]string
+	failure error
+	reads   int
+	rooms   []int
+}
+
+func (self *previewableList) Preview(index int, keypress key.Key) (Preview, bool) {
+	if keypress.Code != key.Enter || !self.IsChoosable(index) {
+		return Preview{}, false
+	}
+
+	name := self.rows[index]
+
+	return Preview{
+		Title: "reading " + name,
+		Read: func(room int) ([]string, error) {
+			self.reads++
+			self.rooms = append(self.rooms, room)
+			if self.failure != nil {
+				return nil, self.failure
+			}
+
+			return self.read[name], nil
+		},
+	}, true
+}
+
+func previewableRows(names ...string) *previewableList {
+	rows := &previewableList{fakeList: fakeList{rows: names}, read: map[string][]string{}}
+	for _, name := range names {
+		rows.read[name] = []string{name + " one", name + " two", name + " three", name + " four"}
+	}
+
+	return rows
+}
+
+func TestAPreviewOpensOnTheLastRowsOfWhatItRead(t *testing.T) {
+	rows := previewableRows("first", "second")
+	self := listState(rows, 1)
+	self.measure = func() (int, int) { return 40, 5 }
+
+	self.apply(key.Key{Code: key.Enter})
+	if !self.preview.isOpen {
+		t.Fatal("expected enter to open the preview")
+	}
+
+	self.draw()
+	if self.preview.offset != 2 {
+		t.Errorf("expected the preview to open at its end, got the offset %d", self.preview.offset)
+	}
+	if rows.reads != 1 {
+		t.Errorf("expected what was read to be kept, got %d reads", rows.reads)
+	}
+}
+
+func TestAPreviewIsReadAgainOnlyWhenTheRoomChanges(t *testing.T) {
+	rows := previewableRows("first")
+	self := listState(rows, 0)
+	room := 40
+	self.measure = func() (int, int) { return room, 10 }
+
+	self.apply(key.Key{Code: key.Enter})
+	self.draw()
+	self.draw()
+	if rows.reads != 1 {
+		t.Errorf("expected one read while nothing changed, got %d", rows.reads)
+	}
+
+	room = 60
+	self.draw()
+	if !slices.Equal(rows.rooms, []int{40, 60}) {
+		t.Errorf("expected the wider terminal to be read again, got %v", rows.rooms)
+	}
+}
+
+func TestAPreviewScrollsWithoutMovingTheCursorBehindIt(t *testing.T) {
+	rows := previewableRows("first", "second")
+	self := listState(rows, 1)
+	self.measure = func() (int, int) { return 40, 5 }
+
+	self.apply(key.Key{Code: key.Enter})
+	self.draw()
+
+	self.apply(key.Key{Code: key.Up})
+	if self.preview.offset != 1 {
+		t.Errorf("expected the preview to scroll back a row, got %d", self.preview.offset)
+	}
+	if self.cursor != 1 {
+		t.Errorf("expected the cursor to stay where it was, got %d", self.cursor)
+	}
+
+	self.apply(key.Key{Code: key.Home})
+	if self.preview.offset != 0 {
+		t.Errorf("expected home to reach the start, got %d", self.preview.offset)
+	}
+
+	self.apply(key.Key{Code: key.Up})
+	if self.preview.offset != 0 {
+		t.Errorf("expected the start to hold, got %d", self.preview.offset)
+	}
+
+	self.apply(key.Key{Code: key.End})
+	self.apply(key.Key{Code: key.Down})
+	if self.preview.offset != 2 {
+		t.Errorf("expected the end to hold, got %d", self.preview.offset)
+	}
+}
+
+func TestAPreviewIsClosedByEscapeAndByQ(t *testing.T) {
+	for _, keypress := range []key.Key{{Code: key.Escape}, {Code: key.Rune, Value: 'q'}} {
+		rows := previewableRows("first", "second")
+		self := listState(rows, 0)
+		self.measure = func() (int, int) { return 40, 6 }
+
+		self.apply(key.Key{Code: key.Enter})
+		self.draw()
+
+		if action := self.apply(keypress); action != continuePicking {
+			t.Errorf("expected %v to close the preview alone, got the action %v", keypress, action)
+		}
+		if self.preview.isOpen {
+			t.Errorf("expected %v to close the preview", keypress)
+		}
+		if self.query != "" {
+			t.Errorf("expected the key that closed the preview to be swallowed, got %q", self.query)
+		}
+	}
+}
+
+func TestAPreviewChoosesItsRowOnASecondEnter(t *testing.T) {
+	rows := previewableRows("first", "second")
+	self := listState(rows, 1)
+	self.measure = func() (int, int) { return 40, 6 }
+
+	self.apply(key.Key{Code: key.Enter})
+	self.draw()
+
+	if action := self.apply(key.Key{Code: key.Enter}); action != rowChosen {
+		t.Errorf("expected a second enter to choose the row, got the action %v", action)
+	}
+	if self.chosen() != 1 {
+		t.Errorf("expected the previewed row to be the chosen one, got %d", self.chosen())
+	}
+}
+
+func TestAPreviewThatCouldNotBeReadSaysSoAndStaysOpen(t *testing.T) {
+	rows := previewableRows("first")
+	rows.failure = errors.New("the journal could not be read")
+	self := listState(rows, 0)
+	self.measure = func() (int, int) { return 40, 6 }
+
+	self.apply(key.Key{Code: key.Enter})
+	self.draw()
+
+	if !self.preview.isOpen {
+		t.Fatal("expected the preview to stay open after a failure")
+	}
+	if self.preview.failure != "the journal could not be read" {
+		t.Errorf("expected the failure to be kept, got %q", self.preview.failure)
+	}
+}
+
+func TestAListThatCannotBePreviewedChoosesOnEnter(t *testing.T) {
+	self := listState(rowsNamed("first", "second"), 1)
+
+	if action := self.apply(key.Key{Code: key.Enter}); action != rowChosen {
+		t.Errorf("expected enter to choose where nothing can be previewed, got %v", action)
+	}
+}
+
+type reachableList struct {
+	previewableList
+}
+
+func (self *reachableList) IsReachable(int) bool { return true }
+
+func (self *reachableList) Preview(index int, keypress key.Key) (Preview, bool) {
+	if keypress.Code != key.Enter {
+		return Preview{}, false
+	}
+
+	name := self.rows[index]
+
+	return Preview{
+		Title: "reading " + name,
+		Read:  func(int) ([]string, error) { return self.read[name], nil },
+	}, true
+}
+
+func reachableRows(names ...string) *reachableList {
+	return &reachableList{previewableList: *previewableRows(names...)}
+}
+
+func TestARowThatCannotBeChosenIsStillReached(t *testing.T) {
+	rows := reachableRows("first", "second")
+	rows.unrunnable = []bool{true, false}
+	self := listState(rows, 0)
+
+	if self.cursor != 0 {
+		t.Fatalf("expected the cursor to rest on the first row, got %d", self.cursor)
+	}
+
+	self.move(1)
+	self.move(-1)
+	if self.cursor != 0 {
+		t.Errorf("expected the cursor to come back to the row that cannot be chosen, got %d", self.cursor)
+	}
+}
+
+func TestARowThatCannotBeChosenIsReadButNeverOpened(t *testing.T) {
+	rows := reachableRows("first", "second")
+	rows.unrunnable = []bool{true, false}
+	self := listState(rows, 0)
+	self.measure = func() (int, int) { return 40, 6 }
+
+	if action := self.apply(key.Key{Code: key.Enter}); action != continuePicking {
+		t.Fatalf("expected enter to read the row rather than choose it, got %v", action)
+	}
+	if !self.preview.isOpen {
+		t.Fatal("expected the preview to open on a row that cannot be chosen")
+	}
+	if self.preview.isOpenable {
+		t.Error("expected the preview to know the row cannot be opened")
+	}
+
+	self.draw()
+
+	if action := self.apply(key.Key{Code: key.Enter}); action != continuePicking {
+		t.Errorf("expected a second enter to refuse to open the row, got %v", action)
+	}
+	if !self.preview.isOpen {
+		t.Error("expected the preview to stay open where the row cannot be opened")
+	}
+}
+
+func TestAListWithoutReachabilityFollowsWhatCanBeChosen(t *testing.T) {
+	rows := previewableRows("first", "second")
+	rows.unrunnable = []bool{true, false}
+	self := listState(rows, 1)
+
+	self.move(-1)
+	if self.cursor != 1 {
+		t.Errorf("expected the row that cannot be chosen to be skipped, got %d", self.cursor)
+	}
+}
+
+func TestAPreviewMarksWhyItCannotBeOpened(t *testing.T) {
+	rows := reachableRows("first", "second")
+	rows.unrunnable = []bool{true, false}
+	self := listState(rows, 0)
+	self.measure = func() (int, int) { return 40, 6 }
+
+	self.apply(key.Key{Code: key.Enter})
+
+	mark, rest, _ := strings.Cut(runningPreviewHint, " ")
+	if got, want := self.previewHint(40), style.Success(mark)+style.Subtle(" "+rest); got != want {
+		t.Errorf("got the hint %q, want %q", got, want)
+	}
+
+	self.preview.isOpenable = true
+	if got, want := self.previewHint(40), style.Subtle(openablePreviewHint); got != want {
+		t.Errorf("got the hint %q, want %q", got, want)
+	}
+}
+
+func TestAHintWithNoRoomForItsMarkIsStillDrawn(t *testing.T) {
+	rows := reachableRows("first")
+	rows.unrunnable = []bool{true}
+	self := listState(rows, 0)
+	self.measure = func() (int, int) { return 4, 6 }
+
+	self.apply(key.Key{Code: key.Enter})
+
+	if got, want := self.previewHint(4), style.Success(Clip(runningPreviewHint, 4)); got != want {
+		t.Errorf("got the hint %q, want %q", got, want)
 	}
 }

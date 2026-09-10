@@ -23,15 +23,15 @@ func TestARunningSessionIsColouredWithoutAMarker(t *testing.T) {
 	}
 }
 
-func TestAShortConversationIsHeldBackAndAChosenOneIsNot(t *testing.T) {
+func TestEveryConversationIsDrawnAlikeWhateverItHolds(t *testing.T) {
 	self := &sessionList{store: Store{Sessions: []*Session{
-		{Name: "able-dolphin", MessageCount: shortConversation - 1},
-		{Name: "brave-otter", MessageCount: shortConversation},
+		{Name: "able-dolphin", MessageCount: 1},
+		{Name: "brave-otter", MessageCount: 40},
 		{Name: "chewy-sardine", MessageCount: 1, IsRunning: true},
 	}}}
 
-	if got, want := self.Row(0, false, 80), style.Subtle(row(self.at(0), false, 80)); got != want {
-		t.Errorf("expected a short conversation to be held back, got %q", got)
+	if got, want := self.Row(0, false, 80), style.Answer(row(self.at(0), false, 80)); got != want {
+		t.Errorf("expected a short conversation to be drawn plainly, got %q", got)
 	}
 	if got, want := self.Row(1, false, 80), style.Answer(row(self.at(1), false, 80)); got != want {
 		t.Errorf("expected a longer conversation to be drawn plainly, got %q", got)
@@ -42,6 +42,9 @@ func TestAShortConversationIsHeldBackAndAChosenOneIsNot(t *testing.T) {
 	if got, want := self.Row(2, false, 80), style.RunningSession(row(self.at(2), false, 80)); got != want {
 		t.Errorf("expected a running session to stay running whatever it holds, got %q", got)
 	}
+	if got, want := self.Row(2, true, 80), style.ChosenRunningSession(row(self.at(2), true, 80)); got != want {
+		t.Errorf("expected the chosen row to take its colour even while running, got %q", got)
+	}
 }
 
 func archiveKeypress() key.Key {
@@ -50,6 +53,10 @@ func archiveKeypress() key.Key {
 
 func deleteKeypress() key.Key {
 	return key.Key{Code: key.Delete}
+}
+
+func openKeypress() key.Key {
+	return key.Key{Code: key.Enter}
 }
 
 func TestASessionAnimalIncludesItsNameAndEmoji(t *testing.T) {
@@ -295,5 +302,50 @@ func TestAnUnboundKeyAsksForNothing(t *testing.T) {
 	}
 	if _, isBound := self.Removal(0, key.Key{Code: key.Enter}); isBound {
 		t.Error("expected enter to be left alone")
+	}
+}
+
+func TestARunningSessionIsReadButNeverOpened(t *testing.T) {
+	self := &sessionList{store: Store{
+		Sessions: []*Session{{Name: "chewy-sardine", IsRunning: true}, {Name: "thick-poodle"}},
+		Read:     func(*Session, int) ([]string, error) { return []string{"a line"}, nil },
+	}}
+
+	if self.IsChoosable(0) {
+		t.Error("expected a running session to stay closed to opening")
+	}
+	if !self.IsReachable(0) {
+		t.Error("expected a running session to be reachable so it can be read")
+	}
+	if _, isBound := self.Preview(0, key.Key{Code: key.Enter}); !isBound {
+		t.Error("expected a running session to be readable")
+	}
+}
+
+func TestASessionCannotBeReadWithoutSomethingToReadItWith(t *testing.T) {
+	self := &sessionList{store: Store{Sessions: []*Session{{Name: "chewy-sardine", IsRunning: true}}}}
+
+	if self.IsReachable(0) {
+		t.Error("expected a running session to be left alone where nothing can read it")
+	}
+	if _, isBound := self.Preview(0, key.Key{Code: key.Enter}); isBound {
+		t.Error("expected no preview where nothing can read it")
+	}
+}
+
+func TestAnArchivedSessionIsOpenedRatherThanRead(t *testing.T) {
+	self := &sessionList{
+		store: Store{
+			ArchivedSessions: []*Session{{Name: "brave-otter", IsArchived: true}},
+			Read:             func(*Session, int) ([]string, error) { return []string{"a line"}, nil },
+		},
+		isArchivedView: true,
+	}
+
+	if _, isBound := self.Preview(0, key.Key{Code: key.Enter}); isBound {
+		t.Error("expected an archived session to be opened rather than read")
+	}
+	if !self.IsReachable(0) {
+		t.Error("expected an archived session to stay reachable")
 	}
 }

@@ -43,13 +43,12 @@ lists every session it matches.
 `
 
 const (
-	runningStatus     = "running"
-	endedStatus       = "ended"
-	archivedStatus    = "archived"
-	titleColumn       = 40
-	shortConversation = 5
-	listLimit         = 50
-	shortFilter       = 3
+	runningStatus  = "running"
+	endedStatus    = "ended"
+	archivedStatus = "archived"
+	titleColumn    = 40
+	listLimit      = 50
+	shortFilter    = 3
 )
 
 type inputOpts struct {
@@ -285,11 +284,8 @@ func writeTable(listings []Listing, writer io.Writer) error {
 
 	for index, listing := range listings {
 		line := listingTable.Row(rows[index], 0)
-		switch {
-		case listing.IsRunning:
+		if listing.IsRunning {
 			line = style.RunningSession(line)
-		case listing.Messages < shortConversation:
-			line = style.Subtle(line)
 		}
 
 		if _, err := fmt.Fprintln(writer, line); err != nil {

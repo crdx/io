@@ -25,7 +25,6 @@ const (
 	lengthColumn      = 6
 	lastMessageColumn = 12
 	roomForModel      = 100
-	shortConversation = 5
 	archiveKey        = 'a'
 	markWidth         = 2
 )
@@ -53,6 +52,7 @@ type Store struct {
 	Archive          func(*Session) error
 	Restore          func(*Session) error
 	Delete           func(*Session) error
+	Read             func(*Session, int) ([]string, error)
 }
 
 func Choose(store Store, terminal *os.File, screen io.Writer) (*Session, error) {
@@ -74,6 +74,10 @@ type sessionList struct {
 func (self *sessionList) Len() int { return len(self.rows()) }
 
 func (self *sessionList) IsChoosable(index int) bool { return !self.at(index).IsRunning }
+
+func (self *sessionList) IsReachable(index int) bool {
+	return self.IsChoosable(index) || self.canRead(index)
+}
 
 func (self *sessionList) Adjust(int, int) {}
 
@@ -104,6 +108,23 @@ func (self *sessionList) Removal(index int, keypress key.Key) (menu.Removal, boo
 	default:
 		return menu.Removal{}, false
 	}
+}
+
+func (self *sessionList) Preview(index int, keypress key.Key) (menu.Preview, bool) {
+	if keypress.Code != key.Enter || !self.canRead(index) {
+		return menu.Preview{}, false
+	}
+
+	readSession := self.at(index)
+
+	return menu.Preview{
+		Title: previewTitle(readSession),
+		Read:  func(room int) ([]string, error) { return self.store.Read(readSession, room) },
+	}, true
+}
+
+func previewTitle(readSession *Session) string {
+	return sessionAnimal(readSession) + "  " + sessionTitle(readSession)
 }
 
 func isArchiveKey(keypress key.Key) bool {
@@ -151,17 +172,20 @@ func (self *sessionList) Row(index int, isChosen bool, room int) string {
 	storedSession := self.at(index)
 	line := row(storedSession, isChosen, room)
 
-	if storedSession.IsRunning {
-		return style.RunningSession.Over(line)
-	}
-	if isChosen {
+	switch {
+	case isChosen && storedSession.IsRunning:
+		return style.ChosenRunningSession.Over(line)
+	case isChosen:
 		return style.ChosenRow.Over(line)
-	}
-	if storedSession.Messages() < shortConversation {
-		return style.Subtle.Over(line)
+	case storedSession.IsRunning:
+		return style.RunningSession.Over(line)
 	}
 
 	return style.Answer.Over(line)
+}
+
+func (self *sessionList) canRead(index int) bool {
+	return self.store.Read != nil && !self.at(index).IsArchived
 }
 
 func (self *sessionList) archival(index int, movedSession *Session) (menu.Removal, bool) {

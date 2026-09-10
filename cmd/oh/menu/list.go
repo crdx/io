@@ -55,6 +55,10 @@ type Switchable interface {
 	Switch(direction int) bool
 }
 
+type Reachable interface {
+	IsReachable(index int) bool
+}
+
 type Removable interface {
 	Removal(index int, keypress key.Key) (Removal, bool)
 }
@@ -64,6 +68,15 @@ type Removal struct {
 	Progress string
 	Perform  func() error
 	Apply    func()
+}
+
+type Previewable interface {
+	Preview(index int, keypress key.Key) (Preview, bool)
+}
+
+type Preview struct {
+	Title string
+	Read  func(room int) ([]string, error)
 }
 
 func Choose(rows List, terminal *os.File, screen io.Writer) (int, error) {
@@ -136,6 +149,7 @@ type state struct {
 	window  int
 
 	removalState removalState
+	preview      previewState
 }
 
 type removalState struct {
@@ -195,6 +209,10 @@ func (self *state) apply(keypress key.Key) action {
 		return continuePicking
 	}
 
+	if self.preview.isOpen {
+		return self.readPreview(keypress)
+	}
+
 	if self.removalState.index >= 0 {
 		self.answerRemoval(keypress)
 		return continuePicking
@@ -203,6 +221,10 @@ func (self *state) apply(keypress key.Key) action {
 	self.removalState.failure = ""
 
 	if self.askToRemove(keypress) {
+		return continuePicking
+	}
+
+	if self.askToPreview(keypress) {
 		return continuePicking
 	}
 
@@ -326,13 +348,13 @@ func (self *state) finishRemoval(err error) {
 
 func (self *state) selectableFrom(at int) int {
 	for index := max(at, 0); index < len(self.matches); index++ {
-		if self.list.IsChoosable(self.matches[index]) {
+		if self.isReachable(self.matches[index]) {
 			return index
 		}
 	}
 
 	for index := min(at, len(self.matches)) - 1; index >= 0; index-- {
-		if self.list.IsChoosable(self.matches[index]) {
+		if self.isReachable(self.matches[index]) {
 			return index
 		}
 	}
@@ -372,7 +394,7 @@ func (self *state) narrow(query string) {
 	self.query = query
 	self.refilter()
 
-	if at := slices.Index(self.matches, wantedIndex); at >= 0 && self.list.IsChoosable(wantedIndex) {
+	if at := slices.Index(self.matches, wantedIndex); at >= 0 && self.isReachable(wantedIndex) {
 		self.cursor = at
 	}
 }
@@ -396,7 +418,7 @@ func (self *state) move(direction int) {
 	}
 
 	for at := self.cursor + direction; at >= 0 && at < len(self.matches); at += direction {
-		if self.list.IsChoosable(self.matches[at]) {
+		if self.isReachable(self.matches[at]) {
 			self.cursor = at
 			return
 		}
@@ -424,7 +446,7 @@ func (self *state) adjust(direction int) {
 
 func (self *state) firstSelectable() int {
 	for at, index := range self.matches {
-		if self.list.IsChoosable(index) {
+		if self.isReachable(index) {
 			return at
 		}
 	}
@@ -434,7 +456,7 @@ func (self *state) firstSelectable() int {
 
 func (self *state) lastSelectable() int {
 	for at, index := range slices.Backward(self.matches) {
-		if self.list.IsChoosable(index) {
+		if self.isReachable(index) {
 			return at
 		}
 	}
@@ -442,15 +464,23 @@ func (self *state) lastSelectable() int {
 	return -1
 }
 
+func (self *state) isReachable(index int) bool {
+	if rows, isReachable := self.list.(Reachable); isReachable {
+		return rows.IsReachable(index)
+	}
+
+	return self.list.IsChoosable(index)
+}
+
 func Paint(rows List, room int, height int, cursor int, query string) string {
 	return paint(rows, room, height, cursor, query, nil)
 }
 
-func PaintRemoval(rows List, room int, height int, cursor int, query string, keypress key.Key) string {
+func PaintAfterKey(rows List, room int, height int, cursor int, query string, keypress key.Key) string {
 	return paint(rows, room, height, cursor, query, &keypress)
 }
 
-func paint(rows List, room int, height int, cursor int, query string, removalKey *key.Key) string {
+func paint(rows List, room int, height int, cursor int, query string, keypress *key.Key) string {
 	var screen strings.Builder
 
 	self := newState(rows)
@@ -458,8 +488,8 @@ func paint(rows List, room int, height int, cursor int, query string, removalKey
 	self.cursor = cursor
 	self.screen = &screen
 	self.measure = func() (int, int) { return room, height }
-	if removalKey != nil {
-		self.askToRemove(*removalKey)
+	if keypress != nil && !self.askToRemove(*keypress) {
+		self.askToPreview(*keypress)
 	}
 
 	self.draw()
@@ -469,6 +499,12 @@ func paint(rows List, room int, height int, cursor int, query string, removalKey
 
 func (self *state) draw() {
 	room, height := self.size()
+
+	if self.preview.isOpen {
+		write(self.screen, self.drawPreview(room, height))
+		return
+	}
+
 	rows := max(height-2, 1)
 	self.window = rows
 

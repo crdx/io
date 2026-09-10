@@ -76,7 +76,7 @@ var (
 	MediumPrice    Style = hex(steel)
 	HighPrice      Style = hex(gold)
 	ExtremePrice   Style = hex(red)
-	RunningSession Style = decorate(col.Italic, hex(steel))
+	RunningSession Style = decorate(col.Italic, Dim)
 	Column         Style = decorate(col.Underline, Dim)
 	TypedInput     Style = Normal
 	User           Style = background("#343541")
@@ -85,6 +85,8 @@ var (
 	Network        Style = hex(red)
 	Simulation     Style = gradient(orchid, aqua)
 )
+
+var ChosenRunningSession Style = decorate(col.Italic, ChosenRow)
 
 var (
 	Heading Style = hex(gold)

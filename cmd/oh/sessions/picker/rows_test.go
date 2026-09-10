@@ -1,10 +1,12 @@
 package picker
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -147,12 +149,13 @@ func TestTheRowsOfTheSessionPickerMatchTheGolden(t *testing.T) {
 
 func TestWhatTheSessionPickerPaintsMatchesTheGolden(t *testing.T) {
 	frames := []struct {
-		name       string
-		room       int
-		height     int
-		cursor     int
-		query      string
-		removalKey *key.Key
+		name     string
+		room     int
+		height   int
+		cursor   int
+		query    string
+		keypress *key.Key
+		read     func(*Session, int) ([]string, error)
 
 		isArchivedView     bool
 		hasNothingArchived bool
@@ -164,27 +167,34 @@ func TestWhatTheSessionPickerPaintsMatchesTheGolden(t *testing.T) {
 		{name: "a filter narrowing the list to the model that answered", room: 120, height: 24, cursor: 0, query: "codex"},
 		{name: "a filter matching the mode a session ran in", room: 120, height: 24, cursor: 0, query: "fast"},
 		{name: "a filter no session answers to", room: 120, height: 24, cursor: 0, query: "kimi"},
-		{name: "the confirmation asked before a session is archived", room: 120, height: 24, cursor: 1, removalKey: new(archiveKeypress())},
-		{name: "the confirmation in a narrow terminal", room: 46, height: 24, cursor: 1, removalKey: new(archiveKeypress())},
-		{name: "the confirmation taking the place of a filter being typed", room: 120, height: 24, cursor: 1, query: "codex", removalKey: new(archiveKeypress())},
-		{name: "a running session under the cursor, which is never offered for archiving", room: 120, height: 24, cursor: 0, query: "codex", removalKey: new(archiveKeypress())},
+		{name: "the confirmation asked before a session is archived", room: 120, height: 24, cursor: 1, keypress: new(archiveKeypress())},
+		{name: "the confirmation in a narrow terminal", room: 46, height: 24, cursor: 1, keypress: new(archiveKeypress())},
+		{name: "the confirmation taking the place of a filter being typed", room: 120, height: 24, cursor: 1, query: "codex", keypress: new(archiveKeypress())},
+		{name: "a running session under the cursor, which is never offered for archiving", room: 120, height: 24, cursor: 0, query: "codex", keypress: new(archiveKeypress())},
 		{name: "the archived view, switched to with left or right", room: 120, height: 24, cursor: 0, isArchivedView: true},
-		{name: "the confirmation asked before an archived session is restored", room: 120, height: 24, cursor: 1, isArchivedView: true, removalKey: new(archiveKeypress())},
+		{name: "the confirmation asked before an archived session is restored", room: 120, height: 24, cursor: 1, isArchivedView: true, keypress: new(archiveKeypress())},
 		{name: "the archived view with nothing archived", room: 120, height: 24, cursor: 0, isArchivedView: true, hasNothingArchived: true},
-		{name: "the confirmation asked before a session is deleted for good", room: 120, height: 24, cursor: 1, removalKey: new(deleteKeypress())},
-		{name: "the deletion confirmation clipped by a narrow terminal", room: 46, height: 24, cursor: 1, removalKey: new(deleteKeypress())},
-		{name: "deleting an archived session for good", room: 120, height: 24, cursor: 0, isArchivedView: true, removalKey: new(deleteKeypress())},
+		{name: "the confirmation asked before a session is deleted for good", room: 120, height: 24, cursor: 1, keypress: new(deleteKeypress())},
+		{name: "the deletion confirmation clipped by a narrow terminal", room: 46, height: 24, cursor: 1, keypress: new(deleteKeypress())},
+		{name: "deleting an archived session for good", room: 120, height: 24, cursor: 0, isArchivedView: true, keypress: new(deleteKeypress())},
+		{name: "the conversation read where it all fits", room: 120, height: 24, cursor: 1, keypress: new(openKeypress()), read: reading()},
+		{name: "the conversation read where the terminal is too short for it", room: 120, height: 8, cursor: 1, keypress: new(openKeypress()), read: reading()},
+		{name: "a conversation read in a narrow terminal", room: 46, height: 12, cursor: 1, keypress: new(openKeypress()), read: reading()},
+		{name: "a conversation that could not be read", room: 120, height: 12, cursor: 1, keypress: new(openKeypress()), read: unreadable()},
+		{name: "an archived session, which is opened rather than read", room: 120, height: 24, cursor: 1, isArchivedView: true, keypress: new(openKeypress()), read: reading()},
+		{name: "a session picker with nothing to read from", room: 120, height: 24, cursor: 1, keypress: new(openKeypress())},
+		{name: "the conversation of a running session, which cannot be opened", room: 120, height: 12, cursor: 0, keypress: new(openKeypress()), read: reading()},
 	}
 
 	var output strings.Builder
 
 	for _, frame := range frames {
 		paint := func(rows menu.List, room int, height int, cursor int, query string) string {
-			if frame.removalKey == nil {
+			if frame.keypress == nil {
 				return menu.Paint(rows, room, height, cursor, query)
 			}
 
-			return menu.PaintRemoval(rows, room, height, cursor, query, *frame.removalKey)
+			return menu.PaintAfterKey(rows, room, height, cursor, query, *frame.keypress)
 		}
 
 		archived := archivedSessions()
@@ -201,6 +211,7 @@ func TestWhatTheSessionPickerPaintsMatchesTheGolden(t *testing.T) {
 						Archive:          archiving(),
 						Restore:          archiving(),
 						Delete:           archiving(),
+						Read:             frame.read,
 					},
 					isArchivedView: frame.isArchivedView,
 				},
@@ -217,4 +228,28 @@ func TestWhatTheSessionPickerPaintsMatchesTheGolden(t *testing.T) {
 
 func archiving() func(*Session) error {
 	return func(*Session) error { return nil }
+}
+
+func reading() func(*Session, int) ([]string, error) {
+	return func(readSession *Session, room int) ([]string, error) {
+		rows := []string{
+			"reasoning about " + readSession.Name + " in a terminal " + strconv.Itoa(room) + " columns wide",
+			"",
+			"The prompt is drawn by layout, which wraps the buffer against the terminal",
+			"width and reports where the cursor landed.",
+			"",
+			"read cmd/oh/line/render.go",
+			"",
+			"Nothing there needs changing to make it sticky: the work belongs in the",
+			"output layer instead.",
+		}
+
+		return rows, nil
+	}
+}
+
+func unreadable() func(*Session, int) ([]string, error) {
+	return func(*Session, int) ([]string, error) {
+		return nil, errors.New("the journal could not be read: no such file or directory")
+	}
 }

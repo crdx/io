@@ -67,6 +67,7 @@ import (
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/pictures"
 	"crdx.org/io/cmd/oh/portgrant"
+	"crdx.org/io/cmd/oh/preview"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/segment"
@@ -5291,6 +5292,15 @@ func TestPick(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		for _, entry := range readJournal(t, filepath.Join("testdata", "input", lifecycleScenario)) {
+			if entry.Event == nil {
+				continue
+			}
+			if _, err := log.Event(*entry.Event); err != nil {
+				t.Fatal(err)
+			}
+		}
+
 		if err := log.Close(); err != nil {
 			t.Fatal(err)
 		}
@@ -5301,7 +5311,14 @@ func TestPick(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	chosenSession, err := picker.Choose(picker.Store{Sessions: sessions}, os.Stdin, os.Stdout)
+	store := picker.Store{
+		Sessions: sessions,
+		Read: func(storedSession *picker.Session, room int) ([]string, error) {
+			return preview.Read(directory, storedSession.Name, nil, room)
+		},
+	}
+
+	chosenSession, err := picker.Choose(store, os.Stdin, os.Stdout)
 	screen := output.New(os.Stdout)
 
 	switch {

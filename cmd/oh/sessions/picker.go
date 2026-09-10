@@ -12,6 +12,7 @@ import (
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/model"
+	"crdx.org/io/cmd/oh/preview"
 	"crdx.org/io/cmd/oh/sessions/picker"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
@@ -58,6 +59,9 @@ func Choose(directory string, workspace *work.Space, terminal *os.File, screen i
 			}
 
 			return os.RemoveAll(location.GetTmpDir(storedSession.Name))
+		},
+		Read: func(storedSession *picker.Session, room int) ([]string, error) {
+			return preview.Read(directory, storedSession.Name, workspace, room)
 		},
 	}
 

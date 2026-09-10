@@ -348,10 +348,10 @@ func TestAnArchivedSessionIsListedOnlyWhenTheArchiveIsAskedFor(t *testing.T) {
 	}
 }
 
-func TestAShortConversationIsHeldBackInTheListing(t *testing.T) {
+func TestOnlyARunningSessionIsDrawnApartInTheListing(t *testing.T) {
 	listings := []Listing{
-		{Name: "able-dolphin", Status: endedStatus, Messages: shortConversation - 1},
-		{Name: "brave-otter", Status: endedStatus, Messages: shortConversation},
+		{Name: "able-dolphin", Status: endedStatus, Messages: 1},
+		{Name: "brave-otter", Status: endedStatus, Messages: 40},
 		{Name: "wild-scorpion", Status: runningStatus, IsRunning: true, Messages: 1},
 	}
 
@@ -364,11 +364,10 @@ func TestAShortConversationIsHeldBackInTheListing(t *testing.T) {
 	if len(lines) != 4 {
 		t.Fatalf("expected a header and three rows, got %d", len(lines))
 	}
-	if got := lines[1]; got != style.Subtle(style.Plain(got)) {
-		t.Errorf("expected the short conversation to be held back, got %q", got)
-	}
-	if strings.Contains(lines[2], "\x1b") {
-		t.Errorf("expected the longer conversation to be drawn plainly, got %q", lines[2])
+	for _, line := range lines[1:3] {
+		if strings.Contains(line, "\x1b") {
+			t.Errorf("expected an ended session to be drawn plainly, got %q", line)
+		}
 	}
 	if got := lines[3]; got != style.RunningSession(style.Plain(got)) {
 		t.Errorf("expected the running session to stay running, got %q", got)

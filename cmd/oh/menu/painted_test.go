@@ -197,3 +197,55 @@ func TestTheCompleteSwitchingLifecycleMatchesTheGolden(t *testing.T) {
 
 	compareWithGolden(t, "switching.ansi", strutil.VisibleEscapes(output.String()))
 }
+
+func TestTheCompletePreviewLifecycleMatchesTheGolden(t *testing.T) {
+	rows := &previewableList{
+		fakeList: fakeList{
+			rows: []string{
+				"chewy-sardine   why does the spinner stutter when a tool runs",
+				"thick-poodle    add support for reasoning traces",
+			},
+			unrunnable: []bool{true, false},
+		},
+		read: map[string][]string{
+			"thick-poodle    add support for reasoning traces": {
+				"› have a look at that",
+				"",
+				"I'll have a look at how the editor draws its prompt.",
+				"",
+				"grep prompt *.go ✓ 1L",
+				"",
+				"The prompt is drawn by layout, which wraps the buffer against",
+				"the terminal width and reports where the cursor landed.",
+			},
+		},
+	}
+
+	keypresses := []key.Key{
+		{Code: key.Enter},
+		{Code: key.Up},
+		{Code: key.Up},
+		{Code: key.PageDown},
+		{Code: key.Home},
+		{Code: key.Escape},
+		{Code: key.Enter},
+		{Code: key.Enter},
+	}
+
+	keys := make(chan key.Key, len(keypresses))
+	for _, keypress := range keypresses {
+		keys <- keypress
+	}
+	close(keys)
+
+	var output strings.Builder
+	chosen, err := choose(rows, keys, func() (int, int) { return 46, 6 }, &output, inline)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if chosen != 1 {
+		t.Errorf("chose row %d, want 1", chosen)
+	}
+
+	compareWithGolden(t, "previewed.ansi", strutil.VisibleEscapes(output.String()))
+}

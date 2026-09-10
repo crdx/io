@@ -2,6 +2,7 @@
 
 ## [0.0.0] - XXXX-XX-XX
 
+- Preview sessions in session picker
 - Name sandbox helper processes
 - Restore the cache properly on resume
 
