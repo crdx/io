@@ -39,6 +39,39 @@ func Choices(path string) []Choice {
 	return availableModelChoices(loadModelCache(path))
 }
 
+type PricedModel struct {
+	Provider string
+	ID       string
+	Prices   agent.TokenPrices
+}
+
+func ListedPrices(path string) []PricedModel {
+	cache := loadModelCache(path)
+
+	var pricedModels []PricedModel
+
+	for _, providerName := range ProviderNames() {
+		listing, isFound := cache.Providers[providerName]
+		if !isFound {
+			continue
+		}
+
+		for _, listedModel := range listing.Models {
+			if listedModel.ID == "" || listedModel.Prices == nil || !listedModel.Prices.IsKnown() {
+				continue
+			}
+
+			pricedModels = append(pricedModels, PricedModel{
+				Provider: providerName,
+				ID:       listedModel.ID,
+				Prices:   *listedModel.Prices,
+			})
+		}
+	}
+
+	return pricedModels
+}
+
 func ParseSelection(path string, writtenSelection string) (Selection, error) {
 	selectionQuery, isFast, err := splitFastMode(writtenSelection)
 	if err != nil {

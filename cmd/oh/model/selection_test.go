@@ -1,6 +1,8 @@
 package model
 
 import (
+	"path/filepath"
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
@@ -348,5 +350,25 @@ func TestExactModelSelectionWinsOverFuzzyMatches(t *testing.T) {
 	}
 	if choice.ID != "deepseek-v4" {
 		t.Errorf("got model %q", choice.ID)
+	}
+}
+
+func TestEveryListedPriceIsReadFromTheCacheEvenWhenTheModelCannotBeChosen(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "models.json")
+	prices := agent.TokenPrices{Input: 3, Output: 15, CacheRead: 0.3, CacheWrite: 3.75}
+	err := StoreSimulated(path, AnthropicProvider, []agent.Model{
+		{ID: "claude-sonnet-4-6", Prices: &prices},
+		{ID: "claude-haiku-4-6"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []PricedModel{{Provider: AnthropicProvider, ID: "claude-sonnet-4-6", Prices: prices}}
+	if got := ListedPrices(path); !reflect.DeepEqual(got, want) {
+		t.Errorf("got %#v, want %#v", got, want)
+	}
+	if ListedPrices(filepath.Join(t.TempDir(), "absent.json")) != nil {
+		t.Error("an absent model cache should quote no prices")
 	}
 }

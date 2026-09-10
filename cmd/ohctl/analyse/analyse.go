@@ -1,12 +1,9 @@
 package analyse
 
 import (
-	"bufio"
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -16,12 +13,13 @@ import (
 
 	"crdx.org/duckopt/v2"
 
+	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/location"
+	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/model"
-	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/cmd/oh/table"
 	"crdx.org/io/cmd/ohctl/console"
-	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/money"
 	"crdx.org/io/session"
 )
 
@@ -34,7 +32,8 @@ Options:
     -j, --json    Write the analysis as JSON
     -h, --help    Show this help
 
-Sessions are named on the command line, or every stored session is analysed when none is.
+Sessions are named on the command line, or every stored session is analysed when none is. Naming
+sessions also reports each of them on a row of its own.
 `
 
 const (
@@ -52,6 +51,11 @@ type inputOpts struct {
 
 type Analysis struct {
 	PromptCache PromptCacheAnalysis `json:"promptCache"`
+	Models      ModelAnalysis       `json:"models"`
+	Activity    ActivityAnalysis    `json:"activity"`
+	Faults      FaultAnalysis       `json:"faults"`
+	Tools       ToolAnalysis        `json:"tools"`
+	Sessions    []SessionStatistics `json:"sessions,omitempty"`
 }
 
 type PromptCacheAnalysis struct {
@@ -59,19 +63,28 @@ type PromptCacheAnalysis struct {
 	Total     CacheStatistics   `json:"total"`
 }
 
-type CacheStatistics struct {
-	Provider        string `json:"provider,omitempty"`
-	Sessions        int    `json:"sessions"`
-	Requests        int    `json:"requests"`
-	Hits            int    `json:"hits"`
-	Misses          int    `json:"misses"`
-	InputTokens     int64  `json:"inputTokens"`
-	CachedTokens    int64  `json:"cachedTokens"`
-	WrittenTokens   int64  `json:"writtenTokens"`
-	PeakInputTokens int64  `json:"peakInputTokens"`
+type ModelAnalysis struct {
+	Models         []ModelStatistics `json:"models"`
+	Total          ModelStatistics   `json:"total"`
+	UnpricedModels int               `json:"unpricedModels"`
 }
 
-const analysisCacheFormat = 2
+type ActivityAnalysis struct {
+	Providers []ActivityStatistics `json:"providers"`
+	Total     ActivityStatistics   `json:"total"`
+}
+
+type FaultAnalysis struct {
+	Providers []FaultStatistics `json:"providers"`
+	Total     FaultStatistics   `json:"total"`
+}
+
+type ToolAnalysis struct {
+	Tools []ToolStatistics `json:"tools"`
+	Total ToolStatistics   `json:"total"`
+}
+
+const analysisCacheFormat = 3
 
 type analysisCache struct {
 	Format   int                      `json:"format"`
@@ -79,66 +92,70 @@ type analysisCache struct {
 }
 
 type cachedSession struct {
-	JournalSize       int64           `json:"journalSize"`
-	JournalModifiedAt int64           `json:"journalModifiedAt"`
-	WireSize          int64           `json:"wireSize"`
-	WireModifiedAt    int64           `json:"wireModifiedAt"`
-	Statistics        CacheStatistics `json:"statistics"`
-	HasStatistics     bool            `json:"hasStatistics"`
+	JournalSize       int64             `json:"journalSize"`
+	JournalModifiedAt int64             `json:"journalModifiedAt"`
+	WireSize          int64             `json:"wireSize"`
+	WireModifiedAt    int64             `json:"wireModifiedAt"`
+	Statistics        SessionStatistics `json:"statistics"`
 }
 
-type wireLineKind int
-
-const (
-	unknownWireLine wireLineKind = iota
-	responsesWireLine
-	anthropicWireLine
-	chatCompletionsWireLine
-)
-
-type wireLine struct {
-	kind             wireLineKind
-	inputTokens      int64
-	cachedTokens     int64
-	writtenTokens    int64
-	hasInputTokens   bool
-	hasCachedTokens  bool
-	hasWrittenTokens bool
-}
-
-type cacheReport struct {
-	inputTokens   int64
-	cachedTokens  int64
-	writtenTokens int64
+type Settings struct {
+	SessionsDir    string
+	CachePath      string
+	ModelCachePath string
+	Currency       money.Currency
+	Names          []string
+	IsJSON         bool
 }
 
 func Run() error {
 	options := duckopt.MustBind[inputOpts](usage, "$0")
-	return run(
-		location.GetSessionsDir(),
-		location.GetAnalysisCachePath(),
-		options.Sessions,
-		options.JSON,
-		console.Standard(),
-	)
+
+	return run(Settings{
+		SessionsDir:    location.GetSessionsDir(),
+		CachePath:      location.GetAnalysisCachePath(),
+		ModelCachePath: location.GetModelCachePath(false),
+		Currency:       readCurrency(),
+		Names:          options.Sessions,
+		IsJSON:         options.JSON,
+	}, console.Standard())
 }
 
-func run(directory string, cachePath string, names []string, isJSON bool, output console.Output) error {
-	selectedNames, err := selectNames(directory, names)
+func readCurrency() money.Currency {
+	settings, err := config.Load(location.GetConfigFile())
+	if err != nil {
+		return money.Dollar()
+	}
+
+	code := strings.ToUpper(strings.TrimSpace(settings.Ui.Currency))
+	if code == "" || code == money.DollarCode {
+		return money.Dollar()
+	}
+
+	return money.Load(location.GetExchangeRateCachePath(), code)
+}
+
+func run(settings Settings, output console.Output) error {
+	selectedNames, err := selectNames(settings.SessionsDir, settings.Names)
 	if err != nil {
 		return err
 	}
 
-	analysis, err := analyseSessionsWithCache(directory, cachePath, selectedNames)
+	sessions, err := readSessions(settings.SessionsDir, settings.CachePath, selectedNames)
 	if err != nil {
 		return err
 	}
 
-	if isJSON {
+	analysis := aggregate(sessions, readPricebook(settings.ModelCachePath))
+
+	if settings.IsJSON {
 		return writeJSON(analysis, output.Screen)
 	}
 
-	return writeText(analysis, output.Screen)
+	return writeText(analysis, presentation{
+		currency:     settings.Currency,
+		isPerSession: len(settings.Names) > 0,
+	}, output.Screen)
 }
 
 func selectNames(directory string, requestedNames []string) ([]string, error) {
@@ -183,18 +200,22 @@ type analysisJob struct {
 
 type sessionAnalysis struct {
 	name             string
-	statistics       CacheStatistics
+	statistics       SessionStatistics
 	cachedStatistics cachedSession
 	err              error
-	hasStatistics    bool
 	hasCached        bool
 }
 
 func analyseSessions(directory string, names []string) (Analysis, error) {
-	return analyseSessionsWithCache(directory, "", names)
+	sessions, err := readSessions(directory, "", names)
+	if err != nil {
+		return Analysis{}, err
+	}
+
+	return aggregate(sessions, pricebook{}), nil
 }
 
-func analyseSessionsWithCache(directory string, cachePath string, names []string) (Analysis, error) {
+func readSessions(directory string, cachePath string, names []string) ([]SessionStatistics, error) {
 	cache := readAnalysisCache(cachePath)
 	jobs := make(chan analysisJob, len(names))
 	results := make(chan sessionAnalysis)
@@ -220,7 +241,7 @@ func analyseSessionsWithCache(directory string, cachePath string, names []string
 		close(results)
 	}()
 
-	byProvider := map[string]*CacheStatistics{}
+	sessions := make([]SessionStatistics, 0, len(names))
 	var firstError error
 	for result := range results {
 		if result.err != nil {
@@ -232,39 +253,224 @@ func analyseSessionsWithCache(directory string, cachePath string, names []string
 		if result.hasCached {
 			cache.Sessions[result.name] = result.cachedStatistics
 		}
-		if !result.hasStatistics {
-			continue
-		}
-		statistics := byProvider[result.statistics.Provider]
-		if statistics == nil {
-			statistics = &CacheStatistics{Provider: result.statistics.Provider}
-			byProvider[result.statistics.Provider] = statistics
-		}
-		statistics.add(result.statistics)
+		statistics := result.statistics
+		statistics.Name = result.name
+		sessions = append(sessions, statistics)
 	}
 	if firstError != nil {
-		return Analysis{}, firstError
+		return nil, firstError
 	}
 	_ = writeAnalysisCache(cachePath, cache)
 
-	providers := make([]CacheStatistics, 0, len(byProvider))
-	for _, statistics := range byProvider {
-		providers = append(providers, *statistics)
-	}
-	slices.SortFunc(providers, func(first CacheStatistics, second CacheStatistics) int {
-		return strings.Compare(first.Provider, second.Provider)
+	slices.SortFunc(sessions, func(first SessionStatistics, second SessionStatistics) int {
+		return strings.Compare(first.Name, second.Name)
 	})
 
-	analysis := Analysis{PromptCache: PromptCacheAnalysis{Providers: providers}}
-	for _, statistics := range providers {
-		analysis.PromptCache.Total.add(statistics)
-	}
-	return analysis, nil
+	return sessions, nil
 }
 
-func analyseSession(directory string, name string) (CacheStatistics, bool, error) {
-	result := analyseSessionWithCache(directory, name, cachedSession{}, false)
-	return result.statistics, result.hasStatistics, result.err
+func aggregate(sessions []SessionStatistics, prices pricebook) Analysis {
+	cacheByProvider := map[string]*CacheStatistics{}
+	activityByProvider := map[string]*ActivityStatistics{}
+	faultsByProvider := map[string]*FaultStatistics{}
+	modelsByName := map[string]*ModelStatistics{}
+	toolsByName := map[string]*ToolStatistics{}
+
+	analysis := Analysis{Sessions: sessions}
+
+	for index := range sessions {
+		statistics := &sessions[index]
+		statistics.Spend, statistics.IsPriced = prices.charge(*statistics)
+
+		if statistics.Cache.Requests > 0 {
+			gather(cacheByProvider, statistics.Provider, statistics.Cache, func(into *CacheStatistics) {
+				into.Provider = statistics.Provider
+			})
+		}
+		gather(activityByProvider, statistics.Provider, statistics.Activity, func(into *ActivityStatistics) {
+			into.Provider = statistics.Provider
+		})
+		gather(faultsByProvider, statistics.Provider, statistics.Faults, func(into *FaultStatistics) {
+			into.Provider = statistics.Provider
+		})
+
+		modelStatistics := modelledSession(*statistics)
+		gather(modelsByName, priceKey(statistics.Provider, statistics.Model), modelStatistics,
+			func(into *ModelStatistics) {
+				into.Provider = modelStatistics.Provider
+				into.Model = modelStatistics.Model
+			})
+
+		for _, toolStatistics := range statistics.Tools {
+			gather(toolsByName, toolStatistics.Name, toolStatistics, func(into *ToolStatistics) {
+				into.Name = toolStatistics.Name
+			})
+		}
+	}
+
+	analysis.PromptCache.Providers = collect(cacheByProvider, func(first CacheStatistics, second CacheStatistics) int {
+		return strings.Compare(first.Provider, second.Provider)
+	})
+	analysis.Activity.Providers = collect(
+		activityByProvider,
+		func(first ActivityStatistics, second ActivityStatistics) int {
+			return strings.Compare(first.Provider, second.Provider)
+		},
+	)
+	analysis.Faults.Providers = collect(faultsByProvider, func(first FaultStatistics, second FaultStatistics) int {
+		return strings.Compare(first.Provider, second.Provider)
+	})
+	analysis.Models.Models = collect(modelsByName, func(first ModelStatistics, second ModelStatistics) int {
+		return strings.Compare(priceKey(first.Provider, first.Model), priceKey(second.Provider, second.Model))
+	})
+	analysis.Tools.Tools = collect(toolsByName, func(first ToolStatistics, second ToolStatistics) int {
+		if first.Calls != second.Calls {
+			return second.Calls - first.Calls
+		}
+		return strings.Compare(first.Name, second.Name)
+	})
+
+	for _, statistics := range analysis.PromptCache.Providers {
+		analysis.PromptCache.Total.add(statistics)
+	}
+	for _, statistics := range analysis.Activity.Providers {
+		analysis.Activity.Total.add(statistics)
+	}
+	for _, statistics := range analysis.Faults.Providers {
+		analysis.Faults.Total.add(statistics)
+	}
+	for _, statistics := range analysis.Models.Models {
+		analysis.Models.Total.add(statistics)
+		if !statistics.IsPriced {
+			analysis.Models.UnpricedModels++
+		}
+	}
+	for _, statistics := range analysis.Tools.Tools {
+		analysis.Tools.Total.add(statistics)
+	}
+
+	return analysis
+}
+
+type summable[Statistics any] interface {
+	*Statistics
+	add(statisticsToAdd Statistics)
+}
+
+func gather[Statistics any, Sum summable[Statistics]](
+	groups map[string]Sum,
+	key string,
+	statistics Statistics,
+	name func(Sum),
+) {
+	sum, isKnown := groups[key]
+	if !isKnown {
+		sum = Sum(new(Statistics))
+		name(sum)
+		groups[key] = sum
+	}
+
+	sum.add(statistics)
+}
+
+func collect[Statistics any](
+	groups map[string]*Statistics,
+	compare func(Statistics, Statistics) int,
+) []Statistics {
+	collection := make([]Statistics, 0, len(groups))
+	for _, statistics := range groups {
+		collection = append(collection, *statistics)
+	}
+	slices.SortFunc(collection, compare)
+
+	return collection
+}
+
+func modelledSession(statistics SessionStatistics) ModelStatistics {
+	return ModelStatistics{
+		Provider:      statistics.Provider,
+		Model:         statistics.Model,
+		Sessions:      1,
+		Requests:      statistics.Cache.Requests,
+		InputTokens:   statistics.Cache.InputTokens,
+		CachedTokens:  statistics.Cache.CachedTokens,
+		WrittenTokens: statistics.Cache.WrittenTokens,
+		OutputTokens:  statistics.Cache.OutputTokens,
+		Spend:         statistics.Spend,
+		IsPriced:      statistics.IsPriced,
+	}
+}
+
+type pricebook map[string]agent.TokenPrices
+
+func priceKey(providerName string, modelName string) string {
+	return providerName + "/" + modelName
+}
+
+func readPricebook(path string) pricebook {
+	prices := pricebook{}
+	if path == "" {
+		return prices
+	}
+
+	for _, pricedModel := range model.ListedPrices(path) {
+		prices[priceKey(pricedModel.Provider, pricedModel.ID)] = pricedModel.Prices
+	}
+
+	return prices
+}
+
+func (self pricebook) charge(statistics SessionStatistics) (float64, bool) {
+	prices, isPriced := self[priceKey(statistics.Provider, statistics.Model)]
+	if !isPriced {
+		return 0, false
+	}
+
+	return metrics.Spend(prices, agent.Usage{
+		InputTokens:  int(statistics.Cache.InputTokens),
+		OutputTokens: int(statistics.Cache.OutputTokens),
+		Cache: &agent.CacheUsage{
+			ReadTokens:  int(statistics.Cache.CachedTokens),
+			WriteTokens: int(statistics.Cache.WrittenTokens),
+		},
+	}), true
+}
+
+type sessionFiles struct {
+	root              *os.Root
+	journalSize       int64
+	journalModifiedAt int64
+	wireSize          int64
+	wireModifiedAt    int64
+}
+
+func openSession(directory string, name string) (sessionFiles, error) {
+	sessionRoot, err := os.OpenRoot(session.Dir(directory, name))
+	if err != nil {
+		return sessionFiles{}, err
+	}
+
+	files := sessionFiles{root: sessionRoot, wireSize: -1}
+
+	journalInfo, err := sessionRoot.Stat(journalTranscriptName)
+	if err != nil {
+		_ = sessionRoot.Close()
+		return sessionFiles{}, err
+	}
+	files.journalSize = journalInfo.Size()
+	files.journalModifiedAt = journalInfo.ModTime().UnixNano()
+
+	wireInfo, err := sessionRoot.Stat(wireTranscriptName)
+	switch {
+	case err == nil:
+		files.wireSize = wireInfo.Size()
+		files.wireModifiedAt = wireInfo.ModTime().UnixNano()
+	case !errors.Is(err, os.ErrNotExist):
+		_ = sessionRoot.Close()
+		return sessionFiles{}, err
+	}
+
+	return files, nil
 }
 
 func analyseSessionWithCache(
@@ -273,345 +479,74 @@ func analyseSessionWithCache(
 	cachedStatistics cachedSession,
 	hasCached bool,
 ) sessionAnalysis {
-	sessionRoot, err := os.OpenRoot(session.Dir(directory, name))
+	files, err := openSession(directory, name)
 	if err != nil {
 		return sessionAnalysis{err: fmt.Errorf("could not read %s: %w", name, err)}
 	}
-	journalInfo, err := sessionRoot.Stat(journalTranscriptName)
-	if err != nil {
-		_ = sessionRoot.Close()
-		return sessionAnalysis{err: fmt.Errorf("could not read %s: %w", name, err)}
-	}
-	wireSize := int64(-1)
-	wireModifiedAt := int64(0)
-	wireInfo, err := sessionRoot.Stat(wireTranscriptName)
-	if err == nil {
-		wireSize = wireInfo.Size()
-		wireModifiedAt = wireInfo.ModTime().UnixNano()
-	} else if !errors.Is(err, os.ErrNotExist) {
-		_ = sessionRoot.Close()
-		return sessionAnalysis{err: fmt.Errorf("could not read %s: %w", name, err)}
+	defer func() { _ = files.root.Close() }()
+
+	if hasCached && cachedStatistics.matches(files) {
+		return sessionAnalysis{statistics: cachedStatistics.Statistics}
 	}
 
-	if hasCached && cachedStatistics.matches(
-		journalInfo.Size(),
-		journalInfo.ModTime().UnixNano(),
-		wireSize,
-		wireModifiedAt,
-	) {
-		_ = sessionRoot.Close()
-		return sessionAnalysis{
-			statistics:    cachedStatistics.Statistics,
-			hasStatistics: cachedStatistics.HasStatistics,
+	statistics, isUsageComplete, err := analyseJournal(directory, name)
+	if err != nil {
+		return sessionAnalysis{err: err}
+	}
+
+	if !isUsageComplete && files.wireSize >= 0 {
+		if err := files.readWireUsage(&statistics); err != nil {
+			return sessionAnalysis{err: fmt.Errorf("could not read %s: %w", name, err)}
 		}
 	}
 
-	journalStatistics, isComplete, err := analyseJournal(directory, name)
+	return cachedAnalysis(statistics, files)
+}
+
+func (self sessionFiles) readWireUsage(statistics *SessionStatistics) error {
+	file, err := self.root.Open(wireTranscriptName)
 	if err != nil {
-		_ = sessionRoot.Close()
-		return sessionAnalysis{err: err}
-	}
-	if isComplete {
-		_ = sessionRoot.Close()
-		return cachedAnalysis(
-			journalStatistics,
-			true,
-			journalInfo.Size(),
-			journalInfo.ModTime().UnixNano(),
-			wireSize,
-			wireModifiedAt,
-		)
-	}
-	if wireSize < 0 {
-		_ = sessionRoot.Close()
-		return cachedAnalysis(
-			CacheStatistics{},
-			false,
-			journalInfo.Size(),
-			journalInfo.ModTime().UnixNano(),
-			wireSize,
-			wireModifiedAt,
-		)
+		return err
 	}
 
-	file, err := sessionRoot.Open(wireTranscriptName)
-	if err != nil {
-		_ = sessionRoot.Close()
-		return sessionAnalysis{err: fmt.Errorf("could not read %s: %w", name, err)}
-	}
 	provider, reports, readErr := readTranscript(file)
-	closeErr := errors.Join(file.Close(), sessionRoot.Close())
-	if err := errors.Join(readErr, closeErr); err != nil {
-		return sessionAnalysis{err: fmt.Errorf("could not read %s: %w", name, err)}
+	if err := errors.Join(readErr, file.Close()); err != nil {
+		return err
 	}
 
-	statistics := CacheStatistics{Provider: provider, Sessions: 1}
-	if statistics.Provider == "" {
-		statistics.Provider = "unknown"
-	}
+	statistics.Cache = CacheStatistics{}
 	for _, report := range reports {
-		statistics.record(report)
+		statistics.Cache.record(report)
 	}
-	return cachedAnalysis(
-		statistics,
-		len(reports) > 0,
-		journalInfo.Size(),
-		journalInfo.ModTime().UnixNano(),
-		wireSize,
-		wireModifiedAt,
-	)
+	if len(reports) > 0 {
+		statistics.Cache.Sessions = 1
+	}
+	if statistics.Provider == unknownProvider && provider != "" {
+		statistics.Provider = provider
+	}
+
+	return nil
 }
 
-func (self cachedSession) matches(
-	journalSize int64,
-	journalModifiedAt int64,
-	wireSize int64,
-	wireModifiedAt int64,
-) bool {
-	return self.JournalSize == journalSize &&
-		self.JournalModifiedAt == journalModifiedAt &&
-		self.WireSize == wireSize &&
-		self.WireModifiedAt == wireModifiedAt
+func (self cachedSession) matches(files sessionFiles) bool {
+	return self.JournalSize == files.journalSize &&
+		self.JournalModifiedAt == files.journalModifiedAt &&
+		self.WireSize == files.wireSize &&
+		self.WireModifiedAt == files.wireModifiedAt
 }
 
-func cachedAnalysis(
-	statistics CacheStatistics,
-	hasStatistics bool,
-	journalSize int64,
-	journalModifiedAt int64,
-	wireSize int64,
-	wireModifiedAt int64,
-) sessionAnalysis {
+func cachedAnalysis(statistics SessionStatistics, files sessionFiles) sessionAnalysis {
 	return sessionAnalysis{
-		statistics:    statistics,
-		hasStatistics: hasStatistics,
+		statistics: statistics,
 		cachedStatistics: cachedSession{
-			JournalSize:       journalSize,
-			JournalModifiedAt: journalModifiedAt,
-			WireSize:          wireSize,
-			WireModifiedAt:    wireModifiedAt,
+			JournalSize:       files.journalSize,
+			JournalModifiedAt: files.journalModifiedAt,
+			WireSize:          files.wireSize,
+			WireModifiedAt:    files.wireModifiedAt,
 			Statistics:        statistics,
-			HasStatistics:     hasStatistics,
 		},
 		hasCached: true,
 	}
-}
-
-func analyseJournal(directory string, name string) (CacheStatistics, bool, error) {
-	statistics := CacheStatistics{Sessions: 1}
-	usageReports := 0
-
-	err := session.Records(directory, name, func(line session.Line) error {
-		if line.Kind == session.Head {
-			var meta struct {
-				Provider string `json:"provider"`
-			}
-			if err := json.Unmarshal(line.Meta, &meta); err != nil {
-				return err
-			}
-			statistics.Provider = meta.Provider
-			return nil
-		}
-		if line.Event == nil || line.Event.Usage == nil || line.Event.Usage.InputTokens <= 0 {
-			return nil
-		}
-
-		usageReports++
-		if line.Event.Usage.Cache != nil {
-			statistics.record(cacheReport{
-				inputTokens:   int64(line.Event.Usage.InputTokens),
-				cachedTokens:  int64(line.Event.Usage.Cache.ReadTokens),
-				writtenTokens: int64(line.Event.Usage.Cache.WriteTokens),
-			})
-		}
-		return nil
-	})
-	if err != nil {
-		return CacheStatistics{}, false, fmt.Errorf("could not analyse %s: %w", name, err)
-	}
-	if statistics.Provider == "" {
-		statistics.Provider = "unknown"
-	}
-	return statistics, usageReports > 0 && statistics.Requests == usageReports, nil
-}
-
-func (self *CacheStatistics) record(report cacheReport) {
-	self.Requests++
-	self.InputTokens += report.inputTokens
-	self.CachedTokens += report.cachedTokens
-	self.WrittenTokens += report.writtenTokens
-	self.PeakInputTokens = max(self.PeakInputTokens, report.inputTokens)
-	if report.cachedTokens > 0 {
-		self.Hits++
-	} else {
-		self.Misses++
-	}
-}
-
-func (self *CacheStatistics) add(statisticsToAdd CacheStatistics) {
-	self.Sessions += statisticsToAdd.Sessions
-	self.Requests += statisticsToAdd.Requests
-	self.Hits += statisticsToAdd.Hits
-	self.Misses += statisticsToAdd.Misses
-	self.InputTokens += statisticsToAdd.InputTokens
-	self.CachedTokens += statisticsToAdd.CachedTokens
-	self.WrittenTokens += statisticsToAdd.WrittenTokens
-	self.PeakInputTokens = max(self.PeakInputTokens, statisticsToAdd.PeakInputTokens)
-}
-
-var (
-	responsesCompletedType = []byte(`"type":"response.completed"`)
-	responsesDoneType      = []byte(`"type":"response.done"`)
-	anthropicStartType     = []byte(`"type":"message_start"`)
-	inputTokensKey         = []byte(`"input_tokens":`)
-	promptTokensKey        = []byte(`"prompt_tokens":`)
-	cachedTokensKey        = []byte(`"cached_tokens":`)
-	cacheReadTokensKey     = []byte(`"cache_read_input_tokens":`)
-	cacheWriteTokensKey    = []byte(`"cache_write_tokens":`)
-	cacheCreationTokensKey = []byte(`"cache_creation_input_tokens":`)
-)
-
-const fragmentOverlap = 96
-
-func readTranscript(reader io.Reader) (string, []cacheReport, error) {
-	bufferedReader := bufio.NewReader(reader)
-	provider := ""
-	var reports []cacheReport
-	var line wireLine
-	var overlap []byte
-	isLineStart := true
-
-	for {
-		fragment, err := bufferedReader.ReadSlice('\n')
-		if isLineStart {
-			if providerName, isProvider := bytes.CutPrefix(fragment, []byte(providerPrefix)); isProvider {
-				provider = strings.TrimSpace(string(providerName))
-			}
-			line.start(fragment)
-		}
-		if line.kind != unknownWireLine {
-			line.inspect(fragment)
-			if len(overlap) > 0 {
-				boundary := append(slices.Clone(overlap), fragment[:min(len(fragment), fragmentOverlap)]...)
-				line.inspect(boundary)
-			}
-			overlap = trailingBytes(overlap, fragment)
-		}
-
-		isLineEnd := !errors.Is(err, bufio.ErrBufferFull)
-		if isLineEnd {
-			if report, isReported := line.report(); isReported {
-				reports = append(reports, report)
-			}
-			line = wireLine{}
-			overlap = overlap[:0]
-			isLineStart = true
-		} else {
-			isLineStart = false
-		}
-
-		if errors.Is(err, io.EOF) {
-			return provider, reports, nil
-		}
-		if err != nil && !errors.Is(err, bufio.ErrBufferFull) {
-			return "", nil, err
-		}
-	}
-}
-
-func (self *wireLine) start(fragment []byte) {
-	if !bytes.HasPrefix(fragment, []byte(dataPrefix)) {
-		return
-	}
-
-	switch {
-	case bytes.Contains(fragment, responsesCompletedType), bytes.Contains(fragment, responsesDoneType):
-		self.kind = responsesWireLine
-	case bytes.Contains(fragment, anthropicStartType):
-		self.kind = anthropicWireLine
-	default:
-		self.kind = chatCompletionsWireLine
-	}
-}
-
-func (self *wireLine) inspect(fragment []byte) {
-	switch self.kind {
-	case responsesWireLine:
-		self.inputTokens, self.hasInputTokens = readNumber(fragment, inputTokensKey, self.inputTokens, self.hasInputTokens)
-		self.cachedTokens, self.hasCachedTokens = readNumber(fragment, cachedTokensKey, self.cachedTokens, self.hasCachedTokens)
-		self.writtenTokens, self.hasWrittenTokens = readNumber(
-			fragment,
-			cacheWriteTokensKey,
-			self.writtenTokens,
-			self.hasWrittenTokens,
-		)
-	case anthropicWireLine:
-		self.inputTokens, self.hasInputTokens = readNumber(fragment, inputTokensKey, self.inputTokens, self.hasInputTokens)
-		self.cachedTokens, self.hasCachedTokens = readNumber(fragment, cacheReadTokensKey, self.cachedTokens, self.hasCachedTokens)
-		self.writtenTokens, self.hasWrittenTokens = readNumber(
-			fragment,
-			cacheCreationTokensKey,
-			self.writtenTokens,
-			self.hasWrittenTokens,
-		)
-	case chatCompletionsWireLine:
-		self.inputTokens, self.hasInputTokens = readNumber(fragment, promptTokensKey, self.inputTokens, self.hasInputTokens)
-		self.cachedTokens, self.hasCachedTokens = readNumber(fragment, cachedTokensKey, self.cachedTokens, self.hasCachedTokens)
-		self.writtenTokens, self.hasWrittenTokens = readNumber(
-			fragment,
-			cacheWriteTokensKey,
-			self.writtenTokens,
-			self.hasWrittenTokens,
-		)
-	case unknownWireLine:
-	}
-}
-
-func (self *wireLine) report() (cacheReport, bool) {
-	if !self.hasInputTokens || !self.hasCachedTokens {
-		return cacheReport{}, false
-	}
-	if self.kind == anthropicWireLine {
-		self.inputTokens += self.cachedTokens + self.writtenTokens
-	}
-	return cacheReport{
-		inputTokens:   self.inputTokens,
-		cachedTokens:  self.cachedTokens,
-		writtenTokens: self.writtenTokens,
-	}, true
-}
-
-func readNumber(fragment []byte, key []byte, current int64, hasCurrent bool) (int64, bool) {
-	remainingFragment := fragment
-	for {
-		index := bytes.Index(remainingFragment, key)
-		if index < 0 {
-			return current, hasCurrent
-		}
-		start := index + len(key)
-		for start < len(remainingFragment) && (remainingFragment[start] == ' ' || remainingFragment[start] == '\t') {
-			start++
-		}
-		if start < len(remainingFragment) && remainingFragment[start] >= '0' && remainingFragment[start] <= '9' {
-			var number int64
-			for ; start < len(remainingFragment) && remainingFragment[start] >= '0' && remainingFragment[start] <= '9'; start++ {
-				number = number*10 + int64(remainingFragment[start]-'0')
-			}
-			current = number
-			hasCurrent = true
-		}
-		remainingFragment = remainingFragment[index+len(key):]
-	}
-}
-
-func trailingBytes(destination []byte, fragment []byte) []byte {
-	if len(fragment) >= fragmentOverlap {
-		return append(destination[:0], fragment[len(fragment)-fragmentOverlap:]...)
-	}
-	if len(destination)+len(fragment) > fragmentOverlap {
-		destination = destination[len(destination)+len(fragment)-fragmentOverlap:]
-	}
-	return append(destination, fragment...)
 }
 
 func readAnalysisCache(path string) analysisCache {
@@ -662,151 +597,4 @@ func writeAnalysisCache(path string, cache analysisCache) error {
 	}
 	defer func() { _ = root.Remove(temporaryName) }()
 	return root.Rename(temporaryName, name)
-}
-
-func writeJSON(analysis Analysis, writer io.Writer) error {
-	encoder := json.NewEncoder(writer)
-	encoder.SetIndent("", "    ")
-	return encoder.Encode(analysis)
-}
-
-type reportRow struct {
-	cells      []string
-	appearance style.Style
-}
-
-func writeText(analysis Analysis, writer io.Writer) error {
-	restoreStyle := style.Init(writer)
-	defer restoreStyle()
-
-	if len(analysis.PromptCache.Providers) == 0 {
-		_, err := fmt.Fprintln(writer, style.Subtle("No cache usage was recorded."))
-		return err
-	}
-
-	cacheRows := make([]reportRow, 0, len(analysis.PromptCache.Providers)+1)
-	for _, statistics := range analysis.PromptCache.Providers {
-		cacheRows = append(cacheRows, cacheRow(model.ProviderName(statistics.Provider), statistics, style.Answer))
-	}
-	if len(analysis.PromptCache.Providers) > 1 {
-		cacheRows = append(cacheRows, cacheRow("Total", analysis.PromptCache.Total, style.Information))
-	}
-	if err := writeReportTable(
-		writer,
-		[]string{"Provider", "Sessions", "Requests", "Hits", "Misses", "Hit Rate", "Input Cached", "Tokens Read"},
-		cacheRows,
-	); err != nil {
-		return err
-	}
-
-	if _, err := fmt.Fprintln(writer); err != nil {
-		return err
-	}
-	contextRows := make([]reportRow, 0, len(analysis.PromptCache.Providers)+1)
-	for _, statistics := range analysis.PromptCache.Providers {
-		contextRows = append(contextRows, contextRow(model.ProviderName(statistics.Provider), statistics, style.Answer))
-	}
-	if len(analysis.PromptCache.Providers) > 1 {
-		contextRows = append(contextRows, contextRow("Total", analysis.PromptCache.Total, style.Information))
-	}
-	return writeReportTable(
-		writer,
-		[]string{"Provider", "Average Input", "Peak Input", "Total Input", "Cache Reads", "Cache Writes", "Fresh Input"},
-		contextRows,
-	)
-}
-
-func cacheRow(name string, statistics CacheStatistics, appearance style.Style) reportRow {
-	return reportRow{
-		appearance: appearance,
-		cells: []string{
-			name,
-			util.FormatCount(statistics.Sessions),
-			util.FormatCount(statistics.Requests),
-			util.FormatCount(statistics.Hits),
-			util.FormatCount(statistics.Misses),
-			percentage(statistics.Hits, statistics.Requests),
-			percentage(statistics.CachedTokens, statistics.InputTokens),
-			formatTokenCount(statistics.CachedTokens),
-		},
-	}
-}
-
-func contextRow(name string, statistics CacheStatistics, appearance style.Style) reportRow {
-	averageInputTokens := int64(0)
-	if statistics.Requests > 0 {
-		averageInputTokens = statistics.InputTokens / int64(statistics.Requests)
-	}
-	freshInputTokens := max(
-		statistics.InputTokens-statistics.CachedTokens-statistics.WrittenTokens,
-		0,
-	)
-	return reportRow{
-		appearance: appearance,
-		cells: []string{
-			name,
-			formatTokenCount(averageInputTokens),
-			formatTokenCount(statistics.PeakInputTokens),
-			formatTokenCount(statistics.InputTokens),
-			formatTokenCount(statistics.CachedTokens),
-			formatTokenCount(statistics.WrittenTokens),
-			formatTokenCount(freshInputTokens),
-		},
-	}
-}
-
-func reportTable(header []string, rows []reportRow) *table.Table {
-	columns := make([]table.Column, len(header))
-	for index, title := range header {
-		columns[index] = table.Column{Title: title}
-		if index > 0 {
-			columns[index].Align = table.Right
-		}
-	}
-
-	cells := make([][]string, len(rows))
-	for index, row := range rows {
-		cells[index] = row.cells
-	}
-
-	return table.New(columns...).Fit(cells)
-}
-
-func writeReportTable(writer io.Writer, header []string, rows []reportRow) error {
-	reportedTable := reportTable(header, rows)
-
-	if _, err := fmt.Fprintln(writer, style.Column(reportedTable.Header(0))); err != nil {
-		return err
-	}
-
-	for _, row := range rows {
-		if _, err := fmt.Fprintln(writer, row.appearance(reportedTable.Row(row.cells, 0))); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-const (
-	billionTokens = 1_000_000_000
-	tokenUnit     = "t"
-)
-
-func formatTokenCount(tokens int64) string {
-	if tokens <= 0 {
-		return "0" + tokenUnit
-	}
-	if tokens < billionTokens {
-		return util.FormatTokenCount(tokens) + tokenUnit
-	}
-	count := strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.2f", float64(tokens)/billionTokens), "0"), ".")
-	return count + "B" + tokenUnit
-}
-
-func percentage[Count ~int | ~int64](part Count, whole Count) string {
-	if whole <= 0 {
-		return "0.0%"
-	}
-	return fmt.Sprintf("%.1f%%", float64(part)*100/float64(whole))
 }

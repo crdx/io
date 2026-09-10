@@ -97,18 +97,22 @@ func (self *Tracker) spendOn(event agent.Event) float64 {
 		return 0
 	}
 
+	return Spend(*self.prices, *event.Usage)
+}
+
+func Spend(prices agent.TokenPrices, usage agent.Usage) float64 {
 	var readTokens, writeTokens int
-	if event.Usage.Cache != nil {
-		readTokens = event.Usage.Cache.ReadTokens
-		writeTokens = event.Usage.Cache.WriteTokens
+	if usage.Cache != nil {
+		readTokens = usage.Cache.ReadTokens
+		writeTokens = usage.Cache.WriteTokens
 	}
 
-	freshTokens := max(event.Usage.InputTokens-readTokens-writeTokens, 0)
+	freshTokens := max(usage.InputTokens-readTokens-writeTokens, 0)
 
-	dollars := float64(freshTokens)*self.prices.Input +
-		float64(readTokens)*self.prices.CacheRead +
-		float64(writeTokens)*self.prices.CacheWrite +
-		float64(event.Usage.OutputTokens)*self.prices.Output
+	dollars := float64(freshTokens)*prices.Input +
+		float64(readTokens)*prices.CacheRead +
+		float64(writeTokens)*prices.CacheWrite +
+		float64(usage.OutputTokens)*prices.Output
 
 	return dollars / tokensPerPricedUnit
 }

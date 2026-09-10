@@ -8,6 +8,7 @@
 - Input and output token API prices, stored when model list is updated
 - Session spend segment shows the API cost of the current session
 - Currency configuration with `ui.currency` if you don't like US dollars
+- `ohctl analyse` also reports models, spend, conversation, faults, and tool use
 
 ### Fixed
 
