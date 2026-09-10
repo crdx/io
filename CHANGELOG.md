@@ -2,6 +2,8 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+## [0.5.0] - 2026-09-10
+
 - Detect valid Codex models the right way
 - Default to high effort level, and make it configurable
 - Make fast mode default configurable
