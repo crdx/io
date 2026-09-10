@@ -26,8 +26,10 @@ const (
 )
 
 const (
-	executable = "/proc/self/exe"
-	shell      = "/bin/bash"
+	executable  = "/proc/self/exe"
+	shell       = "/bin/bash"
+	commandName = "oh (command)"
+	probeName   = "oh (probe)"
 )
 
 const (

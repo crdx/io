@@ -121,6 +121,7 @@ func saysProbeSucceeded(output []byte) bool {
 
 func namespaceProbeCommand(ctx context.Context) *exec.Cmd {
 	probe := exec.CommandContext(ctx, executable, "-test.run=^$")
+	probe.Args = []string{probeName, "-test.run=^$"}
 	probe.Env = append([]string{envProbe + "=1"}, testnamespace.Environment()...)
 	probe.SysProcAttr = namespaceAttributes()
 	return probe

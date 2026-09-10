@@ -28,6 +28,8 @@ const (
 	envKeeper             = "IO_KEEPER"
 	envSandboxToHostPorts = "IO_KEEPER_FORWARD_PORTS"
 	executable            = "/proc/self/exe"
+	keeperName            = "oh (keeper)"
+	commandName           = "oh (command)"
 
 	controlDescriptor = 3
 	messageBytes      = 1 << 16
@@ -134,6 +136,7 @@ func Open(ctx context.Context, sandboxToHostPorts ...uint16) (*Keeper, error) {
 	self := &Keeper{control: control, answers: make(map[uint64]chan arrival)}
 
 	process := exec.CommandContext(context.WithoutCancel(ctx), executable)
+	process.Args = []string{keeperName}
 	process.Env = append([]string{
 		envKeeper + "=1",
 		envSandboxToHostPorts + "=" + encodeSandboxToHostPorts(sandboxToHostPorts),
@@ -605,6 +608,7 @@ func (self *service) spawn(instruction request, output *os.File) {
 	}
 
 	command := exec.CommandContext(context.Background(), executable)
+	command.Args = []string{commandName}
 	command.Dir = instruction.Directory
 	command.Stdout = output
 	command.Stderr = output

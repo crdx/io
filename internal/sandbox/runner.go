@@ -222,6 +222,7 @@ func spawnAlone(
 	output Output,
 ) (process, error) {
 	stub := exec.CommandContext(ctx, executable)
+	stub.Args = []string{commandName}
 	stub.Dir = directory
 	stub.Stdout = output
 	stub.Stderr = output

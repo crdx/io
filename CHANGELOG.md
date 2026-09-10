@@ -1,7 +1,8 @@
 # Changelog
 
-## [0.3.1] - 2026-09-10
+## [0.0.0] - XXXX-XX-XX
 
+- Name sandbox helper processes
 - Restore the cache properly on resume
 
 ## [0.3.0] - 2026-09-10
