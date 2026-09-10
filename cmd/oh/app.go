@@ -952,6 +952,10 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		self.toolOutputLimit.Replace(result.LiveConfig.ToolOutputBytes)
 		self.display.bar.ReplaceLayout(result.LiveConfig.SegmentLayout)
 		self.feedback.Clear(feedback.Config)
+		if len(result.LiveConfig.UnknownSettings) > 0 {
+			self.notifyUnknownSettings(result.LiveConfig.UnknownSettings)
+			return true
+		}
 		if self.feedback.Message().Status != agent.ErrorStatus {
 			self.showFeedback(feedback.Confirmation, feedback.Message{
 				Text:         "Configuration reloaded automatically",
@@ -961,6 +965,17 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		}
 	}
 	return true
+}
+
+func (self *App) notifyUnknownSettings(reports []string) {
+	if len(reports) == 0 {
+		return
+	}
+
+	self.showFeedback(feedback.Config, feedback.Message{
+		Text:   "Unknown settings were ignored.\n" + strings.Join(reports, "\n"),
+		Status: agent.WarningStatus,
+	})
 }
 
 func (self *App) turnSummary() session.TurnSummary {

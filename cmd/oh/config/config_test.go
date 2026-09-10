@@ -337,7 +337,7 @@ func TestAMissingOverrideKeepsTheGlobalConfig(t *testing.T) {
 	}
 }
 
-func TestAnInvalidOverrideNamesTheLocalFile(t *testing.T) {
+func TestAnUnknownOverrideSettingNamesTheLocalFile(t *testing.T) {
 	directory := t.TempDir()
 	globalPath := filepath.Join(directory, "config.toml")
 	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n"); err != nil {
@@ -355,9 +355,9 @@ func TestAnInvalidOverrideNamesTheLocalFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = settings.ValidateConsumed()
-	if err == nil || !strings.Contains(err.Error(), overridePath) || !strings.Contains(err.Error(), "input.mystery") {
-		t.Errorf("got error %v", err)
+	report := strings.Join(settings.UnknownSettings(), "\n")
+	if !strings.Contains(report, overridePath) || !strings.Contains(report, "input.mystery") {
+		t.Errorf("got report %q", report)
 	}
 }
 
@@ -432,7 +432,7 @@ func TestConfiguredSkillDirectoriesRejectsAnEmptyDirectory(t *testing.T) {
 	}
 }
 
-func TestTheSingularSkillTableIsNotAccepted(t *testing.T) {
+func TestTheSingularSkillTableIsReported(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
 	if err := writeConfigFile(path, "[skill]\ninclude = [\"skills\"]\n"); err != nil {
 		t.Fatal(err)
@@ -442,8 +442,9 @@ func TestTheSingularSkillTableIsNotAccepted(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := config.ValidateConsumed(); err == nil || !strings.Contains(err.Error(), "skill.include") {
-		t.Errorf("expected singular skill table error, got %v", err)
+	report := strings.Join(config.UnknownSettings(), "\n")
+	if !strings.Contains(report, "skill.include") {
+		t.Errorf("expected the singular skill table to be reported, got %q", report)
 	}
 }
 
@@ -799,8 +800,8 @@ func TestAnOverrideCanReplaceAGlobalBarPosition(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := settings.ValidateConsumed(); err != nil {
-		t.Fatal(err)
+	if reports := settings.UnknownSettings(); len(reports) > 0 {
+		t.Fatal(reports)
 	}
 	if got := len(layout[segment.TopCenter]); got != 1 {
 		t.Errorf("got %d segments", got)
@@ -851,7 +852,7 @@ func TestAPlacementGivenOptionsItsSegmentRefusesIsRefused(t *testing.T) {
 	}
 }
 
-func TestAPlacementSettingWhatItsSegmentDoesNotReadIsRefused(t *testing.T) {
+func TestAPlacementSettingWhatItsSegmentDoesNotReadIsReported(t *testing.T) {
 	config := configFrom(t, `
 		[bar.top]
 		center = [{ segment = "workspace-dir", loudly = true }]
@@ -861,12 +862,12 @@ func TestAPlacementSettingWhatItsSegmentDoesNotReadIsRefused(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := config.ValidateConsumed()
-	if err == nil {
-		t.Fatal("expected a setting nothing reads to be refused")
+	reports := config.UnknownSettings()
+	if len(reports) == 0 {
+		t.Fatal("expected a setting nothing reads to be reported")
 	}
-	if !strings.Contains(err.Error(), "loudly") {
-		t.Errorf("expected %q to name the setting", err)
+	if !strings.Contains(strings.Join(reports, "\n"), "loudly") {
+		t.Errorf("expected %q to name the setting", reports)
 	}
 }
 
@@ -1048,8 +1049,8 @@ func TestAConfigWrittenBeforeTheStreamingModeExistedNeedsNoMigrating(t *testing.
 	if config.Ui.StreamingMode != output.StreamingModeLine {
 		t.Errorf("got streaming mode %d, want whole lines", config.Ui.StreamingMode)
 	}
-	if err := config.ValidateConsumed(); err != nil {
-		t.Errorf("got %v", err)
+	if reports := config.UnknownSettings(); len(reports) > 0 {
+		t.Errorf("got %v", reports)
 	}
 }
 
@@ -1072,8 +1073,8 @@ func TestTheToolOutputLimitIsRead(t *testing.T) {
 	if config.Tool.Output.Bytes != 48*1024 {
 		t.Errorf("got tool output limit %d, want %d", config.Tool.Output.Bytes, 48*1024)
 	}
-	if err := config.ValidateConsumed(); err != nil {
-		t.Errorf("got %v", err)
+	if reports := config.UnknownSettings(); len(reports) > 0 {
+		t.Errorf("got %v", reports)
 	}
 }
 
@@ -1240,7 +1241,7 @@ func TestAConfigWrittenBeforeTheGroupingExistedNeedsNoMigrating(t *testing.T) {
 	if !reflect.DeepEqual(config.Ui.Grouping, want) {
 		t.Errorf("got grouping %+v, want %+v", config.Ui.Grouping, want)
 	}
-	if err := config.ValidateConsumed(); err != nil {
-		t.Errorf("got %v", err)
+	if reports := config.UnknownSettings(); len(reports) > 0 {
+		t.Errorf("got %v", reports)
 	}
 }

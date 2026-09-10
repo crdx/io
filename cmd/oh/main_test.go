@@ -7049,6 +7049,28 @@ func TestReloadingConfigChangesTheStreamingModeForTheNextTurn(t *testing.T) {
 	}
 }
 
+func TestReloadingConfigKeepsTheChangeAndWarnsAboutASettingNothingReads(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, "[ui]\nstreaming = \"asap\"\n")
+
+	self := testConversation(t, &bytes.Buffer{})
+	prepareLiveConfig(t, self, path)
+
+	writeLiveConfig(t, path, "[ui]\nstreaming = \"paced\"\nmystery = \"loudly\"\n")
+	settleLiveConfig(t, self)
+
+	if self.display.streamingMode != output.StreamingModePaced {
+		t.Errorf("reloaded streaming mode is %d, want paced", self.display.streamingMode)
+	}
+	message := self.feedback.Message()
+	if message.Status != agent.WarningStatus {
+		t.Errorf("feedback status is %q, want a warning", message.Status)
+	}
+	if !strings.Contains(message.Text, "mystery") {
+		t.Errorf("feedback %q does not name the setting", message.Text)
+	}
+}
+
 func TestDeletingALocalConfigLiveReloadsTheGlobalFallback(t *testing.T) {
 	directory := t.TempDir()
 	globalPath := filepath.Join(directory, "config.toml")
@@ -7265,6 +7287,7 @@ const (
 	feedbackClearedByEditing
 	feedbackClearedByTurnCompletion
 	feedbackStorageWarnings
+	feedbackUnknownSettings
 	feedbackTallAnswer
 )
 
@@ -7307,6 +7330,7 @@ func TestFeedbackDrawsEveryVisibleState(t *testing.T) {
 		"editing clears feedback":     func() string { return feedbackStream(t, feedbackClearedByEditing) },
 		"turn completion clears it":   func() string { return feedbackStream(t, feedbackClearedByTurnCompletion) },
 		"combined storage warnings":   func() string { return feedbackStream(t, feedbackStorageWarnings) },
+		"settings nothing reads":      func() string { return feedbackStream(t, feedbackUnknownSettings) },
 		"tall answer stays untouched": func() string { return feedbackStream(t, feedbackTallAnswer) },
 	}
 
@@ -7364,7 +7388,7 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		inputLine.SetText("/help")
 	case feedbackSuccess:
 		inputLine.SetText("/copy")
-	case feedbackStartupInfo, feedbackStorageWarnings:
+	case feedbackStartupInfo, feedbackStorageWarnings, feedbackUnknownSettings:
 	}
 	self.show(inputLine)
 
@@ -7395,6 +7419,12 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		self.show(inputLine)
 	case feedbackStorageWarnings:
 		self.notifyFailure("chat.md recording disabled: transcript append failed\nwire.http recording disabled: wire append failed")
+		self.show(inputLine)
+	case feedbackUnknownSettings:
+		self.notifyUnknownSettings([]string{
+			"config.toml: unknown: ui.mystery",
+			"oh.toml: unknown: bar.top.center.loudly",
+		})
 		self.show(inputLine)
 	case feedbackTallAnswer:
 		const answer = "01 alpha\n\n02 bravo\n\n03 charlie\n\n04 delta\n\n05 echo\n\n06 foxtrot\n\n07 golf"

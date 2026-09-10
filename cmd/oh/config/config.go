@@ -143,6 +143,7 @@ type LiveConfig struct {
 	Grouping           output.Grouping
 	ReasoningRendering output.ReasoningRendering
 	ToolOutputBytes    int
+	UnknownSettings    []string
 }
 
 func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
@@ -158,10 +159,6 @@ func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
 		}
 		return LiveConfig{}, fmt.Errorf("%s: snippets: %w", path, err)
 	}
-	if err := self.ValidateConsumed(); err != nil {
-		return LiveConfig{}, err
-	}
-
 	return LiveConfig{
 		ContinueMessage:    self.Input.Continue,
 		EditorCommand:      self.Editor.Command,
@@ -171,6 +168,7 @@ func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
 		Grouping:           self.Ui.Grouping,
 		ReasoningRendering: self.Ui.ReasoningRendering,
 		ToolOutputBytes:    self.Tool.Output.Bytes,
+		UnknownSettings:    self.UnknownSettings(),
 	}, nil
 }
 
@@ -247,7 +245,9 @@ func (self Config) GetOverride() (Override, bool) {
 	return Override{}, false
 }
 
-func (self Config) ValidateConsumed() error {
+func (self Config) UnknownSettings() []string {
+	var reports []string
+
 	for sourceIndex, source := range self.sources {
 		unknown := source.meta.Undecoded()
 		namedKeys := make([]string, 0, len(unknown))
@@ -262,10 +262,10 @@ func (self Config) ValidateConsumed() error {
 
 		slices.Sort(namedKeys)
 
-		return fmt.Errorf("%s: nothing is done with: %s", source.path, strings.Join(namedKeys, ", "))
+		reports = append(reports, fmt.Sprintf("%s: unknown: %s", source.path, strings.Join(namedKeys, ", ")))
 	}
 
-	return nil
+	return reports
 }
 
 func (self Config) isShadowed(sourceIndex int, key toml.Key) bool {

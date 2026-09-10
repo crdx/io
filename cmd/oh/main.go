@@ -862,6 +862,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 	app.slash.commands = commandRegistry
+	app.notifyUnknownSettings(liveConfig.UnknownSettings)
 	app.continueMessage = liveConfig.ContinueMessage
 	app.display.streamingMode = liveConfig.StreamingMode
 	app.display.reasoningRendering = liveConfig.ReasoningRendering
