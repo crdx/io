@@ -8812,7 +8812,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"exposed-ports / configured hostname": goldenSegmentPass(
 			t,
 			exposedPorts.New(
-				exposedPorts.Direction{
+				exposedPorts.Routes{
 					GetPorts: func() []uint16 { return []uint16{8000} },
 					Hostname: "preview-" + goldenSessionName + ".test",
 				},
@@ -11018,15 +11018,15 @@ func newSessionGoldenProvider(
 
 const goldenSessionName = "brave-otter"
 
-func goldenExposedPorts(ports ...uint16) exposedPorts.Direction {
-	return exposedPorts.Direction{
+func goldenExposedPorts(ports ...uint16) exposedPorts.Routes {
+	return exposedPorts.Routes{
 		GetPorts: func() []uint16 { return ports },
 		Hostname: portgrant.AddressFor(goldenSessionName),
 	}
 }
 
-func goldenLocalPorts(ports ...uint16) exposedPorts.Direction {
-	return exposedPorts.Direction{
+func goldenLocalPorts(ports ...uint16) exposedPorts.Routes {
+	return exposedPorts.Routes{
 		GetPorts: func() []uint16 { return ports },
 		Hostname: portgrant.LocalHost,
 	}

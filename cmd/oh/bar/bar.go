@@ -100,11 +100,11 @@ func NewRegistry(options Options) segment.Registry {
 		modeToggleSegment:      modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
 		pathGrantsSegment:      pathGrants.New(options.Sources.GetPathGrants),
 		exposedPortsSegment: exposedPorts.New(
-			exposedPorts.Direction{
+			exposedPorts.Routes{
 				GetPorts: options.Sources.GetHostToSandboxPorts,
 				Hostname: options.SandboxHostname,
 			},
-			exposedPorts.Direction{
+			exposedPorts.Routes{
 				GetPorts: options.Sources.GetSandboxToHostPorts,
 				Hostname: portgrant.LocalHost,
 			},

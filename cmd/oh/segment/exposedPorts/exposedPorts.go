@@ -17,17 +17,17 @@ const (
 	sandboxToHostArrow = "⇠ "
 )
 
-type Direction struct {
+type Routes struct {
 	GetPorts func() []uint16
 	Hostname string
 }
 
 type state struct {
-	hostToSandbox Direction
-	sandboxToHost Direction
+	hostToSandbox Routes
+	sandboxToHost Routes
 }
 
-func New(hostToSandbox Direction, sandboxToHost Direction) segment.Factory {
+func New(hostToSandbox Routes, sandboxToHost Routes) segment.Factory {
 	return func(options segment.Options) (segment.Segment, error) {
 		if err := options.Read(&struct{}{}); err != nil {
 			return nil, err
@@ -76,10 +76,10 @@ func (self state) getParts() []string {
 	return appendParts(parts, sandboxToHostArrow, self.sandboxToHost)
 }
 
-func appendParts(parts []string, arrow string, direction Direction) []string {
-	for _, port := range direction.GetPorts() {
+func appendParts(parts []string, arrow string, routes Routes) []string {
+	for _, port := range routes.GetPorts() {
 		text := style.Subtle(arrow) + style.Normal(strconv.Itoa(int(port)))
-		parts = append(parts, link.RenderURL(text, portgrant.URL(direction.Hostname, port)))
+		parts = append(parts, link.RenderURL(text, portgrant.URL(routes.Hostname, port)))
 	}
 
 	return parts
