@@ -6,6 +6,7 @@
 - Spell grant flags in capability order (`rxw`)
 - Warn when [sandbox.read] is used redundantly
 - Linkify paths in tool calls, reasoning, notices, everything!
+- Prevent sub usage flashing on refresh
 
 ## [0.4.0] - 2026-09-10
 

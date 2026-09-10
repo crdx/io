@@ -133,7 +133,7 @@ func (self *state) NextRefresh(phase segment.Phase) time.Time {
 		return phase.At
 	}
 
-	if self.status == usageFetching {
+	if self.status == usageFetching && len(self.windows) == 0 {
 		interval := spinner.Activity.RefreshInterval()
 
 		return phase.At.Truncate(interval).Add(interval)
@@ -181,7 +181,8 @@ func (self *state) refreshFromSnapshot() {
 }
 
 func (self *state) getVisibleStatus() usageStatus {
-	if self.status == usageFetching && self.now().Sub(self.fetchStartedAt) < spinnerDelay {
+	if self.status == usageFetching &&
+		(len(self.windows) > 0 || self.now().Sub(self.fetchStartedAt) < spinnerDelay) {
 		return self.statusBeforeFetch
 	}
 

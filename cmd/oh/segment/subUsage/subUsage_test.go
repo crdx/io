@@ -289,7 +289,7 @@ func TestAFreshSnapshotIsNotFetchedAgain(t *testing.T) {
 	}
 }
 
-func TestRefreshingASnapshotDelaysTheSpinnerAndKeepsTheFigures(t *testing.T) {
+func TestRefreshingASnapshotKeepsTheSettledDisplayStable(t *testing.T) {
 	reporter := &scriptedReporter{windows: []agent.UsageWindow{{
 		Duration: 5 * time.Hour,
 		Percent:  40,
@@ -304,14 +304,18 @@ func TestRefreshingASnapshotDelaysTheSpinnerAndKeepsTheFigures(t *testing.T) {
 		t.Fatal("refresh did not start")
 	}
 
-	if got := style.Plain(built.Render(segment.Context{})); got != "● 5h 40% ███░┃░░░" {
-		t.Errorf("short refresh = %q", got)
+	want := "● 5h 40% ███░┃░░░"
+	if got := style.Plain(built.Render(segment.Context{})); got != want {
+		t.Errorf("refresh start = %q, want %q", got, want)
 	}
 
 	clock.set(clock.read().Add(spinnerDelay))
-	want := "● 5h 40% ███░┃░░░ " + built.spinnerFrame()
 	if got := style.Plain(built.Render(segment.Context{})); got != want {
 		t.Errorf("long refresh = %q, want %q", got, want)
+	}
+
+	if got := built.NextRefresh(phaseAt(clock.read())); !got.Equal(testNow.Add(defaultRate + redrawInterval)) {
+		t.Errorf("background refresh = %s", got.Sub(clock.read()))
 	}
 }
 

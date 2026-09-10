@@ -45,15 +45,18 @@ func scoped(scope string, percent float64) agent.UsageWindow {
 }
 
 type segmentCase struct {
-	name      string
-	modelName string
-	windows   []agent.UsageWindow
-	status    usageStatus
-	failure   string
-	fetchedAt time.Time
-	isWaiting bool
-	hasImages bool
-	repaints  int
+	name              string
+	modelName         string
+	windows           []agent.UsageWindow
+	status            usageStatus
+	statusBeforeFetch usageStatus
+	failure           string
+	fetchedAt         time.Time
+	fetchStartedAt    time.Time
+	timeStep          time.Duration
+	isWaiting         bool
+	hasImages         bool
+	repaints          int
 }
 
 func segmentCases() []segmentCase {
@@ -86,11 +89,27 @@ func segmentCases() []segmentCase {
 			windows: []agent.UsageWindow{{Duration: 5 * time.Hour, Percent: 40}},
 		},
 		{
-			name:    "a fetch under way",
-			windows: []agent.UsageWindow{window(5*time.Hour, 40, 150*time.Minute)},
-			status:  usageFetching,
+			name:              "a snapshot refreshing in the background",
+			windows:           []agent.UsageWindow{window(5*time.Hour, 40, 150*time.Minute)},
+			status:            usageFetching,
+			statusBeforeFetch: usageReady,
+			fetchStartedAt:    testNow,
+			timeStep:          spinnerDelay,
+			repaints:          1,
 		},
 		{name: "nothing fetched yet", status: usagePending},
+		{
+			name:              "an initial fetch waiting for its spinner",
+			status:            usageFetching,
+			statusBeforeFetch: usagePending,
+			fetchStartedAt:    testNow,
+		},
+		{
+			name:              "an initial fetch showing its spinner",
+			status:            usageFetching,
+			statusBeforeFetch: usagePending,
+			fetchStartedAt:    testNow.Add(-spinnerDelay),
+		},
 		{
 			name:    "a fetch that was refused",
 			windows: []agent.UsageWindow{window(5*time.Hour, 40, 150*time.Minute)},
@@ -147,12 +166,15 @@ func drawEachCase(t *testing.T, isPlain bool) string {
 		}
 
 		segment := &state{
-			modelName:        strings.ToLower(test.modelName),
-			rate:             defaultRate,
-			isSelfRefreshing: !test.isWaiting,
-			gauges:           gauges,
-			now:              clock.read,
-			status:           test.status,
+			modelName:         strings.ToLower(test.modelName),
+			rate:              defaultRate,
+			isSelfRefreshing:  !test.isWaiting,
+			gauges:            gauges,
+			now:               clock.read,
+			windows:           test.windows,
+			fetchStartedAt:    test.fetchStartedAt,
+			status:            test.status,
+			statusBeforeFetch: test.statusBeforeFetch,
 		}
 
 		fetchedAt := test.fetchedAt
@@ -168,7 +190,7 @@ func drawEachCase(t *testing.T, isPlain bool) string {
 			text := segment.draw(snapshot{
 				windows:   test.windows,
 				fetchedAt: fetchedAt,
-				status:    test.status,
+				status:    segment.getVisibleStatus(),
 				failure:   test.failure,
 			})
 
@@ -178,6 +200,7 @@ func drawEachCase(t *testing.T, isPlain bool) string {
 
 			drawn.WriteString(withoutPayload(text))
 			drawn.WriteString("\n")
+			clock.set(clock.read().Add(test.timeStep))
 		}
 	}
 

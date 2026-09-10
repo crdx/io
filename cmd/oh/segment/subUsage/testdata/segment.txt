@@ -18,10 +18,15 @@
 ● 5h stale
 === a window with no reset at all ===
 ● 5h 40% ███░░░░░
-=== a fetch under way ===
-● 5h 40% ███░┃░░░ ✦·
+=== a snapshot refreshing in the background ===
+● 5h 40% ███░┃░░░
+● 5h 40% ███░┃░░░
 === nothing fetched yet ===
 usage pending
+=== an initial fetch waiting for its spinner ===
+usage pending
+=== an initial fetch showing its spinner ===
+usage ✦·
 === a fetch that was refused ===
 ● 5h 40% ███░┃░░░ 429
 === nothing to show at all ===
