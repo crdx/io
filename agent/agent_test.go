@@ -1106,6 +1106,59 @@ func TestEveryPromptCacheRebuildIsReportedWithItsCause(t *testing.T) {
 	}
 }
 
+func TestACacheRebuildIsQuantifiedInTokensAndWholeMinutes(t *testing.T) {
+	for name, test := range map[string]struct {
+		cause           agent.CacheCause
+		rewrittenTokens int
+		gap             time.Duration
+		want            string
+	}{
+		"a conversation reopened": {
+			cause:           agent.CacheReopened,
+			rewrittenTokens: 294_000,
+			want:            "Cache gone: 294Kt sent.",
+		},
+		"an entry that expired": {
+			cause:           agent.CacheExpired,
+			rewrittenTokens: 294_000,
+			gap:             11*time.Minute + 17*time.Second,
+			want:            "Cache expired: 294Kt sent after 11m.",
+		},
+		"an entry rebuilt an hour later": {
+			cause:           agent.CacheRebuilt,
+			rewrittenTokens: 28_000,
+			gap:             90 * time.Minute,
+			want:            "Cache rebuilt: 28Kt sent 1h later.",
+		},
+		"an entry rebuilt within the minute": {
+			cause:           agent.CacheRebuilt,
+			rewrittenTokens: 28_000,
+			gap:             45 * time.Second,
+			want:            "Cache rebuilt: 28Kt sent <1m later.",
+		},
+		"an entry that had not settled": {
+			cause:           agent.CacheSettling,
+			rewrittenTokens: 300,
+			gap:             4 * time.Second,
+			want:            "Cache unsettled: 300t sent.",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			usage := cachedAs(0, test.rewrittenTokens)
+			event := agent.Event{
+				Kind:  agent.CacheRebuildEvent,
+				Name:  string(test.cause),
+				Took:  test.gap,
+				Usage: &usage,
+			}
+
+			if got := agent.CacheRebuildNotice(event); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
 func TestAPromptCacheIsNotReportedWhenItHeld(t *testing.T) {
 	for name, test := range map[string]struct {
 		replies []agent.Usage

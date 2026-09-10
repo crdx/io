@@ -233,7 +233,7 @@ func CacheRebuildNotice(event Event) string {
 	case CacheExpired:
 		return fmt.Sprintf("Cache expired: %s sent after %s.", tokens, gap)
 	case CacheSettling:
-		return fmt.Sprintf("Cache unsettled: %s sent %s later.", tokens, gap)
+		return fmt.Sprintf("Cache unsettled: %s sent.", tokens)
 	case CacheRebuilt:
 		return fmt.Sprintf("Cache rebuilt: %s sent %s later.", tokens, gap)
 	}
