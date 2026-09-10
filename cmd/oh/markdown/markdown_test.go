@@ -692,3 +692,21 @@ func TestTheLastValidMermaidRemainsTheTailWhileItsSourceIsInvalid(t *testing.T) 
 		t.Error("expected the cached Mermaid rendering to remain the tail")
 	}
 }
+
+func TestAnImageWrittenOutNamesItsAddressWithoutAGap(t *testing.T) {
+	for name, test := range map[string]struct {
+		markdown string
+		want     string
+	}{
+		"no words at all":  {markdown: "![](/pictures/chart.png)", want: "(/pictures/chart.png)"},
+		"words of its own": {markdown: "![a chart](/pictures/chart.png)", want: "a chart (/pictures/chart.png)"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			rows := Render(test.markdown, 60)
+
+			if got := style.Plain(strings.Join(rows, "\n")); got != test.want {
+				t.Errorf("wrote %q, want %q", got, test.want)
+			}
+		})
+	}
+}

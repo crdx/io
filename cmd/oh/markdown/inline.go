@@ -52,7 +52,14 @@ func (self *renderer) renderInlineNode(node ast.Node) string {
 		return label + style.Address(" ("+address+")")
 
 	case *ast.Image:
-		return style.Link(self.inline(node)) + style.Address(" ("+string(node.Destination)+")")
+		address := style.Address("(" + string(node.Destination) + ")")
+
+		words := self.inline(node)
+		if style.Plain(words) == "" {
+			return address
+		}
+
+		return style.Link(words) + " " + address
 
 	case *ast.AutoLink:
 		address := string(node.URL(self.source))

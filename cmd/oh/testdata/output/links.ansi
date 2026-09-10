@@ -28,7 +28,7 @@
 \r\e[K\e[38;2;129;162;190mftp://example.test/archive\e[0m remain\r
 \r\e[Kvisible but inert.\r
 \r\e[K\r
-\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150m\e[0m\r
+\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\r
 \r\e[K\e[38;2;150;152;150m(diagram.png)\e[0m.\r
 \e[?25h\e[?2026l
 === one column ===
@@ -765,7 +765,7 @@
 \r\e[K\e[38;2;129;162;190mg\e[0m\r
 \r\e[K\e[38;2;129;162;190mr\e[0m\r
 \r\e[K\e[38;2;129;162;190ma\e[0m\r
-\r\e[K\e[38;2;129;162;190mm\e[0m\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;129;162;190mm\e[0m\r
 \r\e[K\e[38;2;150;152;150m(\e[0m\r
 \r\e[K\e[38;2;150;152;150md\e[0m\r
 \r\e[K\e[38;2;150;152;150mi\e[0m\r
@@ -793,7 +793,7 @@ This \e[38;2;129;162;190mlong linked label crosses narrow rows without leaking i
 
 Unsupported \e[38;2;129;162;190mscript links\e[0m\e[38;2;150;152;150m (javascript:alert(1))\e[0m, \e[38;2;129;162;190mrelative links\e[0m\e[38;2;150;152;150m (docs/page.md)\e[0m, \e[38;2;129;162;190mhostless links\e[0m\e[38;2;150;152;150m (https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visible but inert.
 
-An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150m (diagram.png)\e[0m.
+An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.
 
 === printed ===
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -813,7 +813,7 @@ This \e]8;;https://example.test/a-long-destination?first=one&second=two\e\\\e[38
 Unsupported \e[38;2;129;162;190mscript links\e[0m\e[38;2;150;152;150m (javascript:alert(1))\e[0m, \e[38;2;129;162;190mrelative links\e[0m\e[38;2;150;152;150m (docs/page.md)\e[0m, \e[38;2;129;162;190mhostless links\e[0m\e[38;2;150;152;150m\e[0m\r
 \e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visible but inert.\r
 \r
-An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150m (diagram.png)\e[0m.\r
+An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.\r
 
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -836,7 +836,7 @@ An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150
 \r\e[Klinks](https:pa\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[KUnsupported \e[38;2;129;162;190mscript links\e[0m\e[38;2;150;152;150m (javascript:alert(1))\e[0m, \e[38;2;129;162;190mrelative links\e[0m\e[38;2;150;152;150m (docs/page.md)\e[0m, \e[38;2;129;162;190mhostless links\e[0m\e[38;2;150;152;150m\e[0m\r
 \r\e[K\e[38;2;150;152;150m(https:path)\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP ftp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP ftp://e\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP ftp://examp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.t\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/arch\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m rema\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain v\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visib\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visible b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visible but i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visible but inert\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visible but inert.\r
 \r\e[K\r
-\r\e[KA\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn im\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image rema\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallba\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![di\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagra\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagram](d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagram](diagr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagram](diagram.p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150m (diagram.png)\e[0m.\e[?25h\e[?2026l\r
+\r\e[KA\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn im\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image rema\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallba\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![di\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagra\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagram](d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagram](diagr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagram](diagram.p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -856,7 +856,7 @@ An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150
 \r\e[KUnsupported \e[38;2;129;162;190mscript links\e[0m\e[38;2;150;152;150m (javascript:alert(1))\e[0m, \e[38;2;129;162;190mrelative links\e[0m\e[38;2;150;152;150m (docs/page.md)\e[0m, [hostless\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KUnsupported \e[38;2;129;162;190mscript links\e[0m\e[38;2;150;152;150m (javascript:alert(1))\e[0m, \e[38;2;129;162;190mrelative links\e[0m\e[38;2;150;152;150m (docs/page.md)\e[0m, \e[38;2;129;162;190mhostless links\e[0m\e[38;2;150;152;150m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visible but inert.\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150m (diagram.png)\e[0m.\e[?25h\e[?2026l\r
+\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -879,7 +879,7 @@ An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150
 \r\e[Klinks](https:pa\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[KUnsupported \e[38;2;129;162;190mscript links\e[0m\e[38;2;150;152;150m (javascript:alert(1))\e[0m, \e[38;2;129;162;190mrelative links\e[0m\e[38;2;150;152;150m (docs/page.md)\e[0m, \e[38;2;129;162;190mhostless links\e[0m\e[38;2;150;152;150m\e[0m\r
 \r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP ftp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP ftp://examp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visib\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visible but inert\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visible but inert.\r
 \r\e[K\r
-\r\e[KAn image\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![di\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagram](diagr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150m (diagram.png)\e[0m.\e[?25h\e[?2026l\r
+\r\e[KAn image\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![di\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagram](diagr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
@@ -958,7 +958,7 @@ An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150
 \r\e[KAn image\r
 \r\e[Kremains a\r
 \r\e[Kfallback:\r
-\r\e[K\e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;129;162;190mdiagram\e[0m\r
 \r\e[K\e[38;2;150;152;150m(diagram.png\e[0m\r
 \r\e[K\e[38;2;150;152;150m)\e[0m.\r
 \e[?25h\e[?2026l
@@ -974,7 +974,7 @@ An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150
 \r\e[K\r
 \r\e[KUnsupported \e[38;2;129;162;190mscript links\e[0m\e[38;2;150;152;150m (javascript:alert(1))\e[0m, \e[38;2;129;162;190mrelative links\e[0m\e[38;2;150;152;150m (docs/page.md)\e[0m, \e[38;2;129;162;190mhostless links\e[0m\e[38;2;150;152;150m (https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visible but inert.\r
 \r\e[K\r
-\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150m (diagram.png)\e[0m.
+\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.
 \e[?25h\e[?2026l
 === wide ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -994,5 +994,5 @@ An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150
 \r\e[KUnsupported \e[38;2;129;162;190mscript links\e[0m\e[38;2;150;152;150m (javascript:alert(1))\e[0m, \e[38;2;129;162;190mrelative links\e[0m\e[38;2;150;152;150m (docs/page.md)\e[0m, \e[38;2;129;162;190mhostless links\e[0m\e[38;2;150;152;150m\e[0m\r
 \r\e[K\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visible but inert.\r
 \r\e[K\r
-\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150m (diagram.png)\e[0m.\r
+\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.\r
 \e[?25h\e[?2026l
