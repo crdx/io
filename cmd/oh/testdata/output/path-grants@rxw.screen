@@ -30,11 +30,11 @@ I can run what is in the tools directory
 now.
 
 
- 🤖 Granted temporary read, write, and
-    execute access to /build. Changes
-    there follow the workspace write
-    capability. Execution there follows
-    the shell capability.
+ 🤖 Granted temporary read, execute, and
+    write access to /build. Execution
+    there follows the shell capability.
+    Changes there follow the workspace
+    write capability.
 
 
 I can build in place and run what comes
@@ -732,11 +732,15 @@ d
 
 ,
 
-w
+e
 
-r
+x
 
-i
+e
+
+c
+
+u
 
 t
 
@@ -750,15 +754,11 @@ n
 
 d
 
-e
+w
 
-x
+r
 
-e
-
-c
-
-u
+i
 
 t
 
@@ -791,6 +791,86 @@ i
 l
 
 d
+
+.
+
+E
+
+x
+
+e
+
+c
+
+u
+
+t
+
+i
+
+o
+
+n
+
+t
+
+h
+
+e
+
+r
+
+e
+
+f
+
+o
+
+l
+
+l
+
+o
+
+w
+
+s
+
+t
+
+h
+
+e
+
+s
+
+h
+
+e
+
+l
+
+l
+
+c
+
+a
+
+p
+
+a
+
+b
+
+i
+
+l
+
+i
+
+t
+
+y
 
 .
 
@@ -863,86 +943,6 @@ i
 t
 
 e
-
-c
-
-a
-
-p
-
-a
-
-b
-
-i
-
-l
-
-i
-
-t
-
-y
-
-.
-
-E
-
-x
-
-e
-
-c
-
-u
-
-t
-
-i
-
-o
-
-n
-
-t
-
-h
-
-e
-
-r
-
-e
-
-f
-
-o
-
-l
-
-l
-
-o
-
-w
-
-s
-
-t
-
-h
-
-e
-
-s
-
-h
-
-e
-
-l
-
-l
 
 c
 
@@ -1320,8 +1320,8 @@ I can also change it while workspace writing is granted.
 I can run what is in the tools directory now.
 
 
- 🤖 Granted temporary read, write, and execute access to /build. Changes there follow the workspace
-    write capability. Execution there follows the shell capability.
+ 🤖 Granted temporary read, execute, and write access to /build. Execution there follows the shell
+    capability. Changes there follow the workspace write capability.
 
 
 I can build in place and run what comes out of it.
@@ -1419,25 +1419,25 @@ now.
  🤖 Granted
     temporar
     y read,
-    write,
+    execute,
     and
-    execute
+    write
     access
     to
     /build.
+    Executio
+    n there
+    follows
+    the
+    shell
+    capabili
+    ty.
     Changes
     there
     follow
     the
     workspac
     e write
-    capabili
-    ty.
-    Executio
-    n there
-    follows
-    the
-    shell
     capabili
     ty.
 
@@ -1511,8 +1511,8 @@ I can also change it while workspace writing is granted.
 I can run what is in the tools directory now.
 
 
- 🤖 Granted temporary read, write, and execute access to /build. Changes there follow the workspace
-    write capability. Execution there follows the shell capability.
+ 🤖 Granted temporary read, execute, and write access to /build. Execution there follows the shell
+    capability. Changes there follow the workspace write capability.
 
 
 I can build in place and run what comes out of it.

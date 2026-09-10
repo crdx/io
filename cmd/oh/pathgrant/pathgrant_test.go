@@ -196,7 +196,7 @@ func TestAnAccessWithoutReadIsRefused(t *testing.T) {
 	grants, _, _ := newTestGrants(t)
 
 	if _, err := grants.Grant(t.TempDir(), WriteAccess); err == nil ||
-		!strings.Contains(err.Error(), `want some of "rwx"`) {
+		!strings.Contains(err.Error(), `want some of "rxw"`) {
 		t.Errorf("got %v", err)
 	}
 }

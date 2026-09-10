@@ -6,7 +6,7 @@ Commands:
   /open <target>
   /new [model]
   /expose <port>
-  /grant {r|rw|rx|rwx} <path>
+  /grant {r|rx|rw|rxw} <path>
   /grants
   /revoke {<path>|<port>}
   /jobs

@@ -86,7 +86,7 @@ func TestGrantsCommandListsTheCurrentState(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "Temporary path grants:\n  r    /read\n  rwx  /tools\n  rw   /write"
+	want := "Temporary path grants:\n  r    /read\n  rxw  /tools\n  rw   /write"
 	if context.notice != want {
 		t.Errorf("got notice %q", context.notice)
 	}

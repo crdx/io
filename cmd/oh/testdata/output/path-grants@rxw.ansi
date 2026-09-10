@@ -30,11 +30,11 @@
 \r\e[Know.\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
-\e[48;2;52;53;65m 🤖 Granted temporary read, write, and  \e[0m\r
-\e[48;2;52;53;65m    execute access to /build. Changes   \e[0m\r
-\e[48;2;52;53;65m    there follow the workspace write    \e[0m\r
-\e[48;2;52;53;65m    capability. Execution there follows \e[0m\r
-\e[48;2;52;53;65m    the shell capability.               \e[0m\r
+\e[48;2;52;53;65m 🤖 Granted temporary read, execute, and\e[0m\r
+\e[48;2;52;53;65m    write access to /build. Execution   \e[0m\r
+\e[48;2;52;53;65m    there follows the shell capability. \e[0m\r
+\e[48;2;52;53;65m    Changes there follow the workspace  \e[0m\r
+\e[48;2;52;53;65m    write capability.                   \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
 \r\e[KI can build in place and run what comes\r
@@ -733,11 +733,15 @@
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65m,\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65mx\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mt\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -751,15 +755,11 @@
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65md\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mx\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mc\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mt\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -792,6 +792,86 @@
 \e[48;2;52;53;65ml\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mE\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mx\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65my\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65m.\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -864,86 +944,6 @@
 \e[48;2;52;53;65mt\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mc\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mp\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mb\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mi\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mi\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65my\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65m.\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mE\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mx\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mc\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mu\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mi\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mf\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mw\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mc\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -1316,7 +1316,7 @@ I can also change it while workspace writing is granted.
 I can run what is in the tools directory now.
 
 \e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m 🤖 Granted temporary read, write, and execute access to /build. Changes there follow the workspace write capability. Execution there follows the shell capability.\e[0m
+\e[48;2;52;53;65m 🤖 Granted temporary read, execute, and write access to /build. Execution there follows the shell capability. Changes there follow the workspace write capability.\e[0m
 \e[48;2;52;53;65m\e[0m
 I can build in place and run what comes out of it.
 
@@ -1359,8 +1359,8 @@ I can also change it while workspace writing is granted.\r
 I can run what is in the tools directory now.\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 Granted temporary read, write, and execute access to /build. Changes there follow the workspace \e[0m\r
-\e[48;2;52;53;65m    write capability. Execution there follows the shell capability.                                 \e[0m\r
+\e[48;2;52;53;65m 🤖 Granted temporary read, execute, and write access to /build. Execution there follows the shell  \e[0m\r
+\e[48;2;52;53;65m    capability. Changes there follow the workspace write capability.                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 I can build in place and run what comes out of it.\r
@@ -1407,8 +1407,8 @@ I will no longer use it.\r
 \e[?2026h\e[?25l\r\e[KI ca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can ru\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run wh\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the too\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the tools d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the tools direc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the tools directory\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the tools directory now\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the tools directory now.\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 Granted temporary read, write, and execute access to /build. Changes there follow the workspace \e[0m\r
-\e[48;2;52;53;65m    write capability. Execution there follows the shell capability.                                 \e[0m\r
+\e[48;2;52;53;65m 🤖 Granted temporary read, execute, and write access to /build. Execution there follows the shell  \e[0m\r
+\e[48;2;52;53;65m    capability. Changes there follow the workspace write capability.                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KI ca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can bu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run wha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run what co\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run what comes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run what comes out\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run what comes out of i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run what comes out of it.\e[?25h\e[?2026l\r
@@ -1455,8 +1455,8 @@ I will no longer use it.\r
 \e[?2026h\e[?25l\r\e[KI can run what is in the tools directory now.\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 Granted temporary read, write, and execute access to /build. Changes there follow the workspace \e[0m\r
-\e[48;2;52;53;65m    write capability. Execution there follows the shell capability.                                 \e[0m\r
+\e[48;2;52;53;65m 🤖 Granted temporary read, execute, and write access to /build. Execution there follows the shell  \e[0m\r
+\e[48;2;52;53;65m    capability. Changes there follow the workspace write capability.                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KI can build in place and run what comes out of it.\e[?25h\e[?2026l\r
@@ -1503,8 +1503,8 @@ I will no longer use it.\r
 \e[?2026h\e[?25l\r\e[KI ca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can ru\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run wh\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the too\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the tools d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the tools direc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the tools directory\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the tools directory now\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can run what is in the tools directory now.\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 Granted temporary read, write, and execute access to /build. Changes there follow the workspace \e[0m\r
-\e[48;2;52;53;65m    write capability. Execution there follows the shell capability.                                 \e[0m\r
+\e[48;2;52;53;65m 🤖 Granted temporary read, execute, and write access to /build. Execution there follows the shell  \e[0m\r
+\e[48;2;52;53;65m    capability. Changes there follow the workspace write capability.                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KI ca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can bu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run wha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run what co\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run what comes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run what comes out\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run what comes out of i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can build in place and run what comes out of it.\e[?25h\e[?2026l\r
@@ -1603,25 +1603,25 @@ I will no longer use it.\r
 \e[48;2;52;53;65m 🤖 Granted \e[0m\r
 \e[48;2;52;53;65m    temporar\e[0m\r
 \e[48;2;52;53;65m    y read, \e[0m\r
-\e[48;2;52;53;65m    write,  \e[0m\r
+\e[48;2;52;53;65m    execute,\e[0m\r
 \e[48;2;52;53;65m    and     \e[0m\r
-\e[48;2;52;53;65m    execute \e[0m\r
+\e[48;2;52;53;65m    write   \e[0m\r
 \e[48;2;52;53;65m    access  \e[0m\r
 \e[48;2;52;53;65m    to      \e[0m\r
 \e[48;2;52;53;65m    /build. \e[0m\r
+\e[48;2;52;53;65m    Executio\e[0m\r
+\e[48;2;52;53;65m    n there \e[0m\r
+\e[48;2;52;53;65m    follows \e[0m\r
+\e[48;2;52;53;65m    the     \e[0m\r
+\e[48;2;52;53;65m    shell   \e[0m\r
+\e[48;2;52;53;65m    capabili\e[0m\r
+\e[48;2;52;53;65m    ty.     \e[0m\r
 \e[48;2;52;53;65m    Changes \e[0m\r
 \e[48;2;52;53;65m    there   \e[0m\r
 \e[48;2;52;53;65m    follow  \e[0m\r
 \e[48;2;52;53;65m    the     \e[0m\r
 \e[48;2;52;53;65m    workspac\e[0m\r
 \e[48;2;52;53;65m    e write \e[0m\r
-\e[48;2;52;53;65m    capabili\e[0m\r
-\e[48;2;52;53;65m    ty.     \e[0m\r
-\e[48;2;52;53;65m    Executio\e[0m\r
-\e[48;2;52;53;65m    n there \e[0m\r
-\e[48;2;52;53;65m    follows \e[0m\r
-\e[48;2;52;53;65m    the     \e[0m\r
-\e[48;2;52;53;65m    shell   \e[0m\r
 \e[48;2;52;53;65m    capabili\e[0m\r
 \e[48;2;52;53;65m    ty.     \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
@@ -1690,7 +1690,7 @@ I will no longer use it.\r
 \r\e[KI can run what is in the tools directory now.
 
 \e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m 🤖 Granted temporary read, write, and execute access to /build. Changes there follow the workspace write capability. Execution there follows the shell capability.\e[0m
+\e[48;2;52;53;65m 🤖 Granted temporary read, execute, and write access to /build. Execution there follows the shell capability. Changes there follow the workspace write capability.\e[0m
 \e[48;2;52;53;65m\e[0m
 \r\e[KI can build in place and run what comes out of it.
 
@@ -1733,8 +1733,8 @@ I will no longer use it.\r
 \r\e[KI can run what is in the tools directory now.\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 Granted temporary read, write, and execute access to /build. Changes there follow the workspace \e[0m\r
-\e[48;2;52;53;65m    write capability. Execution there follows the shell capability.                                 \e[0m\r
+\e[48;2;52;53;65m 🤖 Granted temporary read, execute, and write access to /build. Execution there follows the shell  \e[0m\r
+\e[48;2;52;53;65m    capability. Changes there follow the workspace write capability.                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \r\e[KI can build in place and run what comes out of it.\r

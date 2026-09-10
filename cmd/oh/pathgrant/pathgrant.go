@@ -21,8 +21,8 @@ type Access = shell.Access
 
 const (
 	ReadAccess  = shell.ReadAccess
-	WriteAccess = shell.WriteAccess
 	ExecAccess  = shell.ExecAccess
+	WriteAccess = shell.WriteAccess
 )
 
 type Grant struct {
@@ -361,11 +361,11 @@ func grantNotice(grant Grant) string {
 
 func capabilityClauses(access Access) string {
 	clauses := ""
-	if access.Has(WriteAccess) {
-		clauses += " Changes there follow the workspace write capability."
-	}
 	if access.Has(ExecAccess) {
 		clauses += " Execution there follows the shell capability."
+	}
+	if access.Has(WriteAccess) {
+		clauses += " Changes there follow the workspace write capability."
 	}
 
 	return clauses

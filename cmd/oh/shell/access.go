@@ -9,8 +9,8 @@ type Access uint8
 
 const (
 	ReadAccess Access = 1 << iota
-	WriteAccess
 	ExecAccess
+	WriteAccess
 )
 
 var accessMap = []struct {
@@ -18,16 +18,16 @@ var accessMap = []struct {
 	flag          string
 }{
 	{ReadAccess, "r"},
-	{WriteAccess, "w"},
 	{ExecAccess, "x"},
+	{WriteAccess, "w"},
 }
 
-var AllAccessFlags = (ReadAccess | WriteAccess | ExecAccess).Flags()
+var AllAccessFlags = (ReadAccess | ExecAccess | WriteAccess).Flags()
 
 func (self Access) Has(want Access) bool { return self&want == want }
 
 func IsAccess(access Access) bool {
-	return access.Has(ReadAccess) && access&^(ReadAccess|WriteAccess|ExecAccess) == 0
+	return access.Has(ReadAccess) && access&^(ReadAccess|ExecAccess|WriteAccess) == 0
 }
 
 func (self Access) Flags() string {
@@ -65,10 +65,10 @@ func accessName(access Access) string {
 	switch access {
 	case ReadAccess:
 		return "read"
-	case WriteAccess:
-		return "write"
 	case ExecAccess:
 		return "execute"
+	case WriteAccess:
+		return "write"
 	}
 
 	return ""

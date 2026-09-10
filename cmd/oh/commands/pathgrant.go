@@ -62,7 +62,7 @@ func exposeCommand(sandboxToHost SandboxToHost) slash.Command {
 func grantCommand(grants PathGrants) slash.Command {
 	return slash.Command{
 		Name:        "grant",
-		Description: "Grant temporary path access, spelled with the flags r, w, and x.",
+		Description: "Grant temporary path access, spelled with the flags r, x, and w.",
 		Run: func(context slash.Context, arguments slash.Arguments) error {
 			accessText, path, found := strings.Cut(arguments.Text, " ")
 			path = strings.TrimSpace(path)
@@ -83,15 +83,15 @@ func grantCommand(grants PathGrants) slash.Command {
 		},
 	}.
 		WithArguments(grantFlagChoices()...).
-		WithArgumentUsage("{r|rw|rx|rwx} <path>")
+		WithArgumentUsage("{r|rx|rw|rxw} <path>")
 }
 
 func grantFlagChoices() []string {
 	choices := []pathgrant.Access{
 		pathgrant.ReadAccess,
-		pathgrant.ReadAccess | pathgrant.WriteAccess,
 		pathgrant.ReadAccess | pathgrant.ExecAccess,
-		pathgrant.ReadAccess | pathgrant.WriteAccess | pathgrant.ExecAccess,
+		pathgrant.ReadAccess | pathgrant.WriteAccess,
+		pathgrant.ReadAccess | pathgrant.ExecAccess | pathgrant.WriteAccess,
 	}
 
 	flags := make([]string, 0, len(choices))

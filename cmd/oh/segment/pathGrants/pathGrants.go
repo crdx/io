@@ -118,8 +118,8 @@ func renderAccess(access pathgrant.Access) string {
 		render style.Style
 	}{
 		{pathgrant.ReadAccess, style.Read},
-		{pathgrant.WriteAccess, style.Write},
 		{pathgrant.ExecAccess, style.Exec},
+		{pathgrant.WriteAccess, style.Write},
 	} {
 		if access.Has(right.access) {
 			flags.WriteString(right.render(right.access.Flags()))

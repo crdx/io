@@ -46,7 +46,7 @@ I can run what is in the tools directory now.
 ## Path grant · 3 paths · changed /build · +7s
 
 ```
-Granted temporary read, write, and execute access to /build. Changes there follow the workspace write capability. Execution there follows the shell capability.
+Granted temporary read, execute, and write access to /build. Execution there follows the shell capability. Changes there follow the workspace write capability.
 ```
 
 ## Assistant · +8s

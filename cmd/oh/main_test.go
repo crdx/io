@@ -9691,7 +9691,7 @@ func FuzzPendingPathGrantsSayWhatTheModelHasNotBeenTold(fuzzer *testing.F) {
 			case 2:
 				self.handleCommand("/grant rx " + path)
 			case 3:
-				self.handleCommand("/grant rwx " + path)
+				self.handleCommand("/grant rxw " + path)
 			case 4:
 				self.handleCommand("/revoke " + path)
 			case 5:

@@ -107,7 +107,7 @@ r:/one/reference, rw:/two/reference
 === path-grants / empty ===
 
 === path-grants / every access ===
-r:reference, rw:output, rx:tools, rwx:build
+r:reference, rw:output, rx:tools, rxw:build
 === path-grants / many constrained ===
 r:path-01, r:path-02, r:path-03, +47
 === path-grants / read and write ===
