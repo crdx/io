@@ -628,7 +628,11 @@ func (self *App) refreshPendingMessages() {
 
 	messages := self.pendingNotices.notices()
 	if self.pendingNotices.renderer == nil {
-		self.pendingNotices.renderer = painter.NewPendingMessages(messages, self.screen.IsTerminal())
+		self.pendingNotices.renderer = painter.NewPendingMessages(
+			messages,
+			self.screen.IsTerminal(),
+			self.screen.LinkRoots().WithoutScratch(),
+		)
 		self.screen.Blank()
 		self.pendingNotices.block = self.screen.OpenNotice(self.pendingNotices.renderer)
 		return
@@ -763,7 +767,12 @@ func (self *App) ruleStyle() style.Style {
 
 func (self *App) statusRows(columns int) []string {
 	if self.feedback.IsEmpty() {
-		return painter.RenderQueuedMessages(self.currentTurn.GetInterjections(), columns, self.screen.IsTerminal())
+		return painter.RenderQueuedMessages(
+			self.currentTurn.GetInterjections(),
+			columns,
+			self.screen.IsTerminal(),
+			self.screen.LinkRoots().WithoutScratch(),
+		)
 	}
 
 	return self.feedback.Render(columns, self.getNow())

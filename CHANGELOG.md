@@ -5,6 +5,7 @@
 - Remove stray blank line from incoming mid-round notices
 - Spell grant flags in capability order (`rxw`)
 - Warn when [sandbox.read] is used redundantly
+- Linkify paths in tool calls, reasoning, notices, everything!
 
 ## [0.4.0] - 2026-09-10
 

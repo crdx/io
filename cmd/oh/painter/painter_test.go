@@ -2,6 +2,8 @@ package painter
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -9,6 +11,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/pathgrant"
@@ -72,6 +75,76 @@ func TestOnlyTerminalConversationMessagesContainHyperlinks(t *testing.T) {
 				}
 			})
 		}
+	}
+}
+
+func TestToolCallPathsAreLinkedToTheModelFacingFile(t *testing.T) {
+	scratchDirectory := t.TempDir()
+	path := filepath.Join(scratchDirectory, "candle-shots", "dl-sorted.png")
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
+		t.Fatalf("prepare directory: %v", err)
+	}
+	if err := os.WriteFile(path, nil, 0o600); err != nil {
+		t.Fatalf("prepare file: %v", err)
+	}
+
+	var screenOutput bytes.Buffer
+	screen := output.NewTerminalOfSize(&screenOutput, 80, 24).LinkPathsUnder(link.Roots{Scratch: scratchDirectory})
+	paint := New(screen, false, nil, nil, output.StreamingModeLine)
+	paint.DrawEvent(agent.Event{
+		Kind: agent.ToolCallRequestEvent,
+		ID:   "call-1",
+		Name: "read",
+		FallbackRendering: agent.FallbackRendering{
+			Subject:  "/tmp/candle-shots/dl-sorted.png",
+			ReadOnly: true,
+		},
+	})
+
+	wantTarget := "file://" + filepath.ToSlash(path)
+	if !strings.Contains(screenOutput.String(), "\x1b]8;;"+wantTarget+"\x1b\\") {
+		t.Errorf("got drawing %q, want link to %q", screenOutput.String(), wantTarget)
+	}
+}
+
+func TestModelReasoningPathsAreLinkedToTheModelFacingFile(t *testing.T) {
+	scratchDirectory := t.TempDir()
+	path := filepath.Join(scratchDirectory, "notes.txt")
+	if err := os.WriteFile(path, nil, 0o600); err != nil {
+		t.Fatalf("prepare file: %v", err)
+	}
+
+	var screenOutput bytes.Buffer
+	screen := output.NewTerminalOfSize(&screenOutput, 80, 24).LinkPathsUnder(link.Roots{Scratch: scratchDirectory})
+	paint := New(screen, false, nil, nil, output.StreamingModeLine)
+	paint.DrawEvent(agent.Event{Kind: agent.ModelReasoningEvent, Text: "checking /tmp/notes.txt"})
+
+	wantTarget := "file://" + filepath.ToSlash(path)
+	if !strings.Contains(screenOutput.String(), "\x1b]8;;"+wantTarget+"\x1b\\") {
+		t.Errorf("got drawing %q, want link to %q", screenOutput.String(), wantTarget)
+	}
+}
+
+func TestQueuedMessagePathsAreLinkedAsHostPaths(t *testing.T) {
+	workspace := t.TempDir()
+	path := filepath.Join(workspace, "notes.txt")
+	if err := os.WriteFile(path, nil, 0o600); err != nil {
+		t.Fatalf("prepare file: %v", err)
+	}
+
+	roots := link.Roots{Workspace: workspace}
+	renderings := map[string]string{
+		"footer": strings.Join(RenderQueuedMessages([]string{"check notes.txt"}, 80, true, roots), "\n"),
+		"notice": strings.Join(NewPendingMessages([]string{"check notes.txt"}, true, roots).Rows(80), "\n"),
+	}
+
+	wantTarget := "file://" + filepath.ToSlash(path)
+	for name, rendering := range renderings {
+		t.Run(name, func(t *testing.T) {
+			if !strings.Contains(rendering, "\x1b]8;;"+wantTarget+"\x1b\\") {
+				t.Errorf("got drawing %q, want link to %q", rendering, wantTarget)
+			}
+		})
 	}
 }
 

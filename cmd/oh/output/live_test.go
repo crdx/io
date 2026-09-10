@@ -37,6 +37,22 @@ func TestOnlyTheAnswerIsLinked(t *testing.T) {
 	}
 }
 
+func TestTerminalNoticePathsAreLinkedAsHostPaths(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "notice.txt")
+	if err := os.WriteFile(path, nil, 0o600); err != nil {
+		t.Fatalf("prepare file: %v", err)
+	}
+
+	screen, screenOutput := region()
+	screen.LinkPathsUnder(link.Roots{Scratch: t.TempDir()})
+	screen.Line("notice names " + path)
+
+	wantTarget := "file://" + filepath.ToSlash(path)
+	if !strings.Contains(screenOutput.String(), "\x1b]8;;"+wantTarget+"\x1b\\") {
+		t.Errorf("got drawing %q, want link to %q", screenOutput.String(), wantTarget)
+	}
+}
+
 func TestPathsStayPlainWhenScrollbackIsRedirected(t *testing.T) {
 	workspace := t.TempDir()
 	if err := os.WriteFile(filepath.Join(workspace, "one.go"), nil, 0o600); err != nil {

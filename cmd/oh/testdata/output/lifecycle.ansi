@@ -16,7 +16,7 @@
 \r
 \r\e[KFound it. Reading the renderer now.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where\r
 \r\e[Kthe cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output\r
@@ -58,7 +58,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r
 \r\e[KFound it. Reading the renderer now.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where\r
 \r\e[Kthe cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output\r
@@ -100,7 +100,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r
 \r\e[KFound it. Reading the renderer now.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where\r
 \r\e[Kthe cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output\r
@@ -142,7 +142,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r
 \r\e[KFound it. Reading the renderer now.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where\r
 \r\e[Kthe cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output\r
@@ -162,7 +162,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r
 \r\e[KFound it. Reading the renderer now.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where\r
 \r\e[Kthe cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output\r
@@ -307,7 +307,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 > ask something else\r
 > and a second row\r\r\e[1A\e[J\e[1A\r
 \r> ask something else\r
-> and a second row\r\r\e[1A\e[J\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+> and a second row\r\r\e[1A\e[J\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 > ask something else\r
 > and a second row\r\r\e[1A\e[J\e[2A\e[31C\r

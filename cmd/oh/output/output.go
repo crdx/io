@@ -106,6 +106,7 @@ func (self *Screen) Line(text string) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
+	text = self.linkifyScrollback(text)
 	if len(self.blocks) > 0 {
 		self.blocks = append(self.blocks, groupedBlock{Block: textBlock{text: text}, group: NoticeGroup})
 		self.refresh()

@@ -31,7 +31,7 @@ func submittedMarker(isSent bool) string {
 	return unsentMark + " "
 }
 
-func RenderQueuedMessages(messages []string, columns int, shouldRenderHyperlinks bool) []string {
+func RenderQueuedMessages(messages []string, columns int, shouldRenderHyperlinks bool, roots link.Roots) []string {
 	if len(messages) == 0 {
 		return nil
 	}
@@ -40,19 +40,19 @@ func RenderQueuedMessages(messages []string, columns int, shouldRenderHyperlinks
 	rows = append(rows, renderQueuedRow("", columns))
 
 	for _, message := range messages {
-		summary := summariseQueuedMessage(message, shouldRenderHyperlinks)
+		summary := summariseQueuedMessage(message, shouldRenderHyperlinks, roots)
 		rows = append(rows, renderQueuedRow(unsentMark+" "+summary, columns))
 	}
 
 	return append(rows, renderQueuedRow("", columns))
 }
 
-func summariseQueuedMessage(message string, shouldRenderHyperlinks bool) string {
+func summariseQueuedMessage(message string, shouldRenderHyperlinks bool, roots link.Roots) string {
 	firstLine := strutil.FirstLine(message)
 
 	var renderedLines []string
 	if shouldRenderHyperlinks {
-		renderedLines = markdown.RenderWithHyperlinks(strutil.StripControl(firstLine), unwrappedPreviewColumns)
+		renderedLines = markdown.RenderWithHyperlinksUnder(strutil.StripControl(firstLine), unwrappedPreviewColumns, roots)
 	} else {
 		renderedLines = markdown.Render(strutil.StripControl(firstLine), unwrappedPreviewColumns)
 	}
@@ -84,13 +84,15 @@ func renderQueuedRow(text string, columns int) string {
 
 type PendingMessages struct {
 	messages               []string
+	pathRoots              link.Roots
 	isSent                 bool
 	shouldRenderHyperlinks bool
 }
 
-func NewPendingMessages(messages []string, shouldRenderHyperlinks bool) *PendingMessages {
+func NewPendingMessages(messages []string, shouldRenderHyperlinks bool, pathRoots link.Roots) *PendingMessages {
 	return &PendingMessages{
 		messages:               slices.Clone(messages),
+		pathRoots:              pathRoots,
 		shouldRenderHyperlinks: shouldRenderHyperlinks,
 	}
 }
@@ -118,7 +120,7 @@ func (self *PendingMessages) Rows(columns int) []string {
 
 func (self *PendingMessages) render(message string, columns int) string {
 	return renderSubmittedMessage(
-		message, columns, self.shouldRenderHyperlinks, link.Roots{}, submittedMarker(self.isSent),
+		message, columns, self.shouldRenderHyperlinks, self.pathRoots, submittedMarker(self.isSent),
 	)
 }
 

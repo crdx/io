@@ -153,6 +153,9 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		}
 
 		label := call.LabelFor(event, self.getTool, self.workspace)
+		if self.screen.IsTerminal() {
+			label.PathRoots = self.linkRoots()
+		}
 		self.rows[event.ID] = self.toolBlock.Add(label)
 		self.labels[event.ID] = label
 
@@ -430,6 +433,12 @@ func (self *Picasso) settleAnswer() {
 func (self *Picasso) drawReasoning(isSettled bool) {
 	thought, isRowArriving := self.withoutArrivingTableRow(self.reasoning.Text(), isSettled)
 	rows := RenderReasoning(thought, self.screen.Columns(), self.reasoningRendering)
+	if self.screen.IsTerminal() {
+		roots := self.linkRoots()
+		for i := range rows {
+			rows[i] = link.Render(rows[i], roots)
+		}
+	}
 
 	isTailHidden := !isSettled && self.streamingMode == output.StreamingModeLine
 	if isTailHidden {

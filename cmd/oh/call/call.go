@@ -33,6 +33,7 @@ type Label struct {
 	Accent          string
 	AccentStyle     style.Style
 	ResultURI       string
+	PathRoots       link.Roots
 	Continuation    []Label
 	renderedSubject string
 }
@@ -68,7 +69,7 @@ func (self Label) Render() string {
 		}
 	}
 
-	return line
+	return link.Render(line, self.PathRoots)
 }
 
 func (self Label) Width() int {

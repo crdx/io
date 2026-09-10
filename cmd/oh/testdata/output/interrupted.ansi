@@ -6,7 +6,7 @@
 \r
 \e[?7l\r\e[KReading it now.\r
 \r
-\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r
 \e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
 \r
@@ -14,7 +14,7 @@
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?     \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \e[?25h\e[?2026l
@@ -250,7 +250,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.
 \r
 Reading it now.\r
 \r
-read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+read \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r
 \e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
 \r
@@ -258,7 +258,7 @@ read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[3
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 
@@ -269,7 +269,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KRead\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading it n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading it now.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l\r
 \r
 \e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
 \r
@@ -277,7 +277,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KIt h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the wor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word `o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing els\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -288,7 +288,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KReading it now.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l\r
 \r
 \e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
 \r
@@ -296,7 +296,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -307,7 +307,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KRead\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading it n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading it now.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l\r
 \r
 \e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
 \r
@@ -315,7 +315,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KIt h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the wor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word `o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing els\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -355,14 +355,14 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KReading it now.
 
-\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;150;152;150m–\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m
 
 \e[38;2;207;173;0mThe turn was interrupted.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?\e[0m
 \e[48;2;52;53;65m\e[0m
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 \r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.
 \e[?25h\e[?2026l
@@ -373,7 +373,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \r
 \e[?7l\r\e[KReading it now.\r
 \r
-\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r
 \e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
 \r
@@ -381,7 +381,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \e[?25h\e[?2026l

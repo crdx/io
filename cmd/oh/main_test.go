@@ -278,7 +278,9 @@ func drawPendingMarkdown(t *testing.T) string {
 	var screenOutput strings.Builder
 	screen := output.NewTerminalOfSize(&screenOutput, terminalInputColumns, replayLines)
 	screen.Blank()
-	screen.OpenNotice(painter.NewPendingMessages([]string{"# Heading\n\n- first item\n- second item"}, true))
+	screen.OpenNotice(painter.NewPendingMessages(
+		[]string{"# Heading\n\n- first item\n- second item"}, true, link.Roots{},
+	))
 	screen.Seal()
 
 	return screenOutput.String()
@@ -7536,6 +7538,7 @@ type queuedMessagesScenario int
 
 const (
 	queuedOne queuedMessagesScenario = iota
+	queuedPath
 	queuedTwo
 	queuedSeveral
 	queuedLongMessage
@@ -7552,6 +7555,7 @@ const (
 func TestQueuedMessagesDrawEveryVisibleState(t *testing.T) {
 	passes := map[string]func() string{
 		"one queued":                 func() string { return queuedMessagesStream(t, queuedOne) },
+		"a path queued":              func() string { return queuedMessagesStream(t, queuedPath) },
 		"two queued":                 func() string { return queuedMessagesStream(t, queuedTwo) },
 		"several queued":             func() string { return queuedMessagesStream(t, queuedSeveral) },
 		"a snippet queued":           func() string { return queuedMessagesStream(t, queuedSnippet) },
@@ -7587,11 +7591,14 @@ func queuedMessagesStream(t *testing.T, scenario queuedMessagesScenario) string 
 	var screenOutput strings.Builder
 	self := slashCommandFixture(t, caps.Read)
 	self.agent = agent.New("", quietProvider{}, nil)
+	self.workspace = layOutWorkspace(t)
 	terminalLines := replayLines
 	if scenario == queuedTallerThanTheTerminal {
 		terminalLines = 12
 	}
-	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, terminalLines)
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, terminalLines).LinkPathsUnder(
+		link.Roots{Workspace: self.workspace.GetDir()},
+	)
 	self.slash.commands = fixtureCommandRegistryWithSnippets(
 		t,
 		map[string]snippets.Definition{
@@ -7621,6 +7628,7 @@ func queuedMessagesStream(t *testing.T, scenario queuedMessagesScenario) string 
 
 	queued := map[queuedMessagesScenario][]string{
 		queuedOne:                   {"check the other path too"},
+		queuedPath:                  {"check screen.go too"},
 		queuedTwo:                   {"check the other path too", "and mention what you find"},
 		queuedSeveral:               {"the first", "the second", "the third", "the fourth", "the fifth"},
 		queuedLongMessage:           {longQueuedMessage},
@@ -7639,7 +7647,7 @@ func queuedMessagesStream(t *testing.T, scenario queuedMessagesScenario) string 
 	self.show(inputLine)
 
 	switch scenario {
-	case queuedOne, queuedTwo, queuedSeveral, queuedLongMessage, queuedMultilineMessage,
+	case queuedOne, queuedPath, queuedTwo, queuedSeveral, queuedLongMessage, queuedMultilineMessage,
 		queuedMarkdownEmphasis, queuedTallerThanTheTerminal:
 	case queuedSnippet:
 		self.handleCommand("//add review the second path")
@@ -7663,7 +7671,7 @@ func queuedMessagesStream(t *testing.T, scenario queuedMessagesScenario) string 
 		self.show(inputLine)
 	}
 
-	return screenOutput.String()
+	return strings.ReplaceAll(screenOutput.String(), self.workspace.GetDir(), workspaceMarker)
 }
 
 func plainFeedback(t *testing.T) string {

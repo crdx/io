@@ -6,7 +6,7 @@
 \r
 \e[?7l\r\e[KTaking them together.\r
 \r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -224,7 +224,7 @@ Both still mention the spinner.
 \r
 Taking them together.\r
 \r
-read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -240,8 +240,8 @@ Both still mention the spinner.\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KTaki\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking them\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking them toge\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking them together\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking them together.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -257,8 +257,8 @@ Both still mention the spinner.\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KTaking them together.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -274,8 +274,8 @@ Both still mention the spinner.\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KTaki\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking them\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking them toge\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking them together\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking them together.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -318,7 +318,7 @@ Both still mention the spinner.\r
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KTaking them together.
 
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;150;152;150m–\e[0m
 
 \e[48;2;52;53;65m\e[0m
@@ -333,7 +333,7 @@ Both still mention the spinner.\r
 \r
 \e[?7l\r\e[KTaking them together.\r
 \r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
