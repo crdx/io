@@ -90,9 +90,7 @@ for update, err := range assistant.Stream(ctx, "what is the weather in London?",
 
 ### oh
 
-A coding harness.
-
-See [oh](crdx.org/oh).
+A [coding harness](https://crdx.org/oh).
 
 ### simulate
 
