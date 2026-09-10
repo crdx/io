@@ -1,0 +1,362 @@
+=== narrow ===
+
+ expose the preview and read the notes
+
+
+Looking at the notes first, then
+exposing the preview.
+read target.txt ✓ 1L
+read README.md ✓ 1L
+ls ✓ 2L
+
+
+ 🤖 Exposed sandbox port 8080 to the
+    host at http://127.27.192.223:8080.
+
+
+The preview is up, and the notes hold
+one line.
+=== one column ===
+
+
+e
+
+x
+
+p
+
+o
+
+s
+
+e
+
+t
+
+h
+
+e
+
+p
+
+r
+
+e
+
+v
+
+i
+
+e
+
+w
+
+a
+
+n
+
+d
+
+r
+
+e
+
+a
+
+d
+
+t
+
+h
+
+e
+
+n
+
+o
+
+t
+
+e
+
+s
+
+
+L
+o
+o
+k
+i
+n
+g
+a
+t
+t
+h
+e
+n
+o
+t
+e
+s
+f
+i
+r
+s
+t
+,
+t
+h
+e
+n
+e
+x
+p
+o
+s
+i
+n
+g
+t
+h
+e
+p
+r
+e
+v
+i
+e
+w
+.
+✓
+✓
+✓
+
+
+
+🤖
+
+E
+
+x
+
+p
+
+o
+
+s
+
+e
+
+d
+
+s
+
+a
+
+n
+
+d
+
+b
+
+o
+
+x
+
+p
+
+o
+
+r
+
+t
+
+8
+
+0
+
+8
+
+0
+
+t
+
+o
+
+t
+
+h
+
+e
+
+h
+
+o
+
+s
+
+t
+
+a
+
+t
+
+h
+
+t
+
+t
+
+p
+
+:
+
+/
+
+/
+
+1
+
+2
+
+7
+
+.
+
+2
+
+7
+
+.
+
+1
+
+9
+
+2
+
+.
+
+2
+
+2
+
+3
+
+:
+
+8
+
+0
+
+8
+
+0
+
+.
+
+
+T
+h
+e
+p
+r
+e
+v
+i
+e
+w
+i
+s
+u
+p
+,
+a
+n
+d
+t
+h
+e
+n
+o
+t
+e
+s
+h
+o
+l
+d
+o
+n
+e
+l
+i
+n
+e
+.
+=== printed ===
+
+ expose the preview and read the notes
+
+
+Looking at the notes first, then exposing the preview.
+read target.txt ✓ 1L
+read README.md ✓ 1L
+ls ✓ 2L
+
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
+
+The preview is up, and the notes hold one line.
+=== tiny ===
+
+ expose the
+ preview and
+ read the
+ notes
+
+
+Looking at
+the notes
+first, then
+exposing the
+preview.
+read t… ✓ 1L
+read R… ✓ 1L
+ls ✓ 2L
+
+
+ 🤖 Exposed
+    sandbox
+    port
+    8080 to
+    the host
+    at
+    http://1
+    27.27.19
+    2.223:80
+    80.
+
+
+The preview
+is up, and
+the notes
+hold one
+line.
+=== wide ===
+
+ expose the preview and read the notes
+
+
+Looking at the notes first, then exposing the preview.
+read target.txt ✓ 1L
+read README.md ✓ 1L
+ls ✓ 2L
+
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
+
+The preview is up, and the notes hold one line.

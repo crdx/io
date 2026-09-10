@@ -127,6 +127,10 @@ func (self *Screen) Blank() {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
+	if len(self.blocks) > 0 {
+		return
+	}
+
 	self.isBlankOwed = self.hasPrinted
 }
 

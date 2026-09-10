@@ -1,0 +1,10 @@
+{"event":{"kind":"user_message","text":"expose the preview and read the notes"}}
+{"event":{"kind":"model_reasoning","text":"Looking at the notes first, then exposing the preview."}}
+{"event":{"kind":"tool_call_request","id":"call_1","name":"read","arguments":"{\"path\":\"target.txt\"}","render":"target.txt","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"success","text":"one\n","id":"call_1","name":"read","took":0,"stats":{"kind":"read","lines":1,"bytes":4}}}
+{"event":{"kind":"tool_call_request","id":"call_2","name":"read","arguments":"{\"path\":\"README.md\"}","render":"README.md","read_only":true}}
+{"event":{"kind":"tool_call_request","id":"call_3","name":"ls","arguments":"{\"path\":\".\"}","render":".","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"success","text":"# Readme\n","id":"call_2","name":"read","took":0,"stats":{"kind":"read","lines":1,"bytes":9}}}
+{"event":{"kind":"port_grant_change","name":"8080","state":{"host":"127.27.192.223","ports":[8080]}}}
+{"event":{"kind":"tool_call_result","status":"success","text":"README.md\ntarget.txt\n","id":"call_3","name":"ls","took":0,"stats":{"kind":"list","lines":2,"bytes":21}}}
+{"event":{"kind":"model_message","text":"The preview is up, and the notes hold one line."}}

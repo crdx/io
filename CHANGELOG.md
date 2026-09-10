@@ -2,6 +2,8 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Remove stray blank line from incoming mid-round notices
+
 ## [0.4.0] - 2026-09-10
 
 - Preview sessions in session picker

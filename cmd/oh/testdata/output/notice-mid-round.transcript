@@ -1,0 +1,40 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## User · +0s
+
+expose the preview and read the notes
+
+## Tool calls · +2s
+
+```
+read: target.txt [ok, 1 line, 4B, call_1]
+read: README.md [ok, 1 line, 9B, call_2]
+ls: . [call_3]
+```
+
+## Host → sandbox · 1 sandbox port · changed port 8080 · +7s
+
+```
+Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+```
+
+## Tool calls · +8s
+
+```
+ls [ok, 2 lines, 21B, call_3]
+```
+
+## Assistant · +9s
+
+The preview is up, and the notes hold one line.
+
+
