@@ -5,9 +5,9 @@
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"say something worth coming back to"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Something worth coming back to."}]}}
 {"kind":"turn_completion","turn":{"input_tokens":49020}}
-{"kind":"event","event":{"kind":"user_message","text":"I am back a day later"}}
+{"kind":"event","event":{"kind":"user_message","text":"I am back after a while"}}
 {"kind":"event","event":{"kind":"model_message","text":"Welcome back.","usage":{"input_tokens":280200,"cache":{"read_tokens":0,"write_tokens":280000}}}}
-{"kind":"event","event":{"kind":"cache_rebuild","name":"reopened","usage":{"cache":{"read_tokens":0,"write_tokens":280000}}}}
-{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"I am back a day later"}]}}
+{"kind":"event","event":{"kind":"cache_rebuild","name":"rebuilt","usage":{"cache":{"read_tokens":0,"write_tokens":280000}}}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"I am back after a while"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Welcome back."}]}}
 {"kind":"turn_completion","turn":{"input_tokens":280200}}

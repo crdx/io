@@ -1149,6 +1149,7 @@ func (self *App) restore(storedSession *store.Session) {
 		self.takeSessionTitle(event)
 	}
 
+	self.agent.RestoreCache(storedSession.CacheReading)
 	self.metrics.Restore(storedSession.Events, storedSession.Turns)
 	self.restoreJobs(storedSession.Events)
 

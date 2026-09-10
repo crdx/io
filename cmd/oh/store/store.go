@@ -355,6 +355,7 @@ type Session struct {
 	TurnCompletions   int
 	Turns             []session.TurnSummary
 	HasIncompleteTurn bool
+	CacheReading      agent.CacheReading
 }
 
 func Read(directory string, name string) (*Session, error) {
@@ -400,6 +401,7 @@ func decode(storedSession *session.Session) (*Session, error) {
 		TurnCompletions:   storedSession.TurnCompletions,
 		Turns:             storedSession.Turns,
 		HasIncompleteTurn: storedSession.HasIncompleteTurn,
+		CacheReading:      storedSession.CacheReading,
 	}, nil
 }
 

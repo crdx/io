@@ -394,6 +394,7 @@ type Session struct {
 	TurnCompletions   int
 	Turns             []TurnSummary
 	HasIncompleteTurn bool
+	CacheReading      agent.CacheReading
 }
 
 func Read(directory string, name string) (*Session, error) {
@@ -492,6 +493,7 @@ func (self *Session) take(line Line) {
 			if line.Event.Kind == agent.UserMessageEvent {
 				self.HasIncompleteTurn = true
 			}
+			self.takeCacheReading(*line.Event, line.Time)
 		}
 	case Item:
 		self.Items = append(self.Items, line.Payload)
@@ -502,6 +504,14 @@ func (self *Session) take(line Line) {
 			self.Turns = append(self.Turns, *line.Turn)
 		}
 	}
+}
+
+func (self *Session) takeCacheReading(event agent.Event, writtenAt time.Time) {
+	if event.Kind == agent.CacheRebuildEvent || event.Usage == nil || event.Usage.Cache == nil {
+		return
+	}
+
+	self.CacheReading = agent.CacheReading{ReadTokens: event.Usage.Cache.ReadTokens, At: writtenAt}
 }
 
 type Meta struct {

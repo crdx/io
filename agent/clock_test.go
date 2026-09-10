@@ -20,12 +20,12 @@ func TestACacheReadingIsRememberedOnTheWallClockAlone(t *testing.T) {
 		t.Fatal("got a rebuild on the first reading, want none")
 	}
 
-	if remembered := assistant.cache.at.String(); strings.Contains(remembered, monotonicReading) {
+	if remembered := assistant.cache.At.String(); strings.Contains(remembered, monotonicReading) {
 		t.Errorf("got %q, want no monotonic reading", remembered)
 	}
 
-	if !assistant.cache.at.Equal(askedAt) {
-		t.Errorf("got %q, want the moment the request was made", assistant.cache.at)
+	if !assistant.cache.At.Equal(askedAt) {
+		t.Errorf("got %q, want the moment the request was made", assistant.cache.At)
 	}
 }
 

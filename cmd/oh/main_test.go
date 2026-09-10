@@ -11714,6 +11714,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	if err := resumedAssistant.Load(storedSession.Items); err != nil {
 		t.Fatal(err)
 	}
+	resumedAssistant.RestoreCache(storedSession.CacheReading)
 
 	log, err = store.Open(directory, sessionName)
 	if err != nil {

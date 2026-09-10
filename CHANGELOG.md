@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3.1] - 2026-09-10
+
+- Restore the cache properly on resume
+
 ## [0.3.0] - 2026-09-10
 
 - Add LLM simulator backend with `--demo`, or use the _Simulation_ option during onboarding

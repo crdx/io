@@ -320,9 +320,8 @@ type Agent struct {
 	enabledToolNames map[string]struct{}
 	owners           map[string]tool.Tool
 	state            []json.RawMessage
-	cache            cacheReading
+	cache            CacheReading
 	cacheLifetime    time.Duration
-	wasReopened      bool
 	now              func() time.Time
 
 	retryWaitsPassAtOnce bool

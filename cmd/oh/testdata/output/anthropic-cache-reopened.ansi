@@ -5,9 +5,9 @@
 \e[?7l\r\e[KSomething worth coming back to.\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m I am back a day later                                                                              \e[0m\r
+\e[48;2;52;53;65m I am back after a while                                                                            \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KWelcome back.\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mCache gone: 280Kt sent.\e[0m\r
+\e[38;2;207;173;0mCache rebuilt: 280Kt sent <1m later.\e[0m\r

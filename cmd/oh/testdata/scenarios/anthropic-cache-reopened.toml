@@ -16,7 +16,7 @@ event = [
 ]
 
 [resume]
-prompt = "I am back a day later"
+prompt = "I am back after a while"
 
 [[resume.response]]
 event = [

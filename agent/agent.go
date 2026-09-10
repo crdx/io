@@ -75,7 +75,6 @@ func (self *Agent) Load(items []json.RawMessage) error {
 	}
 	state.Load(cloneState(items))
 	self.state = cloneState(items)
-	self.wasReopened = self.wasReopened || len(items) > 0
 	return nil
 }
 
@@ -212,10 +211,13 @@ const (
 
 const cacheSettlingGap = 30 * time.Second
 
-type cacheReading struct {
-	readTokens int
-	at         time.Time
-	wasRead    bool
+type CacheReading struct {
+	ReadTokens int
+	At         time.Time
+}
+
+func (self CacheReading) exists() bool {
+	return !self.At.IsZero()
 }
 
 func CacheRebuildNotice(event Event) string {
@@ -266,33 +268,33 @@ func (self *Agent) CacheLifetime() time.Duration {
 	return self.cacheLifetime
 }
 
+func (self *Agent) RestoreCache(cacheReading CacheReading) {
+	if !cacheReading.exists() {
+		return
+	}
+
+	self.cache = CacheReading{ReadTokens: cacheReading.ReadTokens, At: util.WallClock(cacheReading.At)}
+}
+
 func (self *Agent) readCache(usage Usage, at time.Time) (Event, bool) {
 	if usage.Cache == nil {
 		return Event{}, false
 	}
 
 	previous := self.cache
-	self.cache = cacheReading{readTokens: usage.Cache.ReadTokens, at: util.WallClock(at), wasRead: true}
+	self.cache = CacheReading{ReadTokens: usage.Cache.ReadTokens, At: util.WallClock(at)}
 
-	if usage.Cache.WriteTokens == 0 {
+	if usage.Cache.WriteTokens == 0 || !previous.exists() {
 		return Event{}, false
 	}
 
-	if !previous.wasRead {
-		if !self.wasReopened || usage.Cache.WriteTokens <= usage.Cache.ReadTokens {
-			return Event{}, false
-		}
-
-		return cacheRebuild(CacheReopened, 0, usage), true
-	}
-
-	if usage.Cache.ReadTokens >= previous.readTokens {
+	if usage.Cache.ReadTokens >= previous.ReadTokens {
 		return Event{}, false
 	}
 
-	gap := util.WallClock(at).Sub(previous.at)
+	gap := util.WallClock(at).Sub(previous.At)
 
-	return cacheRebuild(cacheCause(gap, self.cacheLifetime, previous.readTokens, usage.Cache.WriteTokens), gap, usage), true
+	return cacheRebuild(cacheCause(gap, self.cacheLifetime, previous.ReadTokens, usage.Cache.WriteTokens), gap, usage), true
 }
 
 func cacheRebuild(cause CacheCause, gap time.Duration, usage Usage) Event {

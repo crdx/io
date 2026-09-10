@@ -1113,7 +1113,7 @@ func TestACacheRebuildIsQuantifiedInTokensAndWholeMinutes(t *testing.T) {
 		gap             time.Duration
 		want            string
 	}{
-		"a conversation reopened": {
+		"a reopening recorded before readings were restored": {
 			cause:           agent.CacheReopened,
 			rewrittenTokens: 294_000,
 			want:            "Cache gone: 294Kt sent.",
@@ -1251,51 +1251,69 @@ func TestTheCacheLifetimeIsTheOneTheProviderAsksFor(t *testing.T) {
 	}
 }
 
-func TestReopeningAConversationSaysWhetherItsCacheSurvived(t *testing.T) {
+func TestAResumedConversationJudgesItsCacheAsAnOpenOneDoes(t *testing.T) {
+	moment := time.Unix(1_800_000_000, 0)
+
 	for name, test := range map[string]struct {
-		reply   agent.Usage
-		isFresh bool
-		want    []agent.CacheCause
+		reply     agent.Usage
+		reading   agent.CacheReading
+		wantCause agent.CacheCause
+		wantGap   time.Duration
 	}{
-		"a cache that had gone": {
+		"a cache lost while the session was closed for the day": {
+			reply:     cachedAs(0, 280_000),
+			reading:   agent.CacheReading{ReadTokens: 48_000, At: moment.Add(-24 * time.Hour)},
+			wantCause: agent.CacheExpired,
+			wantGap:   24 * time.Hour,
+		},
+		"a prefix lost while the session was closed for a moment": {
+			reply:     cachedAs(21_000, 28_000),
+			reading:   agent.CacheReading{ReadTokens: 48_000, At: moment.Add(-45 * time.Second)},
+			wantCause: agent.CacheRebuilt,
+			wantGap:   45 * time.Second,
+		},
+		"a cache that held across the close": {
+			reply:   cachedAs(280_000, 400),
+			reading: agent.CacheReading{ReadTokens: 48_000, At: moment.Add(-time.Minute)},
+		},
+		"a session with no reading to restore": {
 			reply: cachedAs(0, 280_000),
-			want:  []agent.CacheCause{agent.CacheReopened},
-		},
-		"a cache that held": {
-			reply: cachedAs(280_000, 400),
-			want:  nil,
-		},
-		"a session opened rather than reopened": {
-			reply:   cachedAs(0, 280_000),
-			isFresh: true,
-			want:    nil,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			assistant := agent.New("", &usageProvider{replies: []agent.Usage{test.reply}}, nil)
-			if !test.isFresh {
-				if err := assistant.Load([]json.RawMessage{json.RawMessage(`{"role":"user"}`)}); err != nil {
-					t.Fatal(err)
-				}
-			}
+			assistant.TakeTimeFrom(func() time.Time { return moment })
 
-			var causes []agent.CacheCause
+			if err := assistant.Load([]json.RawMessage{json.RawMessage(`{"role":"user"}`)}); err != nil {
+				t.Fatal(err)
+			}
+			assistant.RestoreCache(test.reading)
+
+			var notices []agent.Event
 			for update, err := range assistant.Stream(t.Context(), "go on", nil) {
 				if err != nil {
 					t.Fatal(err)
 				}
 				if update.Event != nil && update.Event.Kind == agent.CacheRebuildEvent {
-					causes = append(causes, agent.CacheCause(update.Event.Name))
+					notices = append(notices, *update.Event)
 				}
 			}
 
-			if len(causes) != len(test.want) {
-				t.Fatalf("got %v, want %v", causes, test.want)
-			}
-			for at, cause := range causes {
-				if cause != test.want[at] {
-					t.Errorf("got %q, want %q", cause, test.want[at])
+			if test.wantCause == "" {
+				if len(notices) != 0 {
+					t.Fatalf("got %d notices, want none", len(notices))
 				}
+				return
+			}
+
+			if len(notices) != 1 {
+				t.Fatalf("got %d notices, want 1", len(notices))
+			}
+			if got := agent.CacheCause(notices[0].Name); got != test.wantCause {
+				t.Errorf("got cause %q, want %q", got, test.wantCause)
+			}
+			if notices[0].Took != test.wantGap {
+				t.Errorf("got a gap of %s, want %s", notices[0].Took, test.wantGap)
 			}
 		})
 	}

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"syscall"
 	"testing"
+	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/session"
@@ -196,6 +197,52 @@ func TestTurnCompletionIsReadBackSeparatelyFromEventsAndItems(t *testing.T) {
 	}
 	if storedSession.TurnCompletions != 1 || len(storedSession.Events) != 1 || len(storedSession.Items) != 1 || storedSession.HasIncompleteTurn {
 		t.Errorf("unexpected stored session: %+v", storedSession)
+	}
+}
+
+func TestTheLastCacheReadingIsReadBackWithTheMomentItWasWritten(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := session.Create(directory, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cachedAs := func(readTokens int, writeTokens int) *agent.Usage {
+		return &agent.Usage{
+			InputTokens: readTokens + writeTokens,
+			Cache:       &agent.CacheUsage{ReadTokens: readTokens, WriteTokens: writeTokens},
+		}
+	}
+
+	events := []agent.Event{
+		{Kind: agent.ModelMessageEvent, Text: "first", Usage: cachedAs(9000, 400)},
+		{Kind: agent.ModelMessageEvent, Text: "second", Usage: cachedAs(48000, 900)},
+		{Kind: agent.CacheRebuildEvent, Name: string(agent.CacheRebuilt), Usage: cachedAs(0, 49000)},
+		{Kind: agent.ModelMessageEvent, Text: "third"},
+	}
+
+	var writtenAt time.Time
+	for _, event := range events {
+		moment, err := writer.Event(event)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if event.Kind == agent.ModelMessageEvent && event.Text == "second" {
+			writtenAt = moment
+		}
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := session.Read(directory, writer.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := agent.CacheReading{ReadTokens: 48000, At: writtenAt}
+	if got := storedSession.CacheReading; got.ReadTokens != want.ReadTokens || !got.At.Equal(want.At) {
+		t.Errorf("got %+v, want %+v", got, want)
 	}
 }
 
