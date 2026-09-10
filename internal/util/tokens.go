@@ -49,6 +49,14 @@ func FormatEstimatedTokenCount[Count count](tokens Count) string {
 	return formatLargeTokenCount(estimate, estimateMark, tokenUnit)
 }
 
+func FormatTokens[Count count](tokens Count) string {
+	if tokens <= 0 {
+		return "0" + tokenUnit
+	}
+
+	return FormatTokenCount(tokens) + tokenUnit
+}
+
 func FormatTokenCount[Count count](tokens Count) string {
 	if tokens <= 0 {
 		return "0K"

@@ -6,7 +6,7 @@
 \r
 \r\e[KThe cache went cold on that request.\r
 \r
-\e[38;2;207;173;0mThe prompt cache was rebuilt: 28K tokens sent again 0s later.\e[0m\e[?25h\e[?2026l\r
+\e[38;2;207;173;0mCache rebuilt: 28Kt sent <1m later.\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m carry on                                                                                           \e[0m\r

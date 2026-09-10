@@ -447,11 +447,8 @@ const (
 )
 
 func formatTokenCount(tokens int64) string {
-	if tokens <= 0 {
-		return "0" + tokenUnit
-	}
 	if tokens < billionTokens {
-		return util.FormatTokenCount(tokens) + tokenUnit
+		return util.FormatTokens(tokens)
 	}
 	count := strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.2f", float64(tokens)/billionTokens), "0"), ".")
 	return count + "B" + tokenUnit

@@ -446,3 +446,38 @@ func TestABodyWithNothingToHideIsRecordedAsItWasSent(t *testing.T) {
 		t.Errorf("expected the body unchanged, got:\n%s", transcript)
 	}
 }
+
+func TestATransparentlyDecompressedResponseSaysSo(t *testing.T) {
+	for name, isCompressed := range map[string]bool{"compressed": true, "plain": false} {
+		path := filepath.Join(t.TempDir(), "wire.http")
+		recorder, err := wire.Open(path, wire.Meta{}, func(err error) {
+			t.Errorf("unexpected recorder failure: %v", err)
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		exchange := recorder.Start(req.Request{StartedAt: time.Unix(2, 0), Method: http.MethodPost})
+		exchange.Response(req.Response{
+			ReceivedAt:   time.Unix(3, 0),
+			Protocol:     "HTTP/2.0",
+			Status:       "200 OK",
+			Code:         200,
+			Header:       http.Header{"Content-Type": {"text/event-stream"}},
+			IsCompressed: isCompressed,
+		})
+		exchange.Finish(time.Unix(4, 0), nil, false)
+		if err := recorder.Close(); err != nil {
+			t.Fatal(err)
+		}
+
+		stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+		if err != nil {
+			t.Fatal(err)
+		}
+		note := "# exchange 1 gzip decompressed by the transport"
+		if strings.Contains(string(stored), note) != isCompressed {
+			t.Errorf("%s response recorded wrongly:\n%s", name, string(stored))
+		}
+	}
+}

@@ -71,6 +71,21 @@ func TestFormatTokenCountDropsTheUnitAndSaysNothingUsedAsNothing(t *testing.T) {
 	}
 }
 
+func TestFormatTokensCarriesTheUnitAndSaysNothingUsedAsNothing(t *testing.T) {
+	for tokens, want := range map[int64]string{
+		-1:        "0t",
+		0:         "0t",
+		400:       "1Kt",
+		5000:      "5Kt",
+		294_000:   "294Kt",
+		1_600_000: "1.6Mt",
+	} {
+		if got := util.FormatTokens(tokens); got != want {
+			t.Errorf("FormatTokens(%d) = %q, want %q", tokens, got, want)
+		}
+	}
+}
+
 func TestImageTokensAreEstimatedFromPatches(t *testing.T) {
 	for name, test := range map[string]struct {
 		width  int

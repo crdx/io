@@ -27,7 +27,7 @@ The cache very nearly held.
 ## Cache rebuild · +0s
 
 ```
-The prompt cache did not settle: 300 tokens sent again 0s later.
+Cache unsettled: 1Kt sent <1m later.
 ```
 
 ## User · +0s

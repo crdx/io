@@ -224,21 +224,21 @@ func CacheRebuildNotice(event Event) string {
 		rewrittenTokens = event.Usage.Cache.WriteTokens
 	}
 
-	tokens := util.FormatCount(int64(rewrittenTokens))
-	gap := util.CompactDuration(event.Took)
+	tokens := util.FormatTokens(rewrittenTokens)
+	gap := util.CoarseDuration(event.Took)
 
 	switch CacheCause(event.Name) {
 	case CacheReopened:
-		return fmt.Sprintf("The prompt cache was gone when this conversation reopened: %s tokens sent again.", tokens)
+		return fmt.Sprintf("Cache gone: %s sent.", tokens)
 	case CacheExpired:
-		return fmt.Sprintf("The prompt cache expired: %s tokens sent again after %s.", tokens, gap)
+		return fmt.Sprintf("Cache expired: %s sent after %s.", tokens, gap)
 	case CacheSettling:
-		return fmt.Sprintf("The prompt cache did not settle: %s tokens sent again %s later.", tokens, gap)
+		return fmt.Sprintf("Cache unsettled: %s sent %s later.", tokens, gap)
 	case CacheRebuilt:
-		return fmt.Sprintf("The prompt cache was rebuilt: %s tokens sent again %s later.", tokens, gap)
+		return fmt.Sprintf("Cache rebuilt: %s sent %s later.", tokens, gap)
 	}
 
-	return fmt.Sprintf("The prompt cache was rebuilt: %s tokens sent again.", tokens)
+	return fmt.Sprintf("Cache rebuilt: %s sent.", tokens)
 }
 
 func cacheCause(gap time.Duration, lifetime time.Duration, previousRead int, rewrittenTokens int) CacheCause {
