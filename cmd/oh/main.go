@@ -847,7 +847,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		IsSimulated:           isSimulated,
 		UsageReporter:         usageReporter,
 		UsageCachePath:        usageCachePath,
-		UsageIsSelfRefreshing: backend.RefreshesOwnUsage(selection.Provider),
+		UsageIsSelfRefreshing: usageReporter != nil,
 		UsageGauges:           usage.TerminalGauges(keyboard, os.Stdout),
 		Currency:              currency,
 		Sources:               app.getBarSources(),

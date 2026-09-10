@@ -461,15 +461,81 @@ func TestAResponseWithoutUsageHeadersLeavesTheLastSnapshotStanding(t *testing.T)
 	}
 }
 
-func TestThereAreNoUsageWindowsBeforeTheFirstTurn(t *testing.T) {
+func TestThereAreNoUsageWindowsWhereNoAccountUsageAddressExists(t *testing.T) {
 	client := newUsageClient(t, "http://127.0.0.1:1/nowhere")
 
 	if client.IsAvailable() {
-		t.Fatal("expected usage reporting to be unavailable before a turn supplies rate-limit headers")
+		t.Fatal("expected usage reporting to be unavailable without an account usage address")
 	}
 
 	windows, err := client.UsageWindows(t.Context())
 	if err != nil || windows != nil {
 		t.Errorf("expected no windows and no error, got %v and %v", windows, err)
+	}
+}
+
+func TestTheAccountUsageIsReadBeforeTheFirstTurn(t *testing.T) {
+	var askedPaths []string
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		askedPaths = append(askedPaths, request.URL.Path)
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprint(writer, `{
+			"rate_limit": {
+				"allowed": true,
+				"primary_window": {"used_percent": 42, "limit_window_seconds": 18000, "reset_at": 1788277246}
+			}
+		}`)
+	}))
+	t.Cleanup(server.Close)
+
+	client := newUsageClient(t, server.URL+"/backend-api/codex/responses")
+
+	if !client.IsAvailable() {
+		t.Fatal("expected usage reporting to be available before any turn")
+	}
+
+	windows, err := client.UsageWindows(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(windows) != 1 || windows[0].Percent != 42 || windows[0].Duration != 5*time.Hour {
+		t.Fatalf("got windows %+v", windows)
+	}
+
+	if !slices.Equal(askedPaths, []string{"/backend-api/wham/usage"}) {
+		t.Errorf("got paths %v", askedPaths)
+	}
+}
+
+func TestWindowsReportedByATurnAreKeptOverAFreshProbe(t *testing.T) {
+	usageServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		t.Error("expected no probe where a turn already reported its windows")
+		writer.WriteHeader(http.StatusNotFound)
+	}))
+	t.Cleanup(usageServer.Close)
+
+	turnServer := rateLimitedTurn(t, map[string]string{
+		"X-Codex-Primary-Used-Percent":   "50",
+		"X-Codex-Primary-Window-Minutes": "300",
+	})
+
+	client := newUsageClient(t, turnServer.URL+"/backend-api/codex/responses")
+	client.URL = turnServer.URL
+	client.AddUserMessage("hello")
+
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
+		t.Fatal(err)
+	}
+
+	client.URL = usageServer.URL + "/backend-api/codex/responses"
+
+	windows, err := client.UsageWindows(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(windows) != 1 || windows[0].Percent != 50 {
+		t.Errorf("expected the turn's own snapshot, got %v", windows)
 	}
 }

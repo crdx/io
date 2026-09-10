@@ -12,6 +12,7 @@
 
 ### Fixed
 
+- Read OpenAI subscription usage from account if stale on startup
 - Some minor text wrapping, truncation, and hyperlink issues
 - Image rendering when several parallel reads are triggered
 

@@ -143,17 +143,31 @@ func accountUsageAddress(turnAddress string) (string, bool) {
 }
 
 func (self *Client) IsAvailable() bool {
+	if _, isAvailable := accountUsageAddress(self.URL); isAvailable {
+		return true
+	}
+
 	self.usageMutex.Lock()
 	defer self.usageMutex.Unlock()
 
 	return self.usageWindows != nil
 }
 
-func (self *Client) UsageWindows(context.Context) ([]agent.UsageWindow, error) {
+func (self *Client) UsageWindows(ctx context.Context) ([]agent.UsageWindow, error) {
+	if windows := self.reportedUsageWindows(); windows != nil {
+		return windows, nil
+	}
+
+	probe, err := self.ProbeUsage(ctx)
+
+	return probe.Windows, err
+}
+
+func (self *Client) reportedUsageWindows() []agent.UsageWindow {
 	self.usageMutex.Lock()
 	defer self.usageMutex.Unlock()
 
-	return slices.Clone(self.usageWindows), nil
+	return slices.Clone(self.usageWindows)
 }
 
 func (self *Client) recordUsageWindows(

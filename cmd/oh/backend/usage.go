@@ -3,6 +3,7 @@ package backend
 import (
 	"crdx.org/io/agent"
 	"crdx.org/io/provider/anthropic"
+	"crdx.org/io/provider/codex"
 	"crdx.org/io/provider/opencodego"
 
 	"crdx.org/io/cmd/oh/model"
@@ -22,10 +23,6 @@ type UsageSource struct {
 	HasIdleSessionWindow bool
 }
 
-func RefreshesOwnUsage(providerName string) bool {
-	return providerName != model.CodexProvider
-}
-
 func UsageSources() []UsageSource {
 	return []UsageSource{
 		{
@@ -37,6 +34,7 @@ func UsageSources() []UsageSource {
 		{
 			Provider: model.CodexProvider,
 			Label:    openAILabel,
+			Reporter: codexUsage(),
 		},
 		{
 			Provider: model.OpencodeGoProvider,
@@ -54,6 +52,19 @@ func anthropicUsage() agent.UsageReporter {
 	client, err := anthropic.New(
 		anthropic.StoredCredentials(), listingModel, listingEffort, listingMaxOutputTokens,
 	)
+	if err != nil {
+		return nil
+	}
+
+	return client
+}
+
+func codexUsage() agent.UsageReporter {
+	if !IsLoggedIn(model.CodexProvider) {
+		return nil
+	}
+
+	client, err := codex.New(codex.StoredCredentials(), listingModel, listingEffort)
 	if err != nil {
 		return nil
 	}
