@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.0] - XXXX-XX-XX
+## [0.3.0] - 2026-09-10
 
 - Add LLM simulator backend with `--demo`, or use the _Simulation_ option during onboarding
 - Track input and output token API prices, stored when model list is updated
