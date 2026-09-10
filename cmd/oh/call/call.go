@@ -309,7 +309,7 @@ func listMetricsText(metrics *tool.ToolCallMetrics) string {
 }
 
 func imageMetricsText(metrics *tool.ToolCallMetrics) string {
-	return style.Subtle(util.FormatEstimatedTokenCount(metrics.EstimatedTokens))
+	return style.Subtle(util.FormatEstimatedTokens(metrics.EstimatedTokens))
 }
 
 func writeMetricsText(metrics *tool.ToolCallMetrics) string {
@@ -340,9 +340,9 @@ func tokenEstimate(metrics *tool.ToolCallMetrics) string {
 		return ""
 	}
 
-	returnedText := util.FormatEstimatedTokenCount(returnedTokens)
+	returnedText := util.FormatEstimatedTokens(returnedTokens)
 	if isTotalSaid {
-		return returnedText + " (of " + util.FormatTokenEstimate(metrics.TotalBytes) + ")"
+		return returnedText + " (of " + util.FormatEstimatedTokens(util.EstimateTokenCount(metrics.TotalBytes)) + ")"
 	}
 
 	return returnedText

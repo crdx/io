@@ -35,7 +35,7 @@ func (self state) Render(segment.Context) string {
 	return style.Quantity(fmt.Sprintf(
 		"%s %s/%s",
 		formatPercentage(usedTokens, totalTokens),
-		util.FormatTokenCount(usedTokens),
+		util.FormatWholeThousands(usedTokens),
 		formatTotalTokens(totalTokens),
 	))
 }
@@ -59,5 +59,5 @@ func formatTotalTokens(tokens int) string {
 		return unknown
 	}
 
-	return util.FormatTokenCount(tokens)
+	return util.FormatWholeThousands(tokens)
 }

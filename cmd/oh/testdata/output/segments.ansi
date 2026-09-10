@@ -51,7 +51,7 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫\e[0m\e[38;
 === context-usage / one million ===
 50\e[38;2;150;152;150m% \e[0m500\e[38;2;150;152;150mK/\e[0m1\e[38;2;150;152;150mM\e[0m
 === context-usage / unknown ===
-?\e[38;2;150;152;150m% \e[0m0\e[38;2;150;152;150mK/\e[0m?
+?\e[38;2;150;152;150m% \e[0m0\e[38;2;150;152;150m/\e[0m?
 === exposed-ports / both directions ===
 \e]8;;http://127.27.192.223:8000\e\\\e[38;2;150;152;150m⇢ \e[0m8000\e]8;;\e\\\e[38;2;150;152;150m, \e[0m\e]8;;http://127.0.0.1:3000\e\\\e[38;2;150;152;150m⇠ \e[0m3000\e]8;;\e\\
 === exposed-ports / both directions constrained ===

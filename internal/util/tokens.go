@@ -5,64 +5,43 @@ import (
 )
 
 const (
-	bytesPerToken = 2.8
-	tokenUnit     = "t"
-	estimateMark  = "~"
-	noTokenUnit   = ""
-	noEstimate    = ""
+	bytesPerToken    = 2.8
+	tokenUnit        = "t"
+	estimateMark     = "~"
+	roughestTokens   = 10
+	estimateRounding = 100
 )
-
-func formatLargeTokenCount(tokens float64, prefix string, unit string) string {
-	if tokens >= million {
-		return formatScaledUnit(tokens/million, countPrecision, prefix, "M"+unit)
-	}
-
-	return formatScaledUnit(tokens/thousand, countPrecision, prefix, "K"+unit)
-}
 
 func EstimateTokenCount[Count count](bytes Count) int64 {
 	return int64(math.Ceil(float64(bytes) / bytesPerToken))
 }
 
-func FormatTokenEstimate[Count count](bytes Count) string {
-	return FormatEstimatedTokenCount(EstimateTokenCount(bytes))
-}
-
-func FormatEstimatedTokenCount[Count count](tokens Count) string {
-	if tokens <= 0 {
-		return "0" + tokenUnit
-	}
-
-	estimate := float64(tokens)
-	if estimate < 10 {
-		return formatScaledUnit(estimate, countPrecision, estimateMark, tokenUnit)
-	}
-
-	if estimate < thousand {
-		estimate = max(math.Round(estimate/100)*100, 100)
-	}
-
-	if estimate < thousand {
-		return formatScaledUnit(estimate, countPrecision, estimateMark, tokenUnit)
-	}
-
-	return formatLargeTokenCount(estimate, estimateMark, tokenUnit)
-}
-
 func FormatTokens[Count count](tokens Count) string {
+	return FormatCount(tokens) + tokenUnit
+}
+
+func FormatWholeThousands[Count count](tokens Count) string {
+	if tokens <= 0 {
+		return "0"
+	}
+
+	return FormatCount(max(int64(tokens), thousand))
+}
+
+func FormatEstimatedTokens[Count count](tokens Count) string {
 	if tokens <= 0 {
 		return "0" + tokenUnit
 	}
 
-	return FormatTokenCount(tokens) + tokenUnit
+	return estimateMark + FormatTokens(roundedEstimate(int64(tokens)))
 }
 
-func FormatTokenCount[Count count](tokens Count) string {
-	if tokens <= 0 {
-		return "0K"
+func roundedEstimate(tokens int64) int64 {
+	if tokens < roughestTokens || tokens >= thousand {
+		return tokens
 	}
 
-	return formatLargeTokenCount(max(float64(tokens), thousand), noEstimate, noTokenUnit)
+	return max(int64(math.Round(float64(tokens)/estimateRounding))*estimateRounding, estimateRounding)
 }
 
 func EstimateImageTokenCount(width int, height int) int64 {

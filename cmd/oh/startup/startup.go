@@ -147,7 +147,7 @@ func startupContextTokens(info Info) string {
 	bytes := info.PromptBytes + info.ToolBytes
 
 	var field startupLine
-	field.quantity(util.FormatTokenEstimate(bytes), false)
+	field.quantity(util.FormatEstimatedTokens(util.EstimateTokenCount(bytes)), false)
 	return field.String()
 }
 

@@ -51,7 +51,7 @@ GPT Sol 5.6 ▫▫▫▫▪▫
 === context-usage / one million ===
 50% 500K/1M
 === context-usage / unknown ===
-?% 0K/?
+?% 0/?
 === exposed-ports / both directions ===
 ⇢ 8000, ⇠ 3000
 === exposed-ports / both directions constrained ===

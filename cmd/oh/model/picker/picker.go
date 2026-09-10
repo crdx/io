@@ -164,7 +164,7 @@ func contextWindow(tokens int) string {
 		return unknownQuantity
 	}
 
-	return util.FormatTokenCount(tokens)
+	return util.FormatWholeThousands(tokens)
 }
 
 func tier(prices *agent.TokenPrices) string {

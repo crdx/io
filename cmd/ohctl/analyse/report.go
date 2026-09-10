@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"strings"
 	"time"
 
 	"crdx.org/io/cmd/oh/model"
@@ -128,7 +127,7 @@ func cacheRow(name string, statistics CacheStatistics, appearance style.Style) r
 			util.FormatCount(statistics.Misses),
 			percentage(statistics.Hits, statistics.Requests),
 			percentage(statistics.CachedTokens, statistics.InputTokens),
-			formatTokenCount(statistics.CachedTokens),
+			util.FormatTokens(statistics.CachedTokens),
 		},
 	}
 }
@@ -163,13 +162,13 @@ func contextRow(name string, statistics CacheStatistics, appearance style.Style)
 		appearance: appearance,
 		cells: []string{
 			name,
-			formatTokenCount(statistics.AverageInputTokens()),
-			formatTokenCount(statistics.PeakInputTokens),
-			formatTokenCount(statistics.InputTokens),
-			formatTokenCount(statistics.CachedTokens),
-			formatTokenCount(statistics.WrittenTokens),
-			formatTokenCount(statistics.FreshTokens()),
-			formatTokenCount(statistics.OutputTokens),
+			util.FormatTokens(statistics.AverageInputTokens()),
+			util.FormatTokens(statistics.PeakInputTokens),
+			util.FormatTokens(statistics.InputTokens),
+			util.FormatTokens(statistics.CachedTokens),
+			util.FormatTokens(statistics.WrittenTokens),
+			util.FormatTokens(statistics.FreshTokens()),
+			util.FormatTokens(statistics.OutputTokens),
 		},
 	}
 }
@@ -227,10 +226,10 @@ func modelRow(statistics ModelStatistics, currency money.Currency, appearance st
 			statistics.Model,
 			util.FormatCount(statistics.Sessions),
 			util.FormatCount(statistics.Requests),
-			formatTokenCount(statistics.FreshTokens()),
-			formatTokenCount(statistics.CachedTokens),
-			formatTokenCount(statistics.WrittenTokens),
-			formatTokenCount(statistics.OutputTokens),
+			util.FormatTokens(statistics.FreshTokens()),
+			util.FormatTokens(statistics.CachedTokens),
+			util.FormatTokens(statistics.WrittenTokens),
+			util.FormatTokens(statistics.OutputTokens),
 			formatSpend(statistics.Spend, statistics.IsPriced, currency),
 		},
 	}
@@ -324,7 +323,7 @@ func faultRow(name string, statistics FaultStatistics, appearance style.Style) r
 			util.FormatCount(statistics.SilentTurns),
 			util.FormatCount(statistics.PrefixRewrites),
 			util.FormatCount(statistics.CacheRebuilds.Count()),
-			formatTokenCount(statistics.CacheRebuilds.WrittenTokens),
+			util.FormatTokens(statistics.CacheRebuilds.WrittenTokens),
 		},
 	}
 }
@@ -399,8 +398,8 @@ func sessionRow(statistics SessionStatistics, currency money.Currency) reportRow
 			util.FormatCount(statistics.Activity.Turns),
 			util.FormatCount(statistics.Cache.Requests),
 			percentage(statistics.Cache.Hits, statistics.Cache.Requests),
-			formatTokenCount(statistics.Cache.InputTokens),
-			formatTokenCount(statistics.Cache.OutputTokens),
+			util.FormatTokens(statistics.Cache.InputTokens),
+			util.FormatTokens(statistics.Cache.OutputTokens),
 			util.FormatCount(statistics.Activity.ToolCalls),
 			formatDuration(statistics.Duration()),
 			formatSpend(statistics.Spend, statistics.IsPriced, currency),
@@ -439,19 +438,6 @@ func writeReportTable(writer io.Writer, part section, rows []reportRow) error {
 	}
 
 	return nil
-}
-
-const (
-	billionTokens = 1_000_000_000
-	tokenUnit     = "t"
-)
-
-func formatTokenCount(tokens int64) string {
-	if tokens < billionTokens {
-		return util.FormatTokens(tokens)
-	}
-	count := strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.2f", float64(tokens)/billionTokens), "0"), ".")
-	return count + "B" + tokenUnit
 }
 
 func formatDuration(took time.Duration) string {

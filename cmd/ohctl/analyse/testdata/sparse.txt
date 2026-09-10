@@ -13,11 +13,11 @@ Codex               6Kt         9Kt         12Kt          8Kt           1Kt     
 === counts in their thousands, tokens in their billions, and nothing written ===
 Prompt cache
 Provider  Sessions  Requests  Hits  Misses  Hit Rate  Input Cached  Tokens Read
-Codex          186       22K   22K     335     98.5%         98.4%       3.75Bt
+Codex          186       22K   22K     335     98.5%         98.4%        3.8Bt
 
 Tokens
 Provider  Average Input  Peak Input  Total Input  Cache Reads  Cache Writes  Fresh Input  Output
-Codex             172Kt       614Kt       3.81Bt       3.75Bt            0t         60Mt    12Mt
+Codex             172Kt       614Kt        3.8Bt        3.8Bt            0t         60Mt    12Mt
 
 Conversation
 Provider  Sessions  Turns  Prompts  Replies  Reasoning  Tool Calls  Average Turn  Longest Turn  Open For

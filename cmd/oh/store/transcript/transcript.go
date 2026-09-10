@@ -246,7 +246,7 @@ func measurements(metrics *tool.ToolCallMetrics) string {
 		parts = append(parts, fmt.Sprintf("+%d −%d", metrics.AddedLines, metrics.RemovedLines))
 	}
 	if metrics.EstimatedTokens > 0 {
-		parts = append(parts, util.FormatEstimatedTokenCount(metrics.EstimatedTokens))
+		parts = append(parts, util.FormatEstimatedTokens(metrics.EstimatedTokens))
 	}
 	if cpuTime := util.CompactDuration(metrics.CPUTime); metrics.CPUTime > 0 && cpuTime != noTimeAtAll {
 		parts = append(parts, cpuTime+" CPU")
