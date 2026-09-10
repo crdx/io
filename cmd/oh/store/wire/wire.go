@@ -199,6 +199,7 @@ type exchange struct {
 	body         bytes.Buffer
 	hasResponded bool
 	isStreaming  bool
+	lastReadAt   time.Time
 }
 
 func (self *exchange) Response(response req.Response) {
@@ -212,7 +213,7 @@ func (self *exchange) Response(response req.Response) {
 	self.recorder.write("\n")
 }
 
-func (self *exchange) Body(body []byte) {
+func (self *exchange) Body(readAt time.Time, body []byte) {
 	if !self.isStreaming {
 		_, _ = self.body.Write(body)
 		return
@@ -221,6 +222,7 @@ func (self *exchange) Body(body []byte) {
 	self.recorder.mutex.Lock()
 	defer self.recorder.mutex.Unlock()
 	_, _ = self.body.Write(body)
+	self.recorder.write(self.readMarker(readAt, len(body)))
 	for {
 		bufferedBody := self.body.Bytes()
 		lineEnd := bytes.IndexByte(bufferedBody, '\n')
@@ -250,6 +252,16 @@ func (self *exchange) Finish(finishedAt time.Time, err error, isIncomplete bool)
 		state = "read error: " + censorBearer(err.Error())
 	}
 	self.recorder.write(fmt.Sprintf("# exchange %d end %s elapsed=%s %s\n\n", self.sequence, finishedAt.UTC().Format(time.RFC3339Nano), finishedAt.Sub(self.startedAt), state))
+}
+
+func (self *exchange) readMarker(readAt time.Time, byteCount int) string {
+	marker := fmt.Sprintf("%s%d read %s elapsed=%s", exchangeMarker, self.sequence, readAt.UTC().Format(time.RFC3339Nano), readAt.Sub(self.startedAt))
+	if !self.lastReadAt.IsZero() {
+		marker += " gap=" + readAt.Sub(self.lastReadAt).String()
+	}
+	self.lastReadAt = readAt
+
+	return marker + fmt.Sprintf(" bytes=%d\n", byteCount)
 }
 
 func censorBody(body []byte, contentType string) []byte {

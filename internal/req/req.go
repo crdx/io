@@ -221,7 +221,7 @@ type observedBody struct {
 func (self *observedBody) Read(buffer []byte) (int, error) {
 	count, err := self.ReadCloser.Read(buffer)
 	if count > 0 {
-		self.observer.Body(bytes.Clone(buffer[:count]))
+		self.observer.Body(time.Now(), bytes.Clone(buffer[:count]))
 	}
 	if err != nil {
 		self.finish(err, false)

@@ -28,6 +28,6 @@ type Observer interface {
 
 type ExchangeObserver interface {
 	Response(response Response)
-	Body(body []byte)
+	Body(readAt time.Time, body []byte)
 	Finish(finishedAt time.Time, err error, isIncomplete bool)
 }

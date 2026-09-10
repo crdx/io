@@ -132,6 +132,94 @@ func TestRecorderIgnoresAnEndMarkerWhenNumberingTheNextExchange(t *testing.T) {
 	}
 }
 
+func TestRecorderIgnoresAReadMarkerWhenNumberingTheNextExchange(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "wire.http")
+	stored := strings.Join([]string{
+		"# HTTP transcript\n",
+		"# exchange 4 start 1970-01-01T00:00:02Z\n",
+		"# exchange 4 read 1970-01-01T00:00:03Z elapsed=1s\n",
+		"data: one\n",
+		"# exchange 4 read 1970-01-01T00:00:03.25Z elapsed=1.25s gap=250ms\n",
+		"data: two\n",
+	}, "")
+	if err := os.WriteFile(path, []byte(stored), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	recorder, err := wire.Open(path, wire.Meta{}, func(err error) {
+		t.Errorf("unexpected recorder failure: %v", err)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	recorder.Start(req.Request{StartedAt: time.Unix(2, 0), Method: http.MethodPost})
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	transcript, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(transcript), "# exchange 5 start") {
+		t.Errorf("expected the read markers to be passed over, got %q", string(transcript))
+	}
+}
+
+func TestEachStreamingReadIsTimestampedSoBurstsAreVisible(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "wire.http")
+	recorder, err := wire.Open(path, wire.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 0)}, func(err error) {
+		t.Errorf("unexpected recorder failure: %v", err)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	exchange := recorder.Start(req.Request{
+		StartedAt: time.Unix(2, 0),
+		Method:    http.MethodPost,
+		URL:       "http://example.test/",
+		Protocol:  "HTTP/1.1",
+		Header:    http.Header{"Content-Type": {"application/json"}},
+		Body:      []byte(`{}`),
+	})
+	exchange.Response(req.Response{
+		ReceivedAt: time.Unix(3, 0),
+		Protocol:   "HTTP/1.1",
+		Status:     "200 OK",
+		Code:       200,
+		Header:     http.Header{"Content-Type": {"text/event-stream"}},
+	})
+	exchange.Body(time.Unix(3, 0), []byte("data: one\n"))
+	exchange.Body(time.Unix(3, 0).Add(250*time.Millisecond), []byte("data: two\ndata: three\n"))
+	exchange.Body(time.Unix(3, 0).Add(400*time.Millisecond), []byte("data: partial"))
+	exchange.Finish(time.Unix(4, 0), nil, false)
+
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	transcript := string(stored)
+
+	for _, marker := range []string{
+		"# exchange 1 read 1970-01-01T00:00:03Z elapsed=1s bytes=10\ndata: one\n",
+		"# exchange 1 read 1970-01-01T00:00:03.25Z elapsed=1.25s gap=250ms bytes=22\ndata: two\ndata: three\n",
+		"# exchange 1 read 1970-01-01T00:00:03.4Z elapsed=1.4s gap=150ms bytes=13\n",
+	} {
+		if !strings.Contains(transcript, marker) {
+			t.Errorf("expected %q in:\n%s", marker, transcript)
+		}
+	}
+
+	if strings.Count(transcript, "# exchange 1 read ") != 3 {
+		t.Errorf("expected a marker for every read, got:\n%s", transcript)
+	}
+}
+
 func TestRecorderCensorsHeadersJSONFormsSSEAndBearerText(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "wire.http")
 	recorder, err := wire.Open(path, wire.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 0)}, func(err error) {
@@ -159,7 +247,7 @@ func TestRecorderCensorsHeadersJSONFormsSSEAndBearerText(t *testing.T) {
 		Code:       200,
 		Header:     http.Header{"Content-Type": {"text/event-stream"}},
 	})
-	exchange.Body([]byte("data: {\"refresh_token\":\"sse-secret\",\"ok\":true}\n\ndata: Bearer response-secret\n"))
+	exchange.Body(time.Unix(3, 0), []byte("data: {\"refresh_token\":\"sse-secret\",\"ok\":true}\n\ndata: Bearer response-secret\n"))
 	exchange.Finish(time.Unix(4, 0), nil, false)
 	if err := recorder.Close(); err != nil {
 		t.Fatal(err)
@@ -221,7 +309,7 @@ func TestRecorderCensorsIdentityMetadataWithoutCensoringProtocolIDs(t *testing.T
 			"X-Request-Id":              {"response-request-secret"},
 		},
 	})
-	exchange.Body([]byte("data: {\"workspace_id\":\"response-workspace-secret\",\"uuid\":\"response-uuid-secret\",\"id\":\"response-id\",\"call_id\":\"response-call-id\",\"ok\":true}\n\n"))
+	exchange.Body(time.Unix(3, 0), []byte("data: {\"workspace_id\":\"response-workspace-secret\",\"uuid\":\"response-uuid-secret\",\"id\":\"response-id\",\"call_id\":\"response-call-id\",\"ok\":true}\n\n"))
 	exchange.Finish(time.Unix(4, 0), nil, false)
 	if err := recorder.Close(); err != nil {
 		t.Fatal(err)
@@ -288,7 +376,7 @@ func recordBody(t *testing.T, body []byte, contentType string, events string) st
 		Header:     http.Header{"Content-Type": {"text/event-stream"}},
 	})
 	if events != "" {
-		exchange.Body([]byte(events))
+		exchange.Body(time.Unix(3, 0), []byte(events))
 	}
 	exchange.Finish(time.Unix(4, 0), nil, false)
 

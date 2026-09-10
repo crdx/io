@@ -27,7 +27,7 @@ func (self observer) Start(request req.Request) req.ExchangeObserver {
 }
 
 func (self *observedExchange) Response(response req.Response) { self.response = response }
-func (self *observedExchange) Body(body []byte)               { self.body = append(self.body, body...) }
+func (self *observedExchange) Body(_ time.Time, body []byte)  { self.body = append(self.body, body...) }
 
 func (self *observedExchange) Finish(_ time.Time, err error, isIncomplete bool) {
 	self.isFinished, self.err, self.incomplete = true, err, isIncomplete

@@ -55,6 +55,33 @@ func TestCacheReportsAreReadFromEverySupportedWireShape(t *testing.T) {
 	}
 }
 
+func TestTheReadMarkersBetweenEventsArePassedOver(t *testing.T) {
+	transcript := strings.Join([]string{
+		"# HTTP transcript",
+		"# provider: anthropic",
+		"# exchange 1 read 1970-01-01T00:00:03Z elapsed=1s",
+		`data: {"type":"message_start","message":{"usage":{"input_tokens":50,"output_tokens":1,` +
+			`"cache_read_input_tokens":100000,"cache_creation_input_tokens":248}}}`,
+		"# exchange 1 read 1970-01-01T00:00:03.25Z elapsed=1.25s gap=250ms",
+		`data: {"type":"message_delta","usage":{"output_tokens":1290}}`,
+		"# exchange 1 end 1970-01-01T00:00:04Z elapsed=2s completed",
+	}, "\n")
+
+	provider, reports, err := readTranscript(strings.NewReader(transcript))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if provider != "anthropic" {
+		t.Errorf("got provider %q, want anthropic", provider)
+	}
+	want := []usageReport{
+		{inputTokens: 100298, cachedTokens: 100000, writtenTokens: 248, outputTokens: 1290},
+	}
+	if !reflect.DeepEqual(reports, want) {
+		t.Errorf("got reports %#v, want %#v", reports, want)
+	}
+}
+
 func TestZeroCachedTokensAreAMiss(t *testing.T) {
 	statistics := CacheStatistics{}
 	statistics.record(usageReport{inputTokens: 9000})
