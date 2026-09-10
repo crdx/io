@@ -2,24 +2,18 @@
 
 ## [0.3.0] - XXXX-XX-XX
 
-### Added
-
-- LLM simulator backend with `--demo`, or use the _Simulation_ option during onboarding
-- Input and output token API prices, stored when model list is updated
-- Session spend segment shows the API cost of the current session
-- Currency configuration with `ui.currency` if you don't like US dollars
-- `ohctl analyse` also reports models, spend, conversation, faults, and tool use
-
-### Fixed
-
-- An unknown `config.toml` key is just a warning
+- Add LLM simulator backend with `--demo`, or use the _Simulation_ option during onboarding
+- Track input and output token API prices, stored when model list is updated
+- Add session spend segment which shows the API cost of the current session
+- Configure currency with `ui.currency` if you don't like US dollars
+- Now `ohctl analyse` also reports models, spend, conversation, faults, and tool use
+- Add timestamps to `wire.http` logs
+- Make an unknown `config.toml` key be just a warning
 - Read OpenAI subscription usage from account if stale on startup
-- Some minor text wrapping, truncation, and hyperlink issues
-- Image rendering when several parallel reads are triggered
-
-### Removed
-
-- The extra blank line that was sometimes left behind on exit
+- Fix some minor text wrapping, truncation, spacing, and hyperlink issues
+- Fix image rendering when several parallel reads are triggered
+- Remove the extra blank line that was sometimes left behind on exit
+- Remove the superfluous space before the image address
 
 ## [0.2.0] - 2026-09-09
 
