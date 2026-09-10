@@ -210,6 +210,9 @@ func (self *exchange) Response(response req.Response) {
 	self.isStreaming = strings.Contains(strings.ToLower(self.contentType), "event-stream")
 	self.recorder.write(fmt.Sprintf("\n< %s %s\n", response.Protocol, response.Status))
 	self.recorder.writeHeaders("<", response.Header)
+	if response.IsCompressed {
+		self.recorder.write(fmt.Sprintf("%s%d gzip decompressed by the transport\n", exchangeMarker, self.sequence))
+	}
 	self.recorder.write("\n")
 }
 

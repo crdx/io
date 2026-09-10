@@ -190,11 +190,12 @@ func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser
 
 	if exchange != nil {
 		exchange.Response(Response{
-			ReceivedAt: time.Now(),
-			Protocol:   response.Proto,
-			Status:     response.Status,
-			Code:       response.StatusCode,
-			Header:     response.Header.Clone(),
+			ReceivedAt:   time.Now(),
+			Protocol:     response.Proto,
+			Status:       response.Status,
+			Code:         response.StatusCode,
+			Header:       response.Header.Clone(),
+			IsCompressed: response.Uncompressed,
 		})
 		response.Body = &observedBody{
 			ReadCloser: response.Body,

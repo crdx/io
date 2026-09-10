@@ -15,11 +15,12 @@ type Request struct {
 }
 
 type Response struct {
-	ReceivedAt time.Time
-	Protocol   string
-	Status     string
-	Code       int
-	Header     http.Header
+	ReceivedAt   time.Time
+	Protocol     string
+	Status       string
+	Code         int
+	Header       http.Header
+	IsCompressed bool
 }
 
 type Observer interface {
