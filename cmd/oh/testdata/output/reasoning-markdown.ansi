@@ -483,7 +483,7 @@ The read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\r
 \r\e[K\e[3m\e[38;2;150;152;150mthe read has\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mto come\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mfirst.\e[0m\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mt…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mA plain\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mthought with\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mno markup in\e[0m\r

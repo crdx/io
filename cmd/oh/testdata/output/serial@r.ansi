@@ -11,17 +11,17 @@
 \r
 \r\e[KI'll put a file down to work with.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mwrite\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem …\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mwrite\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m2…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem i…\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading what\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mwas written.\e[0m\e[0m\r
 \r
 \r\e[KNow to read it, add to it, and read it\r
 \r\e[Kback.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnotes.md: no such …\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnotes.md: no such fi…\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mwrite\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem …\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnotes.md: no such …\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mwrite\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m3…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem i…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnotes.md: no such fi…\e[0m\r
 \r
 \r\e[KThe reads went together, the write\r
 \r\e[Kwaited for them and ran on its own, and\r
@@ -632,7 +632,7 @@ the reads to find.\r
 \r\e[Kfile down to\r
 \r\e[Kwork with.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mw…\e[0m\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mt…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mwr…\e[0m\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mth…\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mReading,\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mthen\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mwriting,\e[0m\r
@@ -645,10 +645,10 @@ the reads to find.\r
 \r\e[Kit, and read\r
 \r\e[Kit back.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\r…\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mn…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\re…\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mno…\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mw…\e[0m\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mt…\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\r…\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mn…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mwr…\e[0m\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mth…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\re…\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mno…\e[0m\r
 \r
 \r\e[KThe reads\r
 \r\e[Kwent\r

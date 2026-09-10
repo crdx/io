@@ -6,11 +6,11 @@
 
 One of each, then.
 
-$ COUNT=0; for NAME in… ✓ 2.4s 3L 700M
+$ COUNT=0; for NAME in *… ✓ 2.4s 3L 700M
 ls ✓ 2L
 read diagram.png ✓ ~1.6Kt
 edit screen.go ✓ +12 −5
-grep ^func\\s+… ✓ 7L+ ~100t (of ~3.4Kt)
+grep ^func\\s+(N… ✓ 7L+ ~100t (of ~3.4Kt)
 read README.md ✓ 3L
 
 Here is a script, and a pattern beside
@@ -388,12 +388,12 @@ That is one call of every kind the harness knows how to measure.
 One of each,
 then.
 
-$ COUNT… ✓
+$ COUNT=0… ✓
 ls ✓ 2L
-… ✓ ~1.6Kt
-… ✓ +12 −5
-grep ^f… ✓
-read ✓ 3L
+re… ✓ ~1.6Kt
+ed… ✓ +12 −5
+grep ^fun… ✓
+read R… ✓ 3L
 
 Here is a
 script, and

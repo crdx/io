@@ -737,7 +737,7 @@ A wrapped patch path looks like this:\r
 \r\e[Kthe\r
 \r\e[Krenderer.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mc…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt\r
 \r\e[Kis built in\r

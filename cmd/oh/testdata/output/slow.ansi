@@ -6,7 +6,7 @@
 \e[?7l\r\e[KThat will take a moment.\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;192;128;80m9.5s\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went …\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went on…\e[0m\r
 \r
 \r\e[KThe grep took nine seconds and the find\r
 \r\e[Kgave up after a minute.\r
@@ -223,8 +223,8 @@ The grep took nine seconds and the find gave up after a minute.\r
 \r\e[Ktake a\r
 \r\e[Kmoment.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150msp\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102m…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\g…\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;192;128;80m9.5s\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\…\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mt…\e[0m\r
 \r
 \r\e[KThe grep\r
 \r\e[Ktook nine\r

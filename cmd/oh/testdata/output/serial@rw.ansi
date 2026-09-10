@@ -617,7 +617,7 @@ first.\r
 \r\e[Kfile down to\r
 \r\e[Kwork with.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mwrite\e[0m\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mwrite\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mReading,\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mthen\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mwriting,\e[0m\r
@@ -630,10 +630,10 @@ first.\r
 \r\e[Kit, and read\r
 \r\e[Kit back.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mn…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mwrite\e[0m\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mwrite\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mn…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
 \r
 \r\e[KThe reads\r
 \r\e[Kwent\r

@@ -10,7 +10,7 @@ context.
 Editing the target without reading it
 again.
 
-edit target.txt ✗ 1L the filesystem i…
+edit target.txt ✗ 1L the filesystem is …
 
 The resumed edit was refused because the
 workspace is read-only.
@@ -252,7 +252,7 @@ without
 reading it
 again.
 
-e… ✗ 1L t…
+ed… ✗ 1L th…
 
 The resumed
 edit was

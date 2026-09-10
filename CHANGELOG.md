@@ -11,6 +11,7 @@
 - Make an unknown `config.toml` key be just a warning
 - Read OpenAI subscription usage from account if stale on startup
 - Fix some minor text wrapping, truncation, spacing, and hyperlink issues
+- Stop tool call rows getting truncated an extra two chars
 - Fix image rendering when several parallel reads are triggered
 - Remove the extra blank line that was sometimes left behind on exit
 - Remove the superfluous space before the image address

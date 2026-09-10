@@ -609,7 +609,7 @@ layer instead.\r
 \r\e[Kdraws its\r
 \r\e[Kprompt.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mp\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThe prompt\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mis drawn by\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mthe\e[0m\r
@@ -623,7 +623,7 @@ layer instead.\r
 \r\e[Krenderer\r
 \r\e[Know.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mc…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt\r
 \r\e[Kis drawn by\r

@@ -4,11 +4,11 @@
  then stop it
 
 
-job docs $ python3 -m http.serve… ✓ 1L
+job docs $ python3 -m http.server … ✓ 1L
 job docs status ✓ 1L
 job docs output ✓ 3L
 job docs wait ✓ 3L
-job docs $ pyth… ✗ 1L a job of that n…
+job docs $ pytho… ✗ 1L a job of that na…
 job list ✓ 4L ~100t
 job docs, build wait ✓ 5L ~100t
 job docs stop ✓ 1L
@@ -251,16 +251,16 @@ exceeding its 2s processor limit.
  stop it
 
 
-job … ✓ 1L
-job … ✓ 1L
-job … ✓ 3L
-job … ✓ 3L
-j… ✗ 1L a…
-job li… ✓
-job doc… ✓
-job … ✓ 1L
-job bui… ✓
-job doc… ✓
+job do… ✓ 1L
+job do… ✓ 1L
+job do… ✓ 3L
+job do… ✓ 3L
+job ✗ 1L a …
+… ✓ 4L ~100t
+… ✓ 5L ~100t
+job do… ✓ 1L
+… ✓ 4L ~100t
+… ✓ 7L ~100t
 
 The docs
 server ran

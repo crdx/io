@@ -4,10 +4,10 @@
 \e[48;2;52;53;65m when it finishes                       \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;150;152;150mNAME\e[0m\e[38;2;138;190;183m=\e[0m\e[38;2;150;152;150malpha\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;201;166;212mcase\e[0m\e[38;2;150;152;150m "$NAME" \e[0m\e[38;2;201;166;212min\e[0m\e[38;2;150;152;150m al\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mcommand finished\e[0m \e[38;2;150;152;150malpha an…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;204;102;102msearch\e[0m\e]8;;\e\\ \e[38;2;192;128;80mhow to quote a shell vari…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://gnu.org/bash\e[0m \e[38;2;150;152;150mclean…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;150;152;150mNAME\e[0m\e[38;2;138;190;183m=\e[0m\e[38;2;150;152;150malpha\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;201;166;212mcase\e[0m\e[38;2;150;152;150m "$NAME" \e[0m\e[38;2;201;166;212min\e[0m\e[38;2;150;152;150m alph\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mcommand finished\e[0m \e[38;2;150;152;150malpha and …\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;204;102;102msearch\e[0m\e]8;;\e\\ \e[38;2;192;128;80mhow to quote a shell variab…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://gnu.org/bash\e[0m \e[38;2;150;152;150mclean_h…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[Kdone.\r
 \e[?25h\e[?2026l
@@ -185,10 +185,10 @@ done.\r
 \e[48;2;52;53;65m finishes   \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;150;152;150mNA\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnoti…\e[0m\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;204;102;102msear…\e[0m\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;150;152;150mNAME\e[0m\e[38;2;138;190;183m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;204;102;102msearch\e[0m\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[Kdone.\r
 \e[?25h\e[?2026l

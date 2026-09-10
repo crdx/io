@@ -521,7 +521,7 @@ the editor
 draws its
 prompt.
 
-grep ✓ 1L
+grep p… ✓ 1L
 The prompt
 is drawn by
 the
@@ -535,7 +535,7 @@ Reading the
 renderer
 now.
 
-read ✓ 5L
+read c… ✓ 5L
 
 The prompt
 is drawn by

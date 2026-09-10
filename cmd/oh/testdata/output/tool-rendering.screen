@@ -4,10 +4,10 @@
  when it finishes
 
 
-$ NAME=alpha; case "$NAME" in al… ✓ 2L
-notify command finished alpha an… ✓ 1L
-search how to quote a shell vari… ✓ 1L
-fetch https://gnu.org/bash clean… ✓ 1L
+$ NAME=alpha; case "$NAME" in alph… ✓ 2L
+notify command finished alpha and … ✓ 1L
+search how to quote a shell variab… ✓ 1L
+fetch https://gnu.org/bash clean_h… ✓ 1L
 
 done.
 === one column ===
@@ -135,10 +135,10 @@ done.
  finishes
 
 
-$ NA… ✓ 2L
-noti… ✓ 1L
-sear… ✓ 1L
-fetch ✓ 1L
+$ NAME… ✓ 2L
+notify ✓ 1L
+search ✓ 1L
+fetch … ✓ 1L
 
 done.
 === wide ===

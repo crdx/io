@@ -10,7 +10,7 @@ context.
 Editing the target without reading it
 again.
 
-edit target.txt ✗ 1L file has not bee…
+edit target.txt ✗ 1L file has not been …
 
 The resumed edit was refused because the
 file has not been read in this session.
@@ -263,7 +263,7 @@ without
 reading it
 again.
 
-e… ✗ 1L f…
+ed… ✗ 1L fi…
 
 The resumed
 edit was

@@ -4,7 +4,7 @@
 
 
 read one.txt ✓ 1L
-read two.txt – the call was cancelled…
+read two.txt – the call was cancelled b…
 
 The turn was interrupted.
 
@@ -132,8 +132,8 @@ The turn was interrupted.
  files
 
 
-read ✓ 1L
-re… – the…
+read o… ✓ 1L
+read – the …
 
 The turn was
 interrupted.

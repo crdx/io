@@ -382,10 +382,10 @@ func TestALabelTakesTheRoomATimeWouldHaveTakenWhereNoTimeIsShown(t *testing.T) {
 	block.FinaliseRow(0, Done, time.Millisecond, "", "")
 
 	for _, row := range block.Rows(wide) {
-		if style.Width(row) != wide-edgeGuard {
+		if style.Width(row) != wide {
 			t.Errorf(
-				"expected the row to leave its %d-column edge guard, got width %d in %q",
-				edgeGuard, style.Width(row), row,
+				"expected the row to fill %d columns, got width %d in %q",
+				wide, style.Width(row), row,
 			)
 		}
 	}
@@ -399,16 +399,16 @@ func TestALabelGivesRoomBackWhenTheTimeAppears(t *testing.T) {
 	block.FinaliseRow(0, Done, 3*time.Second, "", "")
 
 	for _, row := range block.Rows(wide) {
-		if style.Width(row) != wide-edgeGuard {
+		if style.Width(row) != wide {
 			t.Errorf(
-				"expected the row to leave its %d-column edge guard, got width %d in %q",
-				edgeGuard, style.Width(row), row,
+				"expected the row to fill %d columns, got width %d in %q",
+				wide, style.Width(row), row,
 			)
 		}
 	}
 }
 
-func TestACompletedOutcomeIsKeptBackFromTheTerminalEdge(t *testing.T) {
+func TestACompletedOutcomeReachesTheTerminalEdge(t *testing.T) {
 	block := testBlock()
 	const narrow = 67
 
@@ -420,8 +420,8 @@ func TestACompletedOutcomeIsKeptBackFromTheTerminalEdge(t *testing.T) {
 	if got := style.Plain(row); !strings.HasSuffix(got, "✓ 7.4s") {
 		t.Errorf("expected the complete outcome at the end, got %q", got)
 	}
-	if got := style.Width(row); got > narrow-edgeGuard {
-		t.Errorf("expected %d guarded columns at the edge, got width %d in %q", edgeGuard, got, row)
+	if got := style.Width(row); got > narrow {
+		t.Errorf("expected the row to fit %d columns, got width %d in %q", narrow, got, row)
 	}
 }
 
@@ -453,5 +453,44 @@ func TestARowWideEnoughKeepsEverythingItMeasured(t *testing.T) {
 
 	if plain := style.Plain(block.Rows(wide)[index]); !strings.HasSuffix(plain, "✓ 1L ~1t") {
 		t.Errorf("expected everything the call measured, got %q", plain)
+	}
+}
+
+func TestTheOutcomeAppearsAsSoonAsOneLabelCellFitsBesideIt(t *testing.T) {
+	block := testBlock()
+
+	index := block.Add(rowLabel("bash", "echo one"))
+	block.FinaliseRow(index, Done, 3*time.Second, "", "1L ~1t")
+
+	drawn := style.Plain(block.Rows(wide)[index])
+	at := strings.Index(drawn, "✓")
+	if at < 0 {
+		t.Fatalf("expected a mark in %q", drawn)
+	}
+
+	outcome := drawn[at:]
+	fits := width.Of(outcome) + 2
+
+	if plain := style.Plain(block.Rows(fits)[index]); !strings.HasSuffix(plain, outcome) {
+		t.Errorf("expected %q beside a cell of the call in %d columns, got %q", outcome, fits, plain)
+	}
+
+	if plain := style.Plain(block.Rows(fits - 1)[index]); strings.HasSuffix(plain, outcome) {
+		t.Errorf("expected the mark alone in %d columns, got %q", fits-1, plain)
+	}
+}
+
+func TestALongSummaryIsElidedToTheTerminalEdge(t *testing.T) {
+	block := testBlock()
+
+	index := block.Add(rowLabel("bash", "echo one"))
+	block.FinaliseRow(index, Done, 3*time.Second, strings.Repeat("summary ", 20), "")
+
+	row := block.Rows(narrow)[index]
+	if got := style.Width(row); got != narrow {
+		t.Errorf("expected the row to fill %d columns, got width %d in %q", narrow, got, row)
+	}
+	if plain := style.Plain(row); !strings.HasSuffix(plain, width.Ellipsis) {
+		t.Errorf("expected the summary to be elided at the edge, got %q", plain)
 	}
 }

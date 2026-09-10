@@ -3,7 +3,7 @@
  start the docs server and keep it up
 
 
-job docs $ python3 -m http.serve… ✓ 1L
+job docs $ python3 -m http.server … ✓ 1L
 
 The docs server is up.
 
@@ -645,7 +645,7 @@ It was stopped when write access was withdrawn.
  up
 
 
-job … ✓ 1L
+job do… ✓ 1L
 
 The docs
 server is
@@ -690,7 +690,7 @@ up.
  it
 
 
-job … ✓ 1L
+job do… ✓ 1L
 
 
  🤖 The job
@@ -701,8 +701,8 @@ job … ✓ 1L
     .
 
 
-job … ✓ 1L
-job ✓ 1L
+job do… ✓ 1L
+job p… ✓ 1L
 
 It was
 stopped when

@@ -15,7 +15,7 @@ Let me search, then read the
 announcement.
 
 search latest Go release ✓ 1L
-fetch https://go.dev/blog/go1.26 ✓ 8L
+fetch https://go.dev/blog/go1.26 m… ✓ 8L
 
 Go 1.26 is current. The announcement
 calls out iterators in container/heap,
@@ -32,7 +32,7 @@ smaller allocation header.
     now refused.
 
 
-fetch https://go… ✗ web access is not…
+fetch https://go.… ✗ web access is not …
 
 The web tools are refused, so I cannot
 read the notes until you grant access
@@ -690,7 +690,7 @@ go test, and a smaller allocation header.
  🤖 The web search and fetch tools are now refused.
 
 
-fetch https://go.dev/doc/go1.26 text ✗ web access is not granted; the user can grant it with ctrl…
+fetch https://go.dev/doc/go1.26 text ✗ web access is not granted; the user can grant it with ctrl+x…
 
 The web tools are refused, so I cannot read the notes until you grant access again.
 === tiny ===
@@ -727,8 +727,8 @@ read the
 announcement
 .
 
-sear… ✓ 1L
-fetch ✓ 8L
+search ✓ 1L
+fetch … ✓ 8L
 
 Go 1.26 is
 current. The
@@ -761,7 +761,7 @@ header.
     refused.
 
 
-fe… ✗ web…
+fet… ✗ web …
 
 The web
 tools are
@@ -797,6 +797,6 @@ go test, and a smaller allocation header.
  🤖 The web search and fetch tools are now refused.
 
 
-fetch https://go.dev/doc/go1.26 text ✗ web access is not granted; the user can grant it with ctrl…
+fetch https://go.dev/doc/go1.26 text ✗ web access is not granted; the user can grant it with ctrl+x…
 
 The web tools are refused, so I cannot read the notes until you grant access again.

@@ -757,7 +757,7 @@ An answer after a thought.\r
 \e[38;2;207;173;0mthe response\e[0m\r
 \e[38;2;207;173;0mdid\e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mt…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r
 \r\e[KA tool ran,\r
@@ -765,11 +765,11 @@ An answer after a thought.\r
 \r\e[Kanswer\r
 \r\e[Kfollowed it.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mR…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mA thought\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mafter a tool\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mcall.\e[0m\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;192;128;80mc…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mcmd\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \e[38;2;207;173;0mThe model\e[0m\r
 \e[38;2;207;173;0mended the\e[0m\r

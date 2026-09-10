@@ -297,8 +297,8 @@ Both still mention the spinner.\r
 \e[?7l\r\e[KTaking them\r
 \r\e[Ktogether.\r
 \r
-\r\e[Kread \e[38;2;192;128;80msc…\e[0m \e[38;2;150;152;150m–\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150msp\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;150;152;150m–\e[0m\r
+\r\e[Kread \e[38;2;192;128;80mscre…\e[0m \e[38;2;150;152;150m–\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mspin\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m 🤖 The     \e[0m\r

@@ -282,7 +282,7 @@ The target is now safely recorded.\r
 \r\e[Kprocess\r
 \r\e[Krestarts.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mt…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe target\r
 \r\e[Kis now\r

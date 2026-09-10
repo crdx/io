@@ -4,9 +4,9 @@
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call%2Fa%3F%26&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150m[\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mregex parse error: [ ^ error…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150m[\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mregex parse error: [ ^ error: …\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe command was stopped …\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe command was stopped be…\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mtouch\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mmarker\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150mno output\e[0m\r
 \r
 \r\e[KEvery finished call has a result link,\r
@@ -243,11 +243,11 @@ Every finished call has a result link, whether or not it returned anything.\r
 \e[48;2;52;53;65m link state \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call%2Fa%3F%26&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\gr…\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mreg…\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call%2Fa%3F%26&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mR…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mrege…\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190m…\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe…\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mtouch\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190ms\e[0m\e[38;2;129;162;190m…\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe …\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mtouch\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mm\e[0m\e[38;2;129;162;190m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KEvery\r
 \r\e[Kfinished\r

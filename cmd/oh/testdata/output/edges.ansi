@@ -4,12 +4,12 @@
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\divine\e]8;;\e\\ \e[38;2;192;128;80mone.go\e[0m \e[38;2;150;152;150mlines \e[0m\e[38;2;192;128;80m1-400\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\conjure\e]8;;\e\\ \e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mDraw\e[0m(rows []\e[38;2;240;198;116mstring\e[0m, co\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;150;152;150mfor do done esac fi …\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102msyntax error\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\conjure\e]8;;\e\\ \e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mDraw\e[0m(rows []\e[38;2;240;198;116mstring\e[0m, colu\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;150;152;150mfor do done esac fi "u…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102msyntax error\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mnothing\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150mno output\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mplen…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~700t (of ~321Kt)\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mplenty\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~700t (of ~321Kt)\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mjapanese\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1.9Kt\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mtoo …\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~4.4Kt (of ~21Kt)\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mtoo mu…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~4.4Kt (of ~21Kt)\e[0m\r
 \r
 \e[38;2;207;173;0mThe turn was interrupted because the\e[0m\r
 \e[38;2;207;173;0muser asked something else.\e[0m\r
@@ -232,13 +232,13 @@ That is all of the awkward ones.\r
 \e[48;2;52;53;65m shapes     \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\divine\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\conjure\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;150;152;150m…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102msyn…\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\divine\e]8;;\e\\ \e[38;2;192;128;80mon…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\conjure\e]8;;\e\\ f\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;150;152;150mf…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102msynt…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mno…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mpl…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mja…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mto…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \e[38;2;207;173;0mThe turn was\e[0m\r
 \e[38;2;207;173;0minterrupted\e[0m\r

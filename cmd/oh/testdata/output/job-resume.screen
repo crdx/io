@@ -3,7 +3,7 @@
  start the docs server and a watcher
 
 
-job docs $ python3 -m http.serve… ✓ 1L
+job docs $ python3 -m http.server … ✓ 1L
 
 Both are up.
 
@@ -443,7 +443,7 @@ Restarted docs from the command it was remembered with.
  watcher
 
 
-job … ✓ 1L
+job do… ✓ 1L
 
 Both are up.
 
@@ -474,8 +474,8 @@ Both are up.
  carry on
 
 
-job ✓ 2L
-job … ✓ 1L
+job l… ✓ 2L
+job do… ✓ 1L
 
 Restarted
 docs from

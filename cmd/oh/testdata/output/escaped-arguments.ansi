@@ -187,9 +187,9 @@ Nothing moved.\r
 \e[48;2;52;53;65m you like   \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L 2M\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\scre…\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190me\e[0m\e[38;2;129;162;190m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L 2M\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\screen…\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mo\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \e[38;2;207;173;0m[#1] Request\e[0m\r
 \e[38;2;207;173;0mfailed;\e[0m\r

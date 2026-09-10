@@ -28,7 +28,7 @@ One more pair, and one of them will not
 be there.
 
 ls ✓ 7L
-read nowhere/at… ✗ 1L nowhere/at/all.…
+read nowhere/at/… ✗ 1L nowhere/at/all.g…
 
 That is the lot: four together, then
 three together, then a pair where only
@@ -478,9 +478,9 @@ the shape of
 this first.
 
 ls ✓ 7L
-find ✓ 2L
-find ✓ 1L
-grep ✓ 2L
+find *… ✓ 2L
+find *… ✓ 1L
+grep p… ✓ 2L
 Three
 searches,
 all at once.
@@ -490,9 +490,9 @@ where the
 drawing
 happens.
 
-grep ✓ 1L
-grep ✓ 1L
-grep ✓ 1L
+grep s… ✓ 1L
+grep f… ✓ 1L
+grep c… ✓ 1L
 
 One more
 pair, and
@@ -501,7 +501,7 @@ will not be
 there.
 
 ls ✓ 7L
-r… ✗ 1L n…
+re… ✗ 1L no…
 
 That is the
 lot: four

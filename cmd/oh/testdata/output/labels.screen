@@ -4,13 +4,13 @@
  skill
 
 
-$ if [[ -d src ]]; then echo the… ✓ 1L
-$ while read -r NAME; do echo "$… ✓ 1L
-$ until [[ -z "$REST" ]]; do RES… ✓ 1L
-$ case "$MODE" in read) echo r ;… ✓ 1L
-$ select CHOICE in one two; do b… ✓ 1L
+$ if [[ -d src ]]; then echo there… ✓ 1L
+$ while read -r NAME; do echo "$NA… ✓ 1L
+$ until [[ -z "$REST" ]]; do REST=… ✓ 1L
+$ case "$MODE" in read) echo r ;; … ✓ 1L
+$ select CHOICE in one two; do bre… ✓ 1L
 $ ls -la | grep -v "^d" | wc -l ✓ 1L
-grep ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ *.… ✓ 1L
+grep ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ *.go ✓ 1L
 load skills/tidy/SKILL.md ✓ 8L
 read wide.md ✓ 3L
 
@@ -350,15 +350,15 @@ func count() int {
  skill
 
 
-$ if… ✓ 1L
-$ wh… ✓ 1L
-$ un… ✓ 1L
-$ ca… ✓ 1L
-$ se… ✓ 1L
-$ ls… ✓ 1L
-grep ✓ 1L
-load ✓ 8L
-read ✓ 3L
+$ if [… ✓ 1L
+$ whil… ✓ 1L
+$ unti… ✓ 1L
+$ case… ✓ 1L
+$ sele… ✓ 1L
+$ ls -… ✓ 1L
+grep ^… ✓ 1L
+load s… ✓ 8L
+read w… ✓ 3L
 
 The listing
 is

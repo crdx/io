@@ -499,7 +499,7 @@ I'll put a
 file down to
 work with.
 
-write ✓ 5L
+write … ✓ 5L
 Reading,
 then
 writing,
@@ -512,10 +512,10 @@ it, add to
 it, and read
 it back.
 
-read ✓ 5L
+read n… ✓ 5L
 ls ✓ 8L
-write ✓ 6L
-read ✓ 6L
+write … ✓ 6L
+read n… ✓ 6L
 
 The reads
 went

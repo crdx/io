@@ -200,10 +200,7 @@ func (self *Block) run() {
 	}
 }
 
-const (
-	failureShare = 2
-	edgeGuard    = 2
-)
+const failureShare = 2
 
 func (self *Block) line(row row, columns int) string {
 	result := self.fitResult(row, columns, row.label.Width())
@@ -212,7 +209,7 @@ func (self *Block) line(row row, columns int) string {
 	summary := row.summary
 
 	if columns > 0 {
-		room := columns - edgeGuard - style.Width(result) - resultSpacing(result)
+		room := columns - style.Width(result) - resultSpacing(result)
 
 		summary = width.Elide(summary, summaryRoom(row.state, room, label.Width()))
 
@@ -259,7 +256,7 @@ func resultSpacing(result string) int {
 func (self *Block) fitResult(row row, columns int, labelWidth int) string {
 	result := self.getResult(row)
 
-	if columns <= 0 || style.Width(result)+edgeGuard+labelGuard(result, labelWidth) <= columns {
+	if columns <= 0 || style.Width(result)+labelGuard(result, labelWidth) <= columns {
 		return result
 	}
 

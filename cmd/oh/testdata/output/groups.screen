@@ -619,7 +619,7 @@ ended before
 the response
 did
 
-read ✓ 1L
+read t… ✓ 1L
 ls ✓ 2L
 
 A tool ran,
@@ -627,11 +627,11 @@ and an
 answer
 followed it.
 
-read ✓ 1L
+read R… ✓ 1L
 A thought
 after a tool
 call.
-ls c… ✓ 1L
+ls cmd ✓ 1L
 
 The model
 ended the

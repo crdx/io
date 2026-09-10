@@ -28,7 +28,7 @@
 \r\e[Kbe there.\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_10&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mnowhere/at…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mnowhere/at/…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.g…\e[0m\r
 \r
 \r\e[KThat is the lot: four together, then\r
 \r\e[Kthree together, then a pair where only\r
@@ -633,9 +633,9 @@ answered.\r
 \r\e[Kthis first.\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m*…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m*…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mp\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThree\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150msearches,\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mall at once.\e[0m\e[0m\r
@@ -645,9 +645,9 @@ answered.\r
 \r\e[Kdrawing\r
 \r\e[Khappens.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mf\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mc\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KOne more\r
 \r\e[Kpair, and\r
@@ -656,7 +656,7 @@ answered.\r
 \r\e[Kthere.\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_10&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\r…\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mn…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\re…\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mno…\e[0m\r
 \r
 \r\e[KThat is the\r
 \r\e[Klot: four\r

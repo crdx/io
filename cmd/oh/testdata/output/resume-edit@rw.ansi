@@ -10,7 +10,7 @@
 \e[?7l\r\e[KEditing the target without reading it\r
 \r\e[Kagain.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0medit\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mfile has not bee…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0medit\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mfile has not been …\e[0m\r
 \r
 \r\e[KThe resumed edit was refused because the\r
 \r\e[Kfile has not been read in this session.\r
@@ -317,7 +317,7 @@ The resumed edit was refused because the file has not been read in this session.
 \r\e[Kreading it\r
 \r\e[Kagain.\r
 \r
-\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0me…\e[0m\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mf…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0med…\e[0m\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mfi…\e[0m\r
 \r
 \r\e[KThe resumed\r
 \r\e[Kedit was\r

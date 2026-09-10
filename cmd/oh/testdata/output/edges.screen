@@ -4,12 +4,12 @@
 
 
 divine one.go lines 1-400 ✓
-conjure func Draw(rows []string, co… ✓
-$ for do done esac fi … ✗ syntax error
+conjure func Draw(rows []string, colu… ✓
+$ for do done esac fi "u… ✗ syntax error
 summon nothing ✓ no output
-summon plen… ✓ 900L+ ~700t (of ~321Kt)
+summon plenty ✓ 900L+ ~700t (of ~321Kt)
 summon japanese ✓ 1L ~1.9Kt
-summon too … ✓ 900L+ ~4.4Kt (of ~21Kt)
+summon too mu… ✓ 900L+ ~4.4Kt (of ~21Kt)
 
 The turn was interrupted because the
 user asked something else.
@@ -162,13 +162,13 @@ That is all of the awkward ones.
  shapes
 
 
-divine … ✓
-conjure ✓
-$ … ✗ syn…
-summon … ✓
-summon … ✓
-summon … ✓
-summon … ✓
+divine on… ✓
+conjure f… ✓
+$ f… ✗ synt…
+summon no… ✓
+summon pl… ✓
+summon ja… ✓
+summon to… ✓
 
 The turn was
 interrupted

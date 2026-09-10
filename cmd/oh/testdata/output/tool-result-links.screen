@@ -4,9 +4,9 @@
 
 
 read README.md ✓ 1L
-grep [ ✗ regex parse error: [ ^ error…
+grep [ ✗ regex parse error: [ ^ error: …
 ls ✓ 0L
-$ sleep 10 – the command was stopped …
+$ sleep 10 – the command was stopped be…
 $ touch marker ✓ no output
 
 Every finished call has a result link,
@@ -159,11 +159,11 @@ Every finished call has a result link, whether or not it returned anything.
  link state
 
 
-read ✓ 1L
-gr… ✗ reg…
+read R… ✓ 1L
+grep ✗ rege…
 ls ✓ 0L
-$ … – the…
-$ touch… ✓
+$ s… – the …
+$ touch m… ✓
 
 Every
 finished
