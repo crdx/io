@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.0] - XXXX-XX-XX
+
+### Added
+
+- LLM simulator backend with `--demo`, or use the _Simulation_ option during onboarding
+- Input and output token API prices, stored when model list is updated
+- Session spend segment shows the API cost of the current session
+- Currency configuration with `ui.currency` if you don't like US dollars
+
+### Fixed
+
+- Some minor text wrapping, truncation, and hyperlink issues
+- Image rendering when several parallel reads are triggered
+
+### Removed
+
+- The extra blank line that was sometimes left behind on exit
+
 ## [0.2.0] - 2026-09-09
 
 ### Added
