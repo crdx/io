@@ -48,9 +48,10 @@ type Picasso struct {
 	reasoningRendering    output.ReasoningRendering
 	resultLinkSessionName string
 
-	getTool   func(string) (tool.Tool, bool)
-	workspace *work.Space
-	pictures  pictureSource
+	getTool       func(string) (tool.Tool, bool)
+	workspace     *work.Space
+	pictures      pictures.Display
+	pictureDrawer markdown.PictureDrawer
 
 	heldPictures []heldPicture
 }
@@ -58,13 +59,6 @@ type Picasso struct {
 type heldPicture struct {
 	index   int
 	picture dynamic.Picture
-}
-
-type pictureSource struct {
-	sessionDirectory string
-	cellWidth        int
-	cellHeight       int
-	isLocal          bool
 }
 
 func New(
@@ -92,13 +86,9 @@ func (self *Picasso) RenderReasoningAs(rendering output.ReasoningRendering) {
 	self.reasoningRendering = rendering
 }
 
-func (self *Picasso) DrawPicturesFrom(sessionDirectory string, cellWidth int, cellHeight int, isLocal bool) {
-	self.pictures = pictureSource{
-		sessionDirectory: sessionDirectory,
-		cellWidth:        cellWidth,
-		cellHeight:       cellHeight,
-		isLocal:          isLocal,
-	}
+func (self *Picasso) DrawPicturesFrom(display pictures.Display) {
+	self.pictures = display
+	self.pictureDrawer = pictures.NewDrawer(display, self.workspace.GetDir())
 }
 
 func (self *Picasso) LinkToolResults(sessionName string) {
@@ -147,16 +137,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		self.discardProvisionalReasoning()
 		self.answer.Reset()
 		self.answer.Write(event.Text)
-		var renderedAnswer []string
-		if self.screen.IsTerminal() {
-			renderedAnswer = markdown.RenderWithHyperlinksUnder(
-				self.answer.Text(),
-				self.screen.Columns(),
-				self.workspace.GetDir(),
-			)
-		} else {
-			renderedAnswer = markdown.Render(self.answer.Text(), self.screen.Columns())
-		}
+		renderedAnswer := markdown.RenderWith(self.answer.Text(), self.answerOptions())
 		if !self.screen.DrawAnswer(renderedAnswer) {
 			self.isStale = true
 		}
@@ -457,16 +438,7 @@ func (self *Picasso) drawReasoning(isSettled bool) {
 func (self *Picasso) drawAnswer(isSettled bool) {
 	answerText, isRowArriving := self.withoutArrivingTableRow(self.answer.Text(), isSettled)
 
-	var rows []string
-	if self.screen.IsTerminal() {
-		rows = self.answerRenderer.RenderWithHyperlinksUnder(
-			answerText,
-			self.screen.Columns(),
-			self.workspace.GetDir(),
-		)
-	} else {
-		rows = self.answerRenderer.Render(answerText, self.screen.Columns())
-	}
+	rows := self.answerRenderer.RenderWith(answerText, self.answerOptions())
 
 	isTailHeldBack := !isRowArriving && self.isTailHeldBack(isSettled)
 	if isTailHeldBack {
@@ -476,6 +448,20 @@ func (self *Picasso) drawAnswer(isSettled bool) {
 	if !self.screen.DrawAnswer(self.answer.Take(rows, isTailHeldBack || isRowArriving)) {
 		self.isStale = true
 	}
+}
+
+func (self *Picasso) answerOptions() markdown.Options {
+	options := markdown.Options{
+		Columns:  self.screen.Columns(),
+		Pictures: self.pictureDrawer,
+	}
+
+	if self.screen.IsTerminal() {
+		options.ShouldRenderHyperlinks = true
+		options.LinkRoot = self.workspace.GetDir()
+	}
+
+	return options
 }
 
 func (self *Picasso) isTailHeldBack(isSettled bool) bool {
@@ -594,11 +580,11 @@ func (self *Picasso) attachPicturesAbove(firstRunningRow int) {
 }
 
 func (self *Picasso) holdPicture(index int, event agent.Event) {
-	if event.Picture == nil || self.pictures.sessionDirectory == "" || !self.screen.IsTerminal() {
+	if event.Picture == nil || self.pictures.SessionDirectory == "" || !self.screen.IsTerminal() {
 		return
 	}
 
-	drawing, isStored := pictures.Prepare(self.pictures.sessionDirectory, event.Picture)
+	drawing, isStored := pictures.Prepare(self.pictures.SessionDirectory, event.Picture)
 	if !isStored {
 		return
 	}
@@ -607,12 +593,12 @@ func (self *Picasso) holdPicture(index int, event agent.Event) {
 		Path:       drawing.Path,
 		Width:      drawing.Width,
 		Height:     drawing.Height,
-		CellWidth:  self.pictures.cellWidth,
-		CellHeight: self.pictures.cellHeight,
-		IsLocal:    self.pictures.isLocal,
+		CellWidth:  self.pictures.CellWidth,
+		CellHeight: self.pictures.CellHeight,
+		IsLocal:    self.pictures.IsLocal,
 	}
 
-	if !self.pictures.isLocal {
+	if !self.pictures.IsLocal {
 		data, isRead := pictures.Read(drawing.Path)
 		if !isRead {
 			return

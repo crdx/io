@@ -139,6 +139,14 @@ func isTerminalLocal() bool {
 	return os.Getenv("SSH_CLIENT") == "" && os.Getenv("SSH_TTY") == "" && os.Getenv("SSH_CONNECTION") == ""
 }
 
+func shadowedScratch(tmpDir string, isYolo bool) string {
+	if isYolo {
+		return ""
+	}
+
+	return tmpDir
+}
+
 func getConfigSources(workspaceDir string) []config.Source {
 	return []config.Source{
 		{Path: location.GetConfigFile()},
@@ -818,11 +826,12 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	if cellWidth, cellHeight, hasGraphics := graphics.Detect(keyboard, os.Stdout); hasGraphics {
-		app.display.pictures = pictureDisplay{
-			sessionDirectory: sessionInfo.Directory,
-			cellWidth:        cellWidth,
-			cellHeight:       cellHeight,
-			isLocal:          isTerminalLocal(),
+		app.display.pictures = pictures.Display{
+			SessionDirectory: sessionInfo.Directory,
+			ScratchDirectory: shadowedScratch(tmpDir, args.Yolo),
+			CellWidth:        cellWidth,
+			CellHeight:       cellHeight,
+			IsLocal:          isTerminalLocal(),
 		}
 
 		app.agent.StorePicturesWith(func(picture tool.Image) *agent.Picture {

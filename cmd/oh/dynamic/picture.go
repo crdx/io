@@ -66,23 +66,9 @@ func (self *pictureRows) place(columns int) []string {
 }
 
 func (self Picture) box(columns int) (graphics.Box, bool) {
-	if columns <= 0 || self.CellWidth <= 0 || self.CellHeight <= 0 {
-		return graphics.Box{}, false
-	}
-
-	cells := min((self.Width+self.CellWidth-1)/self.CellWidth, columns)
-	if cells <= 0 {
-		return graphics.Box{}, false
-	}
-
-	scaledHeight := self.Height * cells * self.CellWidth / self.Width
-	rows := max((scaledHeight+self.CellHeight-1)/self.CellHeight, 1)
-
-	if rows > graphics.MaxRows {
-		rows = graphics.MaxRows
-		cells = max(self.Width*rows*self.CellHeight/(self.Height*self.CellWidth), 1)
-		cells = min(cells, columns)
-	}
-
-	return graphics.Box{Cells: cells, Rows: rows}, true
+	return graphics.Fit(
+		graphics.Size{Width: self.Width, Height: self.Height},
+		graphics.Size{Width: self.CellWidth, Height: self.CellHeight},
+		columns,
+	)
 }

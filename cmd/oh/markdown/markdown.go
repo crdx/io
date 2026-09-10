@@ -25,16 +25,35 @@ const mermaidLanguage = "mermaid"
 
 var markdownParser = goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser()
 
+type PictureDrawer interface {
+	DrawPicture(path string, columns int) ([]string, bool)
+}
+
+type Options struct {
+	Columns                int
+	ShouldRenderHyperlinks bool
+	LinkRoot               string
+	Pictures               PictureDrawer
+}
+
 func Render(markdown string, columns int) []string {
-	return render(markdown, columns, nil, false, "")
+	return render(markdown, Options{Columns: columns}, nil)
 }
 
 func RenderWithHyperlinks(markdown string, columns int) []string {
-	return render(markdown, columns, nil, true, "")
+	return render(markdown, Options{Columns: columns, ShouldRenderHyperlinks: true}, nil)
 }
 
 func RenderWithHyperlinksUnder(markdown string, columns int, linkRoot string) []string {
-	return render(markdown, columns, nil, true, linkRoot)
+	return render(markdown, Options{
+		Columns:                columns,
+		ShouldRenderHyperlinks: true,
+		LinkRoot:               linkRoot,
+	}, nil)
+}
+
+func RenderWith(markdown string, options Options) []string {
+	return render(markdown, options, nil)
 }
 
 func EndsWithTable(markdown string) bool {
@@ -56,7 +75,7 @@ type StreamRenderer struct {
 }
 
 func (self *StreamRenderer) Render(markdown string, columns int) []string {
-	return self.render(markdown, columns, false, "")
+	return self.render(markdown, Options{Columns: columns})
 }
 
 func (self *StreamRenderer) IsTailMermaid() bool {
@@ -72,28 +91,17 @@ func (self *StreamRenderer) Reset() {
 	self.hasStableCandidateStart = false
 }
 
-func (self *StreamRenderer) render(
-	markdown string,
-	columns int,
-	shouldRenderHyperlinks bool,
-	linkRoot string,
-) []string {
+func (self *StreamRenderer) render(markdown string, options Options) []string {
 	self.isTailMermaid = false
 	self.hasMermaid = false
 	self.hasLinkReference = false
 	self.stableCandidateStart = 0
 	self.hasStableCandidateStart = false
 
-	return render(markdown, columns, self, shouldRenderHyperlinks, linkRoot)
+	return render(markdown, options, self)
 }
 
-func render(
-	markdown string,
-	columns int,
-	stream *StreamRenderer,
-	shouldRenderHyperlinks bool,
-	linkRoot string,
-) []string {
+func render(markdown string, options Options, stream *StreamRenderer) []string {
 	source := []byte(strings.ReplaceAll(markdown, "\t", tab))
 	parserContext := parser.NewContext()
 	document := markdownParser.Parse(text.NewReader(source), parser.WithContext(parserContext))
@@ -110,11 +118,12 @@ func render(
 	mermaidBlock := 0
 	renderer := &renderer{
 		source:                 source,
-		columns:                columns,
+		columns:                options.Columns,
 		mermaidBlock:           &mermaidBlock,
 		stream:                 stream,
-		shouldRenderHyperlinks: shouldRenderHyperlinks,
-		linkRoot:               linkRoot,
+		shouldRenderHyperlinks: options.ShouldRenderHyperlinks,
+		linkRoot:               options.LinkRoot,
+		pictures:               options.Pictures,
 	}
 	renderer.blocks(document)
 
@@ -145,6 +154,7 @@ type renderer struct {
 	stream                 *StreamRenderer
 	shouldRenderHyperlinks bool
 	linkRoot               string
+	pictures               PictureDrawer
 }
 
 func (self *renderer) blocks(parent ast.Node) {
@@ -207,6 +217,13 @@ func (self *renderer) block(node ast.Node) {
 
 	case *extensionast.Table:
 		self.rows = append(self.rows, self.table(node)...)
+
+	case *ast.Paragraph, *ast.TextBlock:
+		if self.picture(node) {
+			return
+		}
+
+		self.appendWrapped(self.inline(node))
 
 	default:
 		self.appendWrapped(self.inline(node))
@@ -299,6 +316,7 @@ func (self *renderer) quote(node ast.Node) {
 		stream:                 self.stream,
 		shouldRenderHyperlinks: self.shouldRenderHyperlinks,
 		linkRoot:               self.linkRoot,
+		pictures:               self.pictures,
 	}
 	inner.blocks(node)
 
@@ -341,6 +359,7 @@ func (self *renderer) item(marker string, node ast.Node) {
 		stream:                 self.stream,
 		shouldRenderHyperlinks: self.shouldRenderHyperlinks,
 		linkRoot:               self.linkRoot,
+		pictures:               self.pictures,
 	}
 	inner.blocks(node)
 

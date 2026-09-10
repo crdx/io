@@ -11,19 +11,17 @@ type IncrementalRenderer struct {
 	previousSource string
 	tail           StreamRenderer
 
-	columns                int
-	lastCandidate          int
-	isDisabled             bool
-	shouldRenderHyperlinks bool
-	linkRoot               string
+	options       Options
+	lastCandidate int
+	isDisabled    bool
 }
 
 func (self *IncrementalRenderer) Render(markdown string, columns int) []string {
-	return self.render(markdown, columns, false, "")
+	return self.RenderWith(markdown, Options{Columns: columns})
 }
 
 func (self *IncrementalRenderer) RenderWithHyperlinks(markdown string, columns int) []string {
-	return self.render(markdown, columns, true, "")
+	return self.RenderWith(markdown, Options{Columns: columns, ShouldRenderHyperlinks: true})
 }
 
 func (self *IncrementalRenderer) RenderWithHyperlinksUnder(
@@ -31,7 +29,11 @@ func (self *IncrementalRenderer) RenderWithHyperlinksUnder(
 	columns int,
 	linkRoot string,
 ) []string {
-	return self.render(markdown, columns, true, linkRoot)
+	return self.RenderWith(markdown, Options{
+		Columns:                columns,
+		ShouldRenderHyperlinks: true,
+		LinkRoot:               linkRoot,
+	})
 }
 
 func (self *IncrementalRenderer) IsTailMermaid() bool {
@@ -42,61 +44,48 @@ func (self *IncrementalRenderer) Reset() {
 	*self = IncrementalRenderer{}
 }
 
-func (self *IncrementalRenderer) render(
-	markdown string,
-	columns int,
-	shouldRenderHyperlinks bool,
-	linkRoot string,
-) []string {
-	if columns != self.columns || shouldRenderHyperlinks != self.shouldRenderHyperlinks ||
-		linkRoot != self.linkRoot || !strings.HasPrefix(markdown, self.previousSource) {
+func (self *IncrementalRenderer) RenderWith(markdown string, options Options) []string {
+	if options != self.options || !strings.HasPrefix(markdown, self.previousSource) {
 		self.Reset()
-		self.columns = columns
-		self.shouldRenderHyperlinks = shouldRenderHyperlinks
-		self.linkRoot = linkRoot
+		self.options = options
 	}
 	self.previousSource = markdown
 	if self.isDisabled {
-		return self.tail.render(markdown, columns, shouldRenderHyperlinks, linkRoot)
+		return self.tail.render(markdown, options)
 	}
 
-	tailRows := self.tail.render(markdown[len(self.stableSource):], columns, shouldRenderHyperlinks, linkRoot)
+	tailRows := self.tail.render(markdown[len(self.stableSource):], options)
 	if self.tail.hasMermaid || self.tail.hasLinkReference {
-		return self.disable(markdown, columns)
+		return self.disable(markdown)
 	}
 	if self.tail.hasStableCandidateStart && self.tail.stableCandidateStart > 0 {
 		candidate := len(self.stableSource) + self.tail.stableCandidateStart
-		if candidate > self.lastCandidate && self.advance(markdown, columns, candidate) {
-			tailRows = self.tail.render(
-				markdown[len(self.stableSource):],
-				columns,
-				shouldRenderHyperlinks,
-				linkRoot,
-			)
+		if candidate > self.lastCandidate && self.advance(markdown, candidate) {
+			tailRows = self.tail.render(markdown[len(self.stableSource):], options)
 		}
 	}
 
 	return joinRenderedParts(self.stableRows, tailRows)
 }
 
-func (self *IncrementalRenderer) disable(markdown string, columns int) []string {
+func (self *IncrementalRenderer) disable(markdown string) []string {
 	self.stableRows = nil
 	self.stableSource = ""
 	self.tail.Reset()
 	self.isDisabled = true
 
-	return self.tail.render(markdown, columns, self.shouldRenderHyperlinks, self.linkRoot)
+	return self.tail.render(markdown, self.options)
 }
 
-func (self *IncrementalRenderer) advance(markdown string, columns int, candidate int) bool {
+func (self *IncrementalRenderer) advance(markdown string, candidate int) bool {
 	self.lastCandidate = candidate
-	stableRows := render(markdown[:candidate], columns, nil, self.shouldRenderHyperlinks, self.linkRoot)
+	stableRows := render(markdown[:candidate], self.options, nil)
 	var tail StreamRenderer
-	tailRows := tail.render(markdown[candidate:], columns, self.shouldRenderHyperlinks, self.linkRoot)
+	tailRows := tail.render(markdown[candidate:], self.options)
 	if tail.hasMermaid || tail.hasLinkReference {
 		return false
 	}
-	fullRows := render(markdown, columns, nil, self.shouldRenderHyperlinks, self.linkRoot)
+	fullRows := render(markdown, self.options, nil)
 	if !slices.Equal(fullRows, joinRenderedParts(stableRows, tailRows)) {
 		return false
 	}

@@ -32,6 +32,33 @@ type Box struct {
 	Rows  int
 }
 
+type Size struct {
+	Width  int
+	Height int
+}
+
+func Fit(picture Size, cell Size, columns int) (Box, bool) {
+	if columns <= 0 || picture.Width <= 0 || picture.Height <= 0 || cell.Width <= 0 || cell.Height <= 0 {
+		return Box{}, false
+	}
+
+	cells := min((picture.Width+cell.Width-1)/cell.Width, columns)
+	if cells <= 0 {
+		return Box{}, false
+	}
+
+	scaledHeight := picture.Height * cells * cell.Width / picture.Width
+	rows := max((scaledHeight+cell.Height-1)/cell.Height, 1)
+
+	if rows > MaxRows {
+		rows = MaxRows
+		cells = max(picture.Width*rows*cell.Height/(picture.Height*cell.Width), 1)
+		cells = min(cells, columns)
+	}
+
+	return Box{Cells: cells, Rows: rows}, true
+}
+
 func (self Box) isDrawable() bool {
 	return self.Cells > 0 && self.Rows > 0 && self.Rows <= MaxRows
 }

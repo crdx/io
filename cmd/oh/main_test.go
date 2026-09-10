@@ -6064,10 +6064,10 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 		workspace: workspace,
 		recorder:  record.New(log),
 	}
-	chat.display.pictures = pictureDisplay{
-		sessionDirectory: sessionDirectoryWithPictures(t),
-		cellWidth:        replayCellWidth,
-		cellHeight:       replayCellHeight,
+	chat.display.pictures = pictures.Display{
+		SessionDirectory: sessionDirectoryWithPictures(t),
+		CellWidth:        replayCellWidth,
+		CellHeight:       replayCellHeight,
 	}
 
 	return &replayRig{
@@ -14439,7 +14439,7 @@ func paintPictureEvents(t *testing.T, sessionDirectory string, columns int, even
 	var screenOutput strings.Builder
 	screen := output.NewTerminalOfSize(&screenOutput, columns, replayLines)
 	picasso := newTestPainter(screen, false)
-	picasso.DrawPicturesFrom(sessionDirectory, 10, 20, false)
+	picasso.DrawPicturesFrom(goldenPictureDisplay(sessionDirectory, false))
 
 	for _, event := range events {
 		picasso.DrawEvent(event)
@@ -14560,7 +14560,7 @@ func pictureStream(t *testing.T, isLocal bool, repaints int, isPictureMissing bo
 	var screenOutput strings.Builder
 	screen := output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
 	picasso := newTestPainter(screen, false)
-	picasso.DrawPicturesFrom(sessionDirectory, 10, 20, isLocal)
+	picasso.DrawPicturesFrom(goldenPictureDisplay(sessionDirectory, isLocal))
 
 	for _, event := range pictureCallEvents(reference) {
 		picasso.DrawEvent(event)
@@ -14571,6 +14571,193 @@ func pictureStream(t *testing.T, isLocal bool, repaints int, isPictureMissing bo
 	}
 
 	picasso.Close(dynamic.Done)
+	screen.Seal()
+
+	return screenOutput.String()
+}
+
+func goldenPictureDisplay(directory string, isLocal bool) pictures.Display {
+	return pictures.Display{
+		SessionDirectory: directory,
+		CellWidth:        10,
+		CellHeight:       20,
+		IsLocal:          isLocal,
+	}
+}
+
+func scratchedAnswerPictureStream(t *testing.T) string {
+	t.Helper()
+
+	directory := answerPictureDirectory(t)
+
+	var screenOutput strings.Builder
+	screen := output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	picasso := painter.New(screen, false, nil, work.At(t.TempDir()), defaultStreamingMode)
+
+	display := goldenPictureDisplay(directory, false)
+	display.ScratchDirectory = directory
+	picasso.DrawPicturesFrom(display)
+
+	picasso.DrawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: answerNaming("/tmp/chart.png")})
+	screen.Seal()
+
+	return screenOutput.String()
+}
+
+func answerPictureDirectory(t *testing.T) string {
+	t.Helper()
+
+	directory := t.TempDir()
+	writeAnswerPicture(t, directory, "chart.png", 400, 200)
+
+	return directory
+}
+
+func writeAnswerPicture(t *testing.T, directory string, name string, pictureWidth int, pictureHeight int) {
+	t.Helper()
+
+	path := filepath.Join(directory, name)
+	if err := os.WriteFile(path, drawnPNGFor(t, pictureWidth, pictureHeight), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func twoAnswerPicturesStream(t *testing.T) string {
+	t.Helper()
+
+	directory := answerPictureDirectory(t)
+	writeAnswerPicture(t, directory, "square.png", 200, 200)
+
+	var screenOutput strings.Builder
+	picasso, screen := newAnswerPicturePainter(t, &screenOutput, directory, false)
+
+	picasso.DrawEvent(agent.Event{
+		Kind: agent.ModelMessageEvent,
+		Text: "**Zoomed**\n\n![](chart.png)\n\n**Not zoomed**\n\n![](square.png)\n\nSame settings either way.",
+	})
+	screen.Seal()
+
+	return screenOutput.String()
+}
+
+func answerNaming(path string) string {
+	return "Here is the shape of it:\n\n![](" + path + ")\n\nThat is all the evidence there is."
+}
+
+func newAnswerPicturePainter(
+	t *testing.T,
+	screenOutput *strings.Builder,
+	directory string,
+	isLocal bool,
+) (*Painter, *output.Screen) {
+	t.Helper()
+
+	screen := output.NewTerminalOfSize(screenOutput, replayColumns, replayLines)
+
+	return newAnswerPicturePainterOn(t, screen, directory, isLocal), screen
+}
+
+func newAnswerPicturePainterOn(
+	t *testing.T,
+	screen *output.Screen,
+	directory string,
+	isLocal bool,
+) *Painter {
+	t.Helper()
+
+	picasso := painter.New(screen, false, nil, work.At(directory), defaultStreamingMode)
+	picasso.DrawPicturesFrom(goldenPictureDisplay(directory, isLocal))
+
+	return picasso
+}
+
+func quotedAnswerPictureStream(t *testing.T) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	picasso, screen := newAnswerPicturePainter(t, &screenOutput, answerPictureDirectory(t), false)
+
+	picasso.DrawEvent(agent.Event{
+		Kind: agent.ModelMessageEvent,
+		Text: "It said:\n\n> ![](chart.png)\n>\n> and nothing else",
+	})
+	screen.Seal()
+
+	return screenOutput.String()
+}
+
+func appendedAnswerPictureStream(t *testing.T) string {
+	t.Helper()
+
+	directory := answerPictureDirectory(t)
+
+	var screenOutput strings.Builder
+	screen := output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines).AppendOnly()
+	picasso := newAnswerPicturePainterOn(t, screen, directory, false)
+
+	picasso.DrawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: answerNaming("chart.png")})
+	screen.Seal()
+
+	return screenOutput.String()
+}
+
+func answerPictureStream(t *testing.T, isLocal bool) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	picasso, screen := newAnswerPicturePainter(t, &screenOutput, answerPictureDirectory(t), isLocal)
+
+	picasso.DrawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: answerNaming("chart.png")})
+	screen.Seal()
+
+	return screenOutput.String()
+}
+
+func streamedAnswerPictureStream(t *testing.T) string {
+	t.Helper()
+
+	answer := answerNaming("chart.png")
+
+	var screenOutput strings.Builder
+	picasso, screen := newAnswerPicturePainter(t, &screenOutput, answerPictureDirectory(t), false)
+
+	for _, delta := range deltas(answer, 10) {
+		picasso.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: delta})
+	}
+
+	picasso.DrawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: answer})
+	screen.Seal()
+
+	return screenOutput.String()
+}
+
+func listedAnswerPictureStream(t *testing.T) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	picasso, screen := newAnswerPicturePainter(t, &screenOutput, answerPictureDirectory(t), false)
+
+	picasso.DrawEvent(agent.Event{
+		Kind: agent.ModelMessageEvent,
+		Text: "Both of them:\n\n- ![](chart.png)\n- and a word about it",
+	})
+	screen.Seal()
+
+	return screenOutput.String()
+}
+
+func writtenAnswerPictureStream(t *testing.T, answer string, isDrawingPictures bool) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	screen := output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	picasso := newTestPainter(screen, false)
+
+	if isDrawingPictures {
+		picasso.DrawPicturesFrom(goldenPictureDisplay(t.TempDir(), false))
+	}
+
+	picasso.DrawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: answer})
 	screen.Seal()
 
 	return screenOutput.String()
@@ -14668,6 +14855,21 @@ func TestAPictureRedrawnAtTheSameWidthIsNeverSentTwice(t *testing.T) {
 	}
 }
 
+func TestAPictureNamedInAnAnswerIsDrawnTheSameStreamedAsReplayed(t *testing.T) {
+	requireSameVisibleScreen(
+		t,
+		"a streamed answer drew its picture differently from the replayed one",
+		anonymisePictures(streamedAnswerPictureStream(t)),
+		anonymisePictures(answerPictureStream(t, false)),
+	)
+}
+
+func TestAPictureNamedInAnAnswerIsSentOnlyOnceWhileTheAnswerArrives(t *testing.T) {
+	if sent := strings.Count(streamedAnswerPictureStream(t), "f=100"); sent != 1 {
+		t.Errorf("the picture was transmitted %d times while the answer arrived, want once", sent)
+	}
+}
+
 func TestAPictureIsDrawnUnderTheCallThatReadIt(t *testing.T) {
 	passes := map[string]func() string{
 		"1 a picture sent to the terminal": func() string {
@@ -14705,6 +14907,39 @@ func TestAPictureIsDrawnUnderTheCallThatReadIt(t *testing.T) {
 		},
 		"a3 pictures whose calls finish out of order": func() string {
 			return unorderedPicturesStream(t)
+		},
+		"a4 a picture named in an answer": func() string {
+			return answerPictureStream(t, false)
+		},
+		"a5 a picture named in an answer sent by path": func() string {
+			return answerPictureStream(t, true)
+		},
+		"a6 an answer naming a picture that is not there": func() string {
+			return writtenAnswerPictureStream(t, answerNaming("/pictures/absent.png"), true)
+		},
+		"a7 a picture named in an answer as it arrives": func() string {
+			return streamedAnswerPictureStream(t)
+		},
+		"a8 a picture named in an answer in a list": func() string {
+			return listedAnswerPictureStream(t)
+		},
+		"a9 a picture named in an answer beside prose": func() string {
+			return writtenAnswerPictureStream(t, "Look at ![](/pictures/chart.png) closely.", true)
+		},
+		"b1 a picture named where the terminal draws none": func() string {
+			return writtenAnswerPictureStream(t, answerNaming("/pictures/chart.png"), false)
+		},
+		"b2 a picture named in an answer in a quote": func() string {
+			return quotedAnswerPictureStream(t)
+		},
+		"b3 a picture named in an answer only appended": func() string {
+			return appendedAnswerPictureStream(t)
+		},
+		"b4 two pictures named in one answer": func() string {
+			return twoAnswerPicturesStream(t)
+		},
+		"b5 a picture named under the scratch the model sees as /tmp": func() string {
+			return scratchedAnswerPictureStream(t)
 		},
 	}
 
