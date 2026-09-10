@@ -1,6 +1,7 @@
 package jobNames
 
 import (
+	"slices"
 	"strings"
 	"time"
 
@@ -37,7 +38,19 @@ func New(getJobs func() []jobs.Snapshot, now func() time.Time) segment.Factory {
 func (self state) Render(segment.Context) string {
 	var marks []string
 
-	for _, snapshot := range self.getJobs() {
+	listing := slices.Clone(self.getJobs())
+	slices.SortStableFunc(listing, func(left jobs.Snapshot, right jobs.Snapshot) int {
+		if left.IsLive() == right.IsLive() {
+			return 0
+		}
+		if left.IsLive() {
+			return -1
+		}
+
+		return 1
+	})
+
+	for _, snapshot := range listing {
 		if !self.isShown(snapshot) {
 			continue
 		}

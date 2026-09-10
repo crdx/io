@@ -47,6 +47,21 @@ func TestEveryRunningJobIsNamed(t *testing.T) {
 	}
 }
 
+func TestLiveJobsComeBeforeDeadJobs(t *testing.T) {
+	drawn := style.Plain(build(t,
+		jobs.Snapshot{Name: "failed", State: jobs.StateFailed, EndedAt: endedAgo(time.Second)},
+		jobs.Snapshot{Name: "starting", State: jobs.StateStarting},
+		jobs.Snapshot{Name: "complete", State: jobs.StateComplete, EndedAt: endedAgo(time.Second)},
+		jobs.Snapshot{Name: "running", State: jobs.StateRunning},
+		jobs.Snapshot{Name: "stopping", State: jobs.StateStopping},
+	).Render(segment.Context{}))
+
+	want := "\u25cf starting \u25cf running \u25cf stopping \u2717 failed \u25cb complete"
+	if drawn != want {
+		t.Errorf("got %q, want live jobs first and dead jobs last as %q", drawn, want)
+	}
+}
+
 func TestAFailedJobIsNamedWithACross(t *testing.T) {
 	drawn := style.Plain(build(t,
 		jobs.Snapshot{Name: "builder", State: jobs.StateFailed, EndedAt: endedAgo(time.Second)},
