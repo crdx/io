@@ -84,6 +84,56 @@ func TestMissingConfiguredPathsAreCreatedAndKept(t *testing.T) {
 	}
 }
 
+func TestAReadPathAlreadyCoveredByAnotherListIsWarnedAbout(t *testing.T) {
+	written := t.TempDir()
+	executed := t.TempDir()
+	both := t.TempDir()
+	readOnly := t.TempDir()
+
+	var warnings strings.Builder
+	filtered, err := PreparePaths(Paths{
+		Read:  []string{readOnly, written, executed, both},
+		Write: []string{written, both},
+		Exec:  []string{executed, both},
+	}, &warnings)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(filtered.Read, []string{readOnly, written, executed, both}) {
+		t.Errorf("got read paths %v, want every configured path kept", filtered.Read)
+	}
+
+	reported := warnings.String()
+	for _, want := range []string{
+		"configured path " + written + " is redundant in [sandbox.read] due to sandbox.write",
+		"configured path " + executed + " is redundant in [sandbox.read] due to sandbox.exec",
+		"configured path " + both + " is redundant in [sandbox.read] due to sandbox.write",
+		"configured path " + both + " is redundant in [sandbox.read] due to sandbox.exec",
+	} {
+		if !strings.Contains(reported, want) {
+			t.Errorf("warnings do not report %q: %q", want, reported)
+		}
+	}
+	if strings.Contains(reported, readOnly+" is redundant") {
+		t.Errorf("a read-only path was reported as covered: %q", reported)
+	}
+}
+
+func TestAPathInBothWriteAndExecIsNotWarnedAbout(t *testing.T) {
+	shared := t.TempDir()
+
+	var warnings strings.Builder
+	if _, err := PreparePaths(Paths{
+		Write: []string{shared},
+		Exec:  []string{shared},
+	}, &warnings); err != nil {
+		t.Fatal(err)
+	}
+	if warnings.String() != "" {
+		t.Errorf("got warnings %q, want none because writing does not grant execution", warnings.String())
+	}
+}
+
 func TestUncreatableConfiguredPathsAreWarnedAboutAndSkipped(t *testing.T) {
 	if os.Geteuid() == 0 {
 		t.Skip("root ignores directory permissions")

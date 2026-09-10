@@ -166,7 +166,34 @@ func clonePaths(paths Paths) Paths {
 	}
 }
 
+func warnAboutCoveredPaths(paths Paths, warnings io.Writer) {
+	coveringLists := []struct {
+		name  string
+		paths []string
+	}{
+		{"sandbox.write", paths.Write},
+		{"sandbox.exec", paths.Exec},
+	}
+
+	for _, path := range paths.Read {
+		for _, coveringList := range coveringLists {
+			if !slices.Contains(coveringList.paths, path) {
+				continue
+			}
+
+			util.WriteWarningf(
+				warnings,
+				"configured path %s is redundant in [sandbox.read] due to %s",
+				pathutil.Shorten(path),
+				coveringList.name,
+			)
+		}
+	}
+}
+
 func PreparePaths(paths Paths, warnings io.Writer) (Paths, error) {
+	warnAboutCoveredPaths(paths, warnings)
+
 	filteredPaths := Paths{HostLoopback: slices.Clone(paths.HostLoopback)}
 	lists := []struct {
 		source []string
