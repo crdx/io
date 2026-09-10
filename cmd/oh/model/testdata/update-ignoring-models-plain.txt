@@ -1,5 +1,5 @@
 Provider      Models  Selectable  Ignored  Source
-Codex              1           1           models.dev
+Codex              1           1           models.dev (it lists no models of its own, and only the registry describes it)
 OpenCode Go        —                       all 2 models it offers are ignored
 Anthropic          5           2        3  endpoint
 Ollama             5           0        5  endpoint

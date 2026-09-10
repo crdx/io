@@ -509,6 +509,8 @@ func updateModels(
 		if len(models) == 0 {
 			report.Why = nothingRecordedReason(why, ignoredModels)
 		} else {
+			report.IsRecorded = true
+			report.Why = why
 			cache.Providers[providerName] = cachedModels{
 				FetchedAt: time.Now(),
 				Source:    source,

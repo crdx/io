@@ -1,5 +1,5 @@
 \e[4m\e[38;2;150;152;150mProvider      Models  Selectable  Ignored  Source\e[0m\e[0m
-Codex              1           \e[38;2;76;154;44m1\e[0m           \e[38;2;129;162;190mmodels.dev\e[0m
+Codex              1           \e[38;2;76;154;44m1\e[0m           \e[38;2;129;162;190mmodels.dev\e[0m \e[38;2;150;152;150m(it lists no models of its own, and only the registry describes it)\e[0m
 OpenCode Go        \e[38;2;150;152;150m—\e[0m                       \e[38;2;150;152;150mnot logged in to OpenCode Go: run the login command with opencode-go\e[0m
 Anthropic          \e[38;2;150;152;150m—\e[0m                       \e[38;2;150;152;150mthe one model it offers is ignored\e[0m
 Ollama             \e[38;2;150;152;150m—\e[0m                       \e[38;2;150;152;150mGet "http://localhost:11434/api/tags": connect: connection refused\e[0m

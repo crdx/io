@@ -26,10 +26,11 @@ type providerReport struct {
 	ListedCount     int
 	SelectableCount int
 	IgnoredModels   []ignoredModel
+	IsRecorded      bool
 }
 
 func (self providerReport) hasRecorded() bool {
-	return self.Why == ""
+	return self.IsRecorded
 }
 
 func updateTable() *table.Table {
@@ -104,8 +105,17 @@ func providerCells(report providerReport) []string {
 		strconv.Itoa(report.ListedCount),
 		selectableCount(report.SelectableCount),
 		ignoredCount(len(report.IgnoredModels)),
-		style.Information(report.Source),
+		sourceCell(report),
 	}
+}
+
+func sourceCell(report providerReport) string {
+	source := style.Information(report.Source)
+	if report.Why == "" {
+		return source
+	}
+
+	return source + " " + style.Subtle("("+report.Why+")")
 }
 
 func selectableCount(count int) string {

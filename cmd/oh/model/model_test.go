@@ -585,9 +585,9 @@ func TestAProviderThatListsNothingIsDescribedByTheRegistryAlone(t *testing.T) {
 		t.Fatalf("expected only the compatible latest model to be recorded, got %v", cached.Models)
 	}
 
-	wantRow := "Codex              3           1        2  models.dev\n"
+	wantRow := "Codex              3           1        2  models.dev (the endpoint lists no models)\n"
 	if !strings.Contains(style.Plain(output.String()), wantRow) {
-		t.Errorf("expected the successful row not to carry the listing failure, got %q", output.String())
+		t.Errorf("expected the row to name why the endpoint described nothing, got %q", output.String())
 	}
 
 	choices := choicesFor(codexProvider, cached.Models)
