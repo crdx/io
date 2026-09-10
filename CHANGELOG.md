@@ -9,13 +9,14 @@
 - Now `ohctl analyse` also reports models, spend, conversation, faults, and tool use
 - Render markdown images inline
 - Map /tmp paths within sandbox to host paths transparently
-- Add timestamps to `wire.http` logs
+- Add timestamps and response decompression state to `wire.http` logs
 - Make an unknown `config.toml` key be just a warning
 - Read OpenAI subscription usage from account if stale on startup
 - Fix some minor text wrapping, truncation, spacing, and hyperlink issues
 - Stop tool call rows getting truncated an extra two chars
 - Fix image rendering when several parallel reads are triggered
 - Remove the extra blank line that was sometimes left behind on exit
+- Shorten notices and format token counts consistently
 - Remove the superfluous space before the image address
 
 ## [0.2.0] - 2026-09-09
