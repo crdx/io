@@ -2,6 +2,8 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+## [0.4.0] - 2026-09-10
+
 - Preview sessions in session picker
 - Name sandbox helper processes
 - Restore the cache properly on resume
