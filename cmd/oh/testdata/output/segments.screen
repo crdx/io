@@ -53,15 +53,15 @@ GPT Sol 5.6 ▫▫▫▫▪▫
 === context-usage / unknown ===
 ?% 0/?
 === exposed-ports / both directions ===
-⇢ 8000, ⇠ 3000
+8000, ⇠ 3000
 === exposed-ports / both directions constrained ===
-⇢ 8000, +3
+8000, 8080, +2
 === exposed-ports / configured hostname ===
-⇢ 8000
+8000
 === exposed-ports / empty ===
 
 === exposed-ports / host to sandbox ===
-⇢ 8000, ⇢ 8080
+8000, 8080
 === exposed-ports / sandbox to host ===
 ⇠ 3000, ⇠ 6000
 === fast-mode / fast ===

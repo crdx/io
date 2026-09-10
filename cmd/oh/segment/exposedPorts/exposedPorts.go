@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	hostToSandboxArrow = "⇢ "
-	sandboxToHostArrow = "⇠ "
+	hostToSandboxMarker = ""
+	sandboxToHostMarker = "⇠ "
 )
 
 type Routes struct {
@@ -72,13 +72,16 @@ func (self state) RenderWithin(_ segment.Context, cells int) string {
 
 func (self state) getParts() []string {
 	var parts []string
-	parts = appendParts(parts, hostToSandboxArrow, self.hostToSandbox)
-	return appendParts(parts, sandboxToHostArrow, self.sandboxToHost)
+	parts = appendParts(parts, hostToSandboxMarker, self.hostToSandbox)
+	return appendParts(parts, sandboxToHostMarker, self.sandboxToHost)
 }
 
-func appendParts(parts []string, arrow string, routes Routes) []string {
+func appendParts(parts []string, marker string, routes Routes) []string {
 	for _, port := range routes.GetPorts() {
-		text := style.Subtle(arrow) + style.Normal(strconv.Itoa(int(port)))
+		text := style.Normal(strconv.Itoa(int(port)))
+		if marker != "" {
+			text = style.Subtle(marker) + text
+		}
 		parts = append(parts, link.RenderURL(text, portgrant.URL(routes.Hostname, port)))
 	}
 
