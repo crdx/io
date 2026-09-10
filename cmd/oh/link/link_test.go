@@ -168,6 +168,23 @@ func TestAFilenameHoldingAnEqualsSignIsLinkedWhole(t *testing.T) {
 	}
 }
 
+func TestAPathClosingASentenceIsLinkedWithoutItsFullStop(t *testing.T) {
+	workspace := t.TempDir()
+	path := prepareFile(t, workspace, "changes.patch")
+
+	got := Render("Patch is ready at "+path+".", Roots{Workspace: workspace})
+
+	if address := linkAddress(t, got); address.Path != filepath.ToSlash(path) {
+		t.Errorf("got address %q", address)
+	}
+	if stripEscapes(got) != "Patch is ready at "+path+"." {
+		t.Errorf("expected the visible text unchanged, got %q", stripEscapes(got))
+	}
+	if _, after, _ := strings.Cut(got, closeLink); after != "." {
+		t.Errorf("expected the full stop outside the link, got %q", got)
+	}
+}
+
 func TestMissingPathsAndOrdinaryDottedWordsStayPlain(t *testing.T) {
 	text := "missing.go and example.com are not files here"
 

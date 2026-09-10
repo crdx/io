@@ -5,6 +5,7 @@
 - Preview sessions in session picker
 - Name sandbox helper processes
 - Restore the cache properly on resume
+- Fix linkification of paths ending in dots
 
 ## [0.3.0] - 2026-09-10
 

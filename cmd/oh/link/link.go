@@ -104,18 +104,23 @@ func Render(text string, roots Roots) string {
 			continue
 		}
 
-		pathAt, target, exists := locate(visible.text[match[2]:match[3]], roots)
+		found, exists := locate(visible.text[match[2]:match[3]], roots)
 		if !exists {
 			continue
 		}
 
 		line := submatch(visible.text, match[4], match[5])
 		column := submatch(visible.text, match[6], match[7])
-		begin := visible.starts[match[2]+pathAt]
-		end := visible.ends[match[1]]
+		finish := match[1]
+		if found.end < match[3]-match[2] {
+			finish = match[2] + found.end
+			line, column = "", ""
+		}
+		begin := visible.starts[match[2]+found.begin]
+		end := visible.ends[finish]
 		output.WriteString(text[sourceAt:begin])
 		output.WriteString(openPrefix)
-		output.WriteString(linkURL(target, line, column))
+		output.WriteString(linkURL(found.target, line, column))
 		output.WriteString(terminator)
 		output.WriteString(text[begin:end])
 		output.WriteString(closeLink)
@@ -212,19 +217,50 @@ func submatch(text string, begin int, end int) string {
 	return text[begin:end]
 }
 
-func locate(candidate string, roots Roots) (int, string, bool) {
-	if target, exists := resolve(candidate, roots); exists {
-		return 0, target, true
-	}
+type location struct {
+	begin  int
+	end    int
+	target string
+}
 
-	assignedAt := strings.LastIndexByte(candidate, '=') + 1
-	if assignedAt > 0 && assignedAt < len(candidate) {
-		if target, exists := resolve(candidate[assignedAt:], roots); exists {
-			return assignedAt, target, true
+func locate(candidate string, roots Roots) (location, bool) {
+	for _, end := range endings(candidate) {
+		path := candidate[:end]
+
+		if target, exists := resolve(path, roots); exists {
+			return location{begin: 0, end: end, target: target}, true
+		}
+
+		assignedAt := strings.LastIndexByte(path, '=') + 1
+		if assignedAt > 0 && assignedAt < end {
+			if target, exists := resolve(path[assignedAt:], roots); exists {
+				return location{begin: assignedAt, end: end, target: target}, true
+			}
 		}
 	}
 
-	return 0, "", false
+	return location{}, false
+}
+
+func endings(candidate string) []int {
+	ends := []int{len(candidate)}
+
+	end := len(candidate)
+	for end > 0 && candidate[end-1] == '.' {
+		end--
+	}
+
+	if end < len(candidate) && namesSomething(candidate[:end]) {
+		ends = append(ends, end)
+	}
+
+	return ends
+}
+
+func namesSomething(path string) bool {
+	segment := path[strings.LastIndexByte(path, '/')+1:]
+
+	return strings.Trim(segment, ".") != ""
 }
 
 func resolve(path string, roots Roots) (string, bool) {

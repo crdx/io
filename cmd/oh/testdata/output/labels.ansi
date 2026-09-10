@@ -19,7 +19,7 @@
 \r\e[Kscreen than it is long.\r
 \r\e[K\r
 \r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the\r
-\r\e[Kskill is at ~/skills/tidy/SKILL.md.\r
+\r\e[Kskill is at \e]8;;file:///workspace/skills/tidy/SKILL.md\e\\~/skills/tidy/SKILL.md\e]8;;\e\\.\r
 \r\e[K\r
 \r\e[K\e[38;2;150;152;150m// count reports how many there were.\e[0m\r
 \r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mcount\e[0m() \e[38;2;240;198;116mint\e[0m {\r
@@ -220,28 +220,28 @@
 \r\e[Ks\r
 \r\e[Ka\r
 \r\e[Kt\r
-\r\e[K~\r
-\r\e[K/\r
-\r\e[Ks\r
-\r\e[Kk\r
-\r\e[Ki\r
-\r\e[Kl\r
-\r\e[Kl\r
-\r\e[Ks\r
-\r\e[K/\r
-\r\e[Kt\r
-\r\e[Ki\r
-\r\e[Kd\r
-\r\e[Ky\r
-\r\e[K/\r
-\r\e[KS\r
-\r\e[KK\r
-\r\e[KI\r
-\r\e[KL\r
-\r\e[KL\r
-\r\e[K.\r
-\r\e[Km\r
-\r\e[Kd\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\~\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\/\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\s\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\k\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\i\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\l\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\l\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\s\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\/\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\t\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\i\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\d\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\y\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\/\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\S\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\K\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\I\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\L\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\L\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\.\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\m\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\d\e]8;;\e\\\r
 \r\e[K.\r
 \r\e[K\r
 \r\e[K\e[38;2;150;152;150m/\e[0m\r
@@ -360,7 +360,7 @@ I left a note in ~/README.md and the skill is at ~/skills/tidy/SKILL.md.
 \r
 The listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it is long.\r
 \r
-I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.md.\r
+I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at \e]8;;file:///workspace/skills/tidy/SKILL.md\e\\~/skills/tidy/SKILL.md\e]8;;\e\\.\r
 \r
 \e[38;2;150;152;150m// count reports how many there were.\e[0m\r
 \e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mcount\e[0m() \e[38;2;240;198;116mint\e[0m {\r
@@ -385,7 +385,7 @@ I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and 
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe list\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is `日本語の\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is `日本語のテキスト\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is `日本語のテキストと絵文字\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is `日本語のテキストと絵文字 🎉 が\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is `日本語のテキストと絵文字 🎉 が混ざった\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, whic\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wid\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on sc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen tha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it is long\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it is long.\r
 \r\e[K\r
-\r\e[KI\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI lef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in ~/RE\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in ~/README\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/sk\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at \e]8;;file:///workspace/skills\e\\~/skills\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tid\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SK\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.md.\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[KI\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI lef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in ~/RE\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in ~/README\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/sk\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at \e]8;;file:///workspace/skills\e\\~/skills\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tid\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SK\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at \e]8;;file:///workspace/skills/tidy/SKILL.md\e\\~/skills/tidy/SKILL.md\e]8;;\e\\.\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[38;2;138;190;183m/\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// co\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count repo\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count reports \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count reports how \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count reports how many\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count reports how many the\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count reports how many there w\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count reports how many there were.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kfun\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212mfunc\e[0m co\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mcount\e[0m(\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mcount\e[0m() in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mcount\e[0m() \e[38;2;240;198;116mint\e[0m {\e[?25h\e[?2026l\e[?2026h\e[?25l\r
@@ -410,7 +410,7 @@ I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and 
 \r
 \e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it is long.\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.md.\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at \e]8;;file:///workspace/skills/tidy/SKILL.md\e\\~/skills/tidy/SKILL.md\e]8;;\e\\.\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;150;152;150m// count reports how many there were.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mcount\e[0m() \e[38;2;240;198;116mint\e[0m {\e[?25h\e[?2026l\e[?2026h\e[?25l\r
@@ -435,7 +435,7 @@ I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and 
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe list\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is `日本語の\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is `日本語のテキスト\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is `日本語のテキストと絵文字\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is `日本語のテキストと絵文字 🎉 が\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is `日本語のテキストと絵文字 🎉 が混ざった\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, whic\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wid\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on sc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen tha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it is long\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it is long.\r
 \r\e[K\r
-\r\e[KI\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI lef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in ~/RE\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in ~/README\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/sk\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at \e]8;;file:///workspace/skills\e\\~/skills\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tid\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SK\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.md.\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[KI\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI lef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in ~/RE\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in ~/README\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/sk\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at \e]8;;file:///workspace/skills\e\\~/skills\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tid\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SK\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at \e]8;;file:///workspace/skills/tidy/SKILL.md\e\\~/skills/tidy/SKILL.md\e]8;;\e\\.\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[38;2;138;190;183m/\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// co\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count repo\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count reports \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count reports how \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count reports how many\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count reports how many the\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count reports how many there w\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m// count reports how many there were.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kfun\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212mfunc\e[0m co\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mcount\e[0m(\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mcount\e[0m() in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mcount\e[0m() \e[38;2;240;198;116mint\e[0m {\e[?25h\e[?2026l\e[?2026h\e[?25l\r
@@ -478,8 +478,8 @@ I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and 
 \r\e[K\e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\\r
 \r\e[Kand the\r
 \r\e[Kskill is at\r
-\r\e[K~/skills/tid\r
-\r\e[Ky/SKILL.md.\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\~/skills/tid\e]8;;\e\\\r
+\r\e[K\e]8;;file:///workspace/skills/tidy/SKILL.md\e\\y/SKILL.md\e]8;;\e\\.\r
 \r\e[K\r
 \r\e[K\e[38;2;150;152;150m// count\e[0m\r
 \r\e[K\e[38;2;150;152;150mreports how\e[0m\r
@@ -510,7 +510,7 @@ I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and 
 
 \r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it is long.\r
 \r\e[K\r
-\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.md.\r
+\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at \e]8;;file:///workspace/skills/tidy/SKILL.md\e\\~/skills/tidy/SKILL.md\e]8;;\e\\.\r
 \r\e[K\r
 \r\e[K\e[38;2;150;152;150m// count reports how many there were.\e[0m\r
 \r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mcount\e[0m() \e[38;2;240;198;116mint\e[0m {\r
@@ -535,7 +535,7 @@ I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and 
 \r
 \r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it is long.\r
 \r\e[K\r
-\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.md.\r
+\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at \e]8;;file:///workspace/skills/tidy/SKILL.md\e\\~/skills/tidy/SKILL.md\e]8;;\e\\.\r
 \r\e[K\r
 \r\e[K\e[38;2;150;152;150m// count reports how many there were.\e[0m\r
 \r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mcount\e[0m() \e[38;2;240;198;116mint\e[0m {\r
