@@ -1,3 +1,12 @@
+=== a notice naming a path under /tmp ===
+Could not read /tmp/zoom-on.png
+=== a path the user typed under their own /tmp ===
+
+ look at /tmp/zoom-on.png
+=== a path under the scratch in an answer only appended ===
+it is at /tmp/zoom-on.png
+=== a path under the scratch the model sees as /tmp ===
+it is at /tmp/zoom-on.png
 === email autolink ===
 person-at-example.test
 === pending message ===

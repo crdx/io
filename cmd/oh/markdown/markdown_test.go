@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/style"
 )
 
@@ -146,7 +147,7 @@ func TestUnsupportedMarkdownDestinationsStayPlain(t *testing.T) {
 func TestAPathIsLinkedBeforeItWraps(t *testing.T) {
 	linkRoot, relativePath := linkedPathFixture(t)
 	source := "```bash\n    " + relativePath + "\n```"
-	rows := RenderWithHyperlinksUnder(source, 12, linkRoot)
+	rows := RenderWithHyperlinksUnder(source, 12, link.Roots{Workspace: linkRoot})
 
 	if got, want := style.Plain(strings.Join(rows, "")), "    "+relativePath; got != want {
 		t.Errorf("wrapped path drew %q, want %q", got, want)
@@ -162,7 +163,7 @@ func TestAPathIsLinkedBeforeItWraps(t *testing.T) {
 func TestAPathInATableIsLinkedBeforeItWraps(t *testing.T) {
 	linkRoot, relativePath := linkedPathFixture(t)
 	source := "| Path |\n|---|\n| " + relativePath + " |"
-	rows := RenderWithHyperlinksUnder(source, 20, linkRoot)
+	rows := RenderWithHyperlinksUnder(source, 20, link.Roots{Workspace: linkRoot})
 	linked := strings.Join(rows, "\n")
 	openings := strings.Count(linked, "\x1b]8;;file://")
 	closings := strings.Count(linked, "\x1b]8;;\x1b\\")

@@ -38,6 +38,7 @@ import (
 	"crdx.org/io/cmd/oh/drops"
 	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/graphics"
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/metrics"
@@ -638,7 +639,10 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		}
 	}
 
-	screen := output.New(os.Stdout).LinkPathsUnder(workspace.GetDir())
+	screen := output.New(os.Stdout).LinkPathsUnder(link.Roots{
+		Workspace: workspace.GetDir(),
+		Scratch:   shadowedScratch(tmpDir, args.Yolo),
+	})
 	if args.IsPrinting {
 		screen.AppendOnly()
 	} else {

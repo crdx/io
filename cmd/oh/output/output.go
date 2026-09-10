@@ -29,7 +29,7 @@ type Screen struct {
 	isTerminal            bool
 	canRepaint            bool
 	isTextSizingSupported bool
-	linkRoot              string
+	linkRoots             link.Roots
 	isProgressReported    bool
 	grouping              Grouping
 
@@ -93,8 +93,12 @@ func (self *Screen) IsTerminal() bool {
 	return self.isTerminal
 }
 
-func (self *Screen) LinkPathsUnder(root string) *Screen {
-	self.linkRoot = root
+func (self *Screen) LinkRoots() link.Roots {
+	return self.linkRoots
+}
+
+func (self *Screen) LinkPathsUnder(roots link.Roots) *Screen {
+	self.linkRoots = roots
 	return self
 }
 
@@ -247,11 +251,11 @@ func (self *Screen) at(text string) {
 }
 
 func (self *Screen) linkifyScrollback(text string) string {
-	if !self.isTerminal || self.linkRoot == "" {
+	if !self.isTerminal || self.linkRoots.IsEmpty() {
 		return text
 	}
 
-	return link.Render(text, self.linkRoot)
+	return link.Render(text, self.linkRoots.WithoutScratch())
 }
 
 func (self *Screen) raw(text string) {

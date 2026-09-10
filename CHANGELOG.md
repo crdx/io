@@ -7,6 +7,8 @@
 - Add session spend segment which shows the API cost of the current session
 - Configure currency with `ui.currency` if you don't like US dollars
 - Now `ohctl analyse` also reports models, spend, conversation, faults, and tool use
+- Render markdown images inline
+- Map /tmp paths within sandbox to host paths transparently
 - Add timestamps to `wire.http` logs
 - Make an unknown `config.toml` key be just a warning
 - Read OpenAI subscription usage from account if stale on startup
@@ -235,8 +237,6 @@
 - `stdstream`
 
 ## [0.1.0] - 2026-08-17
-
-### Added
 
 Initial release.
 

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/style"
 )
@@ -331,7 +332,7 @@ func TestAnAppendOnlyTerminalStillLinksThePathsItNames(t *testing.T) {
 	}
 
 	var screenOutput bytes.Buffer
-	screen := appendOnlyScreen(&screenOutput).LinkPathsUnder(workspaceDir)
+	screen := appendOnlyScreen(&screenOutput).LinkPathsUnder(link.Roots{Workspace: workspaceDir})
 	screen.DrawAnswer([]string{"see one.go"})
 	screen.End()
 

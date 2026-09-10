@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/ansi"
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/style"
 )
 
@@ -27,7 +28,7 @@ func TestOnlyTheAnswerIsLinked(t *testing.T) {
 	}
 
 	screen, screenOutput := region()
-	screen.LinkPathsUnder(workspace)
+	screen.LinkPathsUnder(link.Roots{Workspace: workspace})
 	screen.drawRow(style.Subtle("cmd/oh/") + style.Subject("draw.go"))
 	screen.DrawAnswer([]string{"see cmd/oh/draw.go"})
 
@@ -43,7 +44,7 @@ func TestPathsStayPlainWhenScrollbackIsRedirected(t *testing.T) {
 	}
 
 	var screenOutput strings.Builder
-	screen := New(&screenOutput).LinkPathsUnder(workspace)
+	screen := New(&screenOutput).LinkPathsUnder(link.Roots{Workspace: workspace})
 	screen.Line("one.go")
 
 	if got := screenOutput.String(); got != "one.go" {
@@ -248,7 +249,7 @@ func TestAnAnswerAfterReasoningIsLinkedAsItIsPaintedButNotAsARegion(t *testing.T
 	}
 
 	screen, screenOutput := region()
-	screen.LinkPathsUnder(workspace)
+	screen.LinkPathsUnder(link.Roots{Workspace: workspace})
 	screen.DrawReasoning([]string{"looking at one.go"})
 	screen.DrawAnswer([]string{"looking at one.go", "the answer names one.go"})
 	screen.Seal()

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"crdx.org/io/cmd/oh/escape"
+	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/util/pathutil"
 )
 
@@ -60,7 +61,35 @@ func Plain(text string) string {
 	return visibleTextOf(text).text
 }
 
-func Render(text string, workspace string) string {
+type Roots struct {
+	Workspace string
+	Scratch   string
+}
+
+func (self Roots) IsEmpty() bool {
+	return self.Workspace == "" && self.Scratch == ""
+}
+
+func (self Roots) WithoutScratch() Roots {
+	self.Scratch = ""
+
+	return self
+}
+
+func (self Roots) underScratch(path string) (string, bool) {
+	if self.Scratch == "" {
+		return "", false
+	}
+
+	beneath, isBeneath := pathutil.RelativeTo(sandbox.TmpDir, path)
+	if !isBeneath {
+		return "", false
+	}
+
+	return filepath.Join(self.Scratch, beneath), true
+}
+
+func Render(text string, roots Roots) string {
 	visible := visibleTextOf(text)
 	matches := pathPattern.FindAllStringSubmatchIndex(visible.text, -1)
 	if len(matches) == 0 {
@@ -75,7 +104,7 @@ func Render(text string, workspace string) string {
 			continue
 		}
 
-		pathAt, target, exists := locate(visible.text[match[2]:match[3]], workspace)
+		pathAt, target, exists := locate(visible.text[match[2]:match[3]], roots)
 		if !exists {
 			continue
 		}
@@ -183,14 +212,14 @@ func submatch(text string, begin int, end int) string {
 	return text[begin:end]
 }
 
-func locate(candidate string, workspace string) (int, string, bool) {
-	if target, exists := resolve(candidate, workspace); exists {
+func locate(candidate string, roots Roots) (int, string, bool) {
+	if target, exists := resolve(candidate, roots); exists {
 		return 0, target, true
 	}
 
 	assignedAt := strings.LastIndexByte(candidate, '=') + 1
 	if assignedAt > 0 && assignedAt < len(candidate) {
-		if target, exists := resolve(candidate[assignedAt:], workspace); exists {
+		if target, exists := resolve(candidate[assignedAt:], roots); exists {
 			return assignedAt, target, true
 		}
 	}
@@ -198,18 +227,20 @@ func locate(candidate string, workspace string) (int, string, bool) {
 	return 0, "", false
 }
 
-func resolve(path string, workspace string) (string, bool) {
+func resolve(path string, roots Roots) (string, bool) {
 	resolvedPath, err := pathutil.Expand(path)
 	if err != nil {
 		return "", false
 	}
 
-	if !filepath.IsAbs(resolvedPath) {
-		if workspace == "" {
+	if scratchPath, isScratch := roots.underScratch(resolvedPath); isScratch {
+		resolvedPath = scratchPath
+	} else if !filepath.IsAbs(resolvedPath) {
+		if roots.Workspace == "" {
 			return "", false
 		}
 
-		resolvedPath = filepath.Join(workspace, resolvedPath)
+		resolvedPath = filepath.Join(roots.Workspace, resolvedPath)
 	}
 
 	resolvedPath, err = filepath.Abs(resolvedPath)

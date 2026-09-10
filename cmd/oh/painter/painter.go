@@ -229,14 +229,20 @@ func RenderRetry(event agent.Event) string {
 }
 
 func RenderSubmittedMessage(text string, columns int) string {
-	return renderSubmittedMessage(text, columns, false, "", "")
+	return renderSubmittedMessage(text, columns, false, link.Roots{}, "")
 }
 
 func RenderSubmittedMessageWithHyperlinks(text string, columns int) string {
-	return renderSubmittedMessage(text, columns, true, "", "")
+	return renderSubmittedMessage(text, columns, true, link.Roots{}, "")
 }
 
-func renderSubmittedMessage(text string, columns int, shouldRenderHyperlinks bool, workspace string, marker string) string {
+func renderSubmittedMessage(
+	text string,
+	columns int,
+	shouldRenderHyperlinks bool,
+	roots link.Roots,
+	marker string,
+) string {
 	contentColumns := columns
 	if contentColumns > 1 {
 		contentColumns--
@@ -249,13 +255,13 @@ func renderSubmittedMessage(text string, columns int, shouldRenderHyperlinks boo
 
 	var content []string
 	if shouldRenderHyperlinks {
-		content = markdown.RenderWithHyperlinksUnder(strutil.StripControl(text), contentColumns, workspace)
+		content = markdown.RenderWithHyperlinksUnder(strutil.StripControl(text), contentColumns, roots)
 	} else {
 		content = markdown.Render(strutil.StripControl(text), contentColumns)
 	}
 	for i, row := range content {
-		if shouldRenderHyperlinks && workspace != "" {
-			row = link.Render(row, workspace)
+		if shouldRenderHyperlinks && !roots.IsEmpty() {
+			row = link.Render(row, roots)
 		}
 
 		prefix := " "
@@ -381,10 +387,10 @@ func (self *Picasso) drawSubmittedLine(text string, marker string) {
 
 func (self *Picasso) renderUserMessage(text string, marker string) string {
 	if !self.screen.IsTerminal() {
-		return renderSubmittedMessage(text, self.screen.Columns(), false, "", marker)
+		return renderSubmittedMessage(text, self.screen.Columns(), false, link.Roots{}, marker)
 	}
 
-	return renderSubmittedMessage(text, self.screen.Columns(), true, self.workspace.GetDir(), marker)
+	return renderSubmittedMessage(text, self.screen.Columns(), true, self.linkRoots().WithoutScratch(), marker)
 }
 
 func (self *Picasso) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldResetAnswerRenderer bool) {
@@ -450,6 +456,15 @@ func (self *Picasso) drawAnswer(isSettled bool) {
 	}
 }
 
+func (self *Picasso) linkRoots() link.Roots {
+	roots := self.screen.LinkRoots()
+	if roots.Workspace == "" {
+		roots.Workspace = self.workspace.GetDir()
+	}
+
+	return roots
+}
+
 func (self *Picasso) answerOptions() markdown.Options {
 	options := markdown.Options{
 		Columns:  self.screen.Columns(),
@@ -458,7 +473,7 @@ func (self *Picasso) answerOptions() markdown.Options {
 
 	if self.screen.IsTerminal() {
 		options.ShouldRenderHyperlinks = true
-		options.LinkRoot = self.workspace.GetDir()
+		options.LinkRoot = self.linkRoots()
 	}
 
 	return options

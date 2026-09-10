@@ -32,7 +32,7 @@ type PictureDrawer interface {
 type Options struct {
 	Columns                int
 	ShouldRenderHyperlinks bool
-	LinkRoot               string
+	LinkRoot               link.Roots
 	Pictures               PictureDrawer
 }
 
@@ -44,7 +44,7 @@ func RenderWithHyperlinks(markdown string, columns int) []string {
 	return render(markdown, Options{Columns: columns, ShouldRenderHyperlinks: true}, nil)
 }
 
-func RenderWithHyperlinksUnder(markdown string, columns int, linkRoot string) []string {
+func RenderWithHyperlinksUnder(markdown string, columns int, linkRoot link.Roots) []string {
 	return render(markdown, Options{
 		Columns:                columns,
 		ShouldRenderHyperlinks: true,
@@ -153,7 +153,7 @@ type renderer struct {
 	rows                   []string
 	stream                 *StreamRenderer
 	shouldRenderHyperlinks bool
-	linkRoot               string
+	linkRoot               link.Roots
 	pictures               PictureDrawer
 }
 
@@ -235,7 +235,7 @@ func (self *renderer) appendWrapped(styledText string) {
 }
 
 func (self *renderer) linkPaths(text string) string {
-	if !self.shouldRenderHyperlinks || self.linkRoot == "" {
+	if !self.shouldRenderHyperlinks || self.linkRoot.IsEmpty() {
 		return text
 	}
 

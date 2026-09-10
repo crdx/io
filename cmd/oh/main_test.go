@@ -148,6 +148,18 @@ func TestSpecialLinksDrawWhatTheyDrewBefore(t *testing.T) {
 		"pending message with a heading and a list": func() string {
 			return drawPendingMarkdown(t)
 		},
+		"a path under the scratch the model sees as /tmp": func() string {
+			return drawScratchPathLink(t)
+		},
+		"a path the user typed under their own /tmp": func() string {
+			return drawUserScratchPathLink(t)
+		},
+		"a notice naming a path under /tmp": func() string {
+			return drawNoticeScratchPathLink(t)
+		},
+		"a path under the scratch in an answer only appended": func() string {
+			return drawAppendedScratchPathLink(t)
+		},
 	}
 	compareWithGolden(t, "special-links", ".ansi", passes)
 
@@ -175,6 +187,72 @@ func drawEmailLink(t *testing.T) string {
 	paint.DrawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: address})
 
 	return strings.ReplaceAll(screenOutput.String(), address, "person-at-example.test")
+}
+
+func scratchWithPicture(t *testing.T) string {
+	t.Helper()
+
+	scratch := t.TempDir()
+	if err := os.WriteFile(filepath.Join(scratch, "zoom-on.png"), nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	return scratch
+}
+
+func drawScratchPath(t *testing.T, event agent.Event, isAppendOnly bool) string {
+	t.Helper()
+
+	scratch := scratchWithPicture(t)
+
+	var screenOutput strings.Builder
+	screen := output.NewTerminalOfSize(&screenOutput, terminalInputColumns, replayLines)
+	if isAppendOnly {
+		screen.AppendOnly()
+	}
+	screen.LinkPathsUnder(link.Roots{Scratch: scratch})
+
+	paint := painter.New(screen, false, nil, nil, output.StreamingModeLine)
+	paint.DrawEvent(event)
+	screen.Seal()
+
+	return strings.ReplaceAll(screenOutput.String(), scratch, "/state/farm/brave-otter")
+}
+
+func drawScratchPathLink(t *testing.T) string {
+	t.Helper()
+
+	return drawScratchPath(t, agent.Event{
+		Kind: agent.ModelMessageEvent,
+		Text: "it is at /tmp/zoom-on.png",
+	}, false)
+}
+
+func drawAppendedScratchPathLink(t *testing.T) string {
+	t.Helper()
+
+	return drawScratchPath(t, agent.Event{
+		Kind: agent.ModelMessageEvent,
+		Text: "it is at /tmp/zoom-on.png",
+	}, true)
+}
+
+func drawUserScratchPathLink(t *testing.T) string {
+	t.Helper()
+
+	return drawScratchPath(t, agent.Event{
+		Kind: agent.UserMessageEvent,
+		Text: "look at /tmp/zoom-on.png",
+	}, false)
+}
+
+func drawNoticeScratchPathLink(t *testing.T) string {
+	t.Helper()
+
+	return drawScratchPath(t, agent.Event{
+		Kind: agent.FailureEvent,
+		Text: "could not read /tmp/zoom-on.png",
+	}, false)
 }
 
 func drawPendingLink(t *testing.T) string {
@@ -5452,7 +5530,7 @@ func newGroupedRig(t *testing.T, groups []string, isPrinted bool) *replayRig {
 			screen.AppendOnly()
 		}
 
-		return screen.LinkPathsUnder(workspaceDir)
+		return screen.LinkPathsUnder(link.Roots{Workspace: workspaceDir})
 	})
 	rig.chat.screen.SetGrouping(grouping)
 	rig.chat.runMode.isPrinting = isPrinted
@@ -5517,7 +5595,7 @@ func newThinkingRig(t *testing.T, rendering output.ReasoningRendering, isPrinted
 			screen.AppendOnly()
 		}
 
-		return screen.LinkPathsUnder(workspaceDir)
+		return screen.LinkPathsUnder(link.Roots{Workspace: workspaceDir})
 	})
 	rig.chat.display.reasoningRendering = rendering
 	rig.chat.runMode.isPrinting = isPrinted
@@ -6002,7 +6080,7 @@ func newReplayRig(t *testing.T, columns int) *replayRig {
 	t.Helper()
 
 	return newRig(t, func(written *strings.Builder, workspaceDir string) *output.Screen {
-		return output.NewTerminalOfSize(written, columns, replayLines).LinkPathsUnder(workspaceDir)
+		return output.NewTerminalOfSize(written, columns, replayLines).LinkPathsUnder(link.Roots{Workspace: workspaceDir})
 	})
 }
 
@@ -6016,7 +6094,7 @@ func newPlainRig(t *testing.T) *replayRig {
 	t.Helper()
 
 	return newRig(t, func(written *strings.Builder, workspaceDir string) *output.Screen {
-		return output.New(written).LinkPathsUnder(workspaceDir)
+		return output.New(written).LinkPathsUnder(link.Roots{Workspace: workspaceDir})
 	})
 }
 
@@ -6025,7 +6103,7 @@ func newPrintedRig(t *testing.T) *replayRig {
 
 	return newRig(t, func(written *strings.Builder, workspaceDir string) *output.Screen {
 		screen := output.NewTerminalOfSize(written, replayColumns, replayLines)
-		return screen.AppendOnly().LinkPathsUnder(workspaceDir)
+		return screen.AppendOnly().LinkPathsUnder(link.Roots{Workspace: workspaceDir})
 	})
 }
 
@@ -14940,6 +15018,9 @@ func TestAPictureIsDrawnUnderTheCallThatReadIt(t *testing.T) {
 		},
 		"b5 a picture named under the scratch the model sees as /tmp": func() string {
 			return scratchedAnswerPictureStream(t)
+		},
+		"b6 a picture named under /tmp that the scratch does not hold": func() string {
+			return writtenAnswerPictureStream(t, answerNaming("/tmp/absent.png"), true)
 		},
 	}
 

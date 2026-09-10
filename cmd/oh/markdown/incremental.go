@@ -3,6 +3,8 @@ package markdown
 import (
 	"slices"
 	"strings"
+
+	"crdx.org/io/cmd/oh/link"
 )
 
 type IncrementalRenderer struct {
@@ -27,7 +29,7 @@ func (self *IncrementalRenderer) RenderWithHyperlinks(markdown string, columns i
 func (self *IncrementalRenderer) RenderWithHyperlinksUnder(
 	markdown string,
 	columns int,
-	linkRoot string,
+	linkRoot link.Roots,
 ) []string {
 	return self.RenderWith(markdown, Options{
 		Columns:                columns,

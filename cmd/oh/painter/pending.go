@@ -7,6 +7,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/jobrecord"
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/portgrant"
@@ -117,7 +118,7 @@ func (self *PendingMessages) Rows(columns int) []string {
 
 func (self *PendingMessages) render(message string, columns int) string {
 	return renderSubmittedMessage(
-		message, columns, self.shouldRenderHyperlinks, "", submittedMarker(self.isSent),
+		message, columns, self.shouldRenderHyperlinks, link.Roots{}, submittedMarker(self.isSent),
 	)
 }
 

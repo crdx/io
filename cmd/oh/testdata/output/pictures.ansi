@@ -431,3 +431,9 @@ That is all the evidence there is.
 \r\e[K<picture>􎻮͊̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K\r
 \r\e[KThat is all the evidence there is.\e[?25h\e[?2026l
+=== b6 a picture named under /tmp that the scratch does not hold ===
+\e[?2026h\e[?25l\e[?7l\r\e[KHere is the shape of it:\r
+\r\e[K\r
+\r\e[K\e[38;2;150;152;150m(/tmp/absent.png)\e[0m\r
+\r\e[K\r
+\r\e[KThat is all the evidence there is.\e[?25h\e[?2026l
