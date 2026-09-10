@@ -123,10 +123,15 @@ func TestEveryProviderListsModelsWithoutAConversationModel(t *testing.T) {
 	}
 }
 
-func TestSubscriptionCodexDoesNotTrustTheUndocumentedModelListing(t *testing.T) {
+func TestSubscriptionCodexIsAskedForItsOwnCatalogue(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
 	models, err := ListModels(t.Context(), codexProvider, EndpointSettings{})
-	if !errors.Is(err, agent.ErrNoListing) {
-		t.Fatalf("expected the registry to be named as the only source, got %v", err)
+	if errors.Is(err, agent.ErrNoListing) {
+		t.Fatalf("expected Codex to be asked rather than left to the registry, got %v", err)
+	}
+	if err == nil {
+		t.Fatalf("expected the missing credentials to be reported, got %v", models)
 	}
 	if len(models) != 0 {
 		t.Errorf("got %v", models)

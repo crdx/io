@@ -59,7 +59,20 @@ func TestAnUpdateAProviderListsItselfMatchesTheGolden(t *testing.T) {
 			{ID: "gpt-5.6-sol", Name: "GPT-5.6 Sol", EffortLevels: []string{"low", "high"}, MaxOutputTokens: 32_000},
 			{ID: "an-unselectable-model"},
 		},
-		CodexProvider:     {{ID: "gpt-5.6-sol"}},
+		CodexProvider: {
+			{
+				ID:                  "gpt-5.6-sol",
+				Name:                "GPT-5.6 Sol",
+				EffortLevels:        []string{"low", "medium", "high"},
+				ContextWindowTokens: 272_000,
+			},
+			{
+				ID:                  "gpt-5.6-sol-preview",
+				Name:                "GPT-5.6 Sol Preview",
+				EffortLevels:        []string{"low", "medium", "high"},
+				ContextWindowTokens: 272_000,
+			},
+		},
 		AnthropicProvider: nil,
 	}
 

@@ -123,10 +123,6 @@ func connectProvider(choice model.Choice, selection model.Selection, endpoints E
 }
 
 func ListModels(ctx context.Context, providerName string, endpoints EndpointSettings) ([]agent.Model, error) {
-	if providerName == model.CodexProvider && endpoints.OverrideURL == "" {
-		return nil, agent.ErrNoListing
-	}
-
 	choice := model.Choice{
 		Provider:        providerName,
 		ID:              listingModel,

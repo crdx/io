@@ -6,9 +6,10 @@ import (
 )
 
 const (
-	Endpoint     = responses.Endpoint
-	Originator   = responses.Originator
-	SearchEffort = responses.SearchEffort
+	Endpoint      = responses.Endpoint
+	Originator    = responses.Originator
+	SearchEffort  = responses.SearchEffort
+	ClientVersion = responses.ClientVersion
 )
 
 var (

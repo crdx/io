@@ -87,6 +87,7 @@ func (self *Endpoint) Addresses(base string) map[string]string {
 const (
 	versionPrefix    = "/v1"
 	modelsPath       = "/v1/models"
+	codexModelsPath  = "/codex/models"
 	ollamaModelsPath = "/api/tags"
 	registryPath     = "/models.dev/api.json"
 )
@@ -97,6 +98,11 @@ func (self *Endpoint) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 	switch {
 	case strings.HasSuffix(path, registryPath):
 		self.serveRegistry(writer, request)
+
+		return
+
+	case strings.HasSuffix(path, codexModelsPath):
+		self.serveCodexListing(writer)
 
 		return
 

@@ -29,7 +29,7 @@ import (
 const refreshMessage = "Refreshing the model list..."
 
 const (
-	cacheVersion    = 4
+	cacheVersion    = 5
 	updateTimeout   = 90 * time.Second
 	refreshTimeout  = 20 * time.Second
 	maximumCacheAge = 7 * 24 * time.Hour

@@ -84,6 +84,53 @@ func (self *Endpoint) serveListing(writer http.ResponseWriter) {
 	respond(writer, listing{Data: []listedModel{offeredModel}})
 }
 
+type codexListing struct {
+	Models []codexListedModel `json:"models"`
+}
+
+type codexListedModel struct {
+	Slug          string                `json:"slug"`
+	DisplayName   string                `json:"display_name"`
+	Visibility    string                `json:"visibility"`
+	ContextWindow int                   `json:"context_window"`
+	Levels        []codexReasoningLevel `json:"supported_reasoning_levels"`
+}
+
+type codexReasoningLevel struct {
+	Effort      string `json:"effort"`
+	Description string `json:"description"`
+}
+
+func (self *Endpoint) serveCodexListing(writer http.ResponseWriter) {
+	levels := make([]codexReasoningLevel, 0, len(simulatedEfforts))
+
+	for _, effort := range simulatedEfforts {
+		levels = append(levels, codexReasoningLevel{
+			Effort:      effort,
+			Description: effort + " reasoning",
+		})
+	}
+
+	respond(writer, codexListing{
+		Models: []codexListedModel{
+			{
+				Slug:          self.scenario.Model,
+				DisplayName:   self.scenario.Model,
+				Visibility:    "list",
+				ContextWindow: simulatedContext,
+				Levels:        levels,
+			},
+			{
+				Slug:          self.scenario.Model + "-unlisted",
+				DisplayName:   self.scenario.Model + " (unlisted)",
+				Visibility:    "none",
+				ContextWindow: simulatedContext,
+				Levels:        levels,
+			},
+		},
+	})
+}
+
 type ollamaListing struct {
 	Models []ollamaListedModel `json:"models"`
 }

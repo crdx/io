@@ -4327,7 +4327,7 @@ func completedInvalidMermaidScreen(t *testing.T) string {
 func checkedModelCache(providers string) []byte {
 	return fmt.Appendf(
 		nil,
-		`{"version":4,"checked":%q,"providers":%s}`, time.Now().Format(time.RFC3339), providers,
+		`{"version":5,"checked":%q,"providers":%s}`, time.Now().Format(time.RFC3339), providers,
 	)
 }
 

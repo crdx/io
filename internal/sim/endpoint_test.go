@@ -46,8 +46,9 @@ type speaker struct {
 func providers() []speaker {
 	return []speaker{
 		{
-			name:   "codex",
-			format: sim.Responses,
+			name:                 "codex",
+			format:               sim.Responses,
+			hasModelCapabilities: true,
 			connect: func(t *testing.T, address string) agent.Provider {
 				t.Helper()
 
