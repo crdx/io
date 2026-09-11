@@ -57,7 +57,7 @@ func (self *Screen) Sync(draw func()) {
 			self.synchronisedBytes.Reset()
 
 			if text != "" {
-				self.writeRaw(beginFrame + hideCursor + text + showCursor + endFrame)
+				self.writeRaw(self.openFrame() + text + self.closeFrame())
 			}
 		}
 	}()
@@ -78,6 +78,10 @@ func (self *Screen) closeFrame() string {
 		return ""
 	}
 
+	if self.input.isCursorHidden {
+		return endFrame
+	}
+
 	return showCursor + endFrame
 }
 
@@ -88,9 +92,18 @@ type footer struct {
 	column          int
 	separators      int
 	hasContentAbove bool
+	isCursorHidden  bool
 }
 
 func (self *Screen) Footer(rows []string, cursorRow int, cursorColumn int) {
+	self.showFooter(footer{rows: rows, cursorRow: cursorRow, cursorColumn: cursorColumn})
+}
+
+func (self *Screen) InertFooter(rows []string, focusRow int) {
+	self.showFooter(footer{rows: rows, cursorRow: focusRow, isCursorHidden: true})
+}
+
+func (self *Screen) showFooter(input footer) {
 	if !self.canRepaint {
 		return
 	}
@@ -98,14 +111,16 @@ func (self *Screen) Footer(rows []string, cursorRow int, cursorColumn int) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	rows, cursorRow = self.fitFooter(rows, cursorRow)
+	input.rows, input.cursorRow = self.fitFooter(input.rows, input.cursorRow)
 
-	if slices.Equal(self.input.rows, rows) &&
-		self.input.cursorRow == cursorRow && self.input.cursorColumn == cursorColumn {
+	if slices.Equal(self.input.rows, input.rows) &&
+		self.input.cursorRow == input.cursorRow &&
+		self.input.cursorColumn == input.cursorColumn &&
+		self.input.isCursorHidden == input.isCursorHidden {
 		return
 	}
 
-	self.input = footer{rows: rows, cursorRow: cursorRow, cursorColumn: cursorColumn}
+	self.input = input
 
 	self.redraw("")
 }

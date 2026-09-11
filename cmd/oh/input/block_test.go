@@ -252,3 +252,25 @@ func TestABlockDrawsItsRulesInTheStyleItWasGiven(t *testing.T) {
 		t.Error("expected the input itself to be left alone")
 	}
 }
+
+func TestADisabledBlockDimsTheInputItCannotTake(t *testing.T) {
+	block := Block{
+		Input:      edit.Frame{Rows: []string{"one", "two"}, Row: 1, Column: 3},
+		IsDisabled: true,
+	}
+
+	rows, _, _ := block.Rows(40)
+
+	for _, row := range rows[1:3] {
+		if row == style.Plain(row) {
+			t.Errorf("expected a disabled input row to be painted, got %q", row)
+		}
+	}
+
+	if got := style.Plain(rows[1]); got != "one" {
+		t.Errorf("expected the first input row to read the same, got %q", got)
+	}
+	if got := style.Plain(rows[2]); got != "two" {
+		t.Errorf("expected the second input row to read the same, got %q", got)
+	}
+}

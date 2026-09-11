@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/approval"
 	"crdx.org/io/cmd/oh/access"
 	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/caps"
@@ -26,6 +27,7 @@ import (
 	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/location"
+	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/painter"
@@ -122,6 +124,11 @@ type slashState struct {
 	completion slash.Completion
 }
 
+type approvalState struct {
+	broker  *approval.Broker
+	request *approval.Request
+}
+
 type App struct {
 	agent           *agent.Agent
 	recordedEvents  []agent.Event
@@ -150,6 +157,7 @@ type App struct {
 	display         displayState
 	runMode         runMode
 	slash           slashState
+	approval        approvalState
 	transition      cycle.Transition
 	queuedTurn      turn.Queue
 	currentTurn     Turn
@@ -188,6 +196,11 @@ func (self *App) begin(message string) cycle.Transition {
 
 	restoreTitle := self.terminal.Begin(self.mode.Current())
 	restoreCursor := self.screen.BeginEditing()
+	closeApproval := func() {}
+	if self.approval.broker != nil {
+		closeApproval = self.approval.broker.Open()
+	}
+	defer closeApproval()
 
 	restoreTerminal := func() {
 		restoreTerminalState(
@@ -230,6 +243,8 @@ func (self *App) begin(message string) cycle.Transition {
 		OnJobEnded:            self.jobEnded,
 		HostToSandboxChanges:  self.hostToSandboxChanges(),
 		OnHostToSandboxChange: self.notify,
+		ApprovalChanges:       self.approvalChanges(),
+		OnApprovalChange:      self.onApprovalChange,
 		OnDraw:                func() { self.show(inputLine) },
 	})
 
@@ -258,6 +273,14 @@ func restoreTerminalState(screen *output.Screen, isPersisted bool, restorers ...
 }
 
 func (self *App) handleKeypressAndShowInput(inputLine *edit.Input, history *edit.History, keypress key.Key) bool {
+	if self.isAwaitingApproval() {
+		self.screen.Sync(func() {
+			self.answerApproval(keypress)
+			self.show(inputLine)
+		})
+		return true
+	}
+
 	if keypress.Code == key.Clipboard {
 		if self.receivePaste(inputLine, keypress.Clipboard) {
 			self.screen.Sync(func() { self.show(inputLine) })
@@ -274,6 +297,32 @@ func (self *App) handleKeypressAndShowInput(inputLine *edit.Input, history *edit
 		}
 	})
 	return shouldContinue
+}
+
+func (self *App) answerApproval(keypress key.Key) {
+	var isApproved bool
+	isAnswered := false
+
+	switch {
+	case keypress.Code == key.Enter || keypress.Code == key.Escape:
+		isAnswered = true
+	case keypress.Code == key.Rune && !keypress.Mod.Has(key.Ctrl) && !keypress.Mod.Has(key.Alt):
+		switch keypress.Value {
+		case 'y', 'Y':
+			isApproved = true
+			isAnswered = true
+		case 'n', 'N':
+			isAnswered = true
+		}
+	}
+
+	if !isAnswered {
+		return
+	}
+
+	self.approval.request.Answer(isApproved)
+	self.approval.request = nil
+	self.feedback.Clear(feedback.Approval)
 }
 
 func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress key.Key) bool {
@@ -750,11 +799,23 @@ func (self *App) show(inputLine *edit.Input) {
 			Center: self.renderBar(segment.BottomCenter, frame),
 			Right:  bottomRight,
 		},
-		Status: self.statusRows(columns),
-		Rule:   self.ruleStyle(),
+		Status:     self.statusRows(columns),
+		Rule:       self.ruleStyle(),
+		IsDisabled: self.isAwaitingApproval(),
 	}
 
-	self.screen.Footer(block.Rows(columns))
+	rows, cursorRow, cursorColumn := block.Rows(columns)
+
+	if self.isAwaitingApproval() {
+		self.screen.InertFooter(rows, cursorRow)
+		return
+	}
+
+	self.screen.Footer(rows, cursorRow, cursorColumn)
+}
+
+func (self *App) isAwaitingApproval() bool {
+	return self.approval.request != nil
 }
 
 func (self *App) ruleStyle() style.Style {
@@ -829,6 +890,33 @@ func (self *App) getJobs() []jobs.Snapshot {
 	}
 
 	return self.jobs.manager.List()
+}
+
+func (self *App) approvalChanges() <-chan struct{} {
+	if self.approval.broker == nil {
+		return nil
+	}
+
+	return self.approval.broker.Changes()
+}
+
+func (self *App) onApprovalChange() {
+	self.approval.request = self.approval.broker.Current()
+	if self.approval.request == nil {
+		self.feedback.Clear(feedback.Approval)
+		return
+	}
+
+	prompt := self.approval.request.Prompt
+	text := painter.NoticeStyle(agent.WarningStatus).Over(prompt.Question)
+	if prompt.Detail != "" {
+		detail := prompt.Detail
+		if prompt.Language != "" {
+			detail = markdown.Highlight(detail, detail, prompt.Language, false)
+		}
+		text += "\n" + detail
+	}
+	self.showFeedback(feedback.Approval, feedback.Message{Text: text, HasOwnStyle: true})
 }
 
 func (self *App) hostToSandboxChanges() <-chan agent.Event {

@@ -24,11 +24,12 @@ func LeftContentWidth(width int, right string) int {
 }
 
 type Block struct {
-	Top    Ruler
-	Input  edit.Frame
-	Bottom Ruler
-	Status []string
-	Rule   style.Style
+	Top        Ruler
+	Input      edit.Frame
+	Bottom     Ruler
+	Status     []string
+	Rule       style.Style
+	IsDisabled bool
 }
 
 func (self Block) Rows(width int) ([]string, int, int) {
@@ -46,10 +47,24 @@ func (self Block) Rows(width int) ([]string, int, int) {
 
 	rows = append(rows, self.Status...)
 	rows = append(rows, top.render(width, self.rule()))
-	rows = append(rows, self.Input.Rows...)
+	rows = append(rows, self.inputRows()...)
 	rows = append(rows, bottom.render(width, self.rule()))
 
 	return rows, len(self.Status) + self.Input.Row + 1, self.Input.Column
+}
+
+func (self Block) inputRows() []string {
+	if !self.IsDisabled {
+		return self.Input.Rows
+	}
+
+	rows := make([]string, 0, len(self.Input.Rows))
+
+	for _, row := range self.Input.Rows {
+		rows = append(rows, style.DisabledInput.Over(row))
+	}
+
+	return rows
 }
 
 func (self Block) rule() style.Style {

@@ -27,6 +27,7 @@ import (
 	"crdx.org/io/toolbox/title"
 	"crdx.org/io/toolbox/web"
 
+	"crdx.org/io/approval"
 	"crdx.org/io/cmd/oh/backend"
 	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/caps"
@@ -659,6 +660,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	snapshots := file.NewSnapshots()
 	toolboxTools := toolbox.Rummage(files, snapshots)
+	approvalBroker := approval.New()
 	shellTool := shell.New(workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files, args.Yolo, sandboxRunner)
 
 	toolboxTools = append(toolboxTools, shellTool)
@@ -816,6 +818,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		jobs:            jobState{manager: jobManager},
 		configObserver:  configObserver,
 		runMode:         runMode{isPrinting: args.IsPrinting, isYolo: args.Yolo},
+		approval:        approvalState{broker: approvalBroker},
 		startedAt:       util.WallClock(time.Now()),
 		keyboard:        keyboard,
 	}

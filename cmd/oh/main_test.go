@@ -40,6 +40,7 @@ import (
 	"github.com/yuin/goldmark/text"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/approval"
 	"crdx.org/io/cmd/oh/backend"
 	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/call"
@@ -480,6 +481,67 @@ func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 
 	if !self.apply(inputLine, nil, key.Key{Code: key.Escape}) {
 		t.Error("expected escape at rest to leave the conversation open")
+	}
+}
+
+func TestApprovalAcceptsYesAndDeniesNoEnterOrEscape(t *testing.T) {
+	for name, test := range map[string]struct {
+		keypress key.Key
+		wantErr  error
+	}{
+		"yes":    {keypress: key.Key{Code: key.Rune, Value: 'y'}},
+		"no":     {keypress: key.Key{Code: key.Rune, Value: 'n'}, wantErr: approval.ErrDenied},
+		"enter":  {keypress: key.Key{Code: key.Enter}, wantErr: approval.ErrDenied},
+		"escape": {keypress: key.Key{Code: key.Escape}, wantErr: approval.ErrDenied},
+	} {
+		t.Run(name, func(t *testing.T) {
+			broker := approval.New()
+			closeBroker := broker.Open()
+			defer closeBroker()
+
+			result := make(chan error, 1)
+			go func() {
+				result <- broker.Ask(t.Context(), approval.Prompt{Question: "Continue?"})
+			}()
+			<-broker.Changes()
+
+			self := &App{approval: approvalState{broker: broker}}
+			self.onApprovalChange()
+			self.answerApproval(test.keypress)
+
+			if err := <-result; !errors.Is(err, test.wantErr) {
+				t.Errorf("got %v, want %v", err, test.wantErr)
+			}
+			if self.approval.request != nil || !self.feedback.IsEmpty() {
+				t.Error("the answered approval remained visible")
+			}
+		})
+	}
+}
+
+func TestApprovalIgnoresOtherKeys(t *testing.T) {
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+
+	broker := approval.New()
+	closeBroker := broker.Open()
+	defer closeBroker()
+
+	result := make(chan error, 1)
+	go func() { result <- broker.Ask(ctx, approval.Prompt{Question: "Continue?"}) }()
+	<-broker.Changes()
+
+	self := &App{approval: approvalState{broker: broker}}
+	self.onApprovalChange()
+	self.answerApproval(key.Key{Code: key.Rune, Value: 'x'})
+
+	select {
+	case err := <-result:
+		t.Fatalf("an unrelated key answered the approval with %v", err)
+	default:
+	}
+	if self.approval.request == nil || self.feedback.IsEmpty() {
+		t.Error("an unrelated key cleared the approval")
 	}
 }
 
@@ -5717,6 +5779,22 @@ func shown(t *testing.T, stream string, columns int) string {
 	return strings.Join(visibleScreen(t, stream, columns), "\n")
 }
 
+func streamPasses[Scenario any](
+	t *testing.T,
+	stream func(*testing.T, Scenario) string,
+	scenarios map[string]Scenario,
+) map[string]func() string {
+	t.Helper()
+
+	passes := map[string]func() string{}
+
+	for name, scenario := range scenarios {
+		passes[name] = func() string { return stream(t, scenario) }
+	}
+
+	return passes
+}
+
 func shownPasses(t *testing.T, passes map[string]func() string) map[string]func() string {
 	t.Helper()
 
@@ -7386,6 +7464,8 @@ const (
 	feedbackStorageWarnings
 	feedbackUnknownSettings
 	feedbackTallAnswer
+	feedbackNetworkApproval
+	feedbackConcurrentApproval
 )
 
 func TestConfirmationFeedbackSchedulesItsOwnDismissal(t *testing.T) {
@@ -7419,17 +7499,19 @@ func TestCommandFeedbackHasNoAutomaticDismissal(t *testing.T) {
 }
 
 func TestFeedbackDrawsEveryVisibleState(t *testing.T) {
-	passes := map[string]func() string{
-		"command error":               func() string { return feedbackStream(t, feedbackCommandError) },
-		"multiline help":              func() string { return feedbackStream(t, feedbackHelp) },
-		"startup info":                func() string { return feedbackStream(t, feedbackStartupInfo) },
-		"success confirmation":        func() string { return feedbackStream(t, feedbackSuccess) },
-		"editing clears feedback":     func() string { return feedbackStream(t, feedbackClearedByEditing) },
-		"turn completion clears it":   func() string { return feedbackStream(t, feedbackClearedByTurnCompletion) },
-		"combined storage warnings":   func() string { return feedbackStream(t, feedbackStorageWarnings) },
-		"settings nothing reads":      func() string { return feedbackStream(t, feedbackUnknownSettings) },
-		"tall answer stays untouched": func() string { return feedbackStream(t, feedbackTallAnswer) },
-	}
+	passes := streamPasses(t, feedbackStream, map[string]feedbackScenario{
+		"command error":               feedbackCommandError,
+		"multiline help":              feedbackHelp,
+		"startup info":                feedbackStartupInfo,
+		"success confirmation":        feedbackSuccess,
+		"editing clears feedback":     feedbackClearedByEditing,
+		"turn completion clears it":   feedbackClearedByTurnCompletion,
+		"combined storage warnings":   feedbackStorageWarnings,
+		"settings nothing reads":      feedbackUnknownSettings,
+		"tall answer stays untouched": feedbackTallAnswer,
+		"network approval":            feedbackNetworkApproval,
+		"next concurrent approval":    feedbackConcurrentApproval,
+	})
 
 	compareWithGolden(t, "feedback", ".ansi", passes)
 	compareWithGolden(t, "feedback", ".screen", shownPasses(t, passes))
@@ -7485,6 +7567,10 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		inputLine.SetText("/help")
 	case feedbackSuccess:
 		inputLine.SetText("/copy")
+	case feedbackNetworkApproval:
+		inputLine.SetText("what is out there?")
+	case feedbackConcurrentApproval:
+		inputLine.SetText("waiting for approvals")
 	case feedbackStartupInfo, feedbackStorageWarnings, feedbackUnknownSettings:
 	}
 	self.show(inputLine)
@@ -7522,6 +7608,51 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 			"config.toml: unknown: ui.mystery",
 			"oh.toml: unknown: bar.top.center.loudly",
 		})
+		self.show(inputLine)
+	case feedbackNetworkApproval:
+		broker := approval.New()
+		closeBroker := broker.Open()
+		defer closeBroker()
+		go func() {
+			_ = broker.Ask(t.Context(), approval.Prompt{
+				Question: "Run this command on the host network? [y/N] (denies in 1m)",
+				Detail:   "curl example.com",
+				Language: "bash",
+			})
+		}()
+		<-broker.Changes()
+		self.approval.broker = broker
+		self.onApprovalChange()
+		self.show(inputLine)
+	case feedbackConcurrentApproval:
+		broker := approval.New()
+		closeBroker := broker.Open()
+		defer closeBroker()
+
+		firstResult := make(chan error, 1)
+		go func() {
+			firstResult <- broker.Ask(t.Context(), approval.Prompt{
+				Question: "Approve the first operation? [y/N]",
+				Detail:   "first operation",
+			})
+		}()
+		<-broker.Changes()
+		go func() {
+			_ = broker.Ask(t.Context(), approval.Prompt{
+				Question: "Approve the second operation? [y/N]",
+				Detail:   "second operation",
+			})
+		}()
+		<-broker.Changes()
+
+		self.approval.broker = broker
+		self.onApprovalChange()
+		self.show(inputLine)
+		self.answerApproval(key.Key{Code: key.Rune, Value: 'y'})
+		if err := <-firstResult; err != nil {
+			t.Fatal(err)
+		}
+		self.onApprovalChange()
 		self.show(inputLine)
 	case feedbackTallAnswer:
 		const answer = "01 alpha\n\n02 bravo\n\n03 charlie\n\n04 delta\n\n05 echo\n\n06 foxtrot\n\n07 golf"

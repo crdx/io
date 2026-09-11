@@ -352,3 +352,32 @@ func TestWritingWithNoInputShownIsLeftAlone(t *testing.T) {
 		t.Errorf("expected the text and nothing else, got %q", got)
 	}
 }
+
+func TestAnInertFooterLeavesTheCursorHidden(t *testing.T) {
+	screenOutput := &strings.Builder{}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true}
+
+	screen.InertFooter([]string{"> hi"}, 0)
+
+	got := screenOutput.String()
+	if strings.Contains(got, showCursor) {
+		t.Errorf("expected the cursor to stay hidden while the input is inert, got %q", got)
+	}
+	if !strings.HasPrefix(got, beginFrame+hideCursor) || !strings.HasSuffix(got, endFrame) {
+		t.Errorf("expected a complete frame around the inert footer, got %q", got)
+	}
+}
+
+func TestTheCursorComesBackWhenTheInputIsTakenAgain(t *testing.T) {
+	screenOutput := &strings.Builder{}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true}
+
+	screen.InertFooter([]string{"> hi"}, 0)
+	screenOutput.Reset()
+
+	screen.Footer([]string{"> hi"}, 0, 3)
+
+	if got := screenOutput.String(); !strings.HasSuffix(got, showCursor+endFrame) {
+		t.Errorf("expected the cursor back once the input is taken again, got %q", got)
+	}
+}

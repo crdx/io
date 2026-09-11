@@ -71,6 +71,7 @@ var (
 	History        Style = hex(mauve)
 	PendingPrefix  Style = col.Underline
 	ScrolledInput  Style = Dim
+	DisabledInput  Style = Dim
 	ChosenRow      Style = hex(copper)
 	LowPrice       Style = hex(lime)
 	MediumPrice    Style = hex(steel)
