@@ -12,7 +12,6 @@
     "artful",
     "asleep",
     "balmy",
-    "bare",
     "bashful",
     "beige",
     "bendy",
@@ -127,7 +126,6 @@
     "freckled",
     "friendly",
     "frilly",
-    "frisky",
     "frosty",
     "frozen",
     "frugal",
@@ -232,7 +230,6 @@
     "nimble",
     "noble",
     "noisy",
-    "nutty",
     "oaken",
     "oblong",
     "ochre",
@@ -252,7 +249,6 @@
     "peachy",
     "pearly",
     "peppy",
-    "perky",
     "petite",
     "pewter",
     "pink",
@@ -260,7 +256,6 @@
     "playful",
     "plucky",
     "plum",
-    "plump",
     "plush",
     "poised",
     "polar",
@@ -309,7 +304,6 @@
     "secret",
     "sedate",
     "serene",
-    "shaggy",
     "sharp",
     "shiny",
     "short",
@@ -373,7 +367,6 @@
     "tidy",
     "tiny",
     "tipsy",
-    "titchy",
     "toasty",
     "topaz",
     "tranquil",
@@ -485,10 +478,6 @@
       "emoji": "🐻"
     },
     {
-      "name": "beaver",
-      "emoji": "🦫"
-    },
-    {
       "name": "bee",
       "emoji": "🐝"
     },
@@ -535,10 +524,6 @@
     {
       "name": "bullfrog",
       "emoji": "🐸"
-    },
-    {
-      "name": "bushbaby",
-      "emoji": "🐒"
     },
     {
       "name": "camel",
@@ -597,16 +582,8 @@
       "emoji": "🦗"
     },
     {
-      "name": "clam",
-      "emoji": "🐚"
-    },
-    {
       "name": "cobra",
       "emoji": "🐍"
-    },
-    {
-      "name": "cockatoo",
-      "emoji": "🦜"
     },
     {
       "name": "cod",
@@ -631,10 +608,6 @@
     {
       "name": "corgi",
       "emoji": "🐕"
-    },
-    {
-      "name": "cougar",
-      "emoji": "🐆"
     },
     {
       "name": "cow",
@@ -1073,10 +1046,6 @@
       "emoji": "🐋"
     },
     {
-      "name": "mandrill",
-      "emoji": "🐒"
-    },
-    {
       "name": "mantis",
       "emoji": "🦗"
     },
@@ -1181,10 +1150,6 @@
       "emoji": "🐋"
     },
     {
-      "name": "oriole",
-      "emoji": "🐦"
-    },
-    {
       "name": "oryx",
       "emoji": "🦌"
     },
@@ -1219,10 +1184,6 @@
     {
       "name": "parrot",
       "emoji": "🦜"
-    },
-    {
-      "name": "peacock",
-      "emoji": "🦚"
     },
     {
       "name": "pelican",
@@ -1611,8 +1572,28 @@
       "emoji": "🐚"
     },
     {
+      "name": "beaver",
+      "emoji": "🦫"
+    },
+    {
+      "name": "bushbaby",
+      "emoji": "🐒"
+    },
+    {
       "name": "buzzard",
       "emoji": "🦅"
+    },
+    {
+      "name": "clam",
+      "emoji": "🐚"
+    },
+    {
+      "name": "cockatoo",
+      "emoji": "🦜"
+    },
+    {
+      "name": "cougar",
+      "emoji": "🐆"
     },
     {
       "name": "earwig",
@@ -1635,12 +1616,24 @@
       "emoji": "🦗"
     },
     {
+      "name": "mandrill",
+      "emoji": "🐒"
+    },
+    {
       "name": "mite",
       "emoji": "🐛"
     },
     {
+      "name": "oriole",
+      "emoji": "🐦"
+    },
+    {
       "name": "oyster",
       "emoji": "🦪"
+    },
+    {
+      "name": "peacock",
+      "emoji": "🦚"
     },
     {
       "name": "piranha",
