@@ -192,17 +192,16 @@ func warnAboutCoveredPaths(paths Paths, warnings io.Writer) {
 }
 
 func PreparePaths(paths Paths, warnings io.Writer) (Paths, error) {
-	warnAboutCoveredPaths(paths, warnings)
-
 	filteredPaths := Paths{HostLoopback: slices.Clone(paths.HostLoopback)}
 	lists := []struct {
-		source []string
-		target *[]string
+		source  []string
+		target  *[]string
+		isGrant bool
 	}{
-		{paths.Read, &filteredPaths.Read},
-		{paths.Write, &filteredPaths.Write},
-		{paths.Exec, &filteredPaths.Exec},
-		{paths.Home, &filteredPaths.Home},
+		{paths.Read, &filteredPaths.Read, true},
+		{paths.Write, &filteredPaths.Write, true},
+		{paths.Exec, &filteredPaths.Exec, true},
+		{paths.Home, &filteredPaths.Home, false},
 	}
 
 	for _, list := range lists {
@@ -225,9 +224,14 @@ func PreparePaths(paths Paths, warnings io.Writer) (Paths, error) {
 					err,
 				)
 			}
+			if list.isGrant {
+				path = pathutil.Canonicalise(path)
+			}
 			*list.target = append(*list.target, path)
 		}
 	}
+
+	warnAboutCoveredPaths(filteredPaths, warnings)
 
 	return filteredPaths, nil
 }

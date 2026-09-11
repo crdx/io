@@ -15,6 +15,7 @@
 - Use the workspace read/write state to colour the `x` cap
 - Let a file tool follow a symlinked path to the grant that owns it
 - Add `[experimental]` config section
+- Hold every configured path by its real path
 
 ## [0.5.0] - 2026-09-10
 

@@ -2,6 +2,7 @@ package shell
 
 import (
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"slices"
@@ -508,5 +509,82 @@ func TestAConfiguredFileSymlinkCannotDisguiseRepositoryMetadata(t *testing.T) {
 	mode.Toggle(caps.Git)
 	if err := mountedRoot.WriteFile(name, []byte("written"), 0o600); err != nil {
 		t.Errorf("repository metadata write with git capability: %v", err)
+	}
+}
+
+func spelledThroughASymlink(t *testing.T) (string, string) {
+	t.Helper()
+
+	system, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(system, "oh", "skills"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	elsewhere := t.TempDir()
+	if err := os.Symlink(system, filepath.Join(elsewhere, "org.crdx")); err != nil {
+		t.Fatal(err)
+	}
+
+	return system, filepath.Join(elsewhere, "org.crdx")
+}
+
+func TestAGrantIsHeldByItsRealPathWhileAHomeMappingKeepsItsSpelling(t *testing.T) {
+	system, spelled := spelledThroughASymlink(t)
+	homeMapping := filepath.Join(spelled, "oh", "skills")
+
+	prepared, err := PreparePaths(Paths{
+		Read:  []string{filepath.Join(spelled, "oh")},
+		Write: []string{filepath.Join(spelled, "oh", "skills")},
+		Home:  []string{homeMapping},
+	}, io.Discard)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if want := filepath.Join(system, "oh"); prepared.Read[0] != want {
+		t.Errorf("read grant is %q, want the real path %q", prepared.Read[0], want)
+	}
+	if want := filepath.Join(system, "oh", "skills"); prepared.Write[0] != want {
+		t.Errorf("write grant is %q, want the real path %q", prepared.Write[0], want)
+	}
+	if prepared.Home[0] != homeMapping {
+		t.Errorf("home mapping is %q, want the spelling it was given", prepared.Home[0])
+	}
+}
+
+func TestAWriteGrantIsReachedThroughTheSpellingTheConfigurationUsed(t *testing.T) {
+	workspaceRoot, err := os.OpenRoot(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	_, spelled := spelledThroughASymlink(t)
+	mode := caps.NewMode(caps.Read | caps.Write)
+	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+
+	prepared, err := PreparePaths(Paths{
+		Read:  []string{filepath.Join(spelled, "oh")},
+		Write: []string{filepath.Join(spelled, "oh", "skills")},
+	}, io.Discard)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	access, err := NewPathAccess(files, mode, prepared)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+
+	root, name, err := files.Resolve(filepath.Join(spelled, "oh", "skills", "SKILL.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := root.WriteFile(name, []byte("edited"), 0o600); err != nil {
+		t.Errorf("the configured spelling refused a write: %v", err)
 	}
 }
