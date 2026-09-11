@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Show when a limited usage window resets
 - Detect valid Codex context windows the right way
 
 ## [0.5.0] - 2026-09-10

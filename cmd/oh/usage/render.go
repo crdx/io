@@ -176,6 +176,10 @@ func blockGauge(usedPercent int, expectedPercent *int, pace Pace, cells int) str
 func renderReset(limit Limit, now time.Time) string {
 	switch limit.StateAt(now) {
 	case StateLimited:
+		if resetsAt, hasReset := limit.ResetTime(); hasReset {
+			return limitedCountdown(resetsAt.Sub(now))
+		}
+
 		return style.Failure(limitedLabel)
 	case StateIdle:
 		return style.Dim(idleLabel)
@@ -194,20 +198,30 @@ func renderReset(limit Limit, now time.Time) string {
 }
 
 func countdown(remainingTime time.Duration) string {
+	return countdownUnder(remainingTime, style.Normal)
+}
+
+func limitedCountdown(remainingTime time.Duration) string {
+	return countdownUnder(remainingTime, style.Failure)
+}
+
+func countdownUnder(remainingTime time.Duration, majorStyle style.Style) string {
 	switch {
 	case remainingTime >= dayLength:
-		return spans(remainingTime/dayLength, "d", int(remainingTime.Hours())%24, "h")
+		return spans(majorStyle, remainingTime/dayLength, "d", int(remainingTime.Hours())%24, "h")
 	case remainingTime >= time.Hour:
-		return spans(time.Duration(remainingTime.Hours()), "h", int(remainingTime.Minutes())%60, "m")
+		return spans(majorStyle, time.Duration(remainingTime.Hours()), "h", int(remainingTime.Minutes())%60, "m")
 	case remainingTime >= time.Minute:
-		return spans(time.Duration(remainingTime.Minutes()), "m", int(remainingTime.Seconds())%60, "s")
+		return spans(majorStyle, time.Duration(remainingTime.Minutes()), "m", int(remainingTime.Seconds())%60, "s")
 	default:
-		return style.Normal(fmt.Sprintf("%ds", int(remainingTime.Seconds())))
+		return majorStyle(fmt.Sprintf("%ds", int(remainingTime.Seconds())))
 	}
 }
 
-func spans(major time.Duration, majorUnit string, minor int, minorUnit string) string {
-	return style.Normal(fmt.Sprintf("%d%s", major, majorUnit)) + " " +
+func spans(
+	majorStyle style.Style, major time.Duration, majorUnit string, minor int, minorUnit string,
+) string {
+	return majorStyle(fmt.Sprintf("%d%s", major, majorUnit)) + " " +
 		style.Dim(fmt.Sprintf("%d%s", minor, minorUnit))
 }
 

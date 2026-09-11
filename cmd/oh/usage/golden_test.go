@@ -34,6 +34,13 @@ func limitedWindow(percent float64) agent.UsageWindow {
 	return agent.UsageWindow{Duration: 30 * 24 * time.Hour, Percent: percent, IsLimited: true}
 }
 
+func limitedWeeklyWindow() agent.UsageWindow {
+	window := weeklyWindow(100)
+	window.IsLimited = true
+
+	return window
+}
+
 func scopedWindow(scope string, percent float64) agent.UsageWindow {
 	return agent.UsageWindow{
 		Duration: 5 * time.Hour,
@@ -127,6 +134,15 @@ func drawnCases() []drawnCase {
 			name:    "a window that has run out",
 			sources: []Source{{Provider: "codex", Label: "OpenAI", Reporter: reporting(passedWindow())}},
 			at:      collectedAt.Add(2 * time.Minute),
+		},
+		{
+			name: "a limited window that still has a reset",
+			sources: []Source{{
+				Provider: "codex",
+				Label:    "OpenAI",
+				Reporter: reporting(sessionWindow(41), limitedWeeklyWindow()),
+			}},
+			at: minuteLater,
 		},
 		{
 			name:    "a limited window whose reset has passed",

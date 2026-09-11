@@ -25,6 +25,10 @@ Session  37% █████░░░░░░░░░░░
 === a window that has run out ===
 ● OpenAI
 Session  99% ███████████████┃       stale
+=== a limited window that still has a reset ===
+● OpenAI
+Session  41% ██████░░░┃░░░░░░ ▼ 19  1h 59m
+Week    100% ███████████┃████ ▲ 29  1d 23h
 === a limited window whose reset has passed ===
 ● OpenAI
 Session 100% ███████████████┃       stale
