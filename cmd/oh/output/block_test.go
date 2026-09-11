@@ -91,3 +91,45 @@ func TestAnOldBlockHandleCannotDiscardANewerBlock(t *testing.T) {
 		t.Error("the current block could not be discarded")
 	}
 }
+
+func TestANoticeBlockStaysItsOwnBesideALaterLine(t *testing.T) {
+	screen, screenOutput := region()
+	block := &mutableBlock{text: "unsent"}
+
+	handle := screen.OpenNotice(block)
+	screen.Line("the harness said something")
+
+	block.text = "submitted"
+	if !screen.RefreshBlock(handle) {
+		t.Fatal("a line drawn beside the notice took its handle away")
+	}
+	if !screen.SealBlock(handle) {
+		t.Fatal("a line drawn beside the notice left the notice unsealable")
+	}
+
+	drawn := screenOutput.String()
+	if !strings.Contains(drawn, "submitted") {
+		t.Errorf("the notice kept its superseded state: %q", drawn)
+	}
+	if !strings.Contains(drawn, "the harness said something") {
+		t.Errorf("the line beside the notice was lost: %q", drawn)
+	}
+}
+
+func TestDiscardingANoticeBesideALaterLineKeepsTheLine(t *testing.T) {
+	screen, screenOutput := region()
+
+	handle := screen.OpenNotice(textBlock{text: "temporary notice"})
+	screen.Line("the harness said something")
+
+	if !screen.DiscardBlock(handle) {
+		t.Fatal("a line drawn beside the notice left the notice undiscardable")
+	}
+
+	screen.Seal()
+
+	drawn := screenOutput.String()
+	if !strings.Contains(drawn, "the harness said something") {
+		t.Errorf("the line beside the discarded notice was lost: %q", drawn)
+	}
+}

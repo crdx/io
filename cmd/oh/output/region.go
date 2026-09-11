@@ -278,6 +278,8 @@ func (self *Screen) Reset() {
 	self.hasPrinted = false
 	self.liveRegion = liveRegion{}
 	self.isLiveDirty = false
+	self.isShrinkOwed = false
+	self.isRepaintRefused = false
 
 	self.measureTerminal()
 

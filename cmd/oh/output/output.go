@@ -45,9 +45,11 @@ type Screen struct {
 	input       footer
 	shownFooter footer
 
-	liveRegion  liveRegion
-	isLiveDirty bool
-	blocks      []groupedBlock
+	liveRegion       liveRegion
+	isLiveDirty      bool
+	isShrinkOwed     bool
+	isRepaintRefused bool
+	blocks           []groupedBlock
 }
 
 func New(writer io.Writer) *Screen {

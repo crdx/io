@@ -3460,6 +3460,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"legacy-alt-enter":         {".ansi", ".screen"},
 		"lifecycle":                {".ansi", ".screen"},
 		"line-resize":              {".screen"},
+		"short-terminal":           {".screen"},
 		"streaming-modes":          {".screen"},
 		"groupings":                {".screen"},
 		"reasonings":               {".ansi", ".screen"},
@@ -3971,34 +3972,43 @@ func TestPendingModeMessagesAreSeparatedFromStartupAndEachOther(t *testing.T) {
 	requireSameVisibleScreen(
 		t,
 		"messages a turn has taken differ from independently submitted messages",
-		sentModeMessagesStream(t),
+		sentModeMessagesStream(t, ""),
 		submittedModeMessagesStream(),
 	)
 
 	compareWithGolden(t, "pending-mode-messages", ".ansi", map[string]func() string{
 		"complete interaction":  func() string { return pendingModeMessagesStream(t, 2) },
-		"carried by a new turn": func() string { return sentModeMessagesStream(t) },
+		"carried by a new turn": func() string { return sentModeMessagesStream(t, "") },
+		"carried by a new turn beside a later line": func() string {
+			return sentModeMessagesStream(t, laterHarnessLine)
+		},
 	})
 	compareWithGolden(t, "pending-mode-messages", ".screen", shownPasses(t, map[string]func() string{
 		"1 startup":                    func() string { return pendingModeMessagesStream(t, 0) },
 		"2 workspace mode message":     func() string { return pendingModeMessagesStream(t, 1) },
 		"3 workspace and git messages": func() string { return pendingModeMessagesStream(t, 2) },
+		"4 carried by a new turn":      func() string { return sentModeMessagesStream(t, "") },
+		"5 carried by a new turn beside a later line": func() string {
+			return sentModeMessagesStream(t, laterHarnessLine)
+		},
 	}))
 }
+
+const laterHarnessLine = "The job build exited: complete after 30s."
 
 func pendingModeMessagesStream(t *testing.T, toggleCount int) string {
 	t.Helper()
 
-	return modeMessagesStream(t, toggleCount, false)
+	return modeMessagesStream(t, toggleCount, false, "")
 }
 
-func sentModeMessagesStream(t *testing.T) string {
+func sentModeMessagesStream(t *testing.T, laterLine string) string {
 	t.Helper()
 
-	return modeMessagesStream(t, 2, true)
+	return modeMessagesStream(t, 2, true, laterLine)
 }
 
-func modeMessagesStream(t *testing.T, toggleCount int, isSent bool) string {
+func modeMessagesStream(t *testing.T, toggleCount int, isSent bool, laterLine string) string {
 	t.Helper()
 
 	self, _ := modeFixture(t)
@@ -4011,6 +4021,9 @@ func modeMessagesStream(t *testing.T, toggleCount int, isSent bool) string {
 	}
 	if toggleCount > 1 {
 		self.toggleCap(caps.Git)
+	}
+	if laterLine != "" {
+		self.screen.Line(laterLine)
 	}
 	if isSent {
 		self.settleAccess()
@@ -4030,9 +4043,9 @@ func submittedModeMessagesStream() string {
 }
 
 func TestTakingBackAModeChangeDrawsWhatItDrewBefore(t *testing.T) {
-	completeInteraction := func(letter rune) func() string {
+	completeInteraction := func(letter rune, laterLine string) func() string {
 		return func() string {
-			stream := modeTakebackStream(t, letter, 2)
+			stream := modeTakebackStream(t, letter, 2, laterLine)
 			if strings.Contains(stream, "\x1b[H\x1b[2J") {
 				t.Error("taking the mode change back cleared the screen")
 			}
@@ -4041,19 +4054,23 @@ func TestTakingBackAModeChangeDrawsWhatItDrewBefore(t *testing.T) {
 	}
 
 	compareWithGolden(t, "mode-takeback", ".ansi", map[string]func() string{
-		"lookup complete interaction":  completeInteraction('l'),
-		"network complete interaction": completeInteraction('n'),
+		"lookup complete interaction":     completeInteraction('l', ""),
+		"lookup taken back beside a line": completeInteraction('l', laterHarnessLine),
+		"network complete interaction":    completeInteraction('n', ""),
 	})
 	compareWithGolden(t, "mode-takeback", ".screen", shownPasses(t, map[string]func() string{
-		"1 before either chord":  func() string { return modeTakebackStream(t, 'l', 0) },
-		"2 after ctrl+x l":       func() string { return modeTakebackStream(t, 'l', 1) },
-		"3 after ctrl+x l twice": func() string { return modeTakebackStream(t, 'l', 2) },
-		"4 after ctrl+x n":       func() string { return modeTakebackStream(t, 'n', 1) },
-		"5 after ctrl+x n twice": func() string { return modeTakebackStream(t, 'n', 2) },
+		"1 before either chord":  func() string { return modeTakebackStream(t, 'l', 0, "") },
+		"2 after ctrl+x l":       func() string { return modeTakebackStream(t, 'l', 1, "") },
+		"3 after ctrl+x l twice": func() string { return modeTakebackStream(t, 'l', 2, "") },
+		"4 after ctrl+x n":       func() string { return modeTakebackStream(t, 'n', 1, "") },
+		"5 after ctrl+x n twice": func() string { return modeTakebackStream(t, 'n', 2, "") },
+		"6 taken back beside a later line": func() string {
+			return modeTakebackStream(t, 'l', 2, laterHarnessLine)
+		},
 	}))
 }
 
-func modeTakebackStream(t *testing.T, letter rune, toggleCount int) string {
+func modeTakebackStream(t *testing.T, letter rune, toggleCount int, laterLine string) string {
 	t.Helper()
 
 	self, _ := modeFixture(t)
@@ -4067,7 +4084,10 @@ func modeTakebackStream(t *testing.T, letter rune, toggleCount int) string {
 	self.screen.Line("conversation remains in scrollback")
 	self.show(inputLine)
 
-	for range toggleCount {
+	for chord := range toggleCount {
+		if chord > 0 && laterLine != "" {
+			self.screen.Line(laterLine)
+		}
 		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl})
 		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: letter})
 	}
@@ -5853,6 +5873,27 @@ func TestEveryScenarioDrawsWhatItDrewBefore(t *testing.T) {
 	}
 }
 
+const shortLines = 3
+
+func TestATallRegionOnAShortTerminalIsRepairedRatherThanFrozen(t *testing.T) {
+	entries := readJournal(t, filepath.Join("testdata", "input", tallRegionScenario))
+
+	drawn := streamThrough(t, newShortRig(t), entries)
+
+	compareWithGolden(t, "short-terminal", ".screen", map[string]func() string{
+		"streamed taller than the terminal": func() string { return shown(t, drawn, replayColumns) },
+	})
+
+	requireSameVisibleScreen(
+		t,
+		"a conversation taller than the terminal differs from the same one with room to draw",
+		replayAtWidth(t, entries, replayColumns),
+		drawn,
+	)
+}
+
+const tallRegionScenario = "parallel@rxw.jsonl"
+
 func TestAPrintedSessionShowsWhatTheInterfaceShowed(t *testing.T) {
 	for _, journal := range everyJournal(t) {
 		t.Run(journal.name, func(t *testing.T) {
@@ -6206,6 +6247,15 @@ func newReplayRig(t *testing.T, columns int) *replayRig {
 	})
 }
 
+func newShortRig(t *testing.T) *replayRig {
+	t.Helper()
+
+	return newRig(t, func(written *strings.Builder, workspaceDir string) *output.Screen {
+		return output.NewTerminalOfSize(written, replayColumns, shortLines).
+			LinkPathsUnder(link.Roots{Workspace: workspaceDir})
+	})
+}
+
 func newWideRig(t *testing.T) *replayRig {
 	t.Helper()
 
@@ -6376,6 +6426,9 @@ func streamThrough(t *testing.T, rig *replayRig, entries []replayEntry) string {
 	}
 
 	rig.chat.currentTurn.painter.Close(dynamic.Done)
+	if rig.chat.currentTurn.painter.Stale() {
+		rig.chat.redraw()
+	}
 	rig.chat.screen.End()
 	rig.chat.screen.ReportProgress(false)
 
@@ -14551,6 +14604,25 @@ func TestAnEndedJobWaitsForSomeoneToSpeakWhereNobodyIsListening(t *testing.T) {
 	}
 	if note := self.takeEndedJobsNote(); note == "" {
 		t.Error("the ended job said nothing, want it kept for whenever the conversation next runs")
+	}
+}
+
+func TestAPendingNoticeIsMarkedSubmittedThoughTheHarnessDrewBesideIt(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	completeTurn(self)
+
+	self.jobEnded(endedJobConclusion())
+	self.screen.Line("the harness said something")
+	self.settleAccess()
+	self.screen.End()
+
+	drawn := strings.Join(visibleScreen(t, screenOutput.String(), replayColumns), "\n")
+	if strings.Contains(drawn, "⏳") {
+		t.Errorf("the submitted notice still reads as unsent:\n%s", drawn)
+	}
+	if !strings.Contains(drawn, "🤖") {
+		t.Errorf("the submitted notice was not marked as the harness speaking:\n%s", drawn)
 	}
 }
 

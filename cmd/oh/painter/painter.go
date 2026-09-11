@@ -339,7 +339,7 @@ func RenderReasoning(thought string, columns int, rendering output.ReasoningRend
 	return width.Wrap(style.Reasoning(strippedText), columns)
 }
 
-func (self *Picasso) Stale() bool { return self.isStale }
+func (self *Picasso) Stale() bool { return self.isStale || self.screen.WasRepaintRefused() }
 
 func (self *Picasso) Close(state dynamic.RowState) {
 	self.discardProvisionalReasoning()

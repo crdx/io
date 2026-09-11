@@ -1,6 +1,7 @@
 package output
 
 import (
+	"slices"
 	"strings"
 
 	"crdx.org/io/cmd/oh/width"
@@ -56,11 +57,21 @@ func (self *Screen) open(block Block, group Group, handle *BlockHandle) {
 	self.refresh()
 }
 
+func (self *Screen) indexOfBlock(handle *BlockHandle) int {
+	if handle == nil {
+		return -1
+	}
+
+	return slices.IndexFunc(self.blocks, func(block groupedBlock) bool {
+		return block.handle == handle
+	})
+}
+
 func (self *Screen) RefreshBlock(handle *BlockHandle) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	if len(self.blocks) != 1 || self.blocks[0].handle != handle {
+	if self.indexOfBlock(handle) < 0 {
 		return false
 	}
 
@@ -73,20 +84,29 @@ func (self *Screen) DiscardBlock(handle *BlockHandle) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	if len(self.blocks) != 1 || self.blocks[0].handle != handle {
+	at := self.indexOfBlock(handle)
+	if at < 0 {
 		return false
 	}
 
-	self.blocks = nil
+	if len(self.blocks) == 1 {
+		self.blocks = nil
 
-	return self.discardBlock()
+		return self.discardBlock()
+	}
+
+	self.blocks = slices.Delete(self.blocks, at, at+1)
+	self.isShrinkOwed = true
+	self.refresh()
+
+	return true
 }
 
 func (self *Screen) SealBlock(handle *BlockHandle) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	if len(self.blocks) != 1 || self.blocks[0].handle != handle {
+	if self.indexOfBlock(handle) < 0 {
 		return false
 	}
 
@@ -107,6 +127,13 @@ func (self *Screen) Refresh() {
 	defer self.mutex.Unlock()
 
 	self.refresh()
+}
+
+func (self *Screen) WasRepaintRefused() bool {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	return self.isRepaintRefused
 }
 
 func (self *Screen) refresh() {
@@ -137,6 +164,11 @@ func (self *Screen) flushLiveRegion() {
 func (self *Screen) paintBlocks() {
 	rows, firstGroup, lastGroup := renderGroupedBlocks(self.blocks, self.columns, self.grouping)
 	self.paintGroups(rows, firstGroup, lastGroup)
+
+	if self.isShrinkOwed {
+		self.isShrinkOwed = false
+		self.shrinkLiveRegion()
+	}
 }
 
 func renderGroupedBlocks(blocks []groupedBlock, columns int, grouping Grouping) ([]string, Group, Group) {

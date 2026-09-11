@@ -185,6 +185,8 @@ func (self *Screen) paintGroups(newRows []string, firstGroup Group, lastGroup Gr
 	}
 
 	if firstDifference < self.liveRegion.topRowIndex {
+		self.isRepaintRefused = true
+
 		return false
 	}
 
@@ -218,13 +220,26 @@ func (self *Screen) seal() {
 		}
 
 		self.write(text)
-	} else if self.liveRegion.currentContentRowCount < len(self.liveRegion.rows) && self.liveRegion.currentContentRowCount > self.liveRegion.topRowIndex {
-		rows := slices.Clone(self.liveRegion.rows[:self.liveRegion.currentContentRowCount])
-		self.repaint(len(rows)-1, rows, self.liveRegion.spans(AnswerGroup))
+	} else {
+		self.shrinkLiveRegion()
 	}
 
 	self.lastGroup = self.liveRegion.lastGroup
 	self.liveRegion = liveRegion{}
+}
+
+func (self *Screen) shrinkLiveRegion() {
+	if !self.canRepaint {
+		return
+	}
+
+	if self.liveRegion.currentContentRowCount >= len(self.liveRegion.rows) ||
+		self.liveRegion.currentContentRowCount <= self.liveRegion.topRowIndex {
+		return
+	}
+
+	rows := slices.Clone(self.liveRegion.rows[:self.liveRegion.currentContentRowCount])
+	self.repaint(len(rows)-1, rows, self.liveRegion.spans(AnswerGroup))
 }
 
 func (self *Screen) begin(next Group) {

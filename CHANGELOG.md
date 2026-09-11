@@ -2,6 +2,8 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Handle pending notices correctly
+- Repair region if the terminal is too short
 - Ensure max shell timeout is less than the typical prompt cache ttl
 - Tell agent that a finished job will notify
 - Add max job wait time
