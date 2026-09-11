@@ -3,6 +3,7 @@ package truncate_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,6 +14,31 @@ import (
 )
 
 const limitBytes = 12 * 1024
+
+func newLimit(t *testing.T, bytes int) *truncate.Limit {
+	t.Helper()
+
+	limit := truncate.NewLimit(bytes)
+	limit.SaveOverflowWith(newSaver(t, t.TempDir()))
+	return limit
+}
+
+func newSaver(t *testing.T, directory string) truncate.Saver {
+	t.Helper()
+
+	return func(output string) (string, error) {
+		file, err := os.CreateTemp(directory, "output-*.txt")
+		if err != nil {
+			return "", err
+		}
+		defer func() { _ = file.Close() }()
+
+		if _, err := file.WriteString(output); err != nil {
+			return "", err
+		}
+		return file.Name(), nil
+	}
+}
 
 type Args struct {
 	Size int `json:"size"`
@@ -65,7 +91,7 @@ func TestStatisticsPassThroughTheOutputCap(t *testing.T) {
 		return "done", tool.ToolCallMetrics{Kind: tool.MetricRead, Lines: 3, Bytes: 12}, nil
 	})
 
-	call, err := truncate.Tool(subject, limitBytes).Parse(`{}`)
+	call, err := truncate.Tool(subject, newLimit(t, limitBytes)).Parse(`{}`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +106,6 @@ func TestStatisticsPassThroughTheOutputCap(t *testing.T) {
 }
 
 func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
-	t.Setenv("TMPDIR", t.TempDir())
 	whole := strings.Repeat("a line of text\n", 4000)
 	subject := tool.Implement(
 		tool.Definition{
@@ -93,7 +118,7 @@ func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
 		return whole, tool.ToolCallMetrics{Kind: tool.MetricResources}, nil
 	})
 
-	call, err := truncate.Tool(subject, limitBytes).Parse(`{}`)
+	call, err := truncate.Tool(subject, newLimit(t, limitBytes)).Parse(`{}`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,7 +148,7 @@ func TestAnAttachedImagePassesThroughTheOutputCap(t *testing.T) {
 		}, nil
 	})
 
-	call, err := truncate.Tool(subject, limitBytes).Parse(`{}`)
+	call, err := truncate.Tool(subject, newLimit(t, limitBytes)).Parse(`{}`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +163,7 @@ func TestAnAttachedImagePassesThroughTheOutputCap(t *testing.T) {
 }
 
 func TestOutputThatFitsIsLeftAlone(t *testing.T) {
-	output := truncate.Output("hello\n", limitBytes)
+	output := truncate.Output("hello\n", newLimit(t, limitBytes))
 
 	if output != "hello\n" {
 		t.Errorf("expected the output untouched, got %q", output)
@@ -146,11 +171,9 @@ func TestOutputThatFitsIsLeftAlone(t *testing.T) {
 }
 
 func TestTheLimitItIsGivenIsTheOneItCutsAt(t *testing.T) {
-	t.Setenv("TMPDIR", t.TempDir())
-
 	whole := strings.Repeat("a line of text\n", 4000)
 
-	output := truncate.Output(whole, 2*1024)
+	output := truncate.Output(whole, newLimit(t, 2*1024))
 
 	if !strings.Contains(output, "truncated at 1.99K of 58.6K") {
 		t.Errorf("expected the cut at the limit it was given, got %q", output)
@@ -158,11 +181,13 @@ func TestTheLimitItIsGivenIsTheOneItCutsAt(t *testing.T) {
 }
 
 func TestOutputTooBigIsCutAndSaved(t *testing.T) {
-	t.Setenv("TMPDIR", t.TempDir())
+	directory := t.TempDir()
+	limit := truncate.NewLimit(limitBytes)
+	limit.SaveOverflowWith(newSaver(t, directory))
 
 	whole := strings.Repeat("a line of text\n", 4000)
 
-	output := truncate.Output(whole, limitBytes)
+	output := truncate.Output(whole, limit)
 
 	if len(output) > limitBytes+300 {
 		t.Errorf("expected the output to be capped, got %d bytes", len(output))
@@ -172,7 +197,7 @@ func TestOutputTooBigIsCutAndSaved(t *testing.T) {
 		t.Error("expected the cut to fall on a line boundary")
 	}
 
-	saved, err := filepath.Glob(filepath.Join(os.TempDir(), "io-output-*.txt"))
+	saved, err := filepath.Glob(filepath.Join(directory, "output-*.txt"))
 	if err != nil || len(saved) != 1 {
 		t.Fatalf("expected the whole of it saved once, got %v and %v", saved, err)
 	}
@@ -194,9 +219,32 @@ func TestOutputTooBigIsCutAndSaved(t *testing.T) {
 	}
 }
 
+func TestOutputTooBigNamesNoFileWhenNothingSavesIt(t *testing.T) {
+	whole := strings.Repeat("a line of text\n", 4000)
+
+	output := truncate.Output(whole, truncate.NewLimit(limitBytes))
+
+	if !strings.HasSuffix(output, "[truncated at 12K of 58.6K]") {
+		t.Errorf("expected the notice to name no file, got %q", output)
+	}
+}
+
+func TestOutputTooBigSaysSoWhenItCouldNotBeSaved(t *testing.T) {
+	limit := truncate.NewLimit(limitBytes)
+	limit.SaveOverflowWith(func(string) (string, error) {
+		return "", errors.New("the drops directory disappeared")
+	})
+
+	output := truncate.Output(strings.Repeat("a line of text\n", 4000), limit)
+
+	if !strings.HasSuffix(output, "the rest could not be saved: the drops directory disappeared]") {
+		t.Errorf("expected the notice to name the failure, got %q", output)
+	}
+}
+
 func TestAWrappedToolKeepsItsSyntaxHighlighting(t *testing.T) {
 	subject := buildTool(newToolBuilder(t).Syntax("bash"))
-	call, err := truncate.Tool(subject, limitBytes).Parse(`{"size":2}`)
+	call, err := truncate.Tool(subject, newLimit(t, limitBytes)).Parse(`{"size":2}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -209,7 +257,7 @@ func TestAWrappedToolKeepsItsSyntaxHighlighting(t *testing.T) {
 
 func TestAWrappedToolKeepsItsFocusedRendering(t *testing.T) {
 	subject := buildTool(newToolBuilder(t).Focuses(func(tool.ToolCall) string { return "generate" }))
-	call, err := truncate.Tool(subject, limitBytes).Parse(`{"size":2}`)
+	call, err := truncate.Tool(subject, newLimit(t, limitBytes)).Parse(`{"size":2}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -221,7 +269,7 @@ func TestAWrappedToolKeepsItsFocusedRendering(t *testing.T) {
 }
 
 func TestAWrappedToolIsCapped(t *testing.T) {
-	subject := truncate.Tool(buildTool(newToolBuilder(t)), limitBytes)
+	subject := truncate.Tool(buildTool(newToolBuilder(t)), newLimit(t, limitBytes))
 
 	if subject.Name() != "generate" {
 		t.Errorf("expected the name to survive, got %q", subject.Name())
@@ -250,7 +298,7 @@ func TestToolsWrapsEveryTool(t *testing.T) {
 	wrappedTools := truncate.Tools([]tool.Tool{
 		buildTool(newToolBuilder(t)),
 		buildTool(newToolBuilder(t)),
-	}, truncate.NewLimit(limitBytes))
+	}, newLimit(t, limitBytes))
 
 	if len(wrappedTools) != 2 {
 		t.Fatalf("expected both tools back, got %d", len(wrappedTools))
@@ -264,7 +312,7 @@ func TestToolsWrapsEveryTool(t *testing.T) {
 }
 
 func TestEachCallKeepsTheOutputLimitItStartedWith(t *testing.T) {
-	limit := truncate.NewLimit(1024)
+	limit := newLimit(t, 1024)
 	subject := truncate.Tools([]tool.Tool{buildTool(newToolBuilder(t))}, limit)[0]
 
 	started, err := subject.Parse(`{"size":400}`)
@@ -294,7 +342,7 @@ func TestAWrappedToolKeepsOwningItsDurableState(t *testing.T) {
 		}).
 		Run(func(context.Context, Args) (tool.ToolCallResult, error) {
 			return tool.ToolCallResult{Output: "done", State: json.RawMessage(`{"lines":2}`)}, nil
-		}), limitBytes)
+		}), newLimit(t, limitBytes))
 
 	if key := subject.StateKey(); key != "generated" {
 		t.Errorf("the wrapped tool owns %q", key)

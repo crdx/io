@@ -516,30 +516,11 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	closeDrops := func() error { return nil }
-	areDropsMounted := false
-	mountDrops := func(shouldExist bool) error {
-		if areDropsMounted {
-			return nil
-		}
-
-		nextCloseDrops, areNewDropsMounted, err := drops.Mount(files, sessionInfo.Directory)
-		if err != nil {
-			return err
-		}
-		if shouldExist && !areNewDropsMounted {
-			return errors.New("the drops directory disappeared")
-		}
-		if areNewDropsMounted {
-			closeDrops = nextCloseDrops
-			areDropsMounted = true
-		}
-		return nil
+	dropKeeper, err := drops.Open(files, sessionInfo.Directory, log.EnsurePersisted)
+	if err != nil {
+		return "", err
 	}
-	if err := mountDrops(false); err != nil {
-		return "", fmt.Errorf("mount drops: %w", err)
-	}
-	defer func() { _ = closeDrops() }()
+	defer func() { _ = dropKeeper.Close() }()
 
 	defer func() {
 		if !log.IsPersisted() {
@@ -587,7 +568,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			HomeDir:        homeDir,
 			CurrentCaps:    args.Caps,
 			ExtraPaths:     settings.Sandbox,
-			DropsDirectory: drops.GetDirectory(sessionInfo.Directory),
+			DropsDirectory: dropKeeper.GetDirectory(),
 			Skills:         availableSkills,
 			JobsGranted:    jobManager != nil,
 			NetworkGranted: args.Caps.Has(caps.Network),
@@ -598,7 +579,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			return "", err
 		}
 	}
-	systemPrompt = prompt.WithDropsDirectory(systemPrompt, drops.GetDirectory(sessionInfo.Directory))
+	systemPrompt = prompt.WithDropsDirectory(systemPrompt, dropKeeper.GetDirectory())
 
 	tmpRoot, err := shell.MountTemporaryDirectory(files, tmpDir)
 	if err != nil {
@@ -737,13 +718,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	if forkSource != nil {
-		transcriptPath, err := forkSource.CopyChat(sessionInfo.Directory, log.EnsurePersisted)
+		transcriptPath, err := forkSource.CopyChat(dropKeeper)
 		if err != nil {
 			return "", fmt.Errorf("copy the forked session chat: %w", err)
-		}
-		if err := mountDrops(true); err != nil {
-			_ = os.Remove(transcriptPath)
-			return "", fmt.Errorf("make the forked session chat readable: %w", err)
 		}
 		args.Message = forkSource.GetMessageWithChatAt(args.Message, transcriptPath)
 	}
@@ -861,17 +838,8 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	app.onFailure = func(failure error) {
 		_ = notification.SendTurnError(context.Background(), screen.WriteEscape, workspace, failure)
 	}
-	app.savePastedImage = func(mediaType string, data []byte) (string, error) {
-		path, err := drops.SaveImage(sessionInfo.Directory, log.EnsurePersisted, mediaType, data)
-		if err != nil {
-			return "", err
-		}
-		if err := mountDrops(true); err != nil {
-			_ = os.Remove(path)
-			return "", fmt.Errorf("make the pasted image readable: %w", err)
-		}
-		return path, nil
-	}
+	app.savePastedImage = dropKeeper.SaveImage
+	toolOutputLimit.SaveOverflowWith(dropKeeper.SaveOutput)
 
 	if cellWidth, cellHeight, hasGraphics := graphics.Detect(keyboard, os.Stdout); hasGraphics {
 		app.display.pictures = pictures.Display{

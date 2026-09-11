@@ -34,28 +34,37 @@ cmd/oh/draw.go:41:9: undefined: getWidth
 exit status 1
 ```
 
-## job_stop · +6s
+## job_ended · +6s
 
-## User · +7s
+```
+The job seed exited: complete after 14s.
+seeding the database
+
+[truncated at 2K of 58.6K; full output in /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]
+```
+
+## job_stop · +7s
+
+## User · +8s
 
 what happened to it
 
-## Tool calls · +8s
+## Tool calls · +9s
 
 ```
 job: stale status rendering [ok, 1 line, 26B, call_2]
 ```
 
-## job_stop · +10s
+## job_stop · +11s
 
-## Tool calls · +11s
+## Tool calls · +12s
 
 ```
 job: stale discard rendering [ok, 1 line, 52B, call_3]
 job: stale prune rendering [ok, 1 line, 67B, call_4]
 ```
 
-## Assistant · +15s
+## Assistant · +16s
 
 It was stopped when write access was withdrawn.
 

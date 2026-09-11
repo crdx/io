@@ -2827,7 +2827,7 @@ func TestAStoredCallIsShownTheWayItsToolShowsItNow(t *testing.T) {
 
 	current := truncate.Tool(buildSlowTool(
 		slowToolBuilder("read").Focuses(func(tool.ToolCall) string { return "one.go" }),
-	), 12*1024)
+	), truncate.NewLimit(12*1024))
 	testConversation := &App{
 		agent:  agent.New("", quietProvider{}, []tool.Tool{current}),
 		screen: output.New(&screenOutput),
@@ -14660,8 +14660,6 @@ func endedJobConclusion() jobs.Conclusion {
 }
 
 func TestAnEndedJobsOutputIsCappedTheWayAToolCallIs(t *testing.T) {
-	t.Setenv("TMPDIR", t.TempDir())
-
 	self := &App{
 		screen:          output.New(&bytes.Buffer{}),
 		mode:            caps.NewMode(caps.Read),

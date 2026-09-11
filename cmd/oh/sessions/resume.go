@@ -52,8 +52,8 @@ func (self *ForkSource) GetMessageWithChatAt(message string, transcriptPath stri
 	return strings.Replace(message, placeholderPrompt, resolvedPrompt, 1)
 }
 
-func (self *ForkSource) CopyChat(sessionDirectory string, ensureSession func() error) (string, error) {
-	return drops.CopyFile(sessionDirectory, ensureSession, self.SourceChatPath, self.DroppedChatName)
+func (self *ForkSource) CopyChat(keeper *drops.Keeper) (string, error) {
+	return keeper.CopyFile(self.SourceChatPath, self.DroppedChatName)
 }
 
 func GetForkSource(directory string, workspace *work.Space, name string, userMessage string) (*ForkSource, error) {

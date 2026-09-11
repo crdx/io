@@ -1,17 +1,25 @@
 package drops
 
 import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"crdx.org/io/internal/file"
 )
 
-const directoryName = "drops"
+const (
+	directoryName    = "drops"
+	nameDigestLength = 16
+	maxNameAttempts  = 100
+)
 
 func GetDirectory(sessionDirectory string) string {
 	return filepath.Join(sessionDirectory, directoryName)
@@ -110,6 +118,61 @@ func Mount(files *file.Root, sessionDirectory string) (func() error, bool, error
 	directory := GetDirectory(sessionDirectory)
 	files.Mount(directory, file.New(dropsRoot, func(string) error { return file.ErrReadOnly }))
 	return dropsRoot.Close, true, nil
+}
+
+func writeDrop(
+	sessionDirectory string,
+	ensureSession func() error,
+	name string,
+	extension string,
+	data []byte,
+) (string, error) {
+	directory, err := Prepare(sessionDirectory, ensureSession)
+	if err != nil {
+		return "", err
+	}
+
+	path, isDropped, err := dropPath(directory, name, extension, data)
+	if err != nil {
+		return "", err
+	}
+	if isDropped {
+		return path, nil
+	}
+
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		return "", fmt.Errorf("write the %s file: %w", name, err)
+	}
+
+	return path, nil
+}
+
+func dropPath(directory string, name string, extension string, data []byte) (string, bool, error) {
+	digest := sha256.Sum256(data)
+	prefix := name + "-" + hex.EncodeToString(digest[:])[:nameDigestLength]
+
+	for attempt := range maxNameAttempts {
+		candidate := prefix
+		if attempt > 0 {
+			candidate += "-" + strconv.Itoa(attempt)
+		}
+
+		path := filepath.Join(directory, candidate+extension)
+
+		contents, err := os.ReadFile(path) //nolint:gosec // a path built from a digest under the drops directory
+		if errors.Is(err, fs.ErrNotExist) {
+			return path, false, nil
+		}
+		if err != nil {
+			return "", false, fmt.Errorf("inspect the %s file: %w", name, err)
+		}
+
+		if bytes.Equal(contents, data) {
+			return path, true, nil
+		}
+	}
+
+	return "", false, fmt.Errorf("too many %s files share a name in the drops directory", name)
 }
 
 func validateDirectory(info fs.FileInfo) error {

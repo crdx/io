@@ -9,9 +9,11 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/file"
 	"crdx.org/io/session"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/drops"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/work"
@@ -126,9 +128,21 @@ func TestGettingAForkSourcePreparesTheNewConversation(t *testing.T) {
 		t.Errorf("got initial file name %q, want %q", forkSource.DroppedChatName, wantDroppedChatName)
 	}
 	newSessionDirectory := filepath.Join(directory, "new-otter")
-	destinationPath, err := forkSource.CopyChat(newSessionDirectory, func() error {
-		return os.Mkdir(newSessionDirectory, 0o700)
-	})
+	workspaceRoot, err := os.OpenRoot(workspaceDirectory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+	keeper, err := drops.Open(
+		file.New(workspaceRoot, func(string) error { return file.ErrReadOnly }),
+		newSessionDirectory,
+		func() error { return os.Mkdir(newSessionDirectory, 0o700) },
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = keeper.Close() }()
+	destinationPath, err := forkSource.CopyChat(keeper)
 	if err != nil {
 		t.Fatal(err)
 	}

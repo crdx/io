@@ -985,7 +985,7 @@ func (self *App) withinToolOutputLimit(output string) string {
 		return output
 	}
 
-	return truncate.Output(output, self.toolOutputLimit.GetBytes())
+	return truncate.Output(output, self.toolOutputLimit)
 }
 
 func (self *App) stopJobsHoldingPath(path string) {

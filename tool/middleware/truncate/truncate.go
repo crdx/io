@@ -3,8 +3,6 @@ package truncate
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"unicode/utf8"
@@ -13,8 +11,11 @@ import (
 	"crdx.org/io/tool"
 )
 
+type Saver func(output string) (string, error)
+
 type Limit struct {
 	bytes atomic.Int64
+	save  atomic.Pointer[Saver]
 }
 
 func NewLimit(bytes int) *Limit {
@@ -31,24 +32,36 @@ func (self *Limit) Replace(bytes int) {
 	self.bytes.Store(int64(bytes))
 }
 
+func (self *Limit) SaveOverflowWith(save Saver) {
+	self.save.Store(&save)
+}
+
+func (self *Limit) getSaver() Saver {
+	if save := self.save.Load(); save != nil {
+		return *save
+	}
+
+	return nil
+}
+
 func Tools(subjects []tool.Tool, limit *Limit) []tool.Tool {
 	wrappedTools := make([]tool.Tool, len(subjects))
 
 	for i, subject := range subjects {
-		wrappedTools[i] = truncatedTool{Tool: subject, getLimit: limit.GetBytes}
+		wrappedTools[i] = truncatedTool{Tool: subject, limit: limit}
 	}
 
 	return wrappedTools
 }
 
-func Tool(inner tool.Tool, limit int) tool.Tool {
-	return truncatedTool{Tool: inner, getLimit: func() int { return limit }}
+func Tool(inner tool.Tool, limit *Limit) tool.Tool {
+	return truncatedTool{Tool: inner, limit: limit}
 }
 
 type truncatedTool struct {
 	tool.Tool
 
-	getLimit func() int
+	limit *Limit
 }
 
 func (self truncatedTool) Parse(arguments string) (tool.ToolCall, error) {
@@ -57,18 +70,19 @@ func (self truncatedTool) Parse(arguments string) (tool.ToolCall, error) {
 		return nil, err
 	}
 
-	return truncatedToolCall{ToolCall: call, limit: self.getLimit()}, nil
+	return truncatedToolCall{ToolCall: call, limit: self.limit.GetBytes(), save: self.limit.getSaver()}, nil
 }
 
 type truncatedToolCall struct {
 	tool.ToolCall
 
 	limit int
+	save  Saver
 }
 
 func (self truncatedToolCall) Exec(ctx context.Context) (tool.ToolCallResult, error) {
 	result, err := self.ToolCall.Exec(ctx)
-	cappedOutput, returnedBytes, totalBytes := outputWithSizes(result.Output, self.limit)
+	cappedOutput, returnedBytes, totalBytes := outputWithSizes(result.Output, self.limit, self.save)
 	result.Output = cappedOutput
 
 	if result.Metrics.Kind == tool.MetricResources || returnedBytes < totalBytes {
@@ -80,12 +94,12 @@ func (self truncatedToolCall) Exec(ctx context.Context) (tool.ToolCallResult, er
 	return result, err
 }
 
-func Output(output string, limit int) string {
-	cappedOutput, _, _ := outputWithSizes(output, limit)
+func Output(output string, limit *Limit) string {
+	cappedOutput, _, _ := outputWithSizes(output, limit.GetBytes(), limit.getSaver())
 	return cappedOutput
 }
 
-func outputWithSizes(output string, limit int) (string, int, int) {
+func outputWithSizes(output string, limit int, save Saver) (string, int, int) {
 	if len(output) <= limit {
 		return output, len(output), len(output)
 	}
@@ -100,6 +114,13 @@ func outputWithSizes(output string, limit int) (string, int, int) {
 		}
 	}
 
+	if save == nil {
+		return fmt.Sprintf(
+			"%s\n\n[truncated at %s of %s]",
+			output[:end], util.FormatBytes(end, 3), util.FormatBytes(len(output), 3),
+		), end, len(output)
+	}
+
 	path, err := save(output)
 	if err != nil {
 		return fmt.Sprintf(
@@ -109,22 +130,7 @@ func outputWithSizes(output string, limit int) (string, int, int) {
 	}
 
 	return fmt.Sprintf(
-		"%s\n\n[truncated at %s of %s; the whole of it is in %s]",
+		"%s\n\n[truncated at %s of %s; full output in %s]",
 		output[:end], util.FormatBytes(end, 3), util.FormatBytes(len(output), 3), path,
 	), end, len(output)
-}
-
-func save(output string) (string, error) {
-	file, err := os.CreateTemp(os.TempDir(), "io-output-*.txt")
-	if err != nil {
-		return "", err
-	}
-
-	defer func() { _ = file.Close() }()
-
-	if _, err := file.WriteString(output); err != nil {
-		return "", err
-	}
-
-	return filepath.Clean(file.Name()), nil
 }

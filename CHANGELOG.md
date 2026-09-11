@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Save truncated remains in session drops dir
 - Handle pending notices correctly
 - Repair region if the terminal is too short
 - Ensure max shell timeout is less than the typical prompt cache ttl

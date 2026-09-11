@@ -17,6 +17,17 @@
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m 🤖 The job seed exited: complete after \e[0m\r
+\e[48;2;52;53;65m    14s.                                \e[0m\r
+\e[48;2;52;53;65m    seeding the database                \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m    [truncated at 2K of 58.6K; full     \e[0m\r
+\e[48;2;52;53;65m    output in                           \e[0m\r
+\e[48;2;52;53;65m    /state/sessions/brave-otter/drops/ou\e[0m\r
+\e[48;2;52;53;65m    tput-3f2a1c8d4b5e6f70.txt]          \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the\e[0m\r
 \e[48;2;52;53;65m    workspace was made read-only.       \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -346,6 +357,309 @@
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mb\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mx\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m:\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mm\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m1\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m4\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mg\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m[\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m2\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mK\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m5\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m8\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m6\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mK\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m;\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m/\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m/\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m/\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mv\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m-\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m/\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m/\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m-\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m3\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m2\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m1\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m8\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m4\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m5\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m6\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m7\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m0\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mx\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m]\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m🤖\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65mT\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mj\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65md\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mo\e[0m\r
@@ -620,6 +934,12 @@ cmd/oh/draw.go:41:9: undefined: getWidth
 exit status 1\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m 🤖 The job seed exited: complete after 14s.
+seeding the database\e[0m
+\e[48;2;52;53;65m    \e[0m
+\e[48;2;52;53;65m    [truncated at 2K of 58.6K; full output in /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m\e[0m
@@ -649,6 +969,14 @@ The docs server is up.\r
 \e[48;2;52;53;65m    go build ./...                                                                                  \e[0m\r
 \e[48;2;52;53;65m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \e[48;2;52;53;65m    exit status 1                                                                                   \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job seed exited: complete after 14s.                                                        \e[0m\r
+\e[48;2;52;53;65m    seeding the database                                                                            \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m    [truncated at 2K of 58.6K; full output in                                                       \e[0m\r
+\e[48;2;52;53;65m    /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -687,6 +1015,14 @@ It was stopped when write access was withdrawn.\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job seed exited: complete after 14s.                                                        \e[0m\r
+\e[48;2;52;53;65m    seeding the database                                                                            \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m    [truncated at 2K of 58.6K; full output in                                                       \e[0m\r
+\e[48;2;52;53;65m    /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -722,6 +1058,14 @@ It was stopped when write access was withdrawn.\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job seed exited: complete after 14s.                                                        \e[0m\r
+\e[48;2;52;53;65m    seeding the database                                                                            \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m    [truncated at 2K of 58.6K; full output in                                                       \e[0m\r
+\e[48;2;52;53;65m    /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -754,6 +1098,14 @@ It was stopped when write access was withdrawn.\r
 \e[48;2;52;53;65m    go build ./...                                                                                  \e[0m\r
 \e[48;2;52;53;65m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \e[48;2;52;53;65m    exit status 1                                                                                   \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job seed exited: complete after 14s.                                                        \e[0m\r
+\e[48;2;52;53;65m    seeding the database                                                                            \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m    [truncated at 2K of 58.6K; full output in                                                       \e[0m\r
+\e[48;2;52;53;65m    /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -811,6 +1163,34 @@ It was stopped when write access was withdrawn.\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m 🤖 The job \e[0m\r
+\e[48;2;52;53;65m    seed    \e[0m\r
+\e[48;2;52;53;65m    exited: \e[0m\r
+\e[48;2;52;53;65m    complete\e[0m\r
+\e[48;2;52;53;65m    after   \e[0m\r
+\e[48;2;52;53;65m    14s.    \e[0m\r
+\e[48;2;52;53;65m    seeding \e[0m\r
+\e[48;2;52;53;65m    the     \e[0m\r
+\e[48;2;52;53;65m    database\e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m    [truncat\e[0m\r
+\e[48;2;52;53;65m    ed at 2K\e[0m\r
+\e[48;2;52;53;65m    of      \e[0m\r
+\e[48;2;52;53;65m    58.6K;  \e[0m\r
+\e[48;2;52;53;65m    full    \e[0m\r
+\e[48;2;52;53;65m    output  \e[0m\r
+\e[48;2;52;53;65m    in      \e[0m\r
+\e[48;2;52;53;65m    /state/s\e[0m\r
+\e[48;2;52;53;65m    essions/\e[0m\r
+\e[48;2;52;53;65m    brave-ot\e[0m\r
+\e[48;2;52;53;65m    ter/drop\e[0m\r
+\e[48;2;52;53;65m    s/output\e[0m\r
+\e[48;2;52;53;65m    -3f2a1c8\e[0m\r
+\e[48;2;52;53;65m    d4b5e6f7\e[0m\r
+\e[48;2;52;53;65m    0.txt]  \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m 🤖 The job \e[0m\r
 \e[48;2;52;53;65m    docs was\e[0m\r
 \e[48;2;52;53;65m    stopped \e[0m\r
 \e[48;2;52;53;65m    because \e[0m\r
@@ -863,6 +1243,12 @@ cmd/oh/draw.go:41:9: undefined: getWidth
 exit status 1\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m 🤖 The job seed exited: complete after 14s.
+seeding the database\e[0m
+\e[48;2;52;53;65m    \e[0m
+\e[48;2;52;53;65m    [truncated at 2K of 58.6K; full output in /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m\e[0m
@@ -892,6 +1278,14 @@ exit status 1\e[0m
 \e[48;2;52;53;65m    go build ./...                                                                                  \e[0m\r
 \e[48;2;52;53;65m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \e[48;2;52;53;65m    exit status 1                                                                                   \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job seed exited: complete after 14s.                                                        \e[0m\r
+\e[48;2;52;53;65m    seeding the database                                                                            \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m    [truncated at 2K of 58.6K; full output in                                                       \e[0m\r
+\e[48;2;52;53;65m    /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
