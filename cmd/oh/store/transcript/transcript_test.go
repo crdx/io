@@ -82,7 +82,7 @@ func TestTranscriptOmitsReasoningEntirely(t *testing.T) {
 	if strings.Contains(transcript, "Reasoning") || strings.Contains(transcript, "First. Second?") || strings.Contains(transcript, "Third!") {
 		t.Errorf("expected no trace of reasoning at all, got:\n%s", transcript)
 	}
-	if !strings.Contains(transcript, "## Assistant · +4.0s\n\nanswer\n") {
+	if !strings.Contains(transcript, "## Assistant · +4s\n\nanswer\n") {
 		t.Errorf("expected the reasoning to leave the next event untouched, got:\n%s", transcript)
 	}
 }
@@ -152,7 +152,7 @@ func TestTranscriptLogsACallAndItsResultOnOneLine(t *testing.T) {
 		t.Fatal(err)
 	}
 	transcript := string(stored)
-	want := "## Tool calls · +2.0s\n\n```\nbash: ls [ok in 12s, 1 line, 2K of 4K, 2.5s CPU, 4M peak, truncated, call-1]\n```"
+	want := "## Tool calls · +2s\n\n```\nbash: ls [ok in 12s, 1 line, 2K of 4K, 2s CPU, 4M peak, truncated, call-1]\n```"
 	if !strings.Contains(transcript, want) {
 		t.Errorf("expected one heading naming the call and its result folded onto one line, got:\n%s", transcript)
 	}
@@ -190,7 +190,7 @@ func TestTranscriptDoesNotAttributeToolCallsToTheUser(t *testing.T) {
 		t.Fatal(err)
 	}
 	transcript := string(stored)
-	want := "## User · +2.0s\n\ncheck the web\n\n## Tool calls · +4.0s\n\n```\nlookup [ok, call-1]\n```\n\n## Assistant · +8.0s"
+	want := "## User · +2s\n\ncheck the web\n\n## Tool calls · +4s\n\n```\nlookup [ok, call-1]\n```\n\n## Assistant · +8s"
 	if !strings.Contains(transcript, want) {
 		t.Errorf("expected the call log held under its own heading between the user and the answer, got:\n%s", transcript)
 	}
@@ -372,10 +372,10 @@ func TestTranscriptWritesMessagesAsMarkdownRatherThanFencingThem(t *testing.T) {
 		t.Fatal(err)
 	}
 	transcript := string(stored)
-	if !strings.Contains(transcript, "## User · +2.0s\n\nplease explain\n") {
+	if !strings.Contains(transcript, "## User · +2s\n\nplease explain\n") {
 		t.Errorf("expected the user's message written as plain markdown, got:\n%s", transcript)
 	}
-	if !strings.Contains(transcript, "## Assistant · +4.0s\n\n"+content+"\n") {
+	if !strings.Contains(transcript, "## Assistant · +4s\n\n"+content+"\n") {
 		t.Errorf("expected the answer written as its own markdown rather than fenced, got:\n%s", transcript)
 	}
 }
@@ -416,7 +416,7 @@ func TestTranscriptLetsUserTextCollideWithMarkdownSyntax(t *testing.T) {
 				t.Fatal(err)
 			}
 			transcript := string(stored)
-			if !strings.Contains(transcript, "## User · +2.0s\n\n"+test.text+"\n") {
+			if !strings.Contains(transcript, "## User · +2s\n\n"+test.text+"\n") {
 				t.Errorf("expected the user's text written exactly as given, got:\n%s", transcript)
 			}
 			document := transcriptWellFormedness(t, transcript)
@@ -523,7 +523,7 @@ func TestTranscriptLeavesASelfContainedMessageAlone(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if !strings.Contains(string(stored), "## Assistant · +2.0s\n\n"+content+"\n") {
+			if !strings.Contains(string(stored), "## Assistant · +2s\n\n"+content+"\n") {
 				t.Errorf("expected self-contained markdown left exactly as written rather than fenced, got:\n%s", stored)
 			}
 		})
@@ -751,7 +751,7 @@ func TestTranscriptRendersPathGrantEventsFromStructuredState(t *testing.T) {
 	}
 	transcript := string(stored)
 	for _, want := range []string{
-		"## Path grant · 1 path · changed /reference · +2.0s",
+		"## Path grant · 1 path · changed /reference · +2s",
 		"Granted temporary read and write access to /reference. Changes there follow the workspace write capability.",
 	} {
 		if !strings.Contains(transcript, want) {
@@ -821,8 +821,8 @@ func TestTranscriptHoldsTheHeaderApartFromWhatFollowsIt(t *testing.T) {
 	}
 	transcript := string(stored)
 	for _, want := range []string{
-		"- **Workspace:** `/workspace`\n- **Tool detail:** `jq 'select(.event.id == \"<id>\")' session.jsonl`, for the `[id]` of any call\n\n## Silent turn · +2.0s\n",
-		"## Mode · rx · +4.0s\n\n## User · +6.0s\n",
+		"- **Workspace:** `/workspace`\n- **Tool detail:** `jq 'select(.event.id == \"<id>\")' session.jsonl`, for the `[id]` of any call\n\n## Silent turn · +2s\n",
+		"## Mode · rx · +4s\n\n## User · +6s\n",
 	} {
 		if !strings.Contains(transcript, want) {
 			t.Errorf("expected %q in the transcript, got:\n%s", want, transcript)

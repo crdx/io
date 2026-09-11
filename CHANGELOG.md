@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Show whole seconds for durations >= 1s
 - Show when a limited usage window resets
 - Detect valid Codex context windows the right way
 - Allow bash within host network, toggled with `n` cap

@@ -417,7 +417,7 @@ func TestACompletedOutcomeReachesTheTerminalEdge(t *testing.T) {
 	block.FinaliseRow(0, Done, 7420*time.Millisecond, "", "")
 
 	row := block.Rows(narrow)[0]
-	if got := style.Plain(row); !strings.HasSuffix(got, "✓ 7.4s") {
+	if got := style.Plain(row); !strings.HasSuffix(got, "✓ 7s") {
 		t.Errorf("expected the complete outcome at the end, got %q", got)
 	}
 	if got := style.Width(row); got > narrow {

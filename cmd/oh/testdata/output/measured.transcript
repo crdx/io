@@ -20,7 +20,7 @@ One of each, then.
 ## Tool calls · +2s
 
 ```
-bash: COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT [ok, 3 lines, 96B, 2.4s CPU, 700M peak, call_1]
+bash: COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT [ok, 3 lines, 96B, 2s CPU, 700M peak, call_1]
 ls [ok, 2 lines, call_2]
 read: diagram.png [ok, 180K, ~1.6Kt, call_3]
 edit: screen.go [ok, +12 −5, call_4]

@@ -48,8 +48,10 @@ func Ago(when time.Time) string {
 
 func FormatDuration(took time.Duration) string {
 	switch {
+	case took < time.Second:
+		return fmt.Sprintf("0.%ds", int(took.Milliseconds()%1000)/100)
 	case took < time.Minute:
-		return fmt.Sprintf("%d.%ds", int(took.Seconds()), int(took.Milliseconds()%1000)/100)
+		return fmt.Sprintf("%ds", int(took.Seconds()))
 	case took < time.Hour:
 		return fmt.Sprintf("%dm%02ds", int(took.Minutes()), int(took.Seconds())%60)
 	case took < 100*time.Hour:

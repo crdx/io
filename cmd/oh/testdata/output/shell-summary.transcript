@@ -21,7 +21,7 @@ bash: touch build.lock [ok, 2M peak, call_2]
 read: cmd/oh/dynamic/dynamic.go [ok, 1 line, 16B, ~4t, call_3]
 bash: printf 'one\\ttwo\\r\\n\\n\\tthree\\n' [ok, 3 lines, 17B, 2M peak, call_4]
 bash: ls /usr/bin [ok, 1 line, 177B, 6M peak, call_5]
-bash: for NAME in cmd/oh/dynamic cmd/oh/painter cmd/oh/call; do go vet ./$NAME; done [ok, 1 line, 3B, 1.4s CPU, 400M peak, call_6]
+bash: for NAME in cmd/oh/dynamic cmd/oh/painter cmd/oh/call; do go vet ./$NAME; done [ok, 1 line, 3B, 1s CPU, 400M peak, call_6]
 bash: go build ./... [error, 2 lines, 51B, 0.9s CPU, 300M peak, call_7]
 bash: just check [ok, 1 line, 26B, 8M peak, call_8]
 ```

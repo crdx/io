@@ -10,7 +10,7 @@ import (
 func TestCompactDurationDropsAnEmptySmallerUnit(t *testing.T) {
 	cases := map[time.Duration]string{
 		0:                          "0s",
-		1200 * time.Millisecond:    "1.2s",
+		1200 * time.Millisecond:    "1s",
 		30 * time.Second:           "30s",
 		time.Minute:                "1m",
 		5 * time.Minute:            "5m",
