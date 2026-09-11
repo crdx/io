@@ -19,7 +19,8 @@
 - The host's loopback TCP port 3000 is reachable on the same sandbox loopback port
 - A Unix socket works beneath /tmp, and is refused beneath the workspace
 - All other host loopback traffic and external networks are unreachable
-- The web search and fetch tools are refused
+- The lookup tool is refused
+- The fetch tool is refused
 - Anything else that requires external networking must be asked of the user
 
 # /tmp

@@ -6,12 +6,8 @@
 
 Taking them together.
 
-read screen.go –
-grep spinner *.go –
-
-
- 🤖 The workspace is now read-only.
-
+read screen.go ✓ 3L
+grep spinner *.go ✓ 1L
 
 Both still mention the spinner.
 === one column ===
@@ -112,67 +108,8 @@ e
 r
 .
 
-–
-–
-
-
-
-🤖
-
-T
-
-h
-
-e
-
-w
-
-o
-
-r
-
-k
-
-s
-
-p
-
-a
-
-c
-
-e
-
-i
-
-s
-
-n
-
-o
-
-w
-
-r
-
-e
-
-a
-
-d
-
--
-
-o
-
-n
-
-l
-
-y
-
-.
-
+✓
+✓
 
 B
 o
@@ -208,12 +145,8 @@ r
 
 Taking them together.
 
-read screen.go –
-grep spinner *.go –
-
-
- 🤖 The workspace is now read-only.
-
+read screen.go ✓ 3L
+grep spinner *.go ✓ 1L
 
 Both still mention the spinner.
 === tiny ===
@@ -229,16 +162,8 @@ Both still mention the spinner.
 Taking them
 together.
 
-read scre… –
-grep spin… –
-
-
- 🤖 The
-    workspac
-    e is now
-    read-onl
-    y.
-
+read s… ✓ 3L
+grep s… ✓ 1L
 
 Both still
 mention the
@@ -250,11 +175,7 @@ spinner.
 
 Taking them together.
 
-read screen.go –
-grep spinner *.go –
-
-
- 🤖 The workspace is now read-only.
-
+read screen.go ✓ 3L
+grep spinner *.go ✓ 1L
 
 Both still mention the spinner.

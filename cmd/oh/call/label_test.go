@@ -89,10 +89,10 @@ func TestCallNamesAreDrawnFromTheTable(t *testing.T) {
 		eventName string
 		want      call.Label
 	}{
-		"shell":      {eventName: "bash", want: call.Label{Name: "$", NameStyle: style.Shell}},
-		"web search": {eventName: "web_search", want: call.Label{Name: "search", NameStyle: style.Network}},
-		"web fetch":  {eventName: "web_fetch", want: call.Label{Name: "fetch", NameStyle: style.Network}},
-		"ordinary":   {eventName: "grep", want: call.Label{Name: "grep"}},
+		"shell":    {eventName: "bash", want: call.Label{Name: "$", NameStyle: style.Shell}},
+		"lookup":   {eventName: "lookup", want: call.Label{Name: "lookup", NameStyle: style.Lookup}},
+		"fetch":    {eventName: "fetch", want: call.Label{Name: "fetch", NameStyle: style.Network}},
+		"ordinary": {eventName: "grep", want: call.Label{Name: "grep"}},
 	} {
 		t.Run(name, func(t *testing.T) {
 			label := call.LabelFor(agent.Event{Name: test.eventName}, nil, nil)

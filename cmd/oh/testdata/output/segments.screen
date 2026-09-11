@@ -95,13 +95,15 @@ feature/bars
 === local-time / default format ===
 14:32
 === mode-toggle / all granted ===
-rxw gs
+rxw ngl
+=== mode-toggle / lookup only ===
+rxw ngl
+=== mode-toggle / network only ===
+rxw ngl
 === mode-toggle / pending prefix ===
-rxw gs
+rxw ngl
 === mode-toggle / read only ===
-rxw gs
-=== mode-toggle / web only ===
-rxw gs
+rxw ngl
 === path-grants / duplicate basenames ===
 r:/one/reference, rw:/two/reference
 === path-grants / empty ===

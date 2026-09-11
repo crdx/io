@@ -167,14 +167,14 @@ func TestTranscriptDoesNotAttributeToolCallsToTheUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.UserMessageEvent, Text: "check web"}); err != nil {
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.UserMessageEvent, Text: "check the web"}); err != nil {
 		t.Fatal(err)
 	}
-	if err := recorder.Event(time.Unix(5, 6), agent.Event{Kind: agent.ToolCallRequestEvent, ID: "call-1", Name: "web_search"}); err != nil {
+	if err := recorder.Event(time.Unix(5, 6), agent.Event{Kind: agent.ToolCallRequestEvent, ID: "call-1", Name: "lookup"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := recorder.Event(time.Unix(7, 8), agent.Event{
-		Kind: agent.ToolCallResultEvent, ID: "call-1", Name: "web_search", Status: agent.SuccessStatus,
+		Kind: agent.ToolCallResultEvent, ID: "call-1", Name: "lookup", Status: agent.SuccessStatus,
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -190,7 +190,7 @@ func TestTranscriptDoesNotAttributeToolCallsToTheUser(t *testing.T) {
 		t.Fatal(err)
 	}
 	transcript := string(stored)
-	want := "## User · +2.0s\n\ncheck web\n\n## Tool calls · +4.0s\n\n```\nweb_search [ok, call-1]\n```\n\n## Assistant · +8.0s"
+	want := "## User · +2.0s\n\ncheck the web\n\n## Tool calls · +4.0s\n\n```\nlookup [ok, call-1]\n```\n\n## Assistant · +8.0s"
 	if !strings.Contains(transcript, want) {
 		t.Errorf("expected the call log held under its own heading between the user and the answer, got:\n%s", transcript)
 	}

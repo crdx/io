@@ -8,7 +8,7 @@
 - **Workspace:** ``
 - **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
-## Mode · rxwgs · +0s
+## Mode · rxwngl · +0s
 
 ## User · +0s
 
@@ -24,7 +24,7 @@ work: work [cancelled, 1 line, 88B, toolu_1]
 
 The turn was interrupted because the user changed what the harness is allowed to do.
 
-## Mode · rxgs · toggled w · +0s
+## Mode · rxngl · toggled w · +0s
 
 ```
 The workspace is now read-only.

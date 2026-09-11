@@ -6,7 +6,7 @@
 
 $ NAME=alpha; case "$NAME" in alph… ✓ 2L
 notify command finished alpha and … ✓ 1L
-search how to quote a shell variab… ✓ 1L
+lookup how to quote a shell variab… ✓ 1L
 fetch https://gnu.org/bash clean_h… ✓ 1L
 
 done.
@@ -121,7 +121,7 @@ e
 
 $ NAME=alpha; case "$NAME" in alpha) echo alpha ;; esac; (echo beta) 3L ✓ 2L alpha beta
 notify command finished alpha and beta were printed ✓ 1L
-search how to quote a shell variable ✓ 1L
+lookup how to quote a shell variable ✓ 1L
 fetch https://gnu.org/bash clean_html ✓ 1L
 
 done.
@@ -137,7 +137,7 @@ done.
 
 $ NAME… ✓ 2L
 notify ✓ 1L
-search ✓ 1L
+lookup ✓ 1L
 fetch … ✓ 1L
 
 done.
@@ -148,7 +148,7 @@ done.
 
 $ NAME=alpha; case "$NAME" in alpha) echo alpha ;; esac; (echo beta) 3L ✓ 2L alpha beta
 notify command finished alpha and beta were printed ✓ 1L
-search how to quote a shell variable ✓ 1L
+lookup how to quote a shell variable ✓ 1L
 fetch https://gnu.org/bash clean_html ✓ 1L
 
 done.

@@ -4,6 +4,9 @@
 
 - Show when a limited usage window resets
 - Detect valid Codex context windows the right way
+- Rename `web_search` to `lookup`, toggled with `l` cap
+- Rename `web_fetch` to `fetch`, toggled with `n` cap
+- Remove the deprecated `s` cap
 
 ## [0.5.0] - 2026-09-10
 

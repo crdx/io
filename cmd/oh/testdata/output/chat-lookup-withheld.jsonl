@@ -1,0 +1,16 @@
+{"kind":"head","version":13,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
+{"kind":"event","event":{"kind":"user_message","text":"look up a topic while lookup access is withheld"}}
+{"kind":"event","event":{"render":"current weather","read_only":true,"kind":"tool_call_request","id":"call-1","name":"lookup","arguments":"{\"query\":\"current weather\"}"}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"lookup access is not granted; the user can grant it with ctrl+x l","id":"call-1","name":"lookup","status":"error","stats":{"kind":"output","lines":1,"bytes":65}}}
+{"kind":"event","event":{"kind":"model_message","text":"Lookup access is unavailable."}}
+{"kind":"item","payload":{"role":"user","content":"look up a topic while lookup access is withheld"}}
+{"kind":"item","payload":{"role":"assistant","content":"","tool_calls":[{"id":"call-1","type":"function","function":{"name":"lookup","arguments":"{\"query\":\"current weather\"}"}}]}}
+{"kind":"item","payload":{"role":"tool","content":"lookup access is not granted; the user can grant it with ctrl+x l","tool_call_id":"call-1"}}
+{"kind":"item","payload":{"role":"assistant","content":"Lookup access is unavailable."}}
+{"kind":"turn_completion","turn":{}}
+{"kind":"event","event":{"kind":"user_message","text":"continue after the refused lookup"}}
+{"kind":"event","event":{"kind":"model_message","text":"Resumed after the refusal."}}
+{"kind":"item","payload":{"role":"user","content":"continue after the refused lookup"}}
+{"kind":"item","payload":{"role":"assistant","content":"Resumed after the refusal."}}
+{"kind":"turn_completion","turn":{}}

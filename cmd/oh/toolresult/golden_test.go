@@ -13,14 +13,15 @@ import (
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/toolbox/bash"
 	"crdx.org/io/toolbox/edit"
+	"crdx.org/io/toolbox/fetch"
 	"crdx.org/io/toolbox/find"
 	"crdx.org/io/toolbox/grep"
 	"crdx.org/io/toolbox/job"
+	"crdx.org/io/toolbox/lookup"
 	"crdx.org/io/toolbox/ls"
 	"crdx.org/io/toolbox/notify"
 	"crdx.org/io/toolbox/read"
 	"crdx.org/io/toolbox/title"
-	"crdx.org/io/toolbox/web"
 	"crdx.org/io/toolbox/write"
 )
 
@@ -115,23 +116,23 @@ func TestToolResultsRenderForTheUser(t *testing.T) {
 				"regex parse error: unclosed character class"),
 		},
 		{
-			name: "web search",
-			exchange: resultExchange("web_search", web.SearchArgs{Query: "modern Go release"}, agent.SuccessStatus,
+			name: "lookup",
+			exchange: resultExchange("lookup", lookup.Args{Query: "modern Go release"}, agent.SuccessStatus,
 				"## Result\n\nGo has a new release. [Source](https://example.test/release)."),
 		},
 		{
-			name: "web fetch markdown",
-			exchange: resultExchange("web_fetch", web.FetchArgs{URL: "https://example.test/article", Type: "markdown"}, agent.SuccessStatus,
+			name: "fetch markdown",
+			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/article", Type: "markdown"}, agent.SuccessStatus,
 				"# Article\n\n- first\n- second\n"),
 		},
 		{
-			name: "web fetch html",
-			exchange: resultExchange("web_fetch", web.FetchArgs{URL: "https://example.test/raw", Type: "raw"}, agent.SuccessStatus,
+			name: "fetch html",
+			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/raw", Type: "raw"}, agent.SuccessStatus,
 				"<!DOCTYPE html>\n<title>Hello</title>\n"),
 		},
 		{
-			name: "web fetch failure",
-			exchange: resultExchange("web_fetch", web.FetchArgs{URL: "https://example.test/missing", Type: "text"}, agent.ErrorStatus,
+			name: "fetch failure",
+			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/missing", Type: "text"}, agent.ErrorStatus,
 				"web fetch failed with status 404: page not found"),
 		},
 		{

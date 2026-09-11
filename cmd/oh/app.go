@@ -368,11 +368,14 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 	case edit.ToggleShell:
 		self.toggleCap(caps.Shell)
 
+	case edit.ToggleNetwork:
+		self.toggleCap(caps.Network)
+
 	case edit.ToggleGit:
 		self.toggleCap(caps.Git)
 
-	case edit.ToggleWeb:
-		self.toggleCap(caps.Web)
+	case edit.ToggleLookup:
+		self.toggleCap(caps.Lookup)
 
 	case edit.DrawInput:
 	}

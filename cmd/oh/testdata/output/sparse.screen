@@ -3,11 +3,6 @@
  run the thing that takes no arguments
 
 
-
- 🤖 The web search and fetch tools are
-    now refused.
-
-
 status ✓
 notify done nothing to report ✓
 
@@ -78,89 +73,6 @@ t
 s
 
 
-
-
-🤖
-
-T
-
-h
-
-e
-
-w
-
-e
-
-b
-
-s
-
-e
-
-a
-
-r
-
-c
-
-h
-
-a
-
-n
-
-d
-
-f
-
-e
-
-t
-
-c
-
-h
-
-t
-
-o
-
-o
-
-l
-
-s
-
-a
-
-r
-
-e
-
-n
-
-o
-
-w
-
-r
-
-e
-
-f
-
-u
-
-s
-
-e
-
-d
-
-.
-
-
 ✓
 ✓
 
@@ -185,10 +97,6 @@ k
  run the thing that takes no arguments
 
 
-
- 🤖 The web search and fetch tools are now refused.
-
-
 status ✓
 notify done nothing to report ✓
 
@@ -201,16 +109,6 @@ Nothing came back.
  arguments
 
 
-
- 🤖 The web
-    search
-    and
-    fetch
-    tools
-    are now
-    refused.
-
-
 status ✓
 notify do… ✓
 
@@ -219,10 +117,6 @@ back.
 === wide ===
 
  run the thing that takes no arguments
-
-
-
- 🤖 The web search and fetch tools are now refused.
 
 
 status ✓

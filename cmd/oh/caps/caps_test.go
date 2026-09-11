@@ -10,14 +10,16 @@ import (
 )
 
 var (
-	nowReadOnly   = workspaceIs(false)
-	nowReadWrite  = workspaceIs(true)
-	gitReadOnly   = historyIs(false)
-	gitWritable   = historyIs(true)
-	shellGranted  = shellIs(true)
-	shellWithheld = shellIs(false)
-	webGranted    = webIs(true)
-	webWithheld   = webIs(false)
+	nowReadOnly     = workspaceIs(false)
+	nowReadWrite    = workspaceIs(true)
+	gitReadOnly     = historyIs(false)
+	gitWritable     = historyIs(true)
+	shellGranted    = shellIs(true)
+	shellWithheld   = shellIs(false)
+	lookupGranted   = lookupIs(true)
+	lookupWithheld  = lookupIs(false)
+	networkGranted  = networkIs(true)
+	networkWithheld = networkIs(false)
 )
 
 func TestEveryClauseSaysSomethingAndSaysItBothWays(t *testing.T) {
@@ -25,7 +27,8 @@ func TestEveryClauseSaysSomethingAndSaysItBothWays(t *testing.T) {
 		"workspace": {nowReadOnly, nowReadWrite},
 		"history":   {gitReadOnly, gitWritable},
 		"shell":     {shellWithheld, shellGranted},
-		"web":       {webWithheld, webGranted},
+		"lookup":    {lookupWithheld, lookupGranted},
+		"network":   {networkWithheld, networkGranted},
 	} {
 		if clauses[0] == "" || clauses[1] == "" {
 			t.Errorf("%s: expected a clause either way, got %q and %q", name, clauses[0], clauses[1])
@@ -157,18 +160,18 @@ func TestAModeSwappedTwiceIsNotAnnounced(t *testing.T) {
 	}
 }
 
-func TestSwitchingTheWebToolsIsAnnounced(t *testing.T) {
+func TestSwitchingTheLookupToolsIsAnnounced(t *testing.T) {
 	self := NewMode(Read)
-	self.Toggle(Web)
+	self.Toggle(Lookup)
 
-	if got := self.Inject(); got != webGranted {
-		t.Errorf("expected %q, got %q", webGranted, got)
+	if got := self.Inject(); got != lookupGranted {
+		t.Errorf("expected %q, got %q", lookupGranted, got)
 	}
 
-	self.Toggle(Web)
+	self.Toggle(Lookup)
 
-	if got := self.Inject(); got != webWithheld {
-		t.Errorf("expected %q, got %q", webWithheld, got)
+	if got := self.Inject(); got != lookupWithheld {
+		t.Errorf("expected %q, got %q", lookupWithheld, got)
 	}
 }
 
@@ -184,6 +187,21 @@ func TestSwitchingTheShellIsAnnounced(t *testing.T) {
 
 	if got := self.Inject(); got != shellGranted {
 		t.Errorf("expected %q, got %q", shellGranted, got)
+	}
+}
+
+func TestSwitchingHostNetworkAccessIsAnnounced(t *testing.T) {
+	self := NewMode(Read)
+	self.Toggle(Network)
+
+	if got := self.Inject(); got != networkGranted {
+		t.Errorf("expected %q, got %q", networkGranted, got)
+	}
+
+	self.Toggle(Network)
+
+	if got := self.Inject(); got != networkWithheld {
+		t.Errorf("expected %q, got %q", networkWithheld, got)
 	}
 }
 

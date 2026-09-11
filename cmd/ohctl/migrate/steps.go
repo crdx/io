@@ -40,6 +40,7 @@ var steps = map[int]step{
 		migrateJournal: harnessNoticesReplaceSubmittedProse,
 		finalise:       addSessionMeta,
 	},
+	12: {migrateLine: lookupFlagReplacesWebFlag},
 }
 
 var legacyGrantAccess = map[string]string{
@@ -118,7 +119,7 @@ func isTurnCompletion(line map[string]json.RawMessage) bool {
 }
 
 func announces(mode string, text string) bool {
-	grantedCaps, err := caps.Parse(mode)
+	grantedCaps, err := recordedCaps(mode)
 	if err != nil {
 		return false
 	}
@@ -169,6 +170,53 @@ func dropBackgroundCapability(lines []map[string]json.RawMessage) ([]map[string]
 
 func withoutBackgroundFlag(flags string) string {
 	return strings.ReplaceAll(flags, legacyBackgroundFlag, "")
+}
+
+const (
+	legacyLookupFlag  = "s"
+	currentLookupFlag = "l"
+)
+
+func flagsOf(raw json.RawMessage) (string, bool) {
+	var flags string
+	if err := json.Unmarshal(raw, &flags); err != nil {
+		return "", false
+	}
+
+	return flags, true
+}
+
+func recordedCaps(flags string) (caps.Set, error) {
+	return caps.Parse(strings.ReplaceAll(flags, legacyLookupFlag, currentLookupFlag))
+}
+
+func lookupFlagReplacesWebFlag(line map[string]json.RawMessage) error {
+	return with(line, func(event map[string]json.RawMessage) error {
+		if string(event["kind"]) != `"mode_change"` {
+			return nil
+		}
+
+		if string(event["name"]) == `"`+legacyLookupFlag+`"` {
+			event["name"] = json.RawMessage(`"` + currentLookupFlag + `"`)
+		}
+
+		return renameLookupFlag(event)
+	})
+}
+
+func renameLookupFlag(event map[string]json.RawMessage) error {
+	flags, areFlags := flagsOf(event["state"])
+	if !areFlags || !strings.Contains(flags, legacyLookupFlag) {
+		return nil
+	}
+
+	encodedFlags, err := json.Marshal(strings.ReplaceAll(flags, legacyLookupFlag, currentLookupFlag))
+	if err != nil {
+		return err
+	}
+	event["state"] = encodedFlags
+
+	return nil
 }
 
 func promptBytesReplaceContextFiles(lines []map[string]json.RawMessage) ([]map[string]json.RawMessage, error) {
@@ -314,7 +362,7 @@ func addLastMode(lines []map[string]json.RawMessage) ([]map[string]json.RawMessa
 				continue
 			}
 
-			currentCaps, err = caps.Parse(withoutBackgroundFlag(event.Text))
+			currentCaps, err = recordedCaps(withoutBackgroundFlag(event.Text))
 			if err != nil {
 				return nil, fmt.Errorf("line %d: the mode could not be read: %w", index+1, err)
 			}
@@ -633,10 +681,29 @@ func noticeNames(event agent.Event, knownPaths map[string]bool) []string {
 
 func harnessNotice(event agent.Event) (string, bool) {
 	if event.Kind == caps.ModeChange {
-		return caps.ModeNotice(event)
+		return recordedModeNotice(event)
 	}
 
 	return pathgrant.Notice(event)
+}
+
+func recordedModeNotice(event agent.Event) (string, bool) {
+	swappedCaps, isKnown := caps.Named(event.Name)
+	if !isKnown {
+		return "", false
+	}
+
+	flags, areFlags := flagsOf(event.State)
+	if !areFlags {
+		return "", false
+	}
+
+	grantedCaps, err := recordedCaps(flags)
+	if err != nil {
+		return "", false
+	}
+
+	return caps.Notice(swappedCaps, grantedCaps)
 }
 
 func grantedPaths(event agent.Event) []string {

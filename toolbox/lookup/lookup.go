@@ -1,0 +1,55 @@
+package lookup
+
+import (
+	"context"
+	"errors"
+	"strings"
+
+	"crdx.org/io/tool"
+)
+
+var ErrWithheld = errors.New("lookup access is not granted; the user can grant it with ctrl+x l")
+
+type Args struct {
+	Query string `json:"query"`
+}
+
+type Searcher interface {
+	Search(context context.Context, query string) (string, error)
+}
+
+func New(isAllowed func() bool, searcher Searcher) tool.Tool {
+	return tool.Implement(
+		tool.Definition{
+			Name:        "lookup",
+			Description: "search the web using OpenAI and return a cited answer",
+			Schema: tool.Schema{
+				tool.String("query", "web lookup query"),
+			},
+		},
+		func(args Args) (string, string) { return args.Query, "" },
+	).
+		Validate(validate).
+		IsEmbarrassinglyParallel().
+		ChangesNothing().
+		Requires(isAllowed, ErrWithheld).
+		Exec(func(ctx context.Context, args Args) (string, tool.ToolCallMetrics, error) {
+			output, err := searcher.Search(ctx, args.Query)
+			if err != nil {
+				return "", tool.ToolCallMetrics{}, err
+			}
+			if output == "" {
+				return "", tool.ToolCallMetrics{}, errors.New("the lookup returned no content")
+			}
+
+			return output, tool.GetMetrics(output), nil
+		})
+}
+
+func validate(args Args) error {
+	if strings.TrimSpace(args.Query) == "" {
+		return errors.New("query is required")
+	}
+
+	return nil
+}

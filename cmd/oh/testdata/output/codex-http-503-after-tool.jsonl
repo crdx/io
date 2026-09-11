@@ -1,5 +1,5 @@
-{"kind":"head","version":12,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
+{"kind":"head","version":13,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
 {"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
 {"kind":"event","event":{"kind":"user_message","text":"complete a tool round before an upstream failure"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Use the tool."}}

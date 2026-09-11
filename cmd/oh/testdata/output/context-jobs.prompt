@@ -19,7 +19,8 @@
 - A service started with the job tool stays up, and a later bash call reaches it on <loopback>
 - A Unix socket works beneath /tmp, and is refused beneath the workspace
 - The host's loopback interface and external networks are unreachable
-- The web search and fetch tools are refused
+- The lookup tool is refused
+- The fetch tool is refused
 - Anything else that requires external networking must be asked of the user
 
 # /tmp

@@ -22,7 +22,8 @@
 # Network
 
 - There is no sandbox, so a command reaches whatever network this machine reaches
-- The web search and fetch tools are refused
+- The lookup tool is refused
+- The fetch tool is refused
 
 # /tmp
 

@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	readTool      = "read"
-	shellTool     = "bash"
-	webSearchTool = "web_search"
-	webFetchTool  = "web_fetch"
+	readTool   = "read"
+	shellTool  = "bash"
+	lookupTool = "lookup"
+	fetchTool  = "fetch"
 )
 
 type ToolLookup func(string) (tool.Tool, bool)
@@ -111,7 +111,7 @@ var toolLabels = map[string]struct {
 	name  string
 	style style.Style
 }{
-	shellTool:     {"$", style.Shell},
-	webSearchTool: {"search", style.Network},
-	webFetchTool:  {"fetch", style.Network},
+	shellTool:  {"$", style.Shell},
+	lookupTool: {"lookup", style.Lookup},
+	fetchTool:  {"fetch", style.Network},
 }

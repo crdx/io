@@ -10,13 +10,13 @@ import (
 )
 
 func TestEveryCapabilitySetKeepsTheSameLetters(t *testing.T) {
-	for _, flags := range []string{"", "r", "rw", "rx", "rxw", "rxwg", "rxwgs", "rg", "rs"} {
+	for _, flags := range []string{"", "r", "rw", "rx", "rxw", "rxwn", "rxwng", "rxwngl", "rn", "rg", "rl"} {
 		grantedCaps, err := caps.Parse(flags)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if got := style.Plain(render(t, grantedCaps, false)); got != "rxw gs" {
+		if got := style.Plain(render(t, grantedCaps, false)); got != "rxw ngl" {
 			t.Errorf("caps %q drew %q, want the letters to stand whatever is granted", flags, got)
 		}
 	}
@@ -34,7 +34,7 @@ func TestOnlyTheStylingSaysWhatIsGranted(t *testing.T) {
 	if pending == refused {
 		t.Errorf("a pending prefix drew nothing new: %q", pending)
 	}
-	if got := style.Plain(pending); got != "rxw gs" {
+	if got := style.Plain(pending); got != "rxw ngl" {
 		t.Errorf("a pending prefix drew %q, want the same letters", got)
 	}
 }

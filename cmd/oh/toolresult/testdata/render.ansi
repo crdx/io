@@ -129,14 +129,14 @@ main.go:12: undefined: run
 \e[38;2;204;102;102mError\e[0m
 \e[38;2;204;102;102mregex parse error: unclosed character class\e[0m
 
-=== web search ===
-\e[38;2;207;173;0msearch\e[0m · \e[38;2;192;128;80mmodern Go release\e[0m
+=== lookup ===
+\e[38;2;207;173;0mlookup\e[0m · \e[38;2;192;128;80mmodern Go release\e[0m
 
 \e[1m\e[38;2;207;173;0mResult\e[0m\e[0m
 
 Go has a new release. \e[38;2;129;162;190mSource\e[0m\e[38;2;150;152;150m (https://example.test/release)\e[0m.
 
-=== web fetch markdown ===
+=== fetch markdown ===
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/article\e[0m · \e[38;2;150;152;150mmarkdown\e[0m
 
 \e[1m\e[38;2;207;173;0mArticle\e[0m\e[0m
@@ -144,14 +144,14 @@ Go has a new release. \e[38;2;129;162;190mSource\e[0m\e[38;2;150;152;150m (https
 \e[38;2;192;128;80m• \e[0mfirst
 \e[38;2;192;128;80m• \e[0msecond
 
-=== web fetch html ===
+=== fetch html ===
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/raw\e[0m · \e[38;2;150;152;150mraw\e[0m
 
 \e[38;2;150;152;150m<!DOCTYPE html>\e[0m
 <title>\e[38;2;150;152;150mHello\e[0m</title>
 
 
-=== web fetch failure ===
+=== fetch failure ===
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/missing\e[0m · \e[38;2;150;152;150mtext\e[0m
 
 

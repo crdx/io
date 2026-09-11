@@ -129,11 +129,12 @@ import (
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/bash"
 	"crdx.org/io/toolbox/expose"
+	"crdx.org/io/toolbox/fetch"
 	"crdx.org/io/toolbox/job"
+	"crdx.org/io/toolbox/lookup"
 	"crdx.org/io/toolbox/notify"
 	"crdx.org/io/toolbox/read"
 	"crdx.org/io/toolbox/title"
-	"crdx.org/io/toolbox/web"
 	"crdx.org/io/wire/openai/chatcompletions"
 )
 
@@ -3727,7 +3728,7 @@ func TestAResumedConversationDrawsItsRecordedConfinement(t *testing.T) {
 			block := input.Block{
 				Top:    input.Ruler{Left: "oh"},
 				Input:  edit.Frame{Rows: []string{"> carry on"}},
-				Bottom: input.Ruler{Right: "rxw gs"},
+				Bottom: input.Ruler{Right: "rxw ngl"},
 				Rule:   resumedHarness.ruleStyle(),
 			}
 			rows, _, _ := block.Rows(narrowColumns)
@@ -4025,25 +4026,30 @@ func submittedModeMessagesStream() string {
 }
 
 func TestTakingBackAModeChangeDrawsWhatItDrewBefore(t *testing.T) {
-	completeInteraction := func() string {
-		stream := modeTakebackStream(t, 2)
-		if strings.Contains(stream, "\x1b[H\x1b[2J") {
-			t.Error("taking the mode change back cleared the screen")
+	completeInteraction := func(letter rune) func() string {
+		return func() string {
+			stream := modeTakebackStream(t, letter, 2)
+			if strings.Contains(stream, "\x1b[H\x1b[2J") {
+				t.Error("taking the mode change back cleared the screen")
+			}
+			return stream
 		}
-		return stream
 	}
 
 	compareWithGolden(t, "mode-takeback", ".ansi", map[string]func() string{
-		"complete interaction": completeInteraction,
+		"lookup complete interaction":  completeInteraction('l'),
+		"network complete interaction": completeInteraction('n'),
 	})
 	compareWithGolden(t, "mode-takeback", ".screen", shownPasses(t, map[string]func() string{
-		"1 before either chord":  func() string { return modeTakebackStream(t, 0) },
-		"2 after ctrl+x s":       func() string { return modeTakebackStream(t, 1) },
-		"3 after ctrl+x s twice": func() string { return modeTakebackStream(t, 2) },
+		"1 before either chord":  func() string { return modeTakebackStream(t, 'l', 0) },
+		"2 after ctrl+x l":       func() string { return modeTakebackStream(t, 'l', 1) },
+		"3 after ctrl+x l twice": func() string { return modeTakebackStream(t, 'l', 2) },
+		"4 after ctrl+x n":       func() string { return modeTakebackStream(t, 'n', 1) },
+		"5 after ctrl+x n twice": func() string { return modeTakebackStream(t, 'n', 2) },
 	}))
 }
 
-func modeTakebackStream(t *testing.T, toggleCount int) string {
+func modeTakebackStream(t *testing.T, letter rune, toggleCount int) string {
 	t.Helper()
 
 	self, _ := modeFixture(t)
@@ -4059,7 +4065,7 @@ func modeTakebackStream(t *testing.T, toggleCount int) string {
 
 	for range toggleCount {
 		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl})
-		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: 's'})
+		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: letter})
 	}
 
 	return screenOutput.String()
@@ -6230,7 +6236,10 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 			func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
 		),
 	)
-	tools = append(tools, web.New(func() bool { return true }, sessionGoldenSearcher{})...)
+	tools = append(tools,
+		lookup.New(func() bool { return true }, sessionGoldenSearcher{}),
+		fetch.New(func() bool { return true }),
+	)
 	log := testLog(t)
 
 	chat := &App{
@@ -6509,7 +6518,7 @@ func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
 func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	passes := map[string]func() string{}
 
-	for _, flags := range []string{"", "r", "rw", "rx", "rxw", "rxwg", "rxwgs", "rg", "rs"} {
+	for _, flags := range []string{"", "r", "rw", "rx", "rxw", "rxwn", "rxwng", "rxwngl", "rn", "rg", "rl"} {
 		grantedCaps, err := caps.Parse(flags)
 		if err != nil {
 			t.Fatal(err)
@@ -7551,7 +7560,7 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 			Name: "info",
 			Run: func(context slash.Context, _ slash.Arguments) error {
 				context.PlainNotice(style.Information("active-model") + "  GPT Sol\n" +
-					style.Information("mode-toggle") + "   " + style.Subtle("rxw gs"))
+					style.Information("mode-toggle") + "   " + style.Subtle("rxw ngl"))
 				return nil
 			},
 		},
@@ -9001,9 +9010,15 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			"",
 			segment.Context{},
 		),
-		"mode-toggle / web only": goldenSegmentPass(
+		"mode-toggle / network only": goldenSegmentPass(
 			t,
-			modeToggle.New(func() caps.Set { return caps.Read | caps.Web }, func() bool { return false }),
+			modeToggle.New(func() caps.Set { return caps.Read | caps.Network }, func() bool { return false }),
+			"",
+			segment.Context{},
+		),
+		"mode-toggle / lookup only": goldenSegmentPass(
+			t,
+			modeToggle.New(func() caps.Set { return caps.Read | caps.Lookup }, func() bool { return false }),
 			"",
 			segment.Context{},
 		),
@@ -11005,16 +11020,17 @@ func (self sessionGoldenTurn) usesTheInterface() bool {
 }
 
 type sessionGoldenTool struct {
-	Name          string   `toml:"name"`
-	Outputs       []string `toml:"outputs"`
-	Image         string   `toml:"image"`
-	StateKey      string   `toml:"state-key"`
-	ShellWithheld bool     `toml:"shell-withheld"`
-	WebWithheld   bool     `toml:"web-withheld"`
-	WebAnswer     string   `toml:"web-answer"`
-	Blocks        bool     `toml:"blocks"`
-	StoppedOutput string   `toml:"stopped-output"`
-	IsLargeRead   bool     `toml:"large-read"`
+	Name           string   `toml:"name"`
+	Outputs        []string `toml:"outputs"`
+	Image          string   `toml:"image"`
+	StateKey       string   `toml:"state-key"`
+	ShellWithheld  bool     `toml:"shell-withheld"`
+	LookupWithheld bool     `toml:"lookup-withheld"`
+	FetchWithheld  bool     `toml:"fetch-withheld"`
+	LookupAnswer   string   `toml:"lookup-answer"`
+	Blocks         bool     `toml:"blocks"`
+	StoppedOutput  string   `toml:"stopped-output"`
+	IsLargeRead    bool     `toml:"large-read"`
 }
 
 type sessionGoldenScenario struct {
@@ -11302,10 +11318,12 @@ func newSessionGoldenTools(
 			continue
 		}
 
-		if specification.WebWithheld || specification.WebAnswer != "" {
-			isGranted := specification.WebAnswer != ""
-			searcher := sessionGoldenSearcher{answer: specification.WebAnswer}
-			tools = append(tools, web.New(func() bool { return isGranted }, searcher)...)
+		if specification.LookupWithheld || specification.FetchWithheld || specification.LookupAnswer != "" {
+			searcher := sessionGoldenSearcher{answer: specification.LookupAnswer}
+			tools = append(tools,
+				lookup.New(func() bool { return !specification.LookupWithheld }, searcher),
+				fetch.New(func() bool { return !specification.FetchWithheld }),
+			)
 			continue
 		}
 

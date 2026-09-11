@@ -16,13 +16,14 @@ import (
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/toolbox/bash"
 	"crdx.org/io/toolbox/edit"
+	"crdx.org/io/toolbox/fetch"
 	"crdx.org/io/toolbox/find"
 	"crdx.org/io/toolbox/grep"
+	"crdx.org/io/toolbox/lookup"
 	"crdx.org/io/toolbox/ls"
 	"crdx.org/io/toolbox/notify"
 	"crdx.org/io/toolbox/read"
 	"crdx.org/io/toolbox/title"
-	"crdx.org/io/toolbox/web"
 	"crdx.org/io/toolbox/write"
 )
 
@@ -50,10 +51,10 @@ func render(exchange internaltoolresult.Exchange, columns int) string {
 		resultView, err = renderFind(exchange)
 	case "grep":
 		resultView, err = renderGrep(exchange)
-	case "web_search":
-		resultView, err = renderWebSearch(exchange, columns)
-	case "web_fetch":
-		resultView, err = renderWebFetch(exchange, columns)
+	case "lookup":
+		resultView, err = renderLookup(exchange, columns)
+	case "fetch":
+		resultView, err = renderFetch(exchange, columns)
 	case title.Name:
 		resultView, err = renderTitle(exchange)
 	case "notify":
@@ -174,18 +175,18 @@ func renderGrep(exchange internaltoolresult.Exchange) (string, error) {
 	return withFailure(style.Heading("grep")+partSeparator+subject+"\n\n"+body, exchange), nil
 }
 
-func renderWebSearch(exchange internaltoolresult.Exchange, columns int) (string, error) {
-	var arguments web.SearchArgs
+func renderLookup(exchange internaltoolresult.Exchange, columns int) (string, error) {
+	var arguments lookup.Args
 	if err := decodeArguments(exchange, &arguments); err != nil {
 		return "", err
 	}
 
 	body := renderMarkdown(successfulText(exchange), columns)
-	return withFailure(heading("search", safe(arguments.Query))+"\n\n"+body, exchange), nil
+	return withFailure(heading("lookup", safe(arguments.Query))+"\n\n"+body, exchange), nil
 }
 
-func renderWebFetch(exchange internaltoolresult.Exchange, columns int) (string, error) {
-	var arguments web.FetchArgs
+func renderFetch(exchange internaltoolresult.Exchange, columns int) (string, error) {
+	var arguments fetch.Args
 	if err := decodeArguments(exchange, &arguments); err != nil {
 		return "", err
 	}

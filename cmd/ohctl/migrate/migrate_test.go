@@ -581,7 +581,7 @@ func TestFormatNineMigrationForgetsTheModeASessionWasClosedOn(t *testing.T) {
 		t.Errorf("kept %d events, want the two the completed turn holds", got)
 	}
 	currentCaps, recorded := caps.LastRecordedMode(storedSession.Events)
-	if !recorded || currentCaps != caps.All() {
+	if !recorded || currentCaps != caps.Read|caps.Shell|caps.Write|caps.Git|caps.Lookup {
 		t.Errorf("recovered %s and %t, want the mode the turn ran in", currentCaps.Flags(), recorded)
 	}
 }
@@ -747,6 +747,59 @@ func TestFormatElevenMigrationKeepsTheFactAndDropsTheProse(t *testing.T) {
 	}
 }
 
+func TestFormatTwelveMigrationRenamesTheWebFlagToLookup(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":12,"id":"one","name":"brave-otter"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"session_startup","took":1000000}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"mode_change","state":"rxws"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"user_message","text":"begin"}}`,
+		`{"kind":"item","time":"2026-08-01T00:00:04Z","payload":{"role":"user","content":"begin"}}`,
+		`{"kind":"turn_completion","time":"2026-08-01T00:00:05Z"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:06Z","event":{"kind":"mode_change","name":"s","state":"rxw"}}`,
+		`{"kind":"item","time":"2026-08-01T00:00:08Z","payload":{"role":"user","content":"carry on"}}`,
+		`{"kind":"turn_completion","time":"2026-08-01T00:00:09Z"}`,
+	)
+
+	if _, err := migrate.Session(options(directory), name); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	grantedCaps, recorded := caps.LastRecordedMode(storedSession.Events)
+	if !recorded || grantedCaps != caps.Read|caps.Shell|caps.Write {
+		t.Errorf("recovered %s and %t, want the mode the session was left in", grantedCaps.Flags(), recorded)
+	}
+
+	var hasToggle bool
+
+	for _, event := range storedSession.Events {
+		if event.Kind != caps.ModeChange {
+			continue
+		}
+		if strings.Contains(string(event.State), "s") {
+			t.Errorf("the web flag survived in %+v", event)
+		}
+		if event.Name == "" {
+			continue
+		}
+		hasToggle = true
+		if event.Name != caps.Lookup.Flag() {
+			t.Errorf("the toggled capability is still named %q", event.Name)
+		}
+		if notice, isSaid := caps.ModeNotice(event); !isSaid {
+			t.Errorf("the mode change cannot say itself: %q", notice)
+		}
+	}
+
+	if !hasToggle {
+		t.Error("the migrated journal lost the capability it recorded being toggled")
+	}
+}
+
 func firstFormatJournal() []string {
 	return []string{
 		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter",` +
@@ -798,7 +851,7 @@ func TestAJournalMigratesToTheSameBytesWhetherStoredOrArchived(t *testing.T) {
 	}
 
 	for _, wanted := range []string{
-		`"version":12`,
+		`"version":13`,
 		`"emphasis":{"kind":"syntax","value":"a.go"}`,
 		`"access":"rw"`,
 		`{"kind":"turn_interruption","name":"escape"}`,

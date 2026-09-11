@@ -82,8 +82,8 @@ var (
 	TypedInput     Style = Normal
 	User           Style = background("#343541")
 	Greeting       Style = col.Italic
-	Web            Style = hex(steel)
-	Network        Style = hex(red)
+	Lookup         Style = hex(steel)
+	Network        Style = hex(steel)
 	Simulation     Style = gradient(orchid, aqua)
 )
 

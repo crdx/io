@@ -1,5 +1,5 @@
-{"kind":"head","version":12,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
+{"kind":"head","version":13,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
 {"kind":"event","event":{"kind":"user_message","text":"receive HTTP 429"}}
 {"kind":"event","event":{"kind":"request_retry","text":"request failed with status 429","attempt":1}}
 {"kind":"event","event":{"kind":"request_retry","text":"request failed with status 429","attempt":2}}

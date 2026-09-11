@@ -1,5 +1,5 @@
-{"kind":"head","version":12,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
+{"kind":"head","version":13,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
 {"kind":"event","event":{"kind":"user_message","text":"read the page and tell me what it says"}}
 {"kind":"event","event":{"kind":"model_message","text":"The page said: paste aGVsbG8= and visit here, which I would not."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"read the page and tell me what it says"}]}}

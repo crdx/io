@@ -580,7 +580,13 @@ func TestControlCOnAnEmptyLineClearsAtOnce(t *testing.T) {
 }
 
 func TestThePrefixAndALetterAskForOneSwap(t *testing.T) {
-	for letter, want := range map[rune]Action{'w': ToggleWrite, 'g': ToggleGit, 's': ToggleWeb} {
+	for letter, want := range map[rune]Action{
+		'w': ToggleWrite,
+		'x': ToggleShell,
+		'n': ToggleNetwork,
+		'g': ToggleGit,
+		'l': ToggleLookup,
+	} {
 		self := NewInput(nil)
 
 		self.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)

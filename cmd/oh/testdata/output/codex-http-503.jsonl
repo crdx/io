@@ -1,5 +1,5 @@
-{"kind":"head","version":12,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
+{"kind":"head","version":13,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
 {"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
 {"kind":"event","event":{"kind":"user_message","text":"receive HTTP 503"}}
 {"kind":"event","event":{"kind":"request_retry","text":"request failed with status 503","attempt":1}}

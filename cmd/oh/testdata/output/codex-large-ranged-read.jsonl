@@ -1,5 +1,5 @@
-{"kind":"head","version":12,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
+{"kind":"head","version":13,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
 {"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
 {"kind":"event","event":{"kind":"user_message","text":"read lines two and three from the large file"}}
 {"kind":"event","event":{"render":"large.txt","detail":"2-3","emphasis":{"kind":"focus","value":"large.txt"},"read_only":true,"kind":"tool_call_request","id":"call-1","name":"read","arguments":"{\"path\":\"large.txt\",\"offset\":2,\"limit\":2}"}}

@@ -30,7 +30,7 @@ var (
 		"filepathJoin":  filepath.Join,
 		"scopeRules":    scopeRules,
 		"shellAccess":   shellAccess,
-		"webAccess":     webAccess,
+		"lookupAccess":  lookupAccess,
 		"networkRules":  networkRules,
 		"scratchRules":  scratchRules,
 		"shellSandbox":  shellSandbox,
@@ -89,8 +89,9 @@ type harnessContextTemplateData struct {
 	WorkspaceWritable bool
 	GitWritable       bool
 	ShellGranted      bool
-	WebGranted        bool
+	LookupGranted     bool
 	JobsGranted       bool
+	NetworkGranted    bool
 	Yolo              bool
 }
 
@@ -118,6 +119,7 @@ type Config struct {
 	DropsDirectory string
 	Skills         []skill.Skill
 	JobsGranted    bool
+	NetworkGranted bool
 	Yolo           bool
 }
 
@@ -211,7 +213,8 @@ func harnessContext(config Config) string {
 		GitWritable:       currentCaps.Has(caps.Git),
 		ShellGranted:      currentCaps.Has(caps.Shell),
 		JobsGranted:       config.JobsGranted,
-		WebGranted:        currentCaps.Has(caps.Web),
+		NetworkGranted:    config.NetworkGranted,
+		LookupGranted:     currentCaps.Has(caps.Lookup),
 		Yolo:              config.Yolo,
 	}
 
@@ -305,7 +308,7 @@ func shellAccess(isGranted bool) string {
 	return "refused"
 }
 
-func webAccess(isGranted bool) string {
+func lookupAccess(isGranted bool) string {
 	if isGranted {
 		return "granted external network access"
 	}
@@ -330,10 +333,10 @@ func sandboxHeader(isYolo bool) string {
 
 func networkRules(data harnessContextTemplateData) string {
 	if data.Yolo {
-		return strings.Join([]string{
-			"- There is no sandbox, so a command reaches whatever network this machine reaches",
-			"- The web search and fetch tools are " + webAccess(data.WebGranted),
-		}, "\n")
+		return strings.Join(append(
+			[]string{"- There is no sandbox, so a command reaches whatever network this machine reaches"},
+			networkToolRules(data)...,
+		), "\n")
 	}
 
 	lines := []string{
@@ -368,12 +371,22 @@ func networkRules(data harnessContextTemplateData) string {
 		hostReachability = "- All other host loopback traffic and external networks are unreachable"
 	}
 
-	return strings.Join(append(lines,
+	lines = append(lines,
 		"- A Unix socket works beneath /tmp, and is refused beneath the workspace",
 		hostReachability,
-		"- The web search and fetch tools are "+webAccess(data.WebGranted),
+	)
+	lines = append(lines, networkToolRules(data)...)
+
+	return strings.Join(append(lines,
 		"- Anything else that requires external networking must be asked of the user",
 	), "\n")
+}
+
+func networkToolRules(data harnessContextTemplateData) []string {
+	return []string{
+		"- The lookup tool is " + lookupAccess(data.LookupGranted),
+		"- The fetch tool is " + lookupAccess(data.NetworkGranted),
+	}
 }
 
 func scratchRules(tmpDir string, isYolo bool) string {

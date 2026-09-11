@@ -24,11 +24,7 @@ read: screen.go [call_1]
 grep: spinner [call_2]
 ```
 
-## Mode · rxgs · toggled w · +4s
-
-```
-The workspace is now read-only.
-```
+## Mode · toggled w · +4s
 
 ## Tool calls · +5s
 

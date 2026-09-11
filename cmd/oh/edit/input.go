@@ -19,7 +19,8 @@ const (
 	ToggleWrite
 	ToggleShell
 	ToggleGit
-	ToggleWeb
+	ToggleLookup
+	ToggleNetwork
 	CompleteCommand
 )
 
@@ -396,11 +397,14 @@ func (self *Input) toggleMode(button key.Key) Action {
 	case 'x':
 		return ToggleShell
 
+	case 'n':
+		return ToggleNetwork
+
 	case 'g':
 		return ToggleGit
 
-	case 's':
-		return ToggleWeb
+	case 'l':
+		return ToggleLookup
 	}
 
 	return DrawInput

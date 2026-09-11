@@ -29,8 +29,9 @@ opencode-go
 anthropic
 === capabilities ===
 rxw
-rxwg
-rxwgs
+rxwn
+rxwng
+rxwngl
 === tools ===
 read
 ls
@@ -42,8 +43,8 @@ bash
 job
 notify
 title
-web_search
-web_fetch
+lookup
+fetch
 === sessions ===
 newer-jaguar
 older-badger

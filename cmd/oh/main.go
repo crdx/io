@@ -23,9 +23,10 @@ import (
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/expose"
+	"crdx.org/io/toolbox/fetch"
+	"crdx.org/io/toolbox/lookup"
 	"crdx.org/io/toolbox/notify"
 	"crdx.org/io/toolbox/title"
-	"crdx.org/io/toolbox/web"
 
 	"crdx.org/io/approval"
 	"crdx.org/io/cmd/oh/backend"
@@ -80,8 +81,8 @@ var completableToolNames = []string{
 	"job",
 	"notify",
 	title.Name,
-	"web_search",
-	"web_fetch",
+	"lookup",
+	"fetch",
 }
 
 func main() {
@@ -587,6 +588,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			DropsDirectory: drops.GetDirectory(sessionInfo.Directory),
 			Skills:         availableSkills,
 			JobsGranted:    jobManager != nil,
+			NetworkGranted: args.Caps.Has(caps.Network),
 			Yolo:           args.Yolo,
 		})
 		if err != nil {
@@ -677,9 +679,10 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		toolboxTools = append(toolboxTools, notify.New(screen.WriteEscape))
 	}
 	toolboxTools = append(toolboxTools, title.New())
-	toolboxTools = append(toolboxTools, web.New(func() bool {
-		return mode.Current().Has(caps.Web)
-	}, client.Search)...)
+	toolboxTools = append(toolboxTools,
+		lookup.New(func() bool { return mode.Current().Has(caps.Lookup) }, client.Search),
+		fetch.New(func() bool { return mode.Current().Has(caps.Network) }),
+	)
 	toolboxTools = truncate.Tools(toolboxTools, toolOutputLimit)
 
 	enabledToolNames := args.Tools

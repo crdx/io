@@ -3,11 +3,6 @@
 \e[48;2;52;53;65m run the thing that takes no arguments  \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
-\e[48;2;52;53;65m                                        \e[0m\r
-\e[48;2;52;53;65m 🤖 The web search and fetch tools are  \e[0m\r
-\e[48;2;52;53;65m    now refused.                        \e[0m\r
-\e[48;2;52;53;65m                                        \e[0m\r
-\r
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
@@ -79,89 +74,6 @@
 \e[48;2;52;53;65ms\e[0m\r
 \e[48;2;52;53;65m \e[0m\r
 \r
-\e[48;2;52;53;65m \e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65m🤖\e[0m\r
-\e[48;2;52;53;65m \e[0m\r
-\e[48;2;52;53;65mT\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mw\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mb\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mc\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65md\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mf\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mc\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mw\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mf\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mu\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65md\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65m.\e[0m\r
-\e[48;2;52;53;65m \e[0m\r
-\r
 \e[?7l\r\e[K\e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;76;154;44m✓\e[0m\r
 \r
@@ -186,9 +98,6 @@
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m run the thing that takes no arguments\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.\e[0m
-\e[48;2;52;53;65m\e[0m
 status \e[38;2;76;154;44m✓\e[0m
 \e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m
 
@@ -197,10 +106,6 @@ Nothing came back.
 === printed ===
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\r
@@ -213,10 +118,6 @@ Nothing came back.\r
 \e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\r
 \e[?2026h\e[?25l\e[?7l\r\e[Kstatus\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
 \r
@@ -227,10 +128,6 @@ Nothing came back.\r
 \e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\r
 \e[?2026h\e[?25l\e[?7l\r\e[Kstatus\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
 \r
@@ -239,10 +136,6 @@ Nothing came back.\r
 === streamed paced ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[Kstatus\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
@@ -258,16 +151,6 @@ Nothing came back.\r
 \e[48;2;52;53;65m arguments  \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
-\e[48;2;52;53;65m            \e[0m\r
-\e[48;2;52;53;65m 🤖 The web \e[0m\r
-\e[48;2;52;53;65m    search  \e[0m\r
-\e[48;2;52;53;65m    and     \e[0m\r
-\e[48;2;52;53;65m    fetch   \e[0m\r
-\e[48;2;52;53;65m    tools   \e[0m\r
-\e[48;2;52;53;65m    are now \e[0m\r
-\e[48;2;52;53;65m    refused.\e[0m\r
-\e[48;2;52;53;65m            \e[0m\r
-\r
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdo…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
@@ -278,9 +161,6 @@ Nothing came back.\r
 \e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m run the thing that takes no arguments\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.\e[0m
-\e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m
 
@@ -289,10 +169,6 @@ Nothing came back.\r
 === wide ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\r

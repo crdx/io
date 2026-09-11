@@ -15,7 +15,8 @@ const (
 	Shell
 	Write
 	Git
-	Web
+	Lookup
+	Network
 )
 
 var capsMap = []struct {
@@ -25,8 +26,9 @@ var capsMap = []struct {
 	{Read, "r"},
 	{Shell, "x"},
 	{Write, "w"},
+	{Network, "n"},
 	{Git, "g"},
-	{Web, "s"},
+	{Lookup, "l"},
 }
 
 var AllFlags = All().Flags()
@@ -156,11 +158,14 @@ func lexicalDiff(changedCaps Set, currentCaps Set) string {
 	if changedCaps.Has(Shell) {
 		clauses = append(clauses, shellIs(currentCaps.Has(Shell)))
 	}
+	if changedCaps.Has(Network) {
+		clauses = append(clauses, networkIs(currentCaps.Has(Network)))
+	}
 	if changedCaps.Has(Git) {
 		clauses = append(clauses, historyIs(currentCaps.Has(Git)))
 	}
-	if changedCaps.Has(Web) {
-		clauses = append(clauses, webIs(currentCaps.Has(Web)))
+	if changedCaps.Has(Lookup) {
+		clauses = append(clauses, lookupIs(currentCaps.Has(Lookup)))
 	}
 
 	return strings.Join(clauses, " ")
@@ -203,10 +208,18 @@ func historyIs(writable bool) string {
 	return "The .git directory is now read-only."
 }
 
-func webIs(granted bool) string {
+func lookupIs(granted bool) string {
 	if granted {
-		return "The web search and fetch tools can now access the internet."
+		return "The lookup tool can now access the internet."
 	}
 
-	return "The web search and fetch tools are now refused."
+	return "The lookup tool is now refused."
+}
+
+func networkIs(granted bool) string {
+	if granted {
+		return "The bash tool can now request the host network, and the fetch tool can now access the internet."
+	}
+
+	return "The bash tool can no longer request the host network, and the fetch tool is now refused."
 }

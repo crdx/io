@@ -18,8 +18,8 @@ run a multiline command and notify me when it finishes
 ```
 bash: stale shell rendering [ok, 2 lines, 11B, call_1]
 notify: stale notification title [ok, 1 line, 17B, call_2]
-web_search: stale search rendering [ok, 1 line, 63B, call_3]
-web_fetch: stale fetch rendering [ok, 1 line, 16B, call_4]
+lookup: stale search rendering [ok, 1 line, 63B, call_3]
+fetch: stale fetch rendering [ok, 1 line, 16B, call_4]
 ```
 
 ## Assistant · +9s

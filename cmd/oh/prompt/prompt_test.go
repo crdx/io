@@ -226,29 +226,42 @@ func TestTheHarnessGivesTheSessionItsAnimalPersonality(t *testing.T) {
 	}
 }
 
-func TestTheHarnessDisclosesWebAccess(t *testing.T) {
-	withheld := harnessContext(Config{
-		Workspace:   work.At("/workspace"),
-		SessionName: "session-id",
-		TmpDir:      "/tmp/x",
-		HomeDir:     "/state/home",
-		CurrentCaps: caps.Read,
-		ExtraPaths:  shell.Paths{},
-	})
-	if !strings.Contains(withheld, "web search and fetch tools are refused") {
-		t.Errorf("harness context does not disclose withheld web access: %q", withheld)
-	}
-
-	granted := harnessContext(Config{
-		Workspace:   work.At("/workspace"),
-		SessionName: "session-id",
-		TmpDir:      "/tmp/x",
-		HomeDir:     "/state/home",
-		CurrentCaps: caps.Read | caps.Web,
-		ExtraPaths:  shell.Paths{},
-	})
-	if !strings.Contains(granted, "web search and fetch tools are granted external network access") {
-		t.Errorf("harness context does not disclose granted web access: %q", granted)
+func TestTheHarnessDisclosesLookupAndFetchAccess(t *testing.T) {
+	for name, test := range map[string]struct {
+		currentCaps      caps.Set
+		isNetworkGranted bool
+		want             []string
+	}{
+		"both refused": {
+			currentCaps: caps.Read,
+			want:        []string{"lookup tool is refused", "fetch tool is refused"},
+		},
+		"lookup granted": {
+			currentCaps: caps.Read | caps.Lookup,
+			want:        []string{"lookup tool is granted external network access", "fetch tool is refused"},
+		},
+		"fetch granted": {
+			currentCaps:      caps.Read | caps.Network,
+			isNetworkGranted: true,
+			want:             []string{"lookup tool is refused", "fetch tool is granted external network access"},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			got := harnessContext(Config{
+				Workspace:      work.At("/workspace"),
+				SessionName:    "session-id",
+				TmpDir:         "/tmp/x",
+				HomeDir:        "/state/home",
+				CurrentCaps:    test.currentCaps,
+				ExtraPaths:     shell.Paths{},
+				NetworkGranted: test.isNetworkGranted,
+			})
+			for _, want := range test.want {
+				if !strings.Contains(got, want) {
+					t.Errorf("harness context does not contain %q: %q", want, got)
+				}
+			}
+		})
 	}
 }
 

@@ -1,5 +1,5 @@
-{"kind":"head","version":12,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
+{"kind":"head","version":13,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
 {"kind":"event","event":{"kind":"user_message","text":"have a look at the picker"}}
 {"kind":"event","event":{"render":"fix the picker clipping","read_only":true,"kind":"tool_call_request","id":"call-1","name":"title","arguments":"{\"title\":\"fix the picker clipping\"}"}}
 {"kind":"event","event":{"kind":"state_change","id":"call-1","name":"title","state":{"title":"fix the picker clipping"}}}
