@@ -802,6 +802,86 @@ func TestTheNetworkIsUnreachable(t *testing.T) {
 	}
 }
 
+func TestEnabledNetworkingReachesTheHost(t *testing.T) {
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot be built here: %v", err)
+	}
+
+	keeperProcess, err := keeper.Open(t.Context())
+	if err != nil {
+		t.Fatalf("could not open keeper: %v", err)
+	}
+	defer func() { _ = keeperProcess.Close() }()
+
+	for name, runner := range map[string]sandbox.Runner{
+		"direct":  sandbox.Direct(),
+		"wrapped": sandbox.Wrapped(keeperProcess),
+	} {
+		t.Run(name, func(t *testing.T) {
+			var listenConfig net.ListenConfig
+			listener, err := listenConfig.Listen(t.Context(), "tcp4", "127.0.0.1:0")
+			if err != nil {
+				t.Skipf("host sockets are unavailable: %v", err)
+			}
+			defer func() { _ = listener.Close() }()
+
+			host, port, err := net.SplitHostPort(listener.Addr().String())
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			accepted := make(chan error, 1)
+			go func() {
+				connection, err := listener.Accept()
+				if err == nil {
+					_, err = connection.Write([]byte("connected\n"))
+					_ = connection.Close()
+				}
+				accepted <- err
+			}()
+
+			directory := t.TempDir()
+			result, err := runner.Run(
+				t.Context(),
+				directory,
+				"cat </dev/tcp/"+host+"/"+port,
+				sandbox.Policy{
+					Network: true,
+					Write:   []string{directory},
+					Env:     []string{"PATH"},
+					Timeout: 10 * time.Second,
+				},
+			)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if result.ExitCode != 0 || !strings.Contains(result.Output, "connected") {
+				t.Errorf("host networking was unreachable: %q", result.Output)
+			}
+			if err := <-accepted; err != nil {
+				t.Errorf("host service did not accept the connection: %v", err)
+			}
+		})
+	}
+}
+
+func TestEnabledNetworkingKeepsTheHostResolver(t *testing.T) {
+	want, err := os.ReadFile("/etc/resolv.conf")
+	if err != nil {
+		t.Skipf("host resolver configuration is unavailable: %v", err)
+	}
+
+	result := run(
+		t,
+		t.TempDir(),
+		"cat /etc/resolv.conf",
+		sandbox.Policy{Network: true},
+	)
+	if result.ExitCode != 0 || result.Output != string(want) {
+		t.Errorf("got resolver configuration %q, want %q", result.Output, want)
+	}
+}
+
 func TestLoopbackIsReachable(t *testing.T) {
 	addresses := []struct {
 		host   string

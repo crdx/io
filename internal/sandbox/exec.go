@@ -80,8 +80,10 @@ func execSandboxed(encodedPolicy string, command string) error {
 		return err
 	}
 
-	if err := applyNetwork(); err != nil {
-		return err
+	if !policy.Network {
+		if err := applyNetwork(); err != nil {
+			return err
+		}
 	}
 
 	if err := dropCapabilities(); err != nil {

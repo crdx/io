@@ -144,6 +144,23 @@ func TestEveryCommandGetsTheOtherNamespacesToo(t *testing.T) {
 	}
 }
 
+func TestNetworkingEnabledKeepsTheHostNetworkNamespace(t *testing.T) {
+	attributes := hostNetworkAttributes()
+
+	if attributes.Cloneflags&syscall.CLONE_NEWNET != 0 {
+		t.Error("networking still created an isolated network namespace")
+	}
+	for name, flag := range map[string]uintptr{
+		"user":  syscall.CLONE_NEWUSER,
+		"pid":   syscall.CLONE_NEWPID,
+		"mount": syscall.CLONE_NEWNS,
+	} {
+		if attributes.Cloneflags&flag == 0 {
+			t.Errorf("networking removed the %s namespace", name)
+		}
+	}
+}
+
 func TestTheNamespaceProbeIsRememberedOnlyOnceItHasSucceeded(t *testing.T) {
 	isUnmapped := testnamespace.IsUnmapped()
 	probedNamespaces.Delete(isUnmapped)

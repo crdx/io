@@ -53,7 +53,9 @@ var base = []grant{
 }
 
 type Policy struct {
-	Yolo    bool              `json:"yolo,omitempty"`
+	Yolo    bool `json:"yolo,omitempty"`
+	Network bool `json:"network,omitempty"`
+
 	Read    []string          `json:"read"`
 	Write   []string          `json:"write"`
 	Sockets []string          `json:"sockets"`

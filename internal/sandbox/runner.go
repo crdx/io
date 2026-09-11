@@ -136,6 +136,14 @@ func commandEnvironment(policy Policy, encodedPolicy string, command string) []s
 	return append(environment, testnamespace.Environment()...)
 }
 
+func (self runner) spawnerFor(policy Policy) spawner {
+	if policy.Network {
+		return spawnOnHostNetwork
+	}
+
+	return self.spawn
+}
+
 func (self runner) begin(
 	ctx context.Context,
 	cancel context.CancelFunc,
@@ -149,7 +157,9 @@ func (self runner) begin(
 
 	environment := commandEnvironment(policy, encodedPolicy, command)
 
-	child, err := self.spawn(ctx, directory, environment, output)
+	spawn := self.spawnerFor(policy)
+
+	child, err := spawn(ctx, directory, environment, output)
 	if err != nil {
 		defer cancel()
 
@@ -221,13 +231,32 @@ func spawnAlone(
 	environment []string,
 	output Output,
 ) (process, error) {
+	return spawnStub(ctx, directory, environment, output, namespaceAttributes())
+}
+
+func spawnOnHostNetwork(
+	ctx context.Context,
+	directory string,
+	environment []string,
+	output Output,
+) (process, error) {
+	return spawnStub(ctx, directory, environment, output, hostNetworkAttributes())
+}
+
+func spawnStub(
+	ctx context.Context,
+	directory string,
+	environment []string,
+	output Output,
+	attributes *syscall.SysProcAttr,
+) (process, error) {
 	stub := exec.CommandContext(ctx, executable)
 	stub.Args = []string{commandName}
 	stub.Dir = directory
 	stub.Stdout = output
 	stub.Stderr = output
 	stub.Env = environment
-	stub.SysProcAttr = namespaceAttributes()
+	stub.SysProcAttr = attributes
 	stub.Cancel = func() error {
 		return syscall.Kill(-stub.Process.Pid, syscall.SIGKILL)
 	}

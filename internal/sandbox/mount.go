@@ -34,6 +34,8 @@ func (self Policy) nestedPaths() []string {
 	return inside
 }
 
+const privateNamespaces uintptr = syscall.CLONE_NEWUSER | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS
+
 const processFilesystemPath = "/proc"
 
 const TmpDir = "/tmp"
@@ -146,9 +148,11 @@ func applyMounts(policy Policy) error {
 		}
 	}
 
-	for _, file := range resolverFiles {
-		if err := mountReadOnlyTextFile(file.path, file.contents); err != nil {
-			return err
+	if !policy.Network {
+		for _, file := range resolverFiles {
+			if err := mountReadOnlyTextFile(file.path, file.contents); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -270,10 +274,14 @@ func dropCapabilities() error {
 }
 
 func namespaceAttributes() *syscall.SysProcAttr {
-	flags := uintptr(
-		syscall.CLONE_NEWUSER | syscall.CLONE_NEWNET | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
-	)
+	return namespaceAttributesFor(privateNamespaces | syscall.CLONE_NEWNET)
+}
 
+func hostNetworkAttributes() *syscall.SysProcAttr {
+	return namespaceAttributesFor(privateNamespaces)
+}
+
+func namespaceAttributesFor(flags uintptr) *syscall.SysProcAttr {
 	if testnamespace.IsUnmapped() {
 		return &syscall.SysProcAttr{
 			Setpgid:    true,
