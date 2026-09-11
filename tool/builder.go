@@ -20,6 +20,8 @@ type Builder[T any] struct {
 	emphasis       func(call ToolCall) Emphasis
 	emphasisSource func(args T, subject string) string
 	continuation   func(args T) []CallRendering
+	isAllowed      func() bool
+	withheld       error
 }
 
 func Implement[T any](definition Definition, describe Describer[T]) Builder[T] {
@@ -86,6 +88,13 @@ func (self Builder[T]) FocusPath() Builder[T] {
 	})
 }
 
+func (self Builder[T]) Requires(isAllowed func() bool, withheld error) Builder[T] {
+	self.isAllowed = isAllowed
+	self.withheld = withheld
+
+	return self
+}
+
 func (self Builder[T]) ContinuesWith(render func(args T) []CallRendering) Builder[T] {
 	self.continuation = render
 	return self
@@ -109,7 +118,23 @@ func (self Builder[T]) Exec(execute MetricsExecutor[T]) Tool {
 	})
 }
 
+func (self Builder[T]) guardAccess(execute ResultExecutor[T]) ResultExecutor[T] {
+	if self.isAllowed == nil {
+		return execute
+	}
+
+	return func(ctx context.Context, args T) (ToolCallResult, error) {
+		if !self.isAllowed() {
+			return ToolCallResult{}, self.withheld
+		}
+
+		return execute(ctx, args)
+	}
+}
+
 func (self Builder[T]) build(exec ResultExecutor[T]) Tool {
+	exec = self.guardAccess(exec)
+
 	return _tool{
 		name:        self.definition.Name,
 		description: self.definition.Description,

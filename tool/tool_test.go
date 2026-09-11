@@ -89,6 +89,43 @@ func TestParseBindsTheArgumentsToTheCall(t *testing.T) {
 	}
 }
 
+func TestARequiredAccessIsConsultedWhenTheCallExecutes(t *testing.T) {
+	withheld := errors.New("access is not granted")
+	isGranted := false
+	didRun := false
+
+	definedTool := newToolBuilder(t).
+		Requires(func() bool { return isGranted }, withheld).
+		Plain(func(_ context.Context, _ Params) (string, error) {
+			didRun = true
+			return "raining", nil
+		})
+
+	call, err := definedTool.Parse(`{"city":"London"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if _, err := call.Exec(t.Context()); !errors.Is(err, withheld) {
+		t.Errorf("expected the withheld error, got %v", err)
+	}
+
+	if didRun {
+		t.Error("expected the tool not to have run")
+	}
+
+	isGranted = true
+
+	result, err := call.Exec(t.Context())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result.Output != "raining" || !didRun {
+		t.Errorf("expected the tool to have run, got %q", result.Output)
+	}
+}
+
 func TestParseDescribesTheCallOnce(t *testing.T) {
 	descriptions := 0
 	definedTool := tool.Implement(
