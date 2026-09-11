@@ -13,6 +13,7 @@ import (
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/editor"
+	"crdx.org/io/cmd/oh/experimental"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
@@ -43,6 +44,8 @@ type Config struct {
 	Bar      Bar                            `toml:"bar"`
 	Ui       Ui                             `toml:"ui"`
 	Tool     Tool                           `toml:"tool"`
+
+	Experimental map[string]any `toml:"experimental"`
 
 	fallback             *toml.MetaData
 	sources              []sourceMetadata
@@ -150,6 +153,7 @@ type LiveConfig struct {
 	Grouping           output.Grouping
 	ReasoningRendering output.ReasoningRendering
 	ToolOutputBytes    int
+	Experimental       map[string]any
 	UnknownSettings    []string
 }
 
@@ -175,6 +179,7 @@ func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
 		Grouping:           self.Ui.Grouping,
 		ReasoningRendering: self.Ui.ReasoningRendering,
 		ToolOutputBytes:    self.Tool.Output.Bytes,
+		Experimental:       maps.Clone(self.Experimental),
 		UnknownSettings:    self.UnknownSettings(),
 	}, nil
 }
@@ -259,9 +264,10 @@ func (self Config) UnknownSettings() []string {
 		unknown := source.meta.Undecoded()
 		namedKeys := make([]string, 0, len(unknown))
 		for _, key := range unknown {
-			if !self.isShadowed(sourceIndex, key) {
-				namedKeys = append(namedKeys, key.String())
+			if self.isShadowed(sourceIndex, key) || isExperimental(key) {
+				continue
 			}
+			namedKeys = append(namedKeys, key.String())
 		}
 		if len(namedKeys) == 0 {
 			continue
@@ -272,7 +278,25 @@ func (self Config) UnknownSettings() []string {
 		reports = append(reports, fmt.Sprintf("%s: unknown: %s", source.path, strings.Join(namedKeys, ", ")))
 	}
 
+	return append(reports, self.experimentalReports()...)
+}
+
+func (self Config) experimentalReports() []string {
+	var reports []string
+
+	for _, complaint := range experimental.Check(self.Experimental) {
+		setting := "experimental." + complaint.Name
+		if path := self.getSourcePath("experimental", complaint.Name); path != "" {
+			setting = path + ": " + setting
+		}
+		reports = append(reports, fmt.Sprintf("%s: %s", setting, complaint.Reason))
+	}
+
 	return reports
+}
+
+func isExperimental(key toml.Key) bool {
+	return len(key) > 0 && key[0] == "experimental"
 }
 
 func (self Config) isShadowed(sourceIndex int, key toml.Key) bool {

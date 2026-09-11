@@ -1277,3 +1277,60 @@ func TestAnUnrecognisedDefaultEffortIsRefused(t *testing.T) {
 		t.Errorf("got %v", err)
 	}
 }
+
+func TestAnExperimentalToggleIsCarriedToTheLiveConfiguration(t *testing.T) {
+	config := configFrom(t, `
+		[experimental]
+		quiet_rounds = true
+		rounds = 3
+	`)
+
+	live, err := config.BuildLive(testSegments())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if live.Experimental["quiet_rounds"] != true {
+		t.Errorf("got toggles %v", live.Experimental)
+	}
+	if live.Experimental["rounds"] != int64(3) {
+		t.Errorf("got toggles %v", live.Experimental)
+	}
+}
+
+func TestAnExperimentalToggleNothingDeclaresIsReportedOnceAndNamesItsFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[experimental]\nretired_thing = true\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reports := config.UnknownSettings()
+	if len(reports) != 1 {
+		t.Fatalf("got reports %v, want one", reports)
+	}
+	if !strings.Contains(reports[0], "experimental.retired_thing") ||
+		!strings.Contains(reports[0], "does nothing") ||
+		!strings.Contains(reports[0], filepath.Base(path)) {
+		t.Errorf("got report %q", reports[0])
+	}
+}
+
+func TestAnExperimentalToggleWrittenAsATableIsReportedOnlyAsItsOwnSetting(t *testing.T) {
+	config := configFrom(t, `
+		[experimental.grouping]
+		rows = 3
+	`)
+
+	reports := config.UnknownSettings()
+	if len(reports) != 1 {
+		t.Fatalf("got reports %v, want one", reports)
+	}
+	if !strings.Contains(reports[0], "experimental.grouping") {
+		t.Errorf("got report %q", reports[0])
+	}
+}

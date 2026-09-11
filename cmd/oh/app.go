@@ -20,6 +20,7 @@ import (
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/editor"
+	"crdx.org/io/cmd/oh/experimental"
 	"crdx.org/io/cmd/oh/feedback"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/interaction"
@@ -149,6 +150,7 @@ type App struct {
 	terminal        terminal.Terminal
 	metrics         metrics.Tracker
 	toolOutputLimit *truncate.Limit
+	experimental    *experimental.Toggles
 	onFailure       func(failure error)
 	savePastedImage func(mediaType string, data []byte) (string, error)
 	pasteExchange   paste.Exchange
@@ -1044,6 +1046,7 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		self.display.reasoningRendering = result.LiveConfig.ReasoningRendering
 		self.screen.SetGrouping(result.LiveConfig.Grouping)
 		self.toolOutputLimit.Replace(result.LiveConfig.ToolOutputBytes)
+		self.experimental.Replace(result.LiveConfig.Experimental)
 		self.display.bar.ReplaceLayout(result.LiveConfig.SegmentLayout)
 		self.feedback.Clear(feedback.Config)
 		if len(result.LiveConfig.UnknownSettings) > 0 {

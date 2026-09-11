@@ -39,6 +39,7 @@ import (
 	"crdx.org/io/cmd/oh/demo"
 	"crdx.org/io/cmd/oh/drops"
 	"crdx.org/io/cmd/oh/editor"
+	"crdx.org/io/cmd/oh/experimental"
 	"crdx.org/io/cmd/oh/graphics"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/location"
@@ -300,6 +301,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	editorConfiguration := editor.NewConfiguration(settings.Editor.Command)
 	toolOutputLimit := truncate.NewLimit(settings.Tool.Output.Bytes)
+	experimentalToggles := experimental.New(settings.Experimental)
 
 	endpoints := backend.EndpointSettings{
 		OverrideURL: endpointURL,
@@ -826,6 +828,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		recorder:        record.New(log),
 		editorConfig:    editorConfiguration,
 		toolOutputLimit: toolOutputLimit,
+		experimental:    experimentalToggles,
 		workspace:       workspace,
 		mode:            mode,
 		pathGrants:      pathGrants,

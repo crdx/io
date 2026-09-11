@@ -53,6 +53,7 @@ import (
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/editor"
+	"crdx.org/io/cmd/oh/experimental"
 	"crdx.org/io/cmd/oh/feedback"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/interrupt"
@@ -7162,6 +7163,11 @@ func prepareLiveConfigSources(t *testing.T, self *App, sources ...config.Source)
 	} else {
 		self.toolOutputLimit.Replace(live.ToolOutputBytes)
 	}
+	if self.experimental == nil {
+		self.experimental = experimental.New(live.Experimental)
+	} else {
+		self.experimental.Replace(live.Experimental)
+	}
 	self.continueMessage = live.ContinueMessage
 	self.display.streamingMode = live.StreamingMode
 	self.display.reasoningRendering = live.ReasoningRendering
@@ -7327,6 +7333,25 @@ func TestReloadingConfigChangesTheEditorAndToolOutputLimit(t *testing.T) {
 	}
 	if got := self.toolOutputLimit.GetBytes(); got != 4*1024 {
 		t.Errorf("reloaded tool output limit is %d", got)
+	}
+}
+
+func TestReloadingConfigChangesExperimentalToggles(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, "[experimental]\nquiet_rounds = true\n")
+
+	self := testConversation(t, &bytes.Buffer{})
+	prepareLiveConfig(t, self, path)
+
+	if !self.experimental.IsEnabled("quiet_rounds") {
+		t.Fatal("the toggle was not read from the configuration")
+	}
+
+	writeLiveConfig(t, path, "[experimental]\nquiet_rounds = false\n")
+	settleLiveConfig(t, self)
+
+	if self.experimental.IsEnabled("quiet_rounds") {
+		t.Error("the reloaded toggle is still enabled")
 	}
 }
 
