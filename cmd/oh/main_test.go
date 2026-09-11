@@ -5501,7 +5501,8 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 
 	workspace := openTestWorkspace(t, workspaceDirectory)
 
-	globalPath := filepath.Join(t.TempDir(), "SYSTEM.md")
+	configDirectory := t.TempDir()
+	globalPath := filepath.Join(configDirectory, "SYSTEM.md")
 	if err := os.WriteFile(globalPath, []byte("You are the golden test assistant."), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -5525,6 +5526,9 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 		GlobalPath:  globalPath,
 		Workspace:   workspace,
 		SessionName: "brave-otter",
+		SessionsDir: "/state/sessions",
+		SessionDir:  "/state/sessions/brave-otter",
+		ConfigFile:  "/config/config.toml",
 		TmpDir:      "/state/farm/brave-otter",
 		HomeDir:     "/state/home",
 		CurrentCaps: currentCaps,
@@ -5549,6 +5553,7 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 		t.Fatal(err)
 	}
 	got = strings.ReplaceAll(got, workspaceDirectory, "/workspace")
+	got = strings.ReplaceAll(got, configDirectory, "/config")
 	got = strings.ReplaceAll(got, "127.0.0.1", "<loopback>")
 
 	goldenPath := filepath.Join("testdata", "output", name+".prompt")

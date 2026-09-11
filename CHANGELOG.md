@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Tell the agent more information
 - Save truncated remains in session drops dir
 - Handle pending notices correctly
 - Repair region if the terminal is too short

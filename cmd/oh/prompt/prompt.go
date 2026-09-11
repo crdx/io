@@ -69,6 +69,18 @@ var (
 		- Every path on the user's machine, including the ones above, is written here in full
 		- Write them the same way back, and never abbreviate one to a tilde
 
+		# oh
+
+		- oh is the harness you are running within
+		- Each session dir is under {{ .SessionsDir }}, named after the session
+		- This session's directory is {{ .SessionDir }}
+		- "session.jsonl" is the journal, the single source of truth, as JSONL
+		- "meta.json" is the listing entry: name, title, timestamps, and message count
+		- "chat.md" is the readable transcript of the conversation
+		- "wire.http" is the raw traffic between the harness and the model endpoint
+		- The user's settings are in {{ .ConfigFile }}, and their instructions in {{ .GlobalPath }}
+		- A session name said with no other context is a hint to read that session's files
+
 		# State
 
 		- The workspace ({{ .WorkspaceDir }}) is {{ filesystem .WorkspaceWritable }}
@@ -82,6 +94,10 @@ var (
 type harnessContextTemplateData struct {
 	WorkspaceDir      string
 	SessionName       string
+	SessionsDir       string
+	SessionDir        string
+	ConfigFile        string
+	GlobalPath        string
 	TmpDir            string
 	HomeDir           string
 	CurrentCaps       caps.Set
@@ -114,6 +130,9 @@ type Config struct {
 	GlobalPath     string
 	Workspace      *work.Space
 	SessionName    string
+	SessionsDir    string
+	SessionDir     string
+	ConfigFile     string
 	TmpDir         string
 	HomeDir        string
 	CurrentCaps    caps.Set
@@ -207,6 +226,10 @@ func harnessContext(config Config) string {
 	data := harnessContextTemplateData{
 		WorkspaceDir:      config.Workspace.GetDir(),
 		SessionName:       config.SessionName,
+		SessionsDir:       config.SessionsDir,
+		SessionDir:        config.SessionDir,
+		ConfigFile:        config.ConfigFile,
+		GlobalPath:        config.GlobalPath,
 		TmpDir:            config.TmpDir,
 		HomeDir:           config.HomeDir,
 		CurrentCaps:       currentCaps,
@@ -373,7 +396,8 @@ func networkRules(data harnessContextTemplateData) string {
 			verb = " is"
 			destination = "port"
 		}
-		lines = append(lines,
+		lines = append(
+			lines,
 			"- The host's loopback "+subject+verb+" reachable on the same sandbox loopback "+destination,
 		)
 		hostReachability = unreachableRule(
@@ -382,7 +406,8 @@ func networkRules(data harnessContextTemplateData) string {
 		)
 	}
 
-	lines = append(lines,
+	lines = append(
+		lines,
 		"- A Unix socket works beneath /tmp, and is refused beneath the workspace",
 		hostReachability,
 	)
