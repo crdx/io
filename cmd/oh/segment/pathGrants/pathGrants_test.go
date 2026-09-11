@@ -62,6 +62,27 @@ func TestTheSegmentReadsTheCurrentGrantListEveryTime(t *testing.T) {
 	}
 }
 
+func TestTheShellLetterFollowsWhatEachGrantMayChange(t *testing.T) {
+	for _, test := range []struct {
+		access pathgrant.Access
+		paint  style.Style
+	}{
+		{pathgrant.ReadAccess | pathgrant.ExecAccess, style.Read},
+		{pathgrant.ReadAccess | pathgrant.ExecAccess | pathgrant.WriteAccess, style.Write},
+	} {
+		grants := []pathgrant.Grant{{Path: "/tools", Access: test.access}}
+		got := buildSegment(t, &grants, "").Render(segment.Context{})
+		if !strings.Contains(got, test.paint("x")) {
+			t.Errorf(
+				"access %q drew %q, want the shell letter painted %q",
+				test.access.Flags(),
+				got,
+				test.paint("x"),
+			)
+		}
+	}
+}
+
 func TestDuplicateBasenamesExpandToDistinguishingPaths(t *testing.T) {
 	grants := []pathgrant.Grant{
 		{Path: "/one/reference", Access: pathgrant.ReadAccess},

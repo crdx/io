@@ -9,6 +9,7 @@
 - Rename `web_fetch` to `fetch`, toggled with `n` cap
 - Remove the deprecated `s` cap
 - Add flag to enable network in bash tool call
+- Use the workspace read/write state to colour the `x` cap
 
 ## [0.5.0] - 2026-09-10
 

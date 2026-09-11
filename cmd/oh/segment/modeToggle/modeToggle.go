@@ -27,7 +27,12 @@ func (self state) Render(segment.Context) string {
 	isPrefixPending := self.isPrefixPending()
 
 	return self.letter(caps.Read, true, style.Read, isPrefixPending) +
-		self.letter(caps.Shell, grantedCaps.Has(caps.Shell), style.Exec, isPrefixPending) +
+		self.letter(
+			caps.Shell,
+			grantedCaps.Has(caps.Shell),
+			style.ExecWhenWritable(grantedCaps.CanChangeFiles()),
+			isPrefixPending,
+		) +
 		self.letter(caps.Write, grantedCaps.Has(caps.Write), style.Write, isPrefixPending) +
 		gap +
 		self.letter(caps.Network, grantedCaps.Has(caps.Network), style.Network, isPrefixPending) +

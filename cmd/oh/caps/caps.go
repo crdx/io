@@ -57,6 +57,8 @@ func (self Set) Flags() string {
 
 func (self Set) Has(want Set) bool { return self&want == want }
 
+func (self Set) CanChangeFiles() bool { return self.Has(Write) || self.Has(Git) }
+
 func (self Set) Flag() string {
 	for _, cap := range capsMap {
 		if cap.flags == self {

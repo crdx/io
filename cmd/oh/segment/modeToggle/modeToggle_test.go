@@ -1,6 +1,7 @@
 package modeToggle_test
 
 import (
+	"strings"
 	"testing"
 
 	"crdx.org/io/cmd/oh/caps"
@@ -36,6 +37,34 @@ func TestOnlyTheStylingSaysWhatIsGranted(t *testing.T) {
 	}
 	if got := style.Plain(pending); got != "rxw ngl" {
 		t.Errorf("a pending prefix drew %q, want the same letters", got)
+	}
+}
+
+func TestTheShellLetterFollowsWhateverItMayChange(t *testing.T) {
+	for _, test := range []struct {
+		flags string
+		paint style.Style
+	}{
+		{"rx", style.Read},
+		{"rxn", style.Read},
+		{"rxl", style.Read},
+		{"rxw", style.Write},
+		{"rxg", style.Write},
+		{"rxwg", style.Write},
+	} {
+		grantedCaps, err := caps.Parse(test.flags)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if got := render(t, grantedCaps, false); !strings.Contains(got, test.paint("x")) {
+			t.Errorf(
+				"caps %q drew %q, want the shell letter painted %q",
+				test.flags,
+				got,
+				test.paint("x"),
+			)
+		}
 	}
 }
 

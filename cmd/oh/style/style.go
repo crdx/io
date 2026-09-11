@@ -65,7 +65,6 @@ var (
 	Subtle         Style = Dim
 	Read           Style = hex(lime)
 	Write          Style = hex(gold)
-	Exec           Style = hex(red)
 	Shell          Style = hex(steel)
 	Skill          Style = hex(mauve)
 	History        Style = hex(mauve)
@@ -124,6 +123,14 @@ var (
 	DeletedText  Style = hex(red)
 	Hunk         Style = hex(steel)
 )
+
+func ExecWhenWritable(isWritable bool) Style {
+	if isWritable {
+		return Write
+	}
+
+	return Read
+}
 
 var isColorEnabled = true
 

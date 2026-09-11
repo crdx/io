@@ -235,6 +235,27 @@ func TestAFlagNamesOneCapabilityWhileParsingItReadsAWholeMode(t *testing.T) {
 	}
 }
 
+func TestTheHistoryCountsAsChangingFilesJustAsWritingDoes(t *testing.T) {
+	for flags, want := range map[string]bool{
+		"":     false,
+		"x":    false,
+		"nl":   false,
+		"w":    true,
+		"g":    true,
+		"xwg":  true,
+		"xngl": true,
+	} {
+		parsedCaps, err := Parse(flags)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if got := parsedCaps.CanChangeFiles(); got != want {
+			t.Errorf("%q reported %t, want %t", parsedCaps.Flags(), got, want)
+		}
+	}
+}
+
 func TestTheModeSaysWhatTheWorkspaceAllows(t *testing.T) {
 	self := NewMode(writable())
 
