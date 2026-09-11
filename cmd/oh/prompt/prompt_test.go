@@ -286,6 +286,56 @@ func TestTheHarnessDisclosesPrivateLoopbackNetworking(t *testing.T) {
 	}
 }
 
+func TestTheHarnessDisclosesTheHostNetworkACallCanAskFor(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:      work.At("/workspace"),
+		SessionName:    "session-id",
+		TmpDir:         "/tmp/x",
+		HomeDir:        "/state/home",
+		CurrentCaps:    caps.Read | caps.Shell,
+		ExtraPaths:     shell.Paths{},
+		NetworkGranted: true,
+		IsInteractive:  true,
+	})
+
+	for _, want := range []string{
+		"By default, the host's loopback interface and external networks are unreachable",
+		"A bash call with network: true runs on the host's own network",
+		"It cannot reach the sandbox's private loopback",
+		"The user is asked to approve each such call",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("harness context does not contain %q: %q", want, got)
+		}
+	}
+
+	if unwanted := "Anything else that requires external networking must be asked of the user"; strings.Contains(got, unwanted) {
+		t.Errorf("harness context still claims %q: %q", unwanted, got)
+	}
+}
+
+func TestTheHarnessDoesNotOfferTheHostNetworkWhenItIsNotGranted(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:     work.At("/workspace"),
+		SessionName:   "session-id",
+		TmpDir:        "/tmp/x",
+		HomeDir:       "/state/home",
+		CurrentCaps:   caps.Read | caps.Shell,
+		ExtraPaths:    shell.Paths{},
+		IsInteractive: true,
+	})
+
+	for _, unwanted := range []string{"network: true", "By default,"} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("harness context offers %q without the network grant: %q", unwanted, got)
+		}
+	}
+
+	if want := "Anything else that requires external networking must be asked of the user"; !strings.Contains(got, want) {
+		t.Errorf("harness context does not contain %q: %q", want, got)
+	}
+}
+
 func TestTheHarnessDisclosesForwardedHostLoopbackPorts(t *testing.T) {
 	got := harnessContext(Config{
 		Workspace:   work.At("/workspace"),

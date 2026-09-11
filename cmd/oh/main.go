@@ -589,6 +589,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			Skills:         availableSkills,
 			JobsGranted:    jobManager != nil,
 			NetworkGranted: args.Caps.Has(caps.Network),
+			IsInteractive:  !args.IsPrinting,
 			Yolo:           args.Yolo,
 		})
 		if err != nil {
@@ -663,7 +664,19 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	snapshots := file.NewSnapshots()
 	toolboxTools := toolbox.Rummage(files, snapshots)
 	approvalBroker := approval.New()
-	shellTool := shell.New(workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files, args.Yolo, sandboxRunner)
+	approveNetwork := func(ctx context.Context, command string) error {
+		approvalContext, cancel := context.WithTimeout(ctx, time.Minute)
+		defer cancel()
+
+		return approvalBroker.Ask(approvalContext, approval.Prompt{
+			Question: "Run this command on the host network? [y/N] (denies in 1m)",
+			Detail:   command,
+			Language: "bash",
+		})
+	}
+	shellTool := shell.New(
+		workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files, args.Yolo, approveNetwork, sandboxRunner,
+	)
 
 	toolboxTools = append(toolboxTools, shellTool)
 

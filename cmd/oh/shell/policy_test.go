@@ -22,6 +22,8 @@ import (
 
 const reachableDirPrefix = "io-shell-test-"
 
+func allowNetworking(context.Context, string) error { return nil }
+
 func TestMain(testingMain *testing.M) {
 	sandbox.Init()
 	os.Exit(testingMain.Run())
@@ -133,7 +135,7 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read)
 	pathAccess := newTestPathAccess(t, files, mode)
-	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), pathAccess, mode, files, false, sandbox.Direct())
+	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), pathAccess, mode, files, false, allowNetworking, sandbox.Direct())
 
 	if shell.Name() != "bash" {
 		t.Errorf("expected the shell to be offered as bash, got %q", shell.Name())
@@ -146,6 +148,58 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 
 	if _, err := call.Exec(t.Context()); !errors.Is(err, ErrWithheld) {
 		t.Errorf("expected the command to be turned away, got %v", err)
+	}
+}
+
+func TestHostNetworkingRequiresItsCapability(t *testing.T) {
+	workspaceRoot, err := os.OpenRoot(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
+	mode := caps.NewMode(caps.Read | caps.Shell)
+	pathAccess := newTestPathAccess(t, files, mode)
+	approvalFailure := errors.New("approval reached")
+	approvalCount := 0
+	shell := New(
+		t.TempDir(),
+		t.TempDir(),
+		t.TempDir(),
+		pathAccess,
+		mode,
+		files,
+		true,
+		func(context.Context, string) error {
+			approvalCount++
+			return approvalFailure
+		},
+		sandbox.Direct(),
+	)
+
+	execute := func() error {
+		call, parseErr := shell.Parse(`{"command":"true","network":true}`)
+		if parseErr != nil {
+			t.Fatal(parseErr)
+		}
+		_, execErr := call.Exec(t.Context())
+		return execErr
+	}
+
+	if err := execute(); !errors.Is(err, ErrNetworkWithheld) {
+		t.Errorf("without network capability got %v, want %v", err, ErrNetworkWithheld)
+	}
+	if approvalCount != 0 {
+		t.Errorf("approval was requested %d times without the network capability", approvalCount)
+	}
+
+	mode.Toggle(caps.Network)
+	if err := execute(); !errors.Is(err, approvalFailure) {
+		t.Errorf("with network capability got %v, want approval to be reached", err)
+	}
+	if approvalCount != 1 {
+		t.Errorf("approval was requested %d times, want once", approvalCount)
 	}
 }
 
@@ -169,7 +223,7 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read | caps.Shell)
 	pathAccess := newTestPathAccess(t, files, mode)
-	shell := New(workspace, home, tmp, pathAccess, mode, files, false, sandbox.Direct())
+	shell := New(workspace, home, tmp, pathAccess, mode, files, false, allowNetworking, sandbox.Direct())
 	run := func() {
 		call, parseErr := shell.Parse(`{"command":"printf %s \"$MISE_DATA_DIR\""}`)
 		if parseErr != nil {
@@ -213,7 +267,7 @@ func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 	mode := caps.NewMode(initialCaps)
 	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
 	pathAccess := newTestPathAccess(t, files, mode)
-	shell := New(workspace, home, tmp, pathAccess, mode, files, false, sandbox.Direct())
+	shell := New(workspace, home, tmp, pathAccess, mode, files, false, allowNetworking, sandbox.Direct())
 
 	run := func() error {
 		call, parseErr := shell.Parse(`{"command":"touch .git/proof"}`)
@@ -261,7 +315,7 @@ func TestTemporaryPathAccessChangesTheNextShellCommand(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer access.Close()
-	shellTool := New(workspace, home, tmp, access, mode, files, false, sandbox.Direct())
+	shellTool := New(workspace, home, tmp, access, mode, files, false, allowNetworking, sandbox.Direct())
 	run := func() (string, error) {
 		arguments, marshalErr := json.Marshal(map[string]string{"command": "cat " + strconv.Quote(externalFile)})
 		if marshalErr != nil {
@@ -921,7 +975,7 @@ func TestASymlinkedCacheIsReportedToWhoeverAskedForTheCommand(t *testing.T) {
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Write | caps.Shell)
 	pathAccess := newTestPathAccess(t, files, mode)
-	shell := New(workspace, home, t.TempDir(), pathAccess, mode, files, false, sandbox.Direct())
+	shell := New(workspace, home, t.TempDir(), pathAccess, mode, files, false, allowNetworking, sandbox.Direct())
 
 	call, err := shell.Parse(`{"command":"echo one"}`)
 	if err != nil {
@@ -949,7 +1003,7 @@ func TestAWaivedSandboxStillWithholdsAnUngrantedShell(t *testing.T) {
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read)
-	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), newTestPathAccess(t, files, mode), mode, files, true, sandbox.Direct())
+	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), newTestPathAccess(t, files, mode), mode, files, true, allowNetworking, sandbox.Direct())
 
 	call, err := shell.Parse(`{"command":"echo one"}`)
 	if err != nil {
@@ -973,7 +1027,7 @@ func TestAWaivedSandboxRunsACommandWhereTheSandboxCouldNot(t *testing.T) {
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read | caps.Shell)
-	shell := New(workspace, home, tmp, newTestPathAccess(t, files, mode), mode, files, true, sandbox.Direct())
+	shell := New(workspace, home, tmp, newTestPathAccess(t, files, mode), mode, files, true, allowNetworking, sandbox.Direct())
 
 	call, err := shell.Parse(`{"command":"printf %s \"$HOME:$TMPDIR\""}`)
 	if err != nil {

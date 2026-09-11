@@ -15,7 +15,7 @@
 
 # Network
 
-- Networking is limited to the sandbox's private loopback interface
+- A bash call has no network of its own beyond the sandbox's private loopback interface
 - Processes in the same sandbox can communicate over <loopback> and ::1
 - A Unix socket works beneath /tmp, and is refused beneath the workspace
 - The host's loopback interface and external networks are unreachable

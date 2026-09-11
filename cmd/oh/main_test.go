@@ -3436,64 +3436,67 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		".transcript",
 	})
 	for name, extensions := range map[string][]string{
-		"app-plain-resume":       {".jsonl", ".transcript"},
-		"app-plain-turn":         {".jsonl", ".transcript"},
-		"authorisation-url":      {".ansi", ".screen"},
-		"banner":                 {".ansi", ".screen"},
-		"clearing":               {".ansi", ".screen"},
-		"completion":             {".txt"},
-		"config-reload":          {".ansi", ".screen"},
-		"corrupt-session":        {".txt"},
-		"default-bar":            {".ansi", ".screen"},
-		"feedback":               {".ansi", ".screen", ".txt"},
-		"fork-message":           {".txt"},
-		"context":                {".prompt"},
-		"context-drops":          {".prompt"},
-		"context-jobs":           {".prompt"},
-		"context-loopback":       {".prompt"},
-		"context-yolo":           {".prompt"},
-		"inputblock":             {".ansi", ".screen"},
-		"legacy-alt-enter":       {".ansi", ".screen"},
-		"lifecycle":              {".ansi", ".screen"},
-		"line-resize":            {".screen"},
-		"streaming-modes":        {".screen"},
-		"groupings":              {".screen"},
-		"reasonings":             {".ansi", ".screen"},
-		"mermaid-streaming":      {".screen"},
-		"mode-takeback":          {".ansi", ".screen"},
-		"model-arguments":        {".txt"},
-		"new-session":            {".txt"},
-		"ordinary-tab":           {".ansi", ".screen"},
-		"path-grant-lifecycle":   {".ansi", ".screen"},
-		"port-directions":        {".ansi", ".screen"},
-		"path-message":           {".ansi", ".screen"},
-		"user-path-links":        {".ansi", ".screen"},
-		"workspace-paths":        {".ansi", ".screen"},
-		"pending-mode-messages":  {".ansi", ".screen"},
-		"paste":                  {".ansi", ".screen"},
-		"pictures":               {".ansi", ".screen"},
-		"picker-menu":            {".ansi", ".screen"},
-		"plain-input":            {".ansi", ".screen"},
-		"print-arguments":        {".txt"},
-		"queued-messages":        {".ansi", ".screen"},
-		"readline-bindings":      {".ansi", ".screen"},
-		"resume-arguments":       {".txt"},
-		"resume-model-arguments": {".txt"},
-		"resume-mode":            {".ansi"},
-		"resume-confinement":     {".ansi"},
-		"running":                {".ansi", ".screen"},
-		"schedule":               {".ansi", ".screen"},
-		"segments":               {".ansi", ".screen"},
-		"signal-restoration":     {".ansi"},
-		"special-links":          {".ansi", ".screen"},
-		"startup":                {".ansi", ".screen"},
-		"startup-local-config":   {".ansi", ".screen"},
-		"startup-sized":          {".ansi", ".screen"},
-		"startup-sized-output":   {".ansi", ".screen"},
-		"terminal-escape":        {".ansi", ".screen"},
-		"usage":                  {".json"},
-		"usage-arguments":        {".txt"},
-		"vertical-movement":      {".ansi", ".screen"},
+		"app-plain-resume":         {".jsonl", ".transcript"},
+		"app-plain-turn":           {".jsonl", ".transcript"},
+		"authorisation-url":        {".ansi", ".screen"},
+		"banner":                   {".ansi", ".screen"},
+		"clearing":                 {".ansi", ".screen"},
+		"completion":               {".txt"},
+		"config-reload":            {".ansi", ".screen"},
+		"corrupt-session":          {".txt"},
+		"default-bar":              {".ansi", ".screen"},
+		"feedback":                 {".ansi", ".screen", ".txt"},
+		"fork-message":             {".txt"},
+		"context":                  {".prompt"},
+		"context-drops":            {".prompt"},
+		"context-jobs":             {".prompt"},
+		"context-loopback":         {".prompt"},
+		"context-network":          {".prompt"},
+		"context-network-loopback": {".prompt"},
+		"context-network-print":    {".prompt"},
+		"context-yolo":             {".prompt"},
+		"inputblock":               {".ansi", ".screen"},
+		"legacy-alt-enter":         {".ansi", ".screen"},
+		"lifecycle":                {".ansi", ".screen"},
+		"line-resize":              {".screen"},
+		"streaming-modes":          {".screen"},
+		"groupings":                {".screen"},
+		"reasonings":               {".ansi", ".screen"},
+		"mermaid-streaming":        {".screen"},
+		"mode-takeback":            {".ansi", ".screen"},
+		"model-arguments":          {".txt"},
+		"new-session":              {".txt"},
+		"ordinary-tab":             {".ansi", ".screen"},
+		"path-grant-lifecycle":     {".ansi", ".screen"},
+		"port-directions":          {".ansi", ".screen"},
+		"path-message":             {".ansi", ".screen"},
+		"user-path-links":          {".ansi", ".screen"},
+		"workspace-paths":          {".ansi", ".screen"},
+		"pending-mode-messages":    {".ansi", ".screen"},
+		"paste":                    {".ansi", ".screen"},
+		"pictures":                 {".ansi", ".screen"},
+		"picker-menu":              {".ansi", ".screen"},
+		"plain-input":              {".ansi", ".screen"},
+		"print-arguments":          {".txt"},
+		"queued-messages":          {".ansi", ".screen"},
+		"readline-bindings":        {".ansi", ".screen"},
+		"resume-arguments":         {".txt"},
+		"resume-model-arguments":   {".txt"},
+		"resume-mode":              {".ansi"},
+		"resume-confinement":       {".ansi"},
+		"running":                  {".ansi", ".screen"},
+		"schedule":                 {".ansi", ".screen"},
+		"segments":                 {".ansi", ".screen"},
+		"signal-restoration":       {".ansi"},
+		"special-links":            {".ansi", ".screen"},
+		"startup":                  {".ansi", ".screen"},
+		"startup-local-config":     {".ansi", ".screen"},
+		"startup-sized":            {".ansi", ".screen"},
+		"startup-sized-output":     {".ansi", ".screen"},
+		"terminal-escape":          {".ansi", ".screen"},
+		"usage":                    {".json"},
+		"usage-arguments":          {".txt"},
+		"vertical-movement":        {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)
 	}
@@ -5438,15 +5441,23 @@ type promptGolden struct {
 	areJobsGiven        bool
 	hasClipboardDrops   bool
 	hasHostLoopbackPort bool
+	isNetworkGranted    bool
+	isPrinting          bool
 }
 
 func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 	for name, shape := range map[string]promptGolden{
-		"context":          {},
-		"context-yolo":     {isYolo: true},
-		"context-jobs":     {areJobsGiven: true},
-		"context-drops":    {hasClipboardDrops: true},
-		"context-loopback": {hasHostLoopbackPort: true},
+		"context":               {},
+		"context-yolo":          {isYolo: true},
+		"context-jobs":          {areJobsGiven: true},
+		"context-drops":         {hasClipboardDrops: true},
+		"context-loopback":      {hasHostLoopbackPort: true},
+		"context-network":       {isNetworkGranted: true},
+		"context-network-print": {isNetworkGranted: true, isPrinting: true},
+		"context-network-loopback": {
+			hasHostLoopbackPort: true,
+			isNetworkGranted:    true,
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			compareSystemPromptWithGolden(t, name, shape)
@@ -5484,13 +5495,18 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 		hostLoopback = []uint16{3000}
 	}
 
+	currentCaps := caps.Read | caps.Write | caps.Git | caps.Shell
+	if shape.isNetworkGranted {
+		currentCaps |= caps.Network
+	}
+
 	got, _, err := prompt.Load(prompt.Config{
 		GlobalPath:  globalPath,
 		Workspace:   workspace,
 		SessionName: "brave-otter",
 		TmpDir:      "/state/farm/brave-otter",
 		HomeDir:     "/state/home",
-		CurrentCaps: caps.Read | caps.Write | caps.Git | caps.Shell,
+		CurrentCaps: currentCaps,
 		ExtraPaths: shell.Paths{
 			HostLoopback: hostLoopback,
 			Read:         []string{"/reference"},
@@ -5503,8 +5519,10 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 			Description: "Exercise complete prompt assembly.",
 			Location:    "/skills/golden/SKILL.md",
 		}},
-		JobsGranted: shape.areJobsGiven,
-		Yolo:        shape.isYolo,
+		JobsGranted:    shape.areJobsGiven,
+		NetworkGranted: shape.isNetworkGranted,
+		IsInteractive:  !shape.isPrinting,
+		Yolo:           shape.isYolo,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -6227,6 +6245,7 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 		bash.New(
 			files,
 			func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
+			func(context.Context, string) error { return nil },
 			sandbox.Direct(),
 		),
 		notify.New(screen.WriteEscape),
@@ -11020,17 +11039,18 @@ func (self sessionGoldenTurn) usesTheInterface() bool {
 }
 
 type sessionGoldenTool struct {
-	Name           string   `toml:"name"`
-	Outputs        []string `toml:"outputs"`
-	Image          string   `toml:"image"`
-	StateKey       string   `toml:"state-key"`
-	ShellWithheld  bool     `toml:"shell-withheld"`
-	LookupWithheld bool     `toml:"lookup-withheld"`
-	FetchWithheld  bool     `toml:"fetch-withheld"`
-	LookupAnswer   string   `toml:"lookup-answer"`
-	Blocks         bool     `toml:"blocks"`
-	StoppedOutput  string   `toml:"stopped-output"`
-	IsLargeRead    bool     `toml:"large-read"`
+	Name                  string   `toml:"name"`
+	Outputs               []string `toml:"outputs"`
+	Image                 string   `toml:"image"`
+	StateKey              string   `toml:"state-key"`
+	ShellWithheld         bool     `toml:"shell-withheld"`
+	ShouldWithholdNetwork bool     `toml:"network-withheld"`
+	LookupWithheld        bool     `toml:"lookup-withheld"`
+	FetchWithheld         bool     `toml:"fetch-withheld"`
+	LookupAnswer          string   `toml:"lookup-answer"`
+	Blocks                bool     `toml:"blocks"`
+	StoppedOutput         string   `toml:"stopped-output"`
+	IsLargeRead           bool     `toml:"large-read"`
 }
 
 type sessionGoldenScenario struct {
@@ -11309,7 +11329,12 @@ func newSessionGoldenTools(
 		}
 
 		if specification.ShellWithheld {
-			tools = append(tools, newSessionGoldenWithheldShell(t))
+			tools = append(tools, newSessionGoldenShell(t, caps.Read, false))
+			continue
+		}
+
+		if specification.ShouldWithholdNetwork {
+			tools = append(tools, newSessionGoldenShell(t, caps.Read|caps.Shell, true))
 			continue
 		}
 
@@ -11439,7 +11464,7 @@ func (self sessionGoldenSearcher) Search(context.Context, string) (string, error
 	return self.answer, nil
 }
 
-func newSessionGoldenWithheldShell(t *testing.T) tool.Tool {
+func newSessionGoldenShell(t *testing.T, grantedCaps caps.Set, isYolo bool) tool.Tool {
 	t.Helper()
 
 	workspace := t.TempDir()
@@ -11450,14 +11475,17 @@ func newSessionGoldenWithheldShell(t *testing.T) tool.Tool {
 	t.Cleanup(func() { _ = workspaceRoot.Close() })
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
-	mode := caps.NewMode(caps.Read)
+	mode := caps.NewMode(grantedCaps)
 	pathAccess, err := shell.NewPathAccess(files, mode, shell.Paths{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(pathAccess.Close)
 
-	return shell.New(workspace, t.TempDir(), t.TempDir(), pathAccess, mode, files, false, sandbox.Direct())
+	return shell.New(
+		workspace, t.TempDir(), t.TempDir(), pathAccess, mode, files, isYolo,
+		func(context.Context, string) error { return nil }, sandbox.Direct(),
+	)
 }
 
 func serveSessionGoldenResponse(

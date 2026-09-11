@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/work"
+	"crdx.org/io/internal/util/strutil"
 )
 
 const (
@@ -92,6 +93,7 @@ type harnessContextTemplateData struct {
 	LookupGranted     bool
 	JobsGranted       bool
 	NetworkGranted    bool
+	IsInteractive     bool
 	Yolo              bool
 }
 
@@ -120,6 +122,7 @@ type Config struct {
 	Skills         []skill.Skill
 	JobsGranted    bool
 	NetworkGranted bool
+	IsInteractive  bool
 	Yolo           bool
 }
 
@@ -215,6 +218,7 @@ func harnessContext(config Config) string {
 		JobsGranted:       config.JobsGranted,
 		NetworkGranted:    config.NetworkGranted,
 		LookupGranted:     currentCaps.Has(caps.Lookup),
+		IsInteractive:     config.IsInteractive,
 		Yolo:              config.Yolo,
 	}
 
@@ -340,7 +344,7 @@ func networkRules(data harnessContextTemplateData) string {
 	}
 
 	lines := []string{
-		"- Networking is limited to the sandbox's private loopback interface",
+		"- A bash call has no network of its own beyond the sandbox's private loopback interface",
 		"- Processes in the same sandbox can communicate over 127.0.0.1 and ::1",
 	}
 
@@ -351,7 +355,11 @@ func networkRules(data harnessContextTemplateData) string {
 		)
 	}
 
-	hostReachability := "- The host's loopback interface and external networks are unreachable"
+	canRequestHostNetwork := data.NetworkGranted && data.IsInteractive
+	hostReachability := unreachableRule(
+		"the host's loopback interface and external networks are unreachable",
+		canRequestHostNetwork,
+	)
 	if len(data.ExtraPaths.HostLoopback) > 0 {
 		ports := make([]string, len(data.ExtraPaths.HostLoopback))
 		for i, port := range data.ExtraPaths.HostLoopback {
@@ -368,7 +376,10 @@ func networkRules(data harnessContextTemplateData) string {
 		lines = append(lines,
 			"- The host's loopback "+subject+verb+" reachable on the same sandbox loopback "+destination,
 		)
-		hostReachability = "- All other host loopback traffic and external networks are unreachable"
+		hostReachability = unreachableRule(
+			"all other host loopback traffic and external networks are unreachable",
+			canRequestHostNetwork,
+		)
 	}
 
 	lines = append(lines,
@@ -377,15 +388,38 @@ func networkRules(data harnessContextTemplateData) string {
 	)
 	lines = append(lines, networkToolRules(data)...)
 
-	return strings.Join(append(lines,
-		"- Anything else that requires external networking must be asked of the user",
-	), "\n")
+	return strings.Join(append(lines, hostNetworkRules(data.NetworkGranted, data.IsInteractive)...), "\n")
+}
+
+func unreachableRule(text string, canRequest bool) string {
+	if canRequest {
+		return "- By default, " + text
+	}
+
+	return "- " + strutil.Capitalise(text)
 }
 
 func networkToolRules(data harnessContextTemplateData) []string {
 	return []string{
 		"- The lookup tool is " + lookupAccess(data.LookupGranted),
 		"- The fetch tool is " + lookupAccess(data.NetworkGranted),
+	}
+}
+
+func hostNetworkRules(isNetworkGranted bool, isInteractive bool) []string {
+	if !isInteractive {
+		return nil
+	}
+	if !isNetworkGranted {
+		return []string{"- Anything else that requires external networking must be asked of the user"}
+	}
+
+	return []string{
+		"- A bash call with network: true runs on the host's own network instead of that private one",
+		"- It reaches the internet, the local network, and whatever the host's loopback is listening on",
+		"- It cannot reach the sandbox's private loopback, so a service started there is out of its reach",
+		"- The user is asked to approve each such call, and may refuse it or leave it to time out",
+		"- Ask for the network only where the work needs it, and say in the call why it does",
 	}
 }
 

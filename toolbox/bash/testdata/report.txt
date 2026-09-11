@@ -63,7 +63,7 @@ note: the shell reports that a process was killed by SIGKILL.
 === a refusal the sandbox made ===
 exit(1):
 cp: cannot create regular file '/etc/hosts': Permission denied
-note: this command ran in a sandbox, and the failure may be the sandbox refusing it.
+note: this command ran in a sandbox.
 external networks and the host's loopback interface are unavailable.
 writable: /workspace, /tmp
 readable: /etc/ssl/certs, /nix/store
@@ -75,7 +75,7 @@ cp: cannot create regular file '/etc/hosts': Read-only file system
 === a refusal under a policy granting nothing to read ===
 exit(1):
 cat: /etc/shadow: Permission denied
-note: this command ran in a sandbox, and the failure may be the sandbox refusing it.
+note: this command ran in a sandbox.
 external networks and the host's loopback interface are unavailable.
 writable: /workspace
 

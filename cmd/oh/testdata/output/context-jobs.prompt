@@ -14,7 +14,7 @@
 
 # Network
 
-- Networking is limited to the sandbox's private loopback interface
+- A bash call has no network of its own beyond the sandbox's private loopback interface
 - Processes in the same sandbox can communicate over <loopback> and ::1
 - A service started with the job tool stays up, and a later bash call reaches it on <loopback>
 - A Unix socket works beneath /tmp, and is refused beneath the workspace

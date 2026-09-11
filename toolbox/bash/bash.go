@@ -20,11 +20,13 @@ import (
 
 type Args struct {
 	Command string `json:"command"`
+	Network bool   `json:"network,omitempty"`
 }
 
 func New(
 	root *file.Root,
 	buildPolicy func(context.Context) (sandbox.Policy, error),
+	approveNetwork func(context.Context, string) error,
 	runner sandbox.Runner,
 ) tool.Tool {
 	return tool.Implement(
@@ -33,6 +35,7 @@ func New(
 			Description: "run a shell command",
 			Schema: tool.Schema{
 				tool.String("command", "the command line"),
+				tool.Boolean("network", "run on the host network").Optional(),
 			},
 		},
 		Describe,
@@ -44,6 +47,12 @@ func New(
 			if err != nil {
 				return "", tool.ToolCallMetrics{}, err
 			}
+			if args.Network {
+				if err := approveNetwork(ctx, args.Command); err != nil {
+					return "", tool.ToolCallMetrics{}, err
+				}
+			}
+			policy.Network = args.Network
 			return exec(ctx, runner, root, policy, args)
 		})
 }
@@ -289,9 +298,14 @@ func matches(output string, wordings []string) bool {
 }
 
 func note(policy sandbox.Policy) string {
+	reach := "external networks and the host's loopback interface are unavailable."
+	if policy.Network {
+		reach = "this command ran on the host network."
+	}
+
 	lines := []string{
-		"note: this command ran in a sandbox, and the failure may be the sandbox refusing it.",
-		"external networks and the host's loopback interface are unavailable.",
+		"note: this command ran in a sandbox.",
+		reach,
 		"writable: " + strings.Join(policy.Write, ", "),
 	}
 

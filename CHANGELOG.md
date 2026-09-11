@@ -4,9 +4,11 @@
 
 - Show when a limited usage window resets
 - Detect valid Codex context windows the right way
+- Allow bash within host network, toggled with `n` cap
 - Rename `web_search` to `lookup`, toggled with `l` cap
 - Rename `web_fetch` to `fetch`, toggled with `n` cap
 - Remove the deprecated `s` cap
+- Add flag to enable network in bash tool call
 
 ## [0.5.0] - 2026-09-10
 

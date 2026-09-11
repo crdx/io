@@ -1,0 +1,13 @@
+
+ run a command on the host network while network access is withheld
+
+
+$ curl example.com ✗ 1L host network access is not granted; the user can grant it with ctrl+x n
+
+Host network access is unavailable.
+
+
+ continue after the refused command
+
+
+Resumed after the refusal.

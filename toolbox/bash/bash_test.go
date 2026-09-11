@@ -48,8 +48,35 @@ func fixedShell(root *file.Root, policy func() sandbox.Policy) tool.Tool {
 	return bash.New(
 		root,
 		func(context.Context) (sandbox.Policy, error) { return policy(), nil },
+		func(context.Context, string) error { return nil },
 		sandbox.Direct(),
 	)
+}
+
+type recordingRunner struct {
+	policy   sandbox.Policy
+	runCount int
+}
+
+func (self *recordingRunner) Run(
+	_ context.Context,
+	_ string,
+	_ string,
+	policy sandbox.Policy,
+) (sandbox.Result, error) {
+	self.policy = policy
+	self.runCount++
+	return sandbox.Result{}, nil
+}
+
+func (self *recordingRunner) Start(
+	_ context.Context,
+	_ string,
+	_ string,
+	_ sandbox.Policy,
+	_ sandbox.Output,
+) (sandbox.Command, error) {
+	panic("unexpected Start call")
 }
 
 func exec(t *testing.T, root *file.Root, directory string, arguments string) (string, error) {
@@ -91,6 +118,79 @@ func TestTheToolIsCalledExec(t *testing.T) {
 
 	if name := fixedShell(root, func() sandbox.Policy { return sandbox.Policy{Write: []string{directory}} }).Name(); name != "bash" {
 		t.Errorf("got %q, want %q", name, "bash")
+	}
+}
+
+func TestNetworkingFollowsTheArgument(t *testing.T) {
+	root, _ := testRoot(t)
+
+	for _, test := range []struct {
+		name      string
+		arguments string
+		want      bool
+	}{
+		{name: "omitted", arguments: `{"command":"true"}`},
+		{name: "enabled", arguments: `{"command":"true","network":true}`, want: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			runner := &recordingRunner{}
+			approvalCount := 0
+			shell := bash.New(
+				root,
+				func(context.Context) (sandbox.Policy, error) {
+					return sandbox.Policy{Network: true}, nil
+				},
+				func(_ context.Context, command string) error {
+					approvalCount++
+					if command != "true" {
+						t.Errorf("got approval for %q, want %q", command, "true")
+					}
+					return nil
+				},
+				runner,
+			)
+
+			call, err := shell.Parse(test.arguments)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if _, err := call.Exec(t.Context()); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if runner.policy.Network != test.want {
+				t.Errorf("got networking %t, want %t", runner.policy.Network, test.want)
+			}
+			wantApprovalCount := 0
+			if test.want {
+				wantApprovalCount = 1
+			}
+			if approvalCount != wantApprovalCount {
+				t.Errorf("got %d approvals, want %d", approvalCount, wantApprovalCount)
+			}
+		})
+	}
+}
+
+func TestDeniedNetworkingDoesNotRun(t *testing.T) {
+	root, _ := testRoot(t)
+	runner := &recordingRunner{}
+	approvalFailure := errors.New("no")
+	shell := bash.New(
+		root,
+		func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
+		func(context.Context, string) error { return approvalFailure },
+		runner,
+	)
+
+	call, err := shell.Parse(`{"command":"true","network":true}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, err := call.Exec(t.Context()); !errors.Is(err, approvalFailure) {
+		t.Fatalf("got %v, want the approval failure", err)
+	}
+	if runner.runCount != 0 {
+		t.Errorf("the runner was called %d times", runner.runCount)
 	}
 }
 

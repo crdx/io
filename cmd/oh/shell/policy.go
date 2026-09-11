@@ -286,8 +286,13 @@ func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, err
 	return bash.ProtectedPolicy(policy.WithRead(readOnlyPaths...)), nil
 }
 
-var ErrWithheld = errors.New(
-	"shell access is not granted; the user can grant it with ctrl+x x",
+var (
+	ErrWithheld = errors.New(
+		"shell access is not granted; the user can grant it with ctrl+x x",
+	)
+	ErrNetworkWithheld = errors.New(
+		"host network access is not granted; the user can grant it with ctrl+x n",
+	)
 )
 
 func RequireSandbox(ctx context.Context) error {
@@ -337,13 +342,21 @@ func New(
 	mode *caps.Mode,
 	files *file.Root,
 	isYolo bool,
+	approveNetwork func(context.Context, string) error,
 	runner sandbox.Runner,
 ) tool.Tool {
 	fresh := func(ctx context.Context) (sandbox.Policy, error) {
 		return freshPolicy(ctx, workspaceDir, homeDir, tmpDir, pathAccess, mode, isYolo)
 	}
+	networkApproval := func(ctx context.Context, command string) error {
+		if !mode.Current().Has(caps.Network) {
+			return ErrNetworkWithheld
+		}
 
-	return bash.New(files, fresh, runner)
+		return approveNetwork(ctx, command)
+	}
+
+	return bash.New(files, fresh, networkApproval, runner)
 }
 
 func NewJob(

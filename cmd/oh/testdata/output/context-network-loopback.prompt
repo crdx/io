@@ -16,11 +16,16 @@
 
 - A bash call has no network of its own beyond the sandbox's private loopback interface
 - Processes in the same sandbox can communicate over <loopback> and ::1
+- The host's loopback TCP port 3000 is reachable on the same sandbox loopback port
 - A Unix socket works beneath /tmp, and is refused beneath the workspace
-- The host's loopback interface and external networks are unreachable
+- By default, all other host loopback traffic and external networks are unreachable
 - The lookup tool is refused
-- The fetch tool is refused
-- Anything else that requires external networking must be asked of the user
+- The fetch tool is granted external network access
+- A bash call with network: true runs on the host's own network instead of that private one
+- It reaches the internet, the local network, and whatever the host's loopback is listening on
+- It cannot reach the sandbox's private loopback, so a service started there is out of its reach
+- The user is asked to approve each such call, and may refuse it or leave it to time out
+- Ask for the network only where the work needs it, and say in the call why it does
 
 # /tmp
 

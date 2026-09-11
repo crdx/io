@@ -19,8 +19,7 @@
 - A Unix socket works beneath /tmp, and is refused beneath the workspace
 - The host's loopback interface and external networks are unreachable
 - The lookup tool is refused
-- The fetch tool is refused
-- Anything else that requires external networking must be asked of the user
+- The fetch tool is granted external network access
 
 # /tmp
 
