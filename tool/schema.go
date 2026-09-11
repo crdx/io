@@ -14,6 +14,7 @@ const (
 	TypeArray   DataType = "array"
 	TypeString  DataType = "string"
 	TypeInteger DataType = "integer"
+	TypeBoolean DataType = "boolean"
 )
 
 type Schema []Parameter
@@ -43,6 +44,10 @@ func StringArray(name string, description string) Parameter {
 
 func Integer(name string, description string) Parameter {
 	return Parameter{Name: name, Type: TypeInteger, Description: description}
+}
+
+func Boolean(name string, description string) Parameter {
+	return Parameter{Name: name, Type: TypeBoolean, Description: description}
 }
 
 func Enum(name string, description string, values ...string) Parameter {

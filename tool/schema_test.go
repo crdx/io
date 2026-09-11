@@ -31,6 +31,25 @@ func TestOptionalParametersAreLeftOutOfRequired(t *testing.T) {
 	}
 }
 
+func TestABooleanParameterHasABooleanSchema(t *testing.T) {
+	schema := tool.Schema{
+		tool.Boolean("networking", "whether to enable networking").Optional(),
+	}
+
+	schemaJSON, err := json.Marshal(schema)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expectedJSON := `{"type":"object","properties":{` +
+		`"networking":{"type":"boolean","description":"whether to enable networking"}},` +
+		`"additionalProperties":false}`
+
+	if string(schemaJSON) != expectedJSON {
+		t.Errorf("expected %s, got %s", expectedJSON, schemaJSON)
+	}
+}
+
 func TestAStringArrayDescribesItsItems(t *testing.T) {
 	schema := tool.Schema{
 		tool.StringArray("names", "jobs to watch"),
