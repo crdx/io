@@ -555,6 +555,77 @@ func TestAGrantIsHeldByItsRealPathWhileAHomeMappingKeepsItsSpelling(t *testing.T
 	}
 }
 
+func TestAGrantSwallowedByAWiderGrantIsReported(t *testing.T) {
+	outer := t.TempDir()
+	inner := filepath.Join(outer, "inner")
+	if err := os.Mkdir(inner, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	for name, test := range map[string]struct {
+		paths Paths
+		want  string
+	}{
+		"a read grant inside a writable path": {
+			paths: Paths{Read: []string{inner}, Write: []string{outer}},
+			want:  "is writable but holds the read-only",
+		},
+		"a read grant inside an executable path": {
+			paths: Paths{Read: []string{inner}, Exec: []string{outer}},
+			want:  "is executable but holds the read-only",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			var warnings strings.Builder
+			if _, err := PreparePaths(test.paths, &warnings); err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(warnings.String(), test.want) {
+				t.Errorf("got %q, want it to say %q", warnings.String(), test.want)
+			}
+		})
+	}
+}
+
+func TestAGrantRefiningAReadGrantIsNotReported(t *testing.T) {
+	outer := t.TempDir()
+	inner := filepath.Join(outer, "inner")
+	if err := os.Mkdir(inner, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	for name, paths := range map[string]Paths{
+		"a writable path inside a read grant":    {Read: []string{outer}, Write: []string{inner}},
+		"an executable path inside a read grant": {Read: []string{outer}, Exec: []string{inner}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			var warnings strings.Builder
+			if _, err := PreparePaths(paths, &warnings); err != nil {
+				t.Fatal(err)
+			}
+			if warnings.String() != "" {
+				t.Errorf("got %q, want nothing said about a grant refining a read grant", warnings.String())
+			}
+		})
+	}
+}
+
+func TestNestedGrantsOnTheirOwnAreNotReported(t *testing.T) {
+	outer := t.TempDir()
+	inner := filepath.Join(outer, "inner")
+	if err := os.Mkdir(inner, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	var warnings strings.Builder
+	if _, err := PreparePaths(Paths{Read: []string{outer, inner}}, &warnings); err != nil {
+		t.Fatal(err)
+	}
+	if warnings.String() != "" {
+		t.Errorf("got %q, want nothing said about two paths of the same kind", warnings.String())
+	}
+}
+
 func TestAWriteGrantIsReachedThroughTheSpellingTheConfigurationUsed(t *testing.T) {
 	workspaceRoot, err := os.OpenRoot(t.TempDir())
 	if err != nil {

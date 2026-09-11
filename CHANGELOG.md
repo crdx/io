@@ -16,6 +16,7 @@
 - Let a file tool follow a symlinked path to the grant that owns it
 - Add `[experimental]` config section
 - Hold every configured path by its real path
+- Report a configured path that holds one from another list
 
 ## [0.5.0] - 2026-09-10
 

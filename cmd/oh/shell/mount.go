@@ -189,6 +189,46 @@ func warnAboutCoveredPaths(paths Paths, warnings io.Writer) {
 			)
 		}
 	}
+
+	warnAboutContainedPaths(paths, warnings)
+}
+
+type containment struct {
+	outer  []string
+	inner  []string
+	clause string
+	source string
+}
+
+func warnAboutContainedPaths(paths Paths, warnings io.Writer) {
+	for _, pair := range []containment{
+		{paths.Write, paths.Read, "is writable but holds the read-only", "sandbox.read"},
+		{paths.Exec, paths.Read, "is executable but holds the read-only", "sandbox.read"},
+	} {
+		reportContainment(warnings, pair)
+	}
+}
+
+func reportContainment(warnings io.Writer, pair containment) {
+	for _, above := range pair.outer {
+		for _, below := range pair.inner {
+			if above == below {
+				continue
+			}
+			if _, isBelow := pathutil.RelativeTo(above, below); !isBelow {
+				continue
+			}
+
+			util.WriteWarningf(
+				warnings,
+				"configured path %s %s %s from [%s]",
+				pathutil.Shorten(above),
+				pair.clause,
+				pathutil.Shorten(below),
+				pair.source,
+			)
+		}
+	}
 }
 
 func PreparePaths(paths Paths, warnings io.Writer) (Paths, error) {
