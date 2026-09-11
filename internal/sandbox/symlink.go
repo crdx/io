@@ -28,20 +28,11 @@ func pathComponents(path string) []string {
 	return parts
 }
 
-func resolvedPath(path string) string {
-	target, err := filepath.EvalSymlinks(path)
-	if err != nil {
-		return path
-	}
-
-	return target
-}
-
 func resolvedRoots(roots []string) []string {
 	paths := make([]string, 0, len(roots))
 
 	for _, root := range roots {
-		paths = append(paths, resolvedPath(root))
+		paths = append(paths, pathutil.Canonicalise(root))
 	}
 
 	return paths
