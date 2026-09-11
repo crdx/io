@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Ensure max shell timeout is less than the typical prompt cache ttl
 - Tell agent that a finished job will notify
 - Add max job wait time
 - Show whole seconds for durations >= 1s

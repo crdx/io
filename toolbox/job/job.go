@@ -29,7 +29,7 @@ const (
 	waitForAll    = "all"
 )
 
-const waitLimit = 5 * time.Minute
+const waitLimit = 4*time.Minute + 30*time.Second
 
 var actions = []string{
 	actionStart,

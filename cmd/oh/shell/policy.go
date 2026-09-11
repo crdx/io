@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	shellTimeout    = 5 * time.Minute
+	shellTimeout    = 4*time.Minute + 30*time.Second
 	shellCPUPercent = 80
 	shellFileSize   = 64 << 30
 	shellOpenFiles  = 1 << 20
