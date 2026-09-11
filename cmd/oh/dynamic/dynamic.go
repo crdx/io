@@ -36,6 +36,7 @@ type row struct {
 	label     Label
 	state     RowState
 	startedAt time.Time
+	timeLimit time.Duration
 	picture   *pictureRows
 
 	timeTaken time.Duration
@@ -66,11 +67,11 @@ func NewBlock(refresh func()) *Block {
 	return self
 }
 
-func (self *Block) Add(label Label) int {
+func (self *Block) Add(label Label, timeLimit time.Duration) int {
 	index := 0
 
 	self.change(func() {
-		self.rows = append(self.rows, row{label: label, startedAt: time.Now()})
+		self.rows = append(self.rows, row{label: label, startedAt: time.Now(), timeLimit: timeLimit})
 		index = len(self.rows) - 1
 	})
 
@@ -278,10 +279,10 @@ func labelGuard(result string, labelWidth int) int {
 func (self *Block) getResult(row row) string {
 	if row.state == Running {
 		elapsedTime := time.Since(row.startedAt).Truncate(time.Second)
-		return getResultText(self.getProgressIndicator(row), elapsedTime, "")
+		return getResultText(self.getProgressIndicator(row), elapsedTime, row.timeLimit, "")
 	}
 
-	return getResultText(self.getProgressIndicator(row), row.timeTaken, row.metrics)
+	return getResultText(self.getProgressIndicator(row), row.timeTaken, 0, row.metrics)
 }
 
 func (self *Block) getProgressIndicator(row row) string {
@@ -296,10 +297,13 @@ func (self *Block) getProgressIndicator(row row) string {
 	return style.Spinner(spinner.Activity.Frame(self.spinnerFrame))
 }
 
-func getResultText(mark string, took time.Duration, measuredText string) string {
+func getResultText(mark string, took time.Duration, timeLimit time.Duration, measuredText string) string {
 	waitedText := ""
 	if took >= patience {
 		waitedText = style.Spinner(util.CompactDuration(took))
+		if timeLimit > 0 {
+			waitedText += style.Subtle("/" + util.CompactDuration(timeLimit))
+		}
 	}
 
 	return util.JoinNonEmpty(mark, waitedText, measuredText)

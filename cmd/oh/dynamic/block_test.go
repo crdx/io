@@ -91,7 +91,7 @@ func FuzzARowFitsAndPaintsOnlyItsOwnColours(f *testing.F) {
 		}
 
 		block := testBlock()
-		block.Add(rowLabel("$", strings.Repeat("a", bounded(labelWidth, widestRow))))
+		block.Add(rowLabel("$", strings.Repeat("a", bounded(labelWidth, widestRow))), 0)
 		block.FinaliseRow(0, state, time.Second, summary, "1L ~1t")
 
 		row := block.Rows(columns)[0]
@@ -115,7 +115,7 @@ func FuzzARowFitsAndPaintsOnlyItsOwnColours(f *testing.F) {
 func TestARowSaysNothingOfItsProgressUntilItHasBeenGoingAWhile(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("read", "main.go"))
+	block.Add(rowLabel("read", "main.go"), 0)
 
 	if got := block.Rows(wide)[0]; got != "read main.go" {
 		t.Errorf("expected the label and nothing else, got %q", got)
@@ -125,7 +125,7 @@ func TestARowSaysNothingOfItsProgressUntilItHasBeenGoingAWhile(t *testing.T) {
 func TestAQuickRowIsMarkedWithoutATime(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("read", "main.go"))
+	block.Add(rowLabel("read", "main.go"), 0)
 
 	block.FinaliseRow(0, Done, 500*time.Millisecond, "", "")
 
@@ -137,7 +137,7 @@ func TestAQuickRowIsMarkedWithoutATime(t *testing.T) {
 func TestARowWorthWaitingForSaysHowLongItTook(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("read", "main.go"))
+	block.Add(rowLabel("read", "main.go"), 0)
 
 	block.FinaliseRow(0, Done, 5*time.Second, "", "")
 
@@ -149,7 +149,7 @@ func TestARowWorthWaitingForSaysHowLongItTook(t *testing.T) {
 func TestARowWorthWaitingForSaysHowLongItTookBesideWhatItMeasured(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("grep", "*.go"))
+	block.Add(rowLabel("grep", "*.go"), 0)
 
 	block.FinaliseRow(0, Done, 9*time.Second, "", "1L")
 
@@ -165,7 +165,7 @@ func TestARowWorthWaitingForSaysHowLongItTookBesideWhatItMeasured(t *testing.T) 
 func TestAQuickRowSaysOnlyWhatItMeasured(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("grep", "*.go"))
+	block.Add(rowLabel("grep", "*.go"), 0)
 
 	block.FinaliseRow(0, Done, 500*time.Millisecond, "", "1L")
 
@@ -183,11 +183,48 @@ func TestRunningTimerUsesWholeSecondGranularity(t *testing.T) {
 	}
 }
 
+func TestABoundedRowCountsUpTowardsTheTimeItWasGiven(t *testing.T) {
+	block := &Block{isSlow: true}
+	item := row{
+		state:     Running,
+		startedAt: time.Now().Add(-12 * time.Second),
+		timeLimit: 20 * time.Second,
+	}
+
+	if got := style.Plain(block.getResult(item)); got != "✦· 12s/20s" {
+		t.Errorf("expected the timer to name the bound, got %q", got)
+	}
+}
+
+func TestABoundedRowDrawsItsBoundBeneathTheTimeItHasTaken(t *testing.T) {
+	block := &Block{isSlow: true}
+	item := row{
+		state:     Running,
+		startedAt: time.Now().Add(-12 * time.Second),
+		timeLimit: 20 * time.Second,
+	}
+
+	want := style.Spinner("12s") + style.Subtle("/20s")
+
+	if got := block.getResult(item); !strings.HasSuffix(got, want) {
+		t.Errorf("expected the bound drawn apart from the elapsed time, got %q", got)
+	}
+}
+
+func TestARowThatFinishedNeverNamesTheTimeItWasGiven(t *testing.T) {
+	block := &Block{}
+	item := row{state: Done, timeTaken: 12 * time.Second, timeLimit: 20 * time.Second}
+
+	if got := style.Plain(block.getResult(item)); got != "✓ 12s" {
+		t.Errorf("expected the settled row to say only what it took, got %q", got)
+	}
+}
+
 func TestARowThatFailedIsMarkedApartFromOneThatDidNot(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("read", "main.go"))
-	block.Add(rowLabel("read", "nowhere.go"))
+	block.Add(rowLabel("read", "main.go"), 0)
+	block.Add(rowLabel("read", "nowhere.go"), 0)
 
 	block.FinaliseRow(0, Done, 0, "", "")
 	block.FinaliseRow(1, Failed, 0, "", "")
@@ -202,7 +239,7 @@ func TestARowThatFailedIsMarkedApartFromOneThatDidNot(t *testing.T) {
 func TestARowThatFailedSaysWhy(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("write", "main.go"))
+	block.Add(rowLabel("write", "main.go"), 0)
 
 	block.FinaliseRow(0, Failed, 0, "permission denied", "")
 
@@ -214,7 +251,7 @@ func TestARowThatFailedSaysWhy(t *testing.T) {
 func TestAReasonIsPutOnTheOneRow(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("bash", "make"))
+	block.Add(rowLabel("bash", "make"), 0)
 
 	block.FinaliseRow(0, Failed, 0, "no rule to make target\n\tstop.\r", "")
 
@@ -226,7 +263,7 @@ func TestAReasonIsPutOnTheOneRow(t *testing.T) {
 func TestAReasonTakesTheRoomTheLabelDoesNotWant(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("read", "main.go"))
+	block.Add(rowLabel("read", "main.go"), 0)
 
 	reason := strings.Repeat("a", wide/2+10)
 
@@ -240,7 +277,7 @@ func TestAReasonTakesTheRoomTheLabelDoesNotWant(t *testing.T) {
 func TestALongReasonLeavesTheLabelItIsAbout(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("write", "main.go"))
+	block.Add(rowLabel("write", "main.go"), 0)
 
 	block.FinaliseRow(0, Failed, 0, strings.Repeat("wordy ", wide), "")
 
@@ -258,7 +295,7 @@ func TestALongReasonLeavesTheLabelItIsAbout(t *testing.T) {
 func TestARowThatSucceededSaysWhatItHadToShowQuietly(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("$", "echo hello"))
+	block.Add(rowLabel("$", "echo hello"), 0)
 
 	block.FinaliseRow(0, Done, 0, "hello", "")
 
@@ -270,7 +307,7 @@ func TestARowThatSucceededSaysWhatItHadToShowQuietly(t *testing.T) {
 func TestASummaryIsPutOnTheOneRow(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("$", "make"))
+	block.Add(rowLabel("$", "make"), 0)
 
 	block.FinaliseRow(0, Done, 0, "one\ntwo\r\n\tthree\n", "")
 
@@ -288,7 +325,7 @@ func TestASummaryIsPutOnTheOneRow(t *testing.T) {
 func TestASummaryPaintsNoColourOfItsOwn(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("$", "just check"))
+	block.Add(rowLabel("$", "just check"), 0)
 
 	block.FinaliseRow(0, Done, 0, "\x1b[32mok\x1b[0m all six steps", "")
 
@@ -300,7 +337,7 @@ func TestASummaryPaintsNoColourOfItsOwn(t *testing.T) {
 func TestALongSummaryIsReadNoFurtherThanARowCanDraw(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("$", "yes"))
+	block.Add(rowLabel("$", "yes"), 0)
 
 	block.FinaliseRow(0, Done, 0, strings.Repeat("y\n", widestSummaryRead), "")
 
@@ -312,7 +349,7 @@ func TestALongSummaryIsReadNoFurtherThanARowCanDraw(t *testing.T) {
 func TestASummaryTakesOnlyTheRoomALabelLeaves(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("$", strings.Repeat("a", wide)))
+	block.Add(rowLabel("$", strings.Repeat("a", wide)), 0)
 
 	block.FinaliseRow(0, Done, 0, "hello", "")
 
@@ -330,8 +367,8 @@ func TestASummaryTakesOnlyTheRoomALabelLeaves(t *testing.T) {
 func TestClosingTheBlockMarksWhateverWasStillRunning(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("read", "main.go"))
-	block.Add(rowLabel("grep", "spinner"))
+	block.Add(rowLabel("read", "main.go"), 0)
+	block.Add(rowLabel("grep", "spinner"), 0)
 	block.FinaliseRow(0, Done, 0, "", "")
 
 	block.Close(Cancelled)
@@ -350,7 +387,7 @@ func TestClosingTheBlockMarksWhateverWasStillRunning(t *testing.T) {
 func TestARowIsMarkedOnlyOnce(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("read", "main.go"))
+	block.Add(rowLabel("read", "main.go"), 0)
 	block.FinaliseRow(0, Failed, 0, "", "")
 
 	block.FinaliseRow(0, Done, 0, "", "")
@@ -363,7 +400,7 @@ func TestARowIsMarkedOnlyOnce(t *testing.T) {
 func TestALabelIsCutToLeaveRoomForTheOutcome(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("grep", strings.Repeat("x", wide)))
+	block.Add(rowLabel("grep", strings.Repeat("x", wide)), 0)
 
 	block.FinaliseRow(0, Done, 3*time.Second, "", "")
 
@@ -377,7 +414,7 @@ func TestALabelIsCutToLeaveRoomForTheOutcome(t *testing.T) {
 func TestALabelTakesTheRoomATimeWouldHaveTakenWhereNoTimeIsShown(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("bash", strings.Repeat("x", wide)))
+	block.Add(rowLabel("bash", strings.Repeat("x", wide)), 0)
 
 	block.FinaliseRow(0, Done, time.Millisecond, "", "")
 
@@ -394,7 +431,7 @@ func TestALabelTakesTheRoomATimeWouldHaveTakenWhereNoTimeIsShown(t *testing.T) {
 func TestALabelGivesRoomBackWhenTheTimeAppears(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("bash", strings.Repeat("x", wide)))
+	block.Add(rowLabel("bash", strings.Repeat("x", wide)), 0)
 
 	block.FinaliseRow(0, Done, 3*time.Second, "", "")
 
@@ -412,7 +449,7 @@ func TestACompletedOutcomeReachesTheTerminalEdge(t *testing.T) {
 	block := testBlock()
 	const narrow = 67
 
-	block.Add(rowLabel("grep", "RESOLVE_UNIX|resolve_unix|unix.*socket|Landlock|landlock"))
+	block.Add(rowLabel("grep", "RESOLVE_UNIX|resolve_unix|unix.*socket|Landlock|landlock"), 0)
 
 	block.FinaliseRow(0, Done, 7420*time.Millisecond, "", "")
 
@@ -430,7 +467,7 @@ func TestARowTooNarrowForWhatItMeasuredKeepsItsLabelAndItsMark(t *testing.T) {
 
 	block := testBlock()
 
-	index := block.Add(rowLabel("bash", "if [[ -f one ]]; then echo one; fi"))
+	index := block.Add(rowLabel("bash", "if [[ -f one ]]; then echo one; fi"), 0)
 	block.FinaliseRow(index, Done, time.Second, "", "900L+ ~500t (of ~225Kt)")
 
 	row := block.Rows(tiny)[index]
@@ -448,7 +485,7 @@ func TestARowTooNarrowForWhatItMeasuredKeepsItsLabelAndItsMark(t *testing.T) {
 func TestARowWideEnoughKeepsEverythingItMeasured(t *testing.T) {
 	block := testBlock()
 
-	index := block.Add(rowLabel("bash", "echo one"))
+	index := block.Add(rowLabel("bash", "echo one"), 0)
 	block.FinaliseRow(index, Done, time.Second, "", "1L ~1t")
 
 	if plain := style.Plain(block.Rows(wide)[index]); !strings.HasSuffix(plain, "✓ 1L ~1t") {
@@ -459,7 +496,7 @@ func TestARowWideEnoughKeepsEverythingItMeasured(t *testing.T) {
 func TestTheOutcomeAppearsAsSoonAsOneLabelCellFitsBesideIt(t *testing.T) {
 	block := testBlock()
 
-	index := block.Add(rowLabel("bash", "echo one"))
+	index := block.Add(rowLabel("bash", "echo one"), 0)
 	block.FinaliseRow(index, Done, 3*time.Second, "", "1L ~1t")
 
 	drawn := style.Plain(block.Rows(wide)[index])
@@ -483,7 +520,7 @@ func TestTheOutcomeAppearsAsSoonAsOneLabelCellFitsBesideIt(t *testing.T) {
 func TestALongSummaryIsElidedToTheTerminalEdge(t *testing.T) {
 	block := testBlock()
 
-	index := block.Add(rowLabel("bash", "echo one"))
+	index := block.Add(rowLabel("bash", "echo one"), 0)
 	block.FinaliseRow(index, Done, 3*time.Second, strings.Repeat("summary ", 20), "")
 
 	row := block.Rows(narrow)[index]

@@ -3,6 +3,7 @@ package tool
 import (
 	"context"
 	"encoding/json"
+	"time"
 )
 
 type _tool struct {
@@ -52,6 +53,7 @@ type _call struct {
 	emphasis       Emphasis
 	emphasisSource string
 	continuation   []CallRendering
+	timeLimit      time.Duration
 	exec           func(ctx context.Context) (ToolCallResult, error)
 }
 
@@ -59,5 +61,6 @@ func (self _call) Subject() string               { return self.subject }
 func (self _call) Qualifier() string             { return self.qualifier }
 func (self _call) Emphasis() Emphasis            { return self.emphasis }
 func (self _call) Continuation() []CallRendering { return self.continuation }
+func (self _call) TimeLimit() time.Duration      { return self.timeLimit }
 
 func (self _call) Exec(ctx context.Context) (ToolCallResult, error) { return self.exec(ctx) }

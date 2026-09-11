@@ -24,6 +24,7 @@ type ToolCall interface {
 	Qualifier() string
 	Emphasis() Emphasis
 	Continuation() []CallRendering
+	TimeLimit() time.Duration
 	Exec(ctx context.Context) (ToolCallResult, error)
 }
 

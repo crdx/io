@@ -14,7 +14,7 @@ func blockWithPicture(t *testing.T, picture Picture) *Block {
 	block := NewBlock(func() {})
 	t.Cleanup(block.Stop)
 
-	index := block.Add(rowLabel("read", "screenshot.png"))
+	index := block.Add(rowLabel("read", "screenshot.png"), 0)
 	block.AttachPicture(index, picture)
 
 	return block

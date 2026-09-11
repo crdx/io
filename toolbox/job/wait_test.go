@@ -126,6 +126,43 @@ func TestAWaitEndsWhenTheTurnDoes(t *testing.T) {
 	}
 }
 
+func TestAWaitTakesTheAskedForLimitAndNeverExceedsTheCeiling(t *testing.T) {
+	for _, current := range []struct {
+		seconds int
+		limit   time.Duration
+	}{
+		{seconds: 0, limit: waitLimit},
+		{seconds: 30, limit: 30 * time.Second},
+		{seconds: int(waitLimit.Seconds()) + 60, limit: waitLimit},
+	} {
+		if limit := getWaitLimit(Args{WaitSeconds: current.seconds}); limit != current.limit {
+			t.Errorf("%d seconds gave %s, want %s", current.seconds, limit, current.limit)
+		}
+	}
+}
+
+func TestAWaitGivesUpAfterTheNumberOfSecondsItWasGiven(t *testing.T) {
+	manager := jobs.New(endingRunner{after: time.Hour})
+	defer func() { _ = manager.Close() }()
+
+	if _, err := manager.Start(t.Context(), "docs", t.TempDir(), "python3 -m http.server", sandbox.Policy{}); err != nil {
+		t.Fatal(err)
+	}
+
+	started := time.Now()
+	report, err := waited(t.Context(), manager, []string{"docs"}, waitForAny, getWaitLimit(Args{WaitSeconds: 1}))
+	if err != nil {
+		t.Fatalf("the wait failed: %v", err)
+	}
+
+	if elapsed := time.Since(started); elapsed < time.Second || elapsed > 30*time.Second {
+		t.Errorf("the wait took %s, want about the second it was given", elapsed)
+	}
+	if !strings.Contains(report, "the wait gave up after 1s") {
+		t.Errorf("got %q, want it to say it waited the second it was given", report)
+	}
+}
+
 func TestAWaitOnAnUnknownJobSaysSo(t *testing.T) {
 	if _, err := waited(t.Context(), jobs.New(nil), []string{"ghost"}, waitForAny, time.Minute); !errors.Is(err, jobs.ErrNotFound) {
 		t.Errorf("got %v, want the job not to be found", err)

@@ -24,7 +24,7 @@ func run(t *testing.T, manager *jobs.Manager, arguments any) (string, error) {
 
 	built := job.New(manager, nil, func(context.Context) (sandbox.Policy, error) {
 		return sandbox.Policy{}, nil
-	})
+	}, false)
 
 	call, err := built.Parse(string(encoded))
 	if err != nil {
@@ -209,13 +209,35 @@ func TestAWaitRefusesAnUnknownWaitForValue(t *testing.T) {
 	}
 }
 
+func TestAWaitRefusesANegativeNumberOfSeconds(t *testing.T) {
+	_, err := run(t, jobs.New(nil), map[string]any{
+		"action":       "wait",
+		"name":         "build",
+		"wait_seconds": -1,
+	})
+	if err == nil || !strings.Contains(err.Error(), "positive number of seconds") {
+		t.Errorf("got %v, want the negative wait to be refused", err)
+	}
+}
+
+func TestOnlyAWaitTakesANumberOfSeconds(t *testing.T) {
+	_, err := run(t, jobs.New(nil), map[string]any{
+		"action":       "status",
+		"name":         "build",
+		"wait_seconds": 5,
+	})
+	if err == nil || !strings.Contains(err.Error(), "wait_seconds can only be used for wait") {
+		t.Errorf("got %v, want wait_seconds to belong to wait alone", err)
+	}
+}
+
 func TestAJobCallIsRenderedByItsSubject(t *testing.T) {
 	subject, qualifier := job.Describe(job.Args{Action: "start", Name: "docs", Command: "python3  -m\nhttp.server"})
 	if subject != "docs" || qualifier != "" {
 		t.Errorf("got %q / %q, want only the job name in the primary rendering", subject, qualifier)
 	}
 
-	parsedCall, err := job.New(nil, nil, nil).Parse(
+	parsedCall, err := job.New(nil, nil, nil, false).Parse(
 		`{"action":"start","name":"docs","command":"python3  -m\nhttp.server"}`,
 	)
 	if err != nil {
@@ -242,4 +264,16 @@ func TestAJobCallIsRenderedByItsSubject(t *testing.T) {
 	}
 }
 
-var _ tool.Tool = job.New(nil, nil, nil)
+func TestTheToolSaysWhetherAnEndedJobWakesTheConversation(t *testing.T) {
+	waking := job.New(nil, nil, nil, true).Description()
+	if !strings.Contains(waking, "You will be notified automatically when it finishes") {
+		t.Errorf("got %q, want a waking harness to promise the model it will be told", waking)
+	}
+
+	sleeping := job.New(nil, nil, nil, false).Description()
+	if !strings.Contains(sleeping, "You will not be notified automatically when it finishes") {
+		t.Errorf("got %q, want no promise of waking a harness that does not wake", sleeping)
+	}
+}
+
+var _ tool.Tool = job.New(nil, nil, nil, false)

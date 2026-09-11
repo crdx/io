@@ -3,6 +3,7 @@ package call
 import (
 	"slices"
 	"strings"
+	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/skill"
@@ -30,18 +31,31 @@ func Summary(event agent.Event) string {
 }
 
 func Describe(event agent.Event, getTool ToolLookup, workspace *work.Space) agent.FallbackRendering {
+	rendering, _ := describe(event, getTool, workspace)
+	return rendering
+}
+
+func describe(
+	event agent.Event,
+	getTool ToolLookup,
+	workspace *work.Space,
+) (agent.FallbackRendering, time.Duration) {
 	rendering := event.FallbackRendering
+	var timeLimit time.Duration
+
 	if getTool != nil {
 		if calledTool, isKnown := getTool(event.Name); isKnown {
 			rendering.ReadOnly = calledTool.ReadOnly()
 			if parsedToolCall, err := calledTool.Parse(event.Arguments); err == nil {
 				rendering.Describe(parsedToolCall)
+				timeLimit = parsedToolCall.TimeLimit()
 			} else {
 				rendering.Subject = tool.DescribeUnparsedArguments(calledTool, event.Arguments)
 			}
 		}
 	}
-	return plain(shortenPaths(rendering, workspace))
+
+	return plain(shortenPaths(rendering, workspace)), timeLimit
 }
 
 func plain(rendering agent.FallbackRendering) agent.FallbackRendering {
@@ -68,8 +82,9 @@ func printableCallRendering(rendering tool.CallRendering) tool.CallRendering {
 }
 
 func LabelFor(event agent.Event, getTool ToolLookup, workspace *work.Space) Label {
-	rendering := Describe(event, getTool, workspace)
+	rendering, timeLimit := describe(event, getTool, workspace)
 	label := getLabel(event.Name, rendering.Subject, rendering.Note, rendering.Emphasis, rendering.ReadOnly)
+	label.TimeLimit = timeLimit
 	label.Continuation = make([]Label, 0, len(rendering.Continuation))
 	for _, part := range rendering.Continuation {
 		label.Continuation = append(label.Continuation, getLabel(part.Name, part.Subject, part.Qualifier, part.Emphasis, false))

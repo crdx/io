@@ -2,6 +2,8 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Tell agent that a finished job will notify
+- Add max job wait time
 - Show whole seconds for durations >= 1s
 - Show when a limited usage window resets
 - Detect valid Codex context windows the right way

@@ -6254,6 +6254,7 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 			jobs.New(sandbox.Direct()),
 			files,
 			func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
+			false,
 		),
 	)
 	tools = append(tools,
@@ -14538,6 +14539,54 @@ func TestAnEndedJobTellsTheModelWhatItPrintedWithoutBeingAsked(t *testing.T) {
 	}
 }
 
+func TestAnEndedJobWaitsForSomeoneToSpeakWhereNobodyIsListening(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	completeTurn(self)
+
+	self.jobEnded(endedJobConclusion())
+
+	if self.currentTurn.Running() {
+		t.Error("a printed conversation woke itself, want it waiting until someone speaks")
+	}
+	if note := self.takeEndedJobsNote(); note == "" {
+		t.Error("the ended job said nothing, want it kept for whenever the conversation next runs")
+	}
+}
+
+func TestAnEndedJobWakesTheConversationWithATurnOfItsOwn(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.jobs.doesWake = true
+	completeTurn(self)
+
+	self.jobEnded(endedJobConclusion())
+
+	if !self.currentTurn.Running() {
+		t.Fatal("the ended job left the conversation asleep, want a turn of its own")
+	}
+
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	messages := submittedTexts(self.recordedEvents)
+	if len(messages) == 0 || !strings.Contains(messages[len(messages)-1], "build") {
+		t.Errorf("got messages %q, want the ended job named in the turn it woke", messages)
+	}
+	if note := self.takeEndedJobsNote(); note != "" {
+		t.Errorf("told the model %q afterwards, want the waking turn to have taken it", note)
+	}
+}
+
+func endedJobConclusion() jobs.Conclusion {
+	return jobs.Conclusion{
+		Snapshot: jobs.Snapshot{Name: "build", State: jobs.StateFailed, ExitCode: 2},
+		Output:   "undefined: getWidth\nexit status 1\n",
+	}
+}
+
 func TestAnEndedJobsOutputIsCappedTheWayAToolCallIs(t *testing.T) {
 	t.Setenv("TMPDIR", t.TempDir())
 
@@ -15128,7 +15177,7 @@ func resizedPictureRows(t *testing.T) string {
 		ID:        "call-1",
 		Name:      "read",
 		Arguments: `{"path":"screenshot.png"}`,
-	}, nil, nil))
+	}, nil, nil), 0)
 
 	block.AttachPicture(index, dynamic.Picture{
 		Data:       drawnPNGFor(t, 400, 200),

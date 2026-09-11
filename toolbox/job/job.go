@@ -43,27 +43,30 @@ var actions = []string{
 }
 
 type Args struct {
-	Action  string   `json:"action"`
-	Name    string   `json:"name"`
-	Names   []string `json:"names,omitempty"`
-	WaitFor string   `json:"wait_for,omitempty"`
-	Command string   `json:"command"`
+	Action      string   `json:"action"`
+	Name        string   `json:"name"`
+	Names       []string `json:"names,omitempty"`
+	WaitFor     string   `json:"wait_for,omitempty"`
+	WaitSeconds int      `json:"wait_seconds,omitempty"`
+	Command     string   `json:"command"`
 }
 
 func New(
 	manager *jobs.Manager,
 	root *file.Root,
 	buildPolicy func(context.Context) (sandbox.Policy, error),
+	doesWake bool,
 ) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
 			Name:        "job",
-			Description: "run a shell command in the background, returning immediately",
+			Description: description(doesWake),
 			Schema: tool.Schema{
 				tool.Enum("action", "what to do", actions...),
 				tool.String("name", "short name for the job (for all actions except 'list', 'prune'); e.g. check, lint, build").Optional(),
 				tool.StringArray("names", "the job names to watch for wait").Optional(),
 				tool.Enum("wait_for", "whether wait returns after any or all watched jobs end", waitForAny, waitForAll).Optional(),
+				tool.Integer("wait_seconds", fmt.Sprintf("how many seconds to wait at most — max %d (default)", int(waitLimit.Seconds()))).Optional(),
 				tool.String("command", "the command line (for action 'start'); if omitted, re-runs previous job by name").Optional(),
 			},
 		},
@@ -71,9 +74,19 @@ func New(
 	).
 		Validate(validate).
 		ContinuesWith(describeContinuation).
+		TakesAtMost(getTimeLimit).
 		Exec(func(ctx context.Context, args Args) (string, tool.ToolCallMetrics, error) {
 			return run(ctx, manager, root, buildPolicy, args)
 		})
+}
+
+func description(doesWake bool) string {
+	firstSentence := "run a shell command in the background."
+	if doesWake {
+		return firstSentence + " You will be notified automatically when it finishes."
+	}
+
+	return firstSentence + " You will not be notified automatically when it finishes."
 }
 
 func Describe(args Args) (string, string) {
@@ -110,6 +123,9 @@ func validate(args Args) error {
 	if args.WaitFor != "" {
 		return errors.New("wait_for can only be used for wait")
 	}
+	if args.WaitSeconds != 0 {
+		return errors.New("wait_seconds can only be used for wait")
+	}
 	if args.Action == actionList || args.Action == actionPrune {
 		return nil
 	}
@@ -145,6 +161,10 @@ func validateWait(args Args) error {
 		return errors.New("wait_for wants to be either any or all")
 	}
 
+	if args.WaitSeconds < 0 {
+		return errors.New("wait_seconds wants to be a positive number of seconds")
+	}
+
 	return nil
 }
 
@@ -157,6 +177,22 @@ func getWaitNames(args Args) []string {
 	}
 
 	return []string{args.Name}
+}
+
+func getTimeLimit(args Args) time.Duration {
+	if args.Action != actionWait {
+		return 0
+	}
+
+	return getWaitLimit(args)
+}
+
+func getWaitLimit(args Args) time.Duration {
+	if args.WaitSeconds <= 0 {
+		return waitLimit
+	}
+
+	return min(time.Duration(args.WaitSeconds)*time.Second, waitLimit)
 }
 
 func getWaitFor(args Args) string {
@@ -226,7 +262,7 @@ func act(
 		return jobs.Report(snapshot.Describe(), output, snapshot.DroppedBytes), nil
 
 	case actionWait:
-		return waited(ctx, manager, getWaitNames(args), getWaitFor(args), waitLimit)
+		return waited(ctx, manager, getWaitNames(args), getWaitFor(args), getWaitLimit(args))
 
 	case actionDiscard:
 		discardedJob, err := manager.Discard(args.Name)

@@ -3,11 +3,14 @@ package call_test
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/call"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/internal/jobs"
 	"crdx.org/io/tool"
+	"crdx.org/io/toolbox/job"
 )
 
 func label() call.Label {
@@ -120,6 +123,25 @@ func TestAContinuedShellCallUsesTheShellLabel(t *testing.T) {
 	label := call.LabelFor(event, nil, nil)
 	if len(label.Continuation) != 1 || label.Continuation[0].Name != "$" || label.Continuation[0].NameStyle == nil {
 		t.Fatalf("got %#v, want the ordinary shell label as the continuation", label.Continuation)
+	}
+}
+
+func TestALabelCarriesTheTimeTheCallGaveItself(t *testing.T) {
+	waitEvent := agent.Event{
+		Name:      "job",
+		Arguments: `{"action":"wait","name":"check","wait_seconds":20}`,
+	}
+	getTool := func(string) (tool.Tool, bool) {
+		return job.New(jobs.New(nil), nil, nil, false), true
+	}
+
+	if got := call.LabelFor(waitEvent, getTool, nil).TimeLimit; got != 20*time.Second {
+		t.Errorf("got %s, want the wait to declare the time it gave itself", got)
+	}
+
+	statusEvent := agent.Event{Name: "job", Arguments: `{"action":"status","name":"check"}`}
+	if got := call.LabelFor(statusEvent, getTool, nil).TimeLimit; got != 0 {
+		t.Errorf("got %s, want a call that waits for nothing to declare no bound", got)
 	}
 }
 

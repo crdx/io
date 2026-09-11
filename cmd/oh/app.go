@@ -105,6 +105,7 @@ type jobState struct {
 	hasRecorded     bool
 	restoredNote    string
 	endedNotes      []string
+	doesWake        bool
 }
 
 type displayState struct {
@@ -973,6 +974,10 @@ func (self *App) jobEnded(conclusion jobs.Conclusion) {
 	self.jobs.endedNotes = append(self.jobs.endedNotes, notice)
 	self.pendingNotices.add(event)
 	self.refreshPendingMessages()
+
+	if self.jobs.doesWake {
+		self.startTurn()
+	}
 }
 
 func (self *App) withinToolOutputLimit(output string) string {
@@ -1312,6 +1317,10 @@ func (self *App) redraw() {
 	})
 }
 
+func (self *App) startTurn() {
+	self.start("")
+}
+
 func (self *App) start(message string) {
 	userTurnElapsed := self.turnTiming().UserTurn
 	self.settleAccess()
@@ -1625,7 +1634,7 @@ func (self *App) finish() {
 		self.start(message)
 	case turn.AccessChange:
 		if self.untoldAccessMessage() != "" {
-			self.start("")
+			self.startTurn()
 		}
 	case turn.AccessNotice:
 		self.refreshPendingMessages()
@@ -1633,7 +1642,7 @@ func (self *App) finish() {
 		self.refreshPendingMessages()
 		self.notify(turn.PokeEvent())
 		self.agent.AddUserMessage(message)
-		self.start("")
+		self.startTurn()
 	case turn.None:
 	}
 }

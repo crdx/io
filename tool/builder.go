@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path"
 	"strings"
+	"time"
 )
 
 type Builder[T any] struct {
@@ -20,6 +21,7 @@ type Builder[T any] struct {
 	emphasis       func(call ToolCall) Emphasis
 	emphasisSource func(args T, subject string) string
 	continuation   func(args T) []CallRendering
+	timeLimit      func(args T) time.Duration
 	isAllowed      func() bool
 	withheld       error
 }
@@ -95,6 +97,11 @@ func (self Builder[T]) Requires(isAllowed func() bool, withheld error) Builder[T
 	return self
 }
 
+func (self Builder[T]) TakesAtMost(limit func(args T) time.Duration) Builder[T] {
+	self.timeLimit = limit
+	return self
+}
+
 func (self Builder[T]) ContinuesWith(render func(args T) []CallRendering) Builder[T] {
 	self.continuation = render
 	return self
@@ -167,11 +174,16 @@ func (self Builder[T]) build(exec ResultExecutor[T]) Tool {
 			if self.continuation != nil {
 				continuation = self.continuation(args)
 			}
+			var timeLimit time.Duration
+			if self.timeLimit != nil {
+				timeLimit = self.timeLimit(args)
+			}
 			return _call{
 				subject:        subject,
 				qualifier:      qualifier,
 				emphasisSource: emphasisSource,
 				continuation:   continuation,
+				timeLimit:      timeLimit,
 				exec: func(ctx context.Context) (ToolCallResult, error) {
 					return exec(ctx, args)
 				},

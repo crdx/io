@@ -156,7 +156,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		if self.screen.IsTerminal() {
 			label.PathRoots = self.linkRoots()
 		}
-		self.rows[event.ID] = self.toolBlock.Add(label)
+		self.rows[event.ID] = self.toolBlock.Add(label, label.TimeLimit)
 		self.labels[event.ID] = label
 
 	case agent.ToolCallResultEvent:

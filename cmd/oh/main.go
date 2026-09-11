@@ -682,9 +682,19 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	toolboxTools = append(toolboxTools, shellTool)
 
+	doesWake := !args.IsPrinting
+
 	if jobManager != nil {
 		toolboxTools = append(toolboxTools, shell.NewJob(
-			jobManager, workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files, args.Yolo,
+			jobManager,
+			workspace.GetDir(),
+			homeDir,
+			tmpDir,
+			pathAccess,
+			mode,
+			files,
+			args.Yolo,
+			doesWake,
 		))
 	}
 	if keeperProcess != nil {
@@ -694,7 +704,8 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		toolboxTools = append(toolboxTools, notify.New(screen.WriteEscape))
 	}
 	toolboxTools = append(toolboxTools, title.New())
-	toolboxTools = append(toolboxTools,
+	toolboxTools = append(
+		toolboxTools,
 		lookup.New(func() bool { return mode.Current().Has(caps.Lookup) }, client.Search),
 		fetch.New(func() bool { return mode.Current().Has(caps.Network) }),
 	)
@@ -834,12 +845,15 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		pathGrants:      pathGrants,
 		hostToSandbox:   hostToSandbox,
 		sandboxToHost:   sandboxToHost,
-		jobs:            jobState{manager: jobManager},
-		configObserver:  configObserver,
-		runMode:         runMode{isPrinting: args.IsPrinting, isYolo: args.Yolo},
-		approval:        approvalState{broker: approvalBroker},
-		startedAt:       util.WallClock(time.Now()),
-		keyboard:        keyboard,
+		jobs: jobState{
+			manager:  jobManager,
+			doesWake: doesWake,
+		},
+		configObserver: configObserver,
+		runMode:        runMode{isPrinting: args.IsPrinting, isYolo: args.Yolo},
+		approval:       approvalState{broker: approvalBroker},
+		startedAt:      util.WallClock(time.Now()),
+		keyboard:       keyboard,
 	}
 	if resumedSession == nil && model.SupportsFastMode(selection.Provider) {
 		app.openingEvents = []agent.Event{model.FastModeEvent(selection.IsFast)}

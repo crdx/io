@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/link"
@@ -33,6 +34,7 @@ type Label struct {
 	Accent          string
 	AccentStyle     style.Style
 	ResultURI       string
+	TimeLimit       time.Duration
 	PathRoots       link.Roots
 	Continuation    []Label
 	renderedSubject string
