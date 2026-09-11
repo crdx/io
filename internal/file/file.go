@@ -88,21 +88,14 @@ func (self *Root) Resolve(path string) (*Root, string, error) {
 	self.mountsMutex.RLock()
 	defer self.mountsMutex.RUnlock()
 
-	var resolvedRoot *Root
-	resolvedName := ""
-	resolvedAt := ""
-	for at, mountedRoot := range self.mounts {
-		name, below := pathutil.RelativeTo(at, path)
-		if !below || len(at) <= len(resolvedAt) || (mountedRoot.isExact && name != ".") {
-			continue
+	if canonical := pathutil.Canonicalise(path); canonical != path {
+		if root, name := self.mountedAt(canonical); root != nil {
+			return root, name, nil
 		}
-
-		resolvedRoot = mountedRoot.root
-		resolvedName = filepath.Join(mountedRoot.name, name)
-		resolvedAt = at
 	}
-	if resolvedRoot != nil {
-		return resolvedRoot, resolvedName, nil
+
+	if root, name := self.mountedAt(path); root != nil {
+		return root, name, nil
 	}
 
 	return nil, "", ErrOutsideRoot
@@ -134,6 +127,25 @@ func (self *Root) MkdirAll(name string, perm os.FileMode) error {
 	}
 
 	return self.root.MkdirAll(name, perm)
+}
+
+func (self *Root) mountedAt(path string) (*Root, string) {
+	var resolvedRoot *Root
+	resolvedName := ""
+	resolvedAt := ""
+
+	for at, mountedRoot := range self.mounts {
+		name, below := pathutil.RelativeTo(at, path)
+		if !below || len(at) <= len(resolvedAt) || (mountedRoot.isExact && name != ".") {
+			continue
+		}
+
+		resolvedRoot = mountedRoot.root
+		resolvedName = filepath.Join(mountedRoot.name, name)
+		resolvedAt = at
+	}
+
+	return resolvedRoot, resolvedName
 }
 
 func (self *Root) refuseWrite(name string) error {

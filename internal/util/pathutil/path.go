@@ -52,6 +52,25 @@ func Exists(path string) bool {
 	return err == nil
 }
 
+func Canonicalise(path string) string {
+	path = filepath.Clean(path)
+	remainder := ""
+
+	for current := path; ; {
+		if target, err := filepath.EvalSymlinks(current); err == nil {
+			return filepath.Join(target, remainder)
+		}
+
+		parent := filepath.Dir(current)
+		if parent == current {
+			return path
+		}
+
+		remainder = filepath.Join(filepath.Base(current), remainder)
+		current = parent
+	}
+}
+
 func RelativeTo(root string, path string) (string, bool) {
 	root, err := filepath.Abs(root)
 	if err != nil {

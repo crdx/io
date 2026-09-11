@@ -1,6 +1,7 @@
 package pathutil_test
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -94,5 +95,49 @@ func TestRelativeToRejectsAPathOutsideTheRoot(t *testing.T) {
 
 	if name, ok := pathutil.RelativeTo(root, outside); ok {
 		t.Errorf("expected an outside path to be rejected, got %q", name)
+	}
+}
+
+func TestCanonicaliseFollowsASymlinkedSpellingToTheRealPath(t *testing.T) {
+	realDirectory := t.TempDir()
+	elsewhere := t.TempDir()
+	link := filepath.Join(elsewhere, "link")
+
+	if err := os.Symlink(realDirectory, link); err != nil {
+		t.Fatal(err)
+	}
+
+	resolved, err := filepath.EvalSymlinks(realDirectory)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for name, test := range map[string]struct {
+		path string
+		want string
+	}{
+		"the link itself": {path: link, want: resolved},
+		"a name below it": {
+			path: filepath.Join(link, "note.md"),
+			want: filepath.Join(resolved, "note.md"),
+		},
+		"a name that is not there yet": {
+			path: filepath.Join(link, "one", "two"),
+			want: filepath.Join(resolved, "one", "two"),
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := pathutil.Canonicalise(test.path); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestCanonicaliseLeavesAPathWithNothingToFollowAlone(t *testing.T) {
+	nowhere := "/no/such/place"
+
+	if got := pathutil.Canonicalise(nowhere); got != nowhere {
+		t.Errorf("got %q, want the path untouched", got)
 	}
 }

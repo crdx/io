@@ -229,6 +229,48 @@ func TestConfiguredPathsAreMountedWithTheirRequestedFileAccess(t *testing.T) {
 	}
 }
 
+func TestAWriteGrantKeepsItsAccessThroughASymlinkedSpelling(t *testing.T) {
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	mode := caps.NewMode(caps.Read | caps.Write)
+	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+
+	granted := t.TempDir()
+	readDirectory := t.TempDir()
+	if err := os.Symlink(granted, filepath.Join(readDirectory, "linked")); err != nil {
+		t.Fatal(err)
+	}
+
+	access, err := NewPathAccess(files, mode, Paths{
+		Read:  []string{readDirectory},
+		Write: []string{granted},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+
+	for name, path := range map[string]string{
+		"the granted spelling":   filepath.Join(granted, "note.md"),
+		"the symlinked spelling": filepath.Join(readDirectory, "linked", "note.md"),
+	} {
+		t.Run(name, func(t *testing.T) {
+			root, resolvedName, err := files.Resolve(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := root.WriteFile(resolvedName, []byte("written"), 0o600); err != nil {
+				t.Errorf("%s refused a write the sandbox would allow: %v", name, err)
+			}
+		})
+	}
+}
+
 func TestTemporaryAccessOverridesAndThenRestoresConfiguredAccess(t *testing.T) {
 	mode := caps.NewMode(caps.Read | caps.Write)
 	files := configuredPathTestRoot(t, mode)

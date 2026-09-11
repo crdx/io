@@ -10,6 +10,7 @@
 - Remove the deprecated `s` cap
 - Add flag to enable network in bash tool call
 - Use the workspace read/write state to colour the `x` cap
+- Let a file tool follow a symlinked path to the grant that owns it
 
 ## [0.5.0] - 2026-09-10
 
