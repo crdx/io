@@ -240,6 +240,36 @@ func refreshedReporter() *scriptedProbeReporter {
 	}
 }
 
+func recedingReporter() *scriptedProbeReporter {
+	laterWeek := weeklyWindow(88)
+	laterWeek.ResetsAt = laterWeek.ResetsAt.Add(time.Hour)
+
+	return &scriptedProbeReporter{
+		probe: agent.UsageProbe{
+			Windows:      []agent.UsageWindow{sessionWindow(6), laterWeek},
+			Availability: agent.UsageAvailabilityAllowed,
+		},
+	}
+}
+
+func silentReporter() *scriptedProbeReporter {
+	return &scriptedProbeReporter{
+		probe: agent.UsageProbe{Availability: agent.UsageAvailabilityAllowed},
+	}
+}
+
+func resetlessReporter() *scriptedProbeReporter {
+	weekWithoutReset := weeklyWindow(88)
+	weekWithoutReset.ResetsAt = time.Time{}
+
+	return &scriptedProbeReporter{
+		probe: agent.UsageProbe{
+			Windows:      []agent.UsageWindow{sessionWindow(6), weekWithoutReset},
+			Availability: agent.UsageAvailabilityAllowed,
+		},
+	}
+}
+
 func drawEachStandingLimit(t *testing.T, isPlain bool) string {
 	t.Helper()
 
@@ -248,20 +278,38 @@ func drawEachStandingLimit(t *testing.T, isPlain bool) string {
 	for _, test := range []struct {
 		name        string
 		nextProbeAt time.Time
+		reporter    *scriptedProbeReporter
 	}{
 		{
 			name:        "a standing limit whose probe is not due yet",
 			nextProbeAt: collectedAt.Add(10 * time.Minute),
+			reporter:    refreshedReporter(),
 		},
 		{
 			name:        "a standing limit whose probe has fallen due",
 			nextProbeAt: collectedAt.Add(-10 * time.Minute),
+			reporter:    refreshedReporter(),
+		},
+		{
+			name:        "a refreshed window whose reset arrived an hour later",
+			nextProbeAt: collectedAt.Add(-10 * time.Minute),
+			reporter:    recedingReporter(),
+		},
+		{
+			name:        "a refreshed window that arrived with no reset",
+			nextProbeAt: collectedAt.Add(-10 * time.Minute),
+			reporter:    resetlessReporter(),
+		},
+		{
+			name:        "a limit lifted by a probe that named no window",
+			nextProbeAt: collectedAt.Add(-10 * time.Minute),
+			reporter:    silentReporter(),
 		},
 	} {
 		report := Collect(t.Context(), []Source{{
 			Provider:         "codex",
 			Label:            "OpenAI",
-			Reporter:         refreshedReporter(),
+			Reporter:         test.reporter,
 			CachePath:        seededCache(t, test.nextProbeAt),
 			IsSelfRefreshing: true,
 		}}, nowAt(collectedAt))

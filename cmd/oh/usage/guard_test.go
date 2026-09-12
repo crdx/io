@@ -493,3 +493,48 @@ func TestAModelScopedLimitLeavesOtherModelsAvailable(t *testing.T) {
 		t.Errorf("the provider was sent %d requests", second.sendCount)
 	}
 }
+
+func TestARecoveryProbeDoesNotPushAResetOutwards(t *testing.T) {
+	path := cachePath(t)
+	clock := &testClock{now: testNow}
+	resetsAt := testNow.Add(2 * time.Hour)
+
+	seedLimit(t, path, clock, agent.UsageWindow{
+		Duration:  7 * 24 * time.Hour,
+		Percent:   100,
+		ResetsAt:  resetsAt,
+		IsLimited: true,
+	})
+
+	clock.set(testNow.Add(17 * time.Minute))
+
+	provider := &providerStub{probe: agent.UsageProbe{
+		Windows: []agent.UsageWindow{{
+			Duration: 7 * 24 * time.Hour,
+			Percent:  99,
+			ResetsAt: testNow.Add(3 * time.Hour),
+		}},
+		Availability: agent.UsageAvailabilityAllowed,
+	}}
+
+	if _, err := usage.Guard(stoppedContext(t), provider, guardSettings(path, "gpt-5.6-sol", clock)).Send(
+		t.Context(), func(agent.Output) bool { return true },
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := usage.Shared(
+		&scriptedReporter{isAvailable: true}, path, rate, clock.read,
+	).UsageWindows(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(got) != 1 || got[0].Percent != 99 || got[0].IsLimited {
+		t.Fatalf("got %+v", got)
+	}
+
+	if !got[0].ResetsAt.Equal(resetsAt) {
+		t.Errorf("the reset moved to %s, want %s", got[0].ResetsAt, resetsAt)
+	}
+}

@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Fix usage window detection mismatches
 - Count every output token, and every provider, in `ohctl analyse`
 - Draw each analysis table under a Markdown heading
 - Shorten file refusal messages

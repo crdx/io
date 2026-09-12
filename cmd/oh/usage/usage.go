@@ -85,7 +85,7 @@ func (self *sharedReporter) UsageWindows(ctx context.Context) ([]agent.UsageWind
 			return err
 		}
 
-		windows := carryLimits(storedCache.Windows, probe, self.now())
+		windows := mergeWindows(storedCache.Windows, probe, self.now())
 		if len(windows) == 0 {
 			return nil
 		}
@@ -144,22 +144,30 @@ func probeInterval(probe agent.UsageProbe) time.Duration {
 	return probe.RefreshAfter
 }
 
-func carryLimits(
+func mergeWindows(
 	storedWindows []agent.UsageWindow, probe agent.UsageProbe, now time.Time,
 ) []agent.UsageWindow {
+	isSpokenFor := probe.Availability == agent.UsageAvailabilityAllowed
+
 	windows := slices.Clone(probe.Windows)
 	if len(windows) == 0 {
-		if probe.Availability != agent.UsageAvailabilityAllowed {
+		if !isSpokenFor {
 			return nil
 		}
 
 		windows = slices.Clone(storedWindows)
+
+		for i := range windows {
+			windows[i].IsLimited = false
+		}
+
+		return windows
 	}
 
 	for i, window := range windows {
-		if probe.Availability == agent.UsageAvailabilityAllowed {
-			windows[i].IsLimited = false
+		windows[i].ResetsAt = steadyReset(storedWindows, window, now)
 
+		if isSpokenFor {
 			continue
 		}
 
@@ -169,13 +177,32 @@ func carryLimits(
 	return windows
 }
 
+func steadyReset(
+	storedWindows []agent.UsageWindow, window agent.UsageWindow, now time.Time,
+) time.Time {
+	for _, candidate := range storedWindows {
+		if !isSameWindow(candidate, window) || !candidate.ResetsAt.After(now) {
+			continue
+		}
+
+		if window.ResetsAt.IsZero() || candidate.ResetsAt.Before(window.ResetsAt) {
+			return candidate.ResetsAt
+		}
+	}
+
+	return window.ResetsAt
+}
+
 func wasLimited(storedWindows []agent.UsageWindow, window agent.UsageWindow, now time.Time) bool {
 	return slices.ContainsFunc(storedWindows, func(candidate agent.UsageWindow) bool {
 		hasNotReset := candidate.ResetsAt.IsZero() || candidate.ResetsAt.After(now)
 
-		return candidate.IsLimited && hasNotReset &&
-			candidate.Scope == window.Scope && candidate.Duration == window.Duration
+		return candidate.IsLimited && hasNotReset && isSameWindow(candidate, window)
 	})
+}
+
+func isSameWindow(left agent.UsageWindow, right agent.UsageWindow) bool {
+	return left.Scope == right.Scope && left.Duration == right.Duration
 }
 
 func (self *sharedReporter) readSnapshot() ([]agent.UsageWindow, time.Time) {

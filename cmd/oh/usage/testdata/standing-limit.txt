@@ -6,3 +6,15 @@ Week    100% █████████┃██████ ▲ 43  2d 0h
 ● OpenAI
 Session   6% ░░░░░░░░░┃░░░░░░ ▼ 54  2h 0m
 Week     88% ███████████┃██░░ ▲ 17  2d 0h
+=== a refreshed window whose reset arrived an hour later ===
+● OpenAI
+Session   6% ░░░░░░░░░┃░░░░░░ ▼ 54  2h 0m
+Week     88% ███████████┃██░░ ▲ 17  2d 0h
+=== a refreshed window that arrived with no reset ===
+● OpenAI
+Session   6% ░░░░░░░░░┃░░░░░░ ▼ 54  2h 0m
+Week     88% ███████████┃██░░ ▲ 17  2d 0h
+=== a limit lifted by a probe that named no window ===
+● OpenAI
+Session  96% ███████████████┃       stale
+Week    100% ███████████┃████ ▲ 29  2d 0h

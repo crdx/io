@@ -239,25 +239,15 @@ func (self *guardedProvider) wakeMonitor() {
 }
 
 func applyProbe(storedCache *cache, probe agent.UsageProbe, now time.Time) {
-	switch probe.Availability {
-	case agent.UsageAvailabilityAllowed:
-		if len(probe.Windows) > 0 {
-			storedCache.Windows = slices.Clone(probe.Windows)
-		} else {
-			for i := range storedCache.Windows {
-				storedCache.Windows[i].IsLimited = false
-			}
-		}
-	case agent.UsageAvailabilityLimited:
-		if len(probe.Windows) > 0 {
-			storedCache.Windows = probe.Windows
-		}
-	case agent.UsageAvailabilityUnknown:
+	if probe.Availability == agent.UsageAvailabilityUnknown {
+		return
 	}
 
-	if probe.Availability != agent.UsageAvailabilityUnknown {
-		storedCache.FetchedAt = now
+	if windows := mergeWindows(storedCache.Windows, probe, now); len(windows) > 0 {
+		storedCache.Windows = windows
 	}
+
+	storedCache.FetchedAt = now
 }
 
 func probeIsDue(storedCache cache, modelName string, now time.Time) bool {

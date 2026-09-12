@@ -200,6 +200,88 @@ func TestTheOrdinaryRefreshDoesNotPollWhileARecoveryProbeOwnsALimit(t *testing.T
 	}
 }
 
+func weeklyWindowResettingAt(resetsAt time.Time, percent float64) []agent.UsageWindow {
+	return []agent.UsageWindow{{
+		Duration: 7 * 24 * time.Hour,
+		Percent:  percent,
+		ResetsAt: resetsAt,
+	}}
+}
+
+func refreshedWindow(t *testing.T, storedResetsAt time.Time, freshResetsAt time.Time) agent.UsageWindow {
+	t.Helper()
+
+	path := cachePath(t)
+	clock := &testClock{now: testNow}
+
+	stored := &scriptedReporter{
+		windows:     weeklyWindowResettingAt(storedResetsAt, 12),
+		isAvailable: true,
+	}
+	if _, err := usage.Shared(stored, path, rate, clock.read).UsageWindows(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	clock.set(testNow.Add(rate))
+
+	fresh := &scriptedReporter{
+		windows:     weeklyWindowResettingAt(freshResetsAt, 13),
+		isAvailable: true,
+	}
+
+	got, err := usage.Shared(fresh, path, rate, clock.read).UsageWindows(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(got) != 1 {
+		t.Fatalf("got %d windows, want 1", len(got))
+	}
+
+	if got[0].Percent != 13 {
+		t.Errorf("the refreshed window reads %+v", got[0])
+	}
+
+	return got[0]
+}
+
+func TestAStandingWindowKeepsTheEarlierOfTwoResets(t *testing.T) {
+	storedResetsAt := testNow.Add(7 * 24 * time.Hour).Add(-time.Minute)
+	want := storedResetsAt
+
+	got := refreshedWindow(t, storedResetsAt, testNow.Add(rate).Add(7*24*time.Hour))
+	if !got.ResetsAt.Equal(want) {
+		t.Errorf("the reset moved to %s, want %s", got.ResetsAt, want)
+	}
+}
+
+func TestAWindowWithNoResetTakesTheOneAlreadyKnown(t *testing.T) {
+	want := testNow.Add(7 * 24 * time.Hour)
+
+	got := refreshedWindow(t, want, time.Time{})
+	if !got.ResetsAt.Equal(want) {
+		t.Errorf("the reset reads %s, want %s", got.ResetsAt, want)
+	}
+}
+
+func TestAWindowThatHasResetTakesTheResetThatFollowsIt(t *testing.T) {
+	want := testNow.Add(7 * 24 * time.Hour)
+
+	got := refreshedWindow(t, testNow.Add(time.Minute), want)
+	if !got.ResetsAt.Equal(want) {
+		t.Errorf("the reset reads %s, want %s", got.ResetsAt, want)
+	}
+}
+
+func TestAnEarlierResetIsTakenWhereItArrives(t *testing.T) {
+	want := testNow.Add(6 * 24 * time.Hour)
+
+	got := refreshedWindow(t, testNow.Add(7*24*time.Hour), want)
+	if !got.ResetsAt.Equal(want) {
+		t.Errorf("the reset reads %s, want %s", got.ResetsAt, want)
+	}
+}
+
 func seedLimit(t *testing.T, path string, clock *testClock, window agent.UsageWindow) {
 	t.Helper()
 
