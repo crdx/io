@@ -4,10 +4,10 @@
 \r
 \e[?7l\r\e[KThere is no IPv6 here, so 127.0.0.1 instead.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 This machine has IPv6 again, so ::1 reaches the sandbox loopback. The user has returned, so you \e[0m\r
-\e[48;2;52;53;65m    can ask them a question.                                                                        \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 This machine has IPv6 again, so ::1 reaches the sandbox loopback. The user has returned, so you \e[0m\r
+\e[48;2;48;58;67m    can ask them a question.                                                                        \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m try ::1 again                                                                                      \e[0m\r

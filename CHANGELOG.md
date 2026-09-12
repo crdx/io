@@ -36,6 +36,7 @@
 
 ### Interface
 
+- Theme harness-submitted messages
 - Gather consecutive mid-round notices into one panel
 - Handle pending notices correctly
 - Repair the region if the terminal is too short

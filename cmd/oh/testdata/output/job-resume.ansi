@@ -7,13 +7,13 @@
 \r
 \r\e[KBoth are up.\r
 \r
-\e[48;2;52;53;65m                                        \e[0m\r
-\e[48;2;52;53;65m 🤖 The jobs docs and watch are no      \e[0m\r
-\e[48;2;52;53;65m    longer running, having been stopped \e[0m\r
-\e[48;2;52;53;65m    when the session last closed. Start \e[0m\r
-\e[48;2;52;53;65m    one again by name to run its command\e[0m\r
-\e[48;2;52;53;65m    afresh.                             \e[0m\r
-\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;48;58;67m                                        \e[0m\r
+\e[48;2;48;58;67m 🤖 The jobs docs and watch are no      \e[0m\r
+\e[48;2;48;58;67m    longer running, having been stopped \e[0m\r
+\e[48;2;48;58;67m    when the session last closed. Start \e[0m\r
+\e[48;2;48;58;67m    one again by name to run its command\e[0m\r
+\e[48;2;48;58;67m    afresh.                             \e[0m\r
+\e[48;2;48;58;67m                                        \e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m carry on                               \e[0m\r
@@ -100,252 +100,252 @@
 \r\e[Kp\r
 \r\e[K.\r
 \r
-\e[48;2;52;53;65m \e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65m🤖\e[0m\r
-\e[48;2;52;53;65m \e[0m\r
-\e[48;2;52;53;65mT\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mj\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mb\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65md\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mc\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65md\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mw\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mc\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mg\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mu\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mi\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mg\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65m,\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mv\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mi\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mg\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mb\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mp\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mp\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65md\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mw\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mi\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mc\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65md\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65m.\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mS\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mg\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mi\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mb\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65my\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mm\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mu\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mi\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mc\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mm\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mm\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65md\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mf\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65m.\e[0m\r
-\e[48;2;52;53;65m \e[0m\r
+\e[48;2;48;58;67m \e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67m🤖\e[0m\r
+\e[48;2;48;58;67m \e[0m\r
+\e[48;2;48;58;67mT\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mh\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mj\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mb\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67md\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mc\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67md\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mw\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mc\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mh\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mr\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ml\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mg\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mr\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mr\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mu\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mi\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mg\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67m,\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mh\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mv\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mi\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mg\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mb\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mp\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mp\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67md\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mw\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mh\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mh\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mi\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ml\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mc\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ml\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67md\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67m.\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mS\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mr\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mg\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mi\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mb\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67my\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mm\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mr\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mu\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mi\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mc\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mm\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mm\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67md\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mf\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mr\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mh\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67m.\e[0m\r
+\e[48;2;48;58;67m \e[0m\r
 \r
 \e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -423,9 +423,9 @@
 
 Both are up.
 
-\e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed. Start one again by name to run its command afresh.\e[0m
-\e[48;2;52;53;65m\e[0m
+\e[48;2;48;58;67m\e[0m
+\e[48;2;48;58;67m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed. Start one again by name to run its command afresh.\e[0m
+\e[48;2;48;58;67m\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m carry on\e[0m
 \e[48;2;52;53;65m\e[0m
@@ -443,10 +443,10 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.
 \r
 Both are up.\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.\e[0m\r
-\e[48;2;52;53;65m    Start one again by name to run its command afresh.                                              \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.\e[0m\r
+\e[48;2;48;58;67m    Start one again by name to run its command afresh.                                              \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m carry on                                                                                           \e[0m\r
@@ -466,10 +466,10 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r
 \e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth are up.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.\e[0m\r
-\e[48;2;52;53;65m    Start one again by name to run its command afresh.                                              \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.\e[0m\r
+\e[48;2;48;58;67m    Start one again by name to run its command afresh.                                              \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m carry on                                                                                           \e[0m\r
@@ -489,10 +489,10 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r
 \e[?2026h\e[?25l\r\e[KBoth are up.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.\e[0m\r
-\e[48;2;52;53;65m    Start one again by name to run its command afresh.                                              \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.\e[0m\r
+\e[48;2;48;58;67m    Start one again by name to run its command afresh.                                              \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m carry on                                                                                           \e[0m\r
@@ -512,10 +512,10 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r
 \e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth are up.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.\e[0m\r
-\e[48;2;52;53;65m    Start one again by name to run its command afresh.                                              \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.\e[0m\r
+\e[48;2;48;58;67m    Start one again by name to run its command afresh.                                              \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m carry on                                                                                           \e[0m\r
@@ -538,28 +538,28 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r
 \r\e[KBoth are up.\r
 \r
-\e[48;2;52;53;65m            \e[0m\r
-\e[48;2;52;53;65m 🤖 The jobs\e[0m\r
-\e[48;2;52;53;65m    docs and\e[0m\r
-\e[48;2;52;53;65m    watch   \e[0m\r
-\e[48;2;52;53;65m    are no  \e[0m\r
-\e[48;2;52;53;65m    longer  \e[0m\r
-\e[48;2;52;53;65m    running,\e[0m\r
-\e[48;2;52;53;65m    having  \e[0m\r
-\e[48;2;52;53;65m    been    \e[0m\r
-\e[48;2;52;53;65m    stopped \e[0m\r
-\e[48;2;52;53;65m    when the\e[0m\r
-\e[48;2;52;53;65m    session \e[0m\r
-\e[48;2;52;53;65m    last    \e[0m\r
-\e[48;2;52;53;65m    closed. \e[0m\r
-\e[48;2;52;53;65m    Start   \e[0m\r
-\e[48;2;52;53;65m    one     \e[0m\r
-\e[48;2;52;53;65m    again by\e[0m\r
-\e[48;2;52;53;65m    name to \e[0m\r
-\e[48;2;52;53;65m    run its \e[0m\r
-\e[48;2;52;53;65m    command \e[0m\r
-\e[48;2;52;53;65m    afresh. \e[0m\r
-\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;48;58;67m            \e[0m\r
+\e[48;2;48;58;67m 🤖 The jobs\e[0m\r
+\e[48;2;48;58;67m    docs and\e[0m\r
+\e[48;2;48;58;67m    watch   \e[0m\r
+\e[48;2;48;58;67m    are no  \e[0m\r
+\e[48;2;48;58;67m    longer  \e[0m\r
+\e[48;2;48;58;67m    running,\e[0m\r
+\e[48;2;48;58;67m    having  \e[0m\r
+\e[48;2;48;58;67m    been    \e[0m\r
+\e[48;2;48;58;67m    stopped \e[0m\r
+\e[48;2;48;58;67m    when the\e[0m\r
+\e[48;2;48;58;67m    session \e[0m\r
+\e[48;2;48;58;67m    last    \e[0m\r
+\e[48;2;48;58;67m    closed. \e[0m\r
+\e[48;2;48;58;67m    Start   \e[0m\r
+\e[48;2;48;58;67m    one     \e[0m\r
+\e[48;2;48;58;67m    again by\e[0m\r
+\e[48;2;48;58;67m    name to \e[0m\r
+\e[48;2;48;58;67m    run its \e[0m\r
+\e[48;2;48;58;67m    command \e[0m\r
+\e[48;2;48;58;67m    afresh. \e[0m\r
+\e[48;2;48;58;67m            \e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m carry on   \e[0m\r
@@ -583,9 +583,9 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 
 \r\e[KBoth are up.
 
-\e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed. Start one again by name to run its command afresh.\e[0m
-\e[48;2;52;53;65m\e[0m
+\e[48;2;48;58;67m\e[0m
+\e[48;2;48;58;67m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed. Start one again by name to run its command afresh.\e[0m
+\e[48;2;48;58;67m\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m carry on\e[0m
 \e[48;2;52;53;65m\e[0m
@@ -603,10 +603,10 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r
 \r\e[KBoth are up.\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.\e[0m\r
-\e[48;2;52;53;65m    Start one again by name to run its command afresh.                                              \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.\e[0m\r
+\e[48;2;48;58;67m    Start one again by name to run its command afresh.                                              \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m carry on                                                                                           \e[0m\r

@@ -124,7 +124,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.UserMessageEvent:
 		self.discardProvisionalReasoning()
 		self.answer.Reset()
-		self.drawSubmitted(event.Text, "")
+		self.drawSubmitted(submittedMessage{text: event.Text, kind: userSubmission})
 
 	case agent.ModelReasoningEvent:
 		self.answer.Reset()
@@ -176,14 +176,14 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		self.screen.Line(style.Change(agent.CacheRebuildNotice(event)))
 
 	case portgrant.HostToSandboxChange:
-		if message, isSaid := HarnessNotice(event); isSaid {
-			self.drawSubmittedBeforeResult(message, submittedMarker(true))
+		if text, isSaid := HarnessNotice(event); isSaid {
+			self.drawSubmittedBeforeResult(submittedMessage{text: text, kind: sentHarnessSubmission})
 		}
 
 	case caps.ModeChange, caps.JobStop, portgrant.SandboxToHostChange, jobrecord.Ended, jobrecord.EndedWithSession,
 		conditions.Change, pathgrant.Change, turn.HarnessPoke:
-		if message, isSaid := HarnessNotice(event); isSaid {
-			self.drawSubmitted(message, submittedMarker(true))
+		if text, isSaid := HarnessNotice(event); isSaid {
+			self.drawSubmitted(submittedMessage{text: text, kind: sentHarnessSubmission})
 		}
 
 	case agent.RetryingEvent:
@@ -233,32 +233,31 @@ func RenderRetry(event agent.Event) string {
 }
 
 func RenderSubmittedMessage(text string, columns int) string {
-	return renderSubmittedMessage(text, columns, false, link.Roots{}, "")
+	return renderSubmittedMessage(submittedMessage{text: text}, columns, false, link.Roots{})
 }
 
 func RenderSubmittedMessageWithHyperlinks(text string, columns int) string {
-	return renderSubmittedMessage(text, columns, true, link.Roots{}, "")
+	return renderSubmittedMessage(submittedMessage{text: text}, columns, true, link.Roots{})
 }
 
 func renderSubmittedMessage(
-	text string,
+	message submittedMessage,
 	columns int,
 	shouldRenderHyperlinks bool,
 	roots link.Roots,
-	marker string,
 ) string {
-	content := submittedContentRows(text, columns, shouldRenderHyperlinks, roots, marker)
+	content := submittedContentRows(message, columns, shouldRenderHyperlinks, roots)
 
-	return strings.Join(frameSubmitted(content, columns), "\n")
+	return strings.Join(frameSubmitted(content, columns, message.background()), "\n")
 }
 
 func submittedContentRows(
-	text string,
+	message submittedMessage,
 	columns int,
 	shouldRenderHyperlinks bool,
 	roots link.Roots,
-	marker string,
 ) []string {
+	marker := message.marker()
 	contentColumns := columns
 	if contentColumns > 1 {
 		contentColumns--
@@ -271,9 +270,9 @@ func submittedContentRows(
 
 	var content []string
 	if shouldRenderHyperlinks {
-		content = markdown.RenderWithHyperlinksUnder(strutil.StripControl(text), contentColumns, roots)
+		content = markdown.RenderWithHyperlinksUnder(strutil.StripControl(message.text), contentColumns, roots)
 	} else {
-		content = markdown.Render(strutil.StripControl(text), contentColumns)
+		content = markdown.Render(strutil.StripControl(message.text), contentColumns)
 	}
 	for i, row := range content {
 		if shouldRenderHyperlinks && !roots.IsEmpty() {
@@ -294,7 +293,7 @@ func submittedContentRows(
 	return content
 }
 
-func frameSubmitted(content []string, columns int) []string {
+func frameSubmitted(content []string, columns int, background style.Style) []string {
 	rows := append([]string{""}, content...)
 	rows = append(rows, "")
 
@@ -303,7 +302,7 @@ func frameSubmitted(content []string, columns int) []string {
 			row += strings.Repeat(" ", room)
 		}
 
-		rows[i] = style.User(row)
+		rows[i] = background(row)
 	}
 
 	return rows
@@ -388,17 +387,19 @@ func (self *Picasso) Stop() {
 	}
 }
 
-func (self *Picasso) drawSubmitted(text string, marker string) {
+func (self *Picasso) drawSubmitted(message submittedMessage) {
 	self.Close(dynamic.Cancelled)
-	self.drawSubmittedLine(text, marker)
+	self.drawSubmittedLine(message)
 	self.screen.End()
 	self.screen.Blank()
 }
 
-func (self *Picasso) drawSubmittedBeforeResult(text string, marker string) {
+func (self *Picasso) drawSubmittedBeforeResult(message submittedMessage) {
 	self.screen.Panel(submittedRows{
-		render: func(columns int) []string { return self.submittedContent(text, marker, columns) },
-	}, frameSubmitted)
+		render: func(columns int) []string { return self.submittedContent(message, columns) },
+	}, func(content []string, columns int) []string {
+		return frameSubmitted(content, columns, message.background())
+	})
 }
 
 type submittedRows struct {
@@ -418,25 +419,25 @@ func (self submittedRows) Rows(columns int) []string {
 	return rows
 }
 
-func (self *Picasso) submittedContent(text string, marker string, columns int) []string {
+func (self *Picasso) submittedContent(message submittedMessage, columns int) []string {
 	if !self.screen.IsTerminal() {
-		return submittedContentRows(text, columns, false, link.Roots{}, marker)
+		return submittedContentRows(message, columns, false, link.Roots{})
 	}
 
-	return submittedContentRows(text, columns, true, self.linkRoots().WithoutScratch(), marker)
+	return submittedContentRows(message, columns, true, self.linkRoots().WithoutScratch())
 }
 
-func (self *Picasso) drawSubmittedLine(text string, marker string) {
+func (self *Picasso) drawSubmittedLine(message submittedMessage) {
 	self.screen.Blank()
-	self.screen.Line(self.renderUserMessage(text, marker))
+	self.screen.Line(self.renderSubmitted(message))
 }
 
-func (self *Picasso) renderUserMessage(text string, marker string) string {
+func (self *Picasso) renderSubmitted(message submittedMessage) string {
 	if !self.screen.IsTerminal() {
-		return renderSubmittedMessage(text, self.screen.Columns(), false, link.Roots{}, marker)
+		return renderSubmittedMessage(message, self.screen.Columns(), false, link.Roots{})
 	}
 
-	return renderSubmittedMessage(text, self.screen.Columns(), true, self.linkRoots().WithoutScratch(), marker)
+	return renderSubmittedMessage(message, self.screen.Columns(), true, self.linkRoots().WithoutScratch())
 }
 
 func (self *Picasso) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldResetAnswerRenderer bool) {

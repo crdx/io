@@ -68,6 +68,7 @@ var (
 	Shell          Style = hex(steel)
 	Skill          Style = hex(mauve)
 	History        Style = hex(mauve)
+	Harness        Style = background("#303a43")
 	PendingPrefix  Style = col.Underline
 	ScrolledInput  Style = Dim
 	ChosenRow      Style = hex(copper)

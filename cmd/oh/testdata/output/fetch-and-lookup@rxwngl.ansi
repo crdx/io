@@ -27,11 +27,11 @@
 \e[48;2;52;53;65m text                                   \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
-\e[48;2;52;53;65m                                        \e[0m\r
-\e[48;2;52;53;65m 🤖 The bash tool can no longer request \e[0m\r
-\e[48;2;52;53;65m    the host network, and the fetch tool\e[0m\r
-\e[48;2;52;53;65m    is now refused.                     \e[0m\r
-\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;48;58;67m                                        \e[0m\r
+\e[48;2;48;58;67m 🤖 The bash tool can no longer request \e[0m\r
+\e[48;2;48;58;67m    the host network, and the fetch tool\e[0m\r
+\e[48;2;48;58;67m    is now refused.                     \e[0m\r
+\e[48;2;48;58;67m                                        \e[0m\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190mfetch\e[0m\e]8;;\e\\ \e[38;2;192;128;80mhttps://go.…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mnetwork access is …\e[0m\r
 \r
@@ -513,154 +513,154 @@
 \e[48;2;52;53;65mt\e[0m\r
 \e[48;2;52;53;65m \e[0m\r
 \r
-\e[48;2;52;53;65m \e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65m🤖\e[0m\r
-\e[48;2;52;53;65m \e[0m\r
-\e[48;2;52;53;65mT\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mb\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mc\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mg\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mq\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mu\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mw\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mk\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65m,\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ma\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65md\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mf\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mc\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mi\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mn\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mw\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mr\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mf\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mu\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ms\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65md\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65m.\e[0m\r
-\e[48;2;52;53;65m \e[0m\r
+\e[48;2;48;58;67m \e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67m🤖\e[0m\r
+\e[48;2;48;58;67m \e[0m\r
+\e[48;2;48;58;67mT\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mh\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mb\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mh\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ml\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mc\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ml\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mg\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mr\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mr\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mq\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mu\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mh\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mh\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mw\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mr\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mk\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67m,\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ma\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67md\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mh\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mf\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mc\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mh\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mt\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ml\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mi\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mn\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mo\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mw\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mr\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mf\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67mu\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67ms\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67me\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67md\e[0m\r
+\e[48;2;48;58;67m\e[0m\r
+\e[48;2;48;58;67m.\e[0m\r
+\e[48;2;48;58;67m \e[0m\r
 \r
 \r\e[K\e[38;2;204;102;102m✗\e[0m\r
 \r
@@ -747,9 +747,9 @@ Go \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;19
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m now read the release notes as plain text\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.\e[0m
-\e[48;2;52;53;65m\e[0m
+\e[48;2;48;58;67m\e[0m
+\e[48;2;48;58;67m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.\e[0m
+\e[48;2;48;58;67m\e[0m
 \e[38;2;129;162;190mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mnetwork access is not granted; the user can grant it with ctrl+x n\e[0m
 
 Fetching is refused, so I cannot read the notes until you grant access again.
@@ -775,9 +775,9 @@ Go \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;19
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.        \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.        \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mnetwork access is not granted; the user can grant it with ct…\e[0m\r
 \r
@@ -804,9 +804,9 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.        \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.        \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mnetwork access is not granted; the user can grant it with ct…\e[0m\e[?25h\e[?2026l\r
 \r
@@ -833,9 +833,9 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.        \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.        \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mnetwork access is not granted; the user can grant it with ct…\e[0m\e[?25h\e[?2026l\r
 \r
@@ -862,9 +862,9 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.        \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.        \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mnetwork access is not granted; the user can grant it with ct…\e[0m\e[?25h\e[?2026l\r
 \r
@@ -928,20 +928,20 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 \e[48;2;52;53;65m plain text \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
-\e[48;2;52;53;65m            \e[0m\r
-\e[48;2;52;53;65m 🤖 The bash\e[0m\r
-\e[48;2;52;53;65m    tool can\e[0m\r
-\e[48;2;52;53;65m    no      \e[0m\r
-\e[48;2;52;53;65m    longer  \e[0m\r
-\e[48;2;52;53;65m    request \e[0m\r
-\e[48;2;52;53;65m    the host\e[0m\r
-\e[48;2;52;53;65m    network,\e[0m\r
-\e[48;2;52;53;65m    and the \e[0m\r
-\e[48;2;52;53;65m    fetch   \e[0m\r
-\e[48;2;52;53;65m    tool is \e[0m\r
-\e[48;2;52;53;65m    now     \e[0m\r
-\e[48;2;52;53;65m    refused.\e[0m\r
-\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;48;58;67m            \e[0m\r
+\e[48;2;48;58;67m 🤖 The bash\e[0m\r
+\e[48;2;48;58;67m    tool can\e[0m\r
+\e[48;2;48;58;67m    no      \e[0m\r
+\e[48;2;48;58;67m    longer  \e[0m\r
+\e[48;2;48;58;67m    request \e[0m\r
+\e[48;2;48;58;67m    the host\e[0m\r
+\e[48;2;48;58;67m    network,\e[0m\r
+\e[48;2;48;58;67m    and the \e[0m\r
+\e[48;2;48;58;67m    fetch   \e[0m\r
+\e[48;2;48;58;67m    tool is \e[0m\r
+\e[48;2;48;58;67m    now     \e[0m\r
+\e[48;2;48;58;67m    refused.\e[0m\r
+\e[48;2;48;58;67m            \e[0m\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190mfet…\e[0m\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mnetw…\e[0m\r
 \r
@@ -972,9 +972,9 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m now read the release notes as plain text\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.\e[0m
-\e[48;2;52;53;65m\e[0m
+\e[48;2;48;58;67m\e[0m
+\e[48;2;48;58;67m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.\e[0m
+\e[48;2;48;58;67m\e[0m
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mnetwork access is not granted; the user can grant it with ctrl+x n\e[0m
 
 \r\e[KFetching is refused, so I cannot read the notes until you grant access again.
@@ -1000,9 +1000,9 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.        \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 The bash tool can no longer request the host network, and the fetch tool is now refused.        \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mnetwork access is not granted; the user can grant it with ct…\e[0m\r
 \r

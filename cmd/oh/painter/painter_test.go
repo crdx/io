@@ -54,6 +54,28 @@ func TestPathGrantEventsAreDrawnFromTheirStructuredState(t *testing.T) {
 	}
 }
 
+func TestSubmittedMessagePresentationFollowsItsKind(t *testing.T) {
+	for name, testCase := range map[string]struct {
+		kind       submissionKind
+		marker     string
+		background style.Style
+	}{
+		"user":            {kind: userSubmission, background: style.User},
+		"pending harness": {kind: pendingHarnessSubmission, marker: unsentMark + " ", background: style.Harness},
+		"sent harness":    {kind: sentHarnessSubmission, marker: harnessMark + " ", background: style.Harness},
+	} {
+		t.Run(name, func(t *testing.T) {
+			message := submittedMessage{kind: testCase.kind}
+			if got := message.marker(); got != testCase.marker {
+				t.Errorf("marker = %q, want %q", got, testCase.marker)
+			}
+			if got, want := message.background()("text"), testCase.background("text"); got != want {
+				t.Errorf("background = %q, want %q", got, want)
+			}
+		})
+	}
+}
+
 func TestOnlyTerminalConversationMessagesContainHyperlinks(t *testing.T) {
 	for eventName, kind := range map[string]agent.Kind{
 		"assistant": agent.ModelMessageEvent,

@@ -1,6 +1,6 @@
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The workspace is now read-only.                                                                 \e[0m\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 The workspace is now read-only.                                                                 \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m continue with the new mode                                                                         \e[0m\r

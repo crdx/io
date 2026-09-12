@@ -24,12 +24,38 @@ const (
 	unwrappedPreviewColumns = 1 << 16
 )
 
-func submittedMarker(isSent bool) string {
-	if isSent {
+type submissionKind uint8
+
+const (
+	userSubmission submissionKind = iota
+	pendingHarnessSubmission
+	sentHarnessSubmission
+)
+
+type submittedMessage struct {
+	text string
+	kind submissionKind
+}
+
+func (self submittedMessage) marker() string {
+	switch self.kind {
+	case pendingHarnessSubmission:
+		return unsentMark + " "
+	case sentHarnessSubmission:
 		return harnessMark + " "
+	case userSubmission:
+		return ""
 	}
 
-	return unsentMark + " "
+	return ""
+}
+
+func (self submittedMessage) background() style.Style {
+	if self.kind == userSubmission {
+		return style.User
+	}
+
+	return style.Harness
 }
 
 func RenderQueuedMessages(messages []string, columns int, shouldRenderHyperlinks bool, roots link.Roots) []string {
@@ -86,7 +112,7 @@ func renderQueuedRow(text string, columns int) string {
 type PendingMessages struct {
 	messages               []string
 	pathRoots              link.Roots
-	isSent                 bool
+	kind                   submissionKind
 	shouldRenderHyperlinks bool
 }
 
@@ -94,6 +120,7 @@ func NewPendingMessages(messages []string, shouldRenderHyperlinks bool, pathRoot
 	return &PendingMessages{
 		messages:               slices.Clone(messages),
 		pathRoots:              pathRoots,
+		kind:                   pendingHarnessSubmission,
 		shouldRenderHyperlinks: shouldRenderHyperlinks,
 	}
 }
@@ -103,7 +130,7 @@ func (self *PendingMessages) Replace(messages []string) {
 }
 
 func (self *PendingMessages) MarkSent() {
-	self.isSent = true
+	self.kind = sentHarnessSubmission
 }
 
 func (self *PendingMessages) Rows(columns int) []string {
@@ -119,9 +146,12 @@ func (self *PendingMessages) Rows(columns int) []string {
 	return rows
 }
 
-func (self *PendingMessages) render(message string, columns int) string {
+func (self *PendingMessages) render(text string, columns int) string {
 	return renderSubmittedMessage(
-		message, columns, self.shouldRenderHyperlinks, self.pathRoots, submittedMarker(self.isSent),
+		submittedMessage{text: text, kind: self.kind},
+		columns,
+		self.shouldRenderHyperlinks,
+		self.pathRoots,
 	)
 }
 
