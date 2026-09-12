@@ -34,7 +34,6 @@
         "total": {
             "sessions": 0,
             "turns": 0,
-            "turnTimings": 0,
             "prompts": 0,
             "replies": 0,
             "reasoningBlocks": 0,
@@ -71,5 +70,6 @@
             "cancellations": 0,
             "took": 0
         }
-    }
+    },
+    "skippedSessions": 0
 }

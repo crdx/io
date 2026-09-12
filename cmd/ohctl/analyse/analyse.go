@@ -2,7 +2,6 @@ package analyse
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -31,17 +30,9 @@ Usage:
 Options:
     -j, --json    Write the analysis as JSON
     -h, --help    Show this help
-
-Sessions are named on the command line, or every stored session is analysed when the command names no session. Naming
-sessions also reports each of them on a row of its own.
 `
 
-const (
-	wireTranscriptName    = "wire.http"
-	journalTranscriptName = "session.jsonl"
-	providerPrefix        = "# provider: "
-	dataPrefix            = "data: "
-)
+const journalTranscriptName = "session.jsonl"
 
 type inputOpts struct {
 	Analyse  bool     `docopt:"analyse"`
@@ -50,12 +41,13 @@ type inputOpts struct {
 }
 
 type Analysis struct {
-	PromptCache PromptCacheAnalysis `json:"promptCache"`
-	Models      ModelAnalysis       `json:"models"`
-	Activity    ActivityAnalysis    `json:"activity"`
-	Faults      FaultAnalysis       `json:"faults"`
-	Tools       ToolAnalysis        `json:"tools"`
-	Sessions    []SessionStatistics `json:"sessions,omitempty"`
+	PromptCache     PromptCacheAnalysis `json:"promptCache"`
+	Models          ModelAnalysis       `json:"models"`
+	Activity        ActivityAnalysis    `json:"activity"`
+	Faults          FaultAnalysis       `json:"faults"`
+	Tools           ToolAnalysis        `json:"tools"`
+	Sessions        []SessionStatistics `json:"sessions,omitempty"`
+	SkippedSessions int                 `json:"skippedSessions"`
 }
 
 type PromptCacheAnalysis struct {
@@ -84,7 +76,7 @@ type ToolAnalysis struct {
 	Total ToolStatistics   `json:"total"`
 }
 
-const analysisCacheFormat = 4
+const analysisCacheFormat = 5
 
 type analysisCache struct {
 	Format   int                      `json:"format"`
@@ -94,8 +86,7 @@ type analysisCache struct {
 type cachedSession struct {
 	JournalSize       int64             `json:"journalSize"`
 	JournalModifiedAt int64             `json:"journalModifiedAt"`
-	WireSize          int64             `json:"wireSize"`
-	WireModifiedAt    int64             `json:"wireModifiedAt"`
+	IsWhole           bool              `json:"isWhole"`
 	Statistics        SessionStatistics `json:"statistics"`
 }
 
@@ -141,12 +132,13 @@ func run(settings Settings, output console.Output) error {
 		return err
 	}
 
-	sessions, err := readSessions(settings.SessionsDir, settings.CachePath, selectedNames)
+	sessions, skippedCount, err := readSessions(settings.SessionsDir, settings.CachePath, selectedNames)
 	if err != nil {
 		return err
 	}
 
 	analysis := aggregate(sessions, readPricebook(settings.ModelCachePath))
+	analysis.SkippedSessions = skippedCount
 
 	if settings.IsJSON {
 		return writeJSON(analysis, output.Screen)
@@ -204,18 +196,10 @@ type sessionAnalysis struct {
 	cachedStatistics cachedSession
 	err              error
 	hasCached        bool
+	isWhole          bool
 }
 
-func analyseSessions(directory string, names []string) (Analysis, error) {
-	sessions, err := readSessions(directory, "", names)
-	if err != nil {
-		return Analysis{}, err
-	}
-
-	return aggregate(sessions, pricebook{}), nil
-}
-
-func readSessions(directory string, cachePath string, names []string) ([]SessionStatistics, error) {
+func readSessions(directory string, cachePath string, names []string) ([]SessionStatistics, int, error) {
 	cache := readAnalysisCache(cachePath)
 	jobs := make(chan analysisJob, len(names))
 	results := make(chan sessionAnalysis)
@@ -242,6 +226,7 @@ func readSessions(directory string, cachePath string, names []string) ([]Session
 	}()
 
 	sessions := make([]SessionStatistics, 0, len(names))
+	skippedCount := 0
 	var firstError error
 	for result := range results {
 		if result.err != nil {
@@ -253,12 +238,16 @@ func readSessions(directory string, cachePath string, names []string) ([]Session
 		if result.hasCached {
 			cache.Sessions[result.name] = result.cachedStatistics
 		}
+		if !result.isWhole {
+			skippedCount++
+			continue
+		}
 		statistics := result.statistics
 		statistics.Name = result.name
 		sessions = append(sessions, statistics)
 	}
 	if firstError != nil {
-		return nil, firstError
+		return nil, 0, firstError
 	}
 	_ = writeAnalysisCache(cachePath, cache)
 
@@ -266,7 +255,7 @@ func readSessions(directory string, cachePath string, names []string) ([]Session
 		return strings.Compare(first.Name, second.Name)
 	})
 
-	return sessions, nil
+	return sessions, skippedCount, nil
 }
 
 func aggregate(sessions []SessionStatistics, prices pricebook) Analysis {
@@ -341,7 +330,7 @@ func aggregate(sessions []SessionStatistics, prices pricebook) Analysis {
 	}
 	for _, statistics := range analysis.Models.Models {
 		analysis.Models.Total.add(statistics)
-		if !statistics.IsPriced && statistics.Requests > 0 {
+		if !statistics.IsPriced {
 			analysis.Models.UnpricedModels++
 		}
 	}
@@ -437,11 +426,8 @@ func (self pricebook) charge(statistics SessionStatistics) (float64, bool) {
 }
 
 type sessionFiles struct {
-	root              *os.Root
 	journalSize       int64
 	journalModifiedAt int64
-	wireSize          int64
-	wireModifiedAt    int64
 }
 
 func openSession(directory string, name string) (sessionFiles, error) {
@@ -449,28 +435,17 @@ func openSession(directory string, name string) (sessionFiles, error) {
 	if err != nil {
 		return sessionFiles{}, err
 	}
-
-	files := sessionFiles{root: sessionRoot, wireSize: -1}
+	defer func() { _ = sessionRoot.Close() }()
 
 	journalInfo, err := sessionRoot.Stat(journalTranscriptName)
 	if err != nil {
-		_ = sessionRoot.Close()
-		return sessionFiles{}, err
-	}
-	files.journalSize = journalInfo.Size()
-	files.journalModifiedAt = journalInfo.ModTime().UnixNano()
-
-	wireInfo, err := sessionRoot.Stat(wireTranscriptName)
-	switch {
-	case err == nil:
-		files.wireSize = wireInfo.Size()
-		files.wireModifiedAt = wireInfo.ModTime().UnixNano()
-	case !errors.Is(err, os.ErrNotExist):
-		_ = sessionRoot.Close()
 		return sessionFiles{}, err
 	}
 
-	return files, nil
+	return sessionFiles{
+		journalSize:       journalInfo.Size(),
+		journalModifiedAt: journalInfo.ModTime().UnixNano(),
+	}, nil
 }
 
 func analyseSessionWithCache(
@@ -483,71 +458,32 @@ func analyseSessionWithCache(
 	if err != nil {
 		return sessionAnalysis{err: fmt.Errorf("could not read %s: %w", name, err)}
 	}
-	defer func() { _ = files.root.Close() }()
 
 	if hasCached && cachedStatistics.matches(files) {
-		return sessionAnalysis{statistics: cachedStatistics.Statistics}
+		return sessionAnalysis{statistics: cachedStatistics.Statistics, isWhole: cachedStatistics.IsWhole}
 	}
 
-	statistics, isUsageComplete, err := analyseJournal(directory, name)
+	statistics, isWhole, err := analyseJournal(directory, name)
 	if err != nil {
 		return sessionAnalysis{err: err}
 	}
 
-	if !isUsageComplete && files.wireSize >= 0 {
-		if err := files.readWireUsage(&statistics); err != nil {
-			return sessionAnalysis{err: fmt.Errorf("could not read %s: %w", name, err)}
-		}
-	}
-
-	return cachedAnalysis(statistics, files)
-}
-
-func (self sessionFiles) readWireUsage(statistics *SessionStatistics) error {
-	file, err := self.root.Open(wireTranscriptName)
-	if err != nil {
-		return err
-	}
-
-	provider, reports, readErr := readTranscript(file)
-	if err := errors.Join(readErr, file.Close()); err != nil {
-		return err
-	}
-
-	if statistics.Provider == unknownProvider && provider != "" {
-		statistics.Provider = provider
-	}
-
-	if len(reports) < statistics.Cache.Requests {
-		return nil
-	}
-
-	statistics.Cache = CacheStatistics{}
-	for _, report := range reports {
-		statistics.Cache.record(report)
-	}
-	if len(reports) > 0 {
-		statistics.Cache.Sessions = 1
-	}
-
-	return nil
+	return cachedAnalysis(statistics, isWhole, files)
 }
 
 func (self cachedSession) matches(files sessionFiles) bool {
 	return self.JournalSize == files.journalSize &&
-		self.JournalModifiedAt == files.journalModifiedAt &&
-		self.WireSize == files.wireSize &&
-		self.WireModifiedAt == files.wireModifiedAt
+		self.JournalModifiedAt == files.journalModifiedAt
 }
 
-func cachedAnalysis(statistics SessionStatistics, files sessionFiles) sessionAnalysis {
+func cachedAnalysis(statistics SessionStatistics, isWhole bool, files sessionFiles) sessionAnalysis {
 	return sessionAnalysis{
 		statistics: statistics,
+		isWhole:    isWhole,
 		cachedStatistics: cachedSession{
 			JournalSize:       files.journalSize,
 			JournalModifiedAt: files.journalModifiedAt,
-			WireSize:          files.wireSize,
-			WireModifiedAt:    files.wireModifiedAt,
+			IsWhole:           isWhole,
 			Statistics:        statistics,
 		},
 		hasCached: true,

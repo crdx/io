@@ -22,6 +22,7 @@ type journalTally struct {
 	statistics   SessionStatistics
 	tools        map[string]*ToolStatistics
 	usageReports int
+	untimedTurns int
 }
 
 func analyseJournal(directory string, name string) (SessionStatistics, bool, error) {
@@ -34,9 +35,9 @@ func analyseJournal(directory string, name string) (SessionStatistics, bool, err
 		return SessionStatistics{}, false, fmt.Errorf("could not analyse %s: %w", name, err)
 	}
 
-	statistics, isUsageComplete := tally.finish()
+	statistics, isWhole := tally.finish()
 
-	return statistics, isUsageComplete, nil
+	return statistics, isWhole, nil
 }
 
 func (self *journalTally) record(line session.Line) error {
@@ -56,11 +57,12 @@ func (self *journalTally) record(line session.Line) error {
 		self.statistics.StartedAt = line.Time
 	case session.TurnCompletion:
 		self.statistics.Activity.Turns++
-		if line.Turn != nil && line.Turn.Took > 0 {
-			self.statistics.Activity.TurnTimings++
-			self.statistics.Activity.TurnTime += line.Turn.Took
-			self.statistics.Activity.LongestTurn = max(self.statistics.Activity.LongestTurn, line.Turn.Took)
+		if line.Turn == nil || line.Turn.Took <= 0 {
+			self.untimedTurns++
+			break
 		}
+		self.statistics.Activity.TurnTime += line.Turn.Took
+		self.statistics.Activity.LongestTurn = max(self.statistics.Activity.LongestTurn, line.Turn.Took)
 	case session.Event:
 		if line.Event != nil {
 			self.recordEvent(*line.Event)
@@ -183,13 +185,14 @@ func (self *journalTally) finish() (SessionStatistics, bool) {
 		return strings.Compare(first.Name, second.Name)
 	})
 
-	isUsageComplete := self.usageReports > 0 &&
+	isWhole := self.usageReports > 0 &&
 		statistics.Cache.Requests == self.usageReports &&
-		statistics.Cache.OutputTokens > 0
+		statistics.Cache.OutputTokens > 0 &&
+		self.untimedTurns == 0
 
-	if statistics.Cache.Requests > 0 {
+	if isWhole {
 		statistics.Cache.Sessions = 1
 	}
 
-	return statistics, isUsageComplete
+	return statistics, isWhole
 }

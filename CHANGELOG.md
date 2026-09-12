@@ -4,6 +4,7 @@
 
 - Fix usage window detection mismatches
 - Count every output token, and every provider, in `ohctl analyse`
+- Only analyse valid journals
 - Draw each analysis table under a Markdown heading
 - Shorten file refusal messages
 - Gather consecutive mid-round notices into one panel

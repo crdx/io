@@ -36,7 +36,6 @@ type ActivityStatistics struct {
 	Provider        string        `json:"provider,omitempty"`
 	Sessions        int           `json:"sessions"`
 	Turns           int           `json:"turns"`
-	TurnTimings     int           `json:"turnTimings"`
 	Prompts         int           `json:"prompts"`
 	Replies         int           `json:"replies"`
 	ReasoningBlocks int           `json:"reasoningBlocks"`
@@ -140,17 +139,16 @@ func (self *CacheStatistics) add(statisticsToAdd CacheStatistics) {
 }
 
 func (self *ActivityStatistics) AverageTurn() time.Duration {
-	if self.TurnTimings <= 0 {
+	if self.Turns <= 0 {
 		return 0
 	}
 
-	return self.TurnTime / time.Duration(self.TurnTimings)
+	return self.TurnTime / time.Duration(self.Turns)
 }
 
 func (self *ActivityStatistics) add(statisticsToAdd ActivityStatistics) {
 	self.Sessions += statisticsToAdd.Sessions
 	self.Turns += statisticsToAdd.Turns
-	self.TurnTimings += statisticsToAdd.TurnTimings
 	self.Prompts += statisticsToAdd.Prompts
 	self.Replies += statisticsToAdd.Replies
 	self.ReasoningBlocks += statisticsToAdd.ReasoningBlocks

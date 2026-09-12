@@ -36,17 +36,29 @@
                 "writtenTokens": 0,
                 "outputTokens": 2500,
                 "peakInputTokens": 20000
+            },
+            {
+                "provider": "openrouter",
+                "sessions": 1,
+                "requests": 1,
+                "hits": 0,
+                "misses": 1,
+                "inputTokens": 12000,
+                "cachedTokens": 0,
+                "writtenTokens": 0,
+                "outputTokens": 150,
+                "peakInputTokens": 12000
             }
         ],
         "total": {
-            "sessions": 4,
-            "requests": 22,
+            "sessions": 5,
+            "requests": 23,
             "hits": 13,
-            "misses": 9,
-            "inputTokens": 810000,
+            "misses": 10,
+            "inputTokens": 822000,
             "cachedTokens": 625000,
             "writtenTokens": 35000,
-            "outputTokens": 37500,
+            "outputTokens": 37650,
             "peakInputTokens": 100000
         }
     },
@@ -92,11 +104,11 @@
                 "provider": "openrouter",
                 "model": "kimi-k2-thinking",
                 "sessions": 1,
-                "requests": 0,
-                "inputTokens": 0,
+                "requests": 1,
+                "inputTokens": 12000,
                 "cachedTokens": 0,
                 "writtenTokens": 0,
-                "outputTokens": 0,
+                "outputTokens": 150,
                 "spend": 0,
                 "isPriced": false
             }
@@ -105,15 +117,15 @@
             "provider": "",
             "model": "",
             "sessions": 5,
-            "requests": 22,
-            "inputTokens": 810000,
+            "requests": 23,
+            "inputTokens": 822000,
             "cachedTokens": 625000,
             "writtenTokens": 35000,
-            "outputTokens": 37500,
+            "outputTokens": 37650,
             "spend": 0.8218749999999999,
             "isPriced": true
         },
-        "unpricedModels": 1
+        "unpricedModels": 2
     },
     "activity": {
         "providers": [
@@ -121,7 +133,6 @@
                 "provider": "anthropic",
                 "sessions": 2,
                 "turns": 8,
-                "turnTimings": 8,
                 "prompts": 8,
                 "replies": 8,
                 "reasoningBlocks": 12,
@@ -134,7 +145,6 @@
                 "provider": "codex",
                 "sessions": 1,
                 "turns": 10,
-                "turnTimings": 10,
                 "prompts": 11,
                 "replies": 9,
                 "reasoningBlocks": 44,
@@ -147,20 +157,18 @@
                 "provider": "ollama",
                 "sessions": 1,
                 "turns": 4,
-                "turnTimings": 0,
                 "prompts": 4,
                 "replies": 4,
                 "reasoningBlocks": 0,
                 "toolCalls": 6,
-                "turnTime": 0,
-                "longestTurn": 0,
+                "turnTime": 120000000000,
+                "longestTurn": 45000000000,
                 "sessionTime": 720000000000
             },
             {
                 "provider": "openrouter",
                 "sessions": 1,
-                "turns": 1,
-                "turnTimings": 0,
+                "turns": 0,
                 "prompts": 1,
                 "replies": 0,
                 "reasoningBlocks": 0,
@@ -172,13 +180,12 @@
         ],
         "total": {
             "sessions": 5,
-            "turns": 23,
-            "turnTimings": 18,
+            "turns": 22,
             "prompts": 24,
             "replies": 21,
             "reasoningBlocks": 56,
             "toolCalls": 161,
-            "turnTime": 1950000000000,
+            "turnTime": 2070000000000,
             "longestTurn": 300000000000,
             "sessionTime": 9600000000000
         }
@@ -320,7 +327,6 @@
             "activity": {
                 "sessions": 1,
                 "turns": 5,
-                "turnTimings": 5,
                 "prompts": 5,
                 "replies": 5,
                 "reasoningBlocks": 12,
@@ -384,7 +390,6 @@
             "activity": {
                 "sessions": 1,
                 "turns": 3,
-                "turnTimings": 3,
                 "prompts": 3,
                 "replies": 3,
                 "reasoningBlocks": 0,
@@ -441,7 +446,6 @@
             "activity": {
                 "sessions": 1,
                 "turns": 10,
-                "turnTimings": 10,
                 "prompts": 11,
                 "replies": 9,
                 "reasoningBlocks": 44,
@@ -498,20 +502,19 @@
             "started": "2026-09-01T14:00:00Z",
             "ended": "2026-09-01T14:03:00Z",
             "cache": {
-                "sessions": 0,
-                "requests": 0,
+                "sessions": 1,
+                "requests": 1,
                 "hits": 0,
-                "misses": 0,
-                "inputTokens": 0,
+                "misses": 1,
+                "inputTokens": 12000,
                 "cachedTokens": 0,
                 "writtenTokens": 0,
-                "outputTokens": 0,
-                "peakInputTokens": 0
+                "outputTokens": 150,
+                "peakInputTokens": 12000
             },
             "activity": {
                 "sessions": 1,
-                "turns": 1,
-                "turnTimings": 0,
+                "turns": 0,
                 "prompts": 1,
                 "replies": 0,
                 "reasoningBlocks": 0,
@@ -558,13 +561,12 @@
             "activity": {
                 "sessions": 1,
                 "turns": 4,
-                "turnTimings": 0,
                 "prompts": 4,
                 "replies": 4,
                 "reasoningBlocks": 0,
                 "toolCalls": 6,
-                "turnTime": 0,
-                "longestTurn": 0,
+                "turnTime": 120000000000,
+                "longestTurn": 45000000000,
                 "sessionTime": 720000000000
             },
             "faults": {
@@ -594,5 +596,6 @@
             "spend": 0,
             "isPriced": false
         }
-    ]
+    ],
+    "skippedSessions": 12
 }

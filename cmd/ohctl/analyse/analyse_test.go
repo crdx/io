@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -25,66 +26,6 @@ const journalProvider = "codex"
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
-func TestCacheReportsAreReadFromEverySupportedWireShape(t *testing.T) {
-	transcript := strings.Join([]string{
-		"# HTTP transcript",
-		"# provider: mixed",
-		`data: {"type":"response.completed","padding":"` + strings.Repeat("x", 10_000) +
-			`","response":{"usage":{"input_tokens":2600,"output_tokens":780,` +
-			`"input_tokens_details":{"cached_tokens":2000,"cache_write_tokens":400}}}}`,
-		`data: {"type":"message_start","message":{"usage":{"input_tokens":50,"output_tokens":1,` +
-			`"cache_read_input_tokens":100000,"cache_creation_input_tokens":248}}}`,
-		`data: {"type":"message_delta","usage":{"output_tokens":1290}}`,
-		`data: {"usage":{"prompt_tokens":2006,"completion_tokens":64,"prompt_tokens_details":{"cached_tokens":1920}}}`,
-		`data: {"type":"message_delta","usage":{"input_tokens":50,"cache_read_input_tokens":100000,"cache_creation_input_tokens":0}}`,
-		`data: {"type":"response.completed","response":{"usage":{"input_tokens":900}}}`,
-	}, "\n")
-
-	provider, reports, err := readTranscript(strings.NewReader(transcript))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if provider != "mixed" {
-		t.Errorf("got provider %q, want mixed", provider)
-	}
-	want := []usageReport{
-		{inputTokens: 2600, cachedTokens: 2000, writtenTokens: 400, outputTokens: 780},
-		{inputTokens: 100298, cachedTokens: 100000, writtenTokens: 248, outputTokens: 1290},
-		{inputTokens: 2006, cachedTokens: 1920, outputTokens: 64},
-		{inputTokens: 900},
-	}
-	if !reflect.DeepEqual(reports, want) {
-		t.Errorf("got reports %#v, want %#v", reports, want)
-	}
-}
-
-func TestTheReadMarkersBetweenEventsArePassedOver(t *testing.T) {
-	transcript := strings.Join([]string{
-		"# HTTP transcript",
-		"# provider: anthropic",
-		"# exchange 1 read 1970-01-01T00:00:03Z elapsed=1s",
-		`data: {"type":"message_start","message":{"usage":{"input_tokens":50,"output_tokens":1,` +
-			`"cache_read_input_tokens":100000,"cache_creation_input_tokens":248}}}`,
-		"# exchange 1 read 1970-01-01T00:00:03.25Z elapsed=1.25s gap=250ms",
-		`data: {"type":"message_delta","usage":{"output_tokens":1290}}`,
-		"# exchange 1 end 1970-01-01T00:00:04Z elapsed=2s completed",
-	}, "\n")
-
-	provider, reports, err := readTranscript(strings.NewReader(transcript))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if provider != "anthropic" {
-		t.Errorf("got provider %q, want anthropic", provider)
-	}
-	want := []usageReport{
-		{inputTokens: 100298, cachedTokens: 100000, writtenTokens: 248, outputTokens: 1290},
-	}
-	if !reflect.DeepEqual(reports, want) {
-		t.Errorf("got reports %#v, want %#v", reports, want)
-	}
-}
-
 func TestZeroCachedTokensAreAMiss(t *testing.T) {
 	statistics := CacheStatistics{}
 	statistics.record(usageReport{inputTokens: 9000})
@@ -95,104 +36,12 @@ func TestZeroCachedTokensAreAMiss(t *testing.T) {
 	}
 }
 
-func TestTheTotalsOfALongLineOutrankTheAttributionBeforeThem(t *testing.T) {
-	var attribution strings.Builder
-	for index := range 200 {
-		fmt.Fprintf(
-			&attribution,
-			`"item%d":{"cached_tokens":11,"input_tokens":22,"output_tokens":33,"padding":"%s"},`,
-			index,
-			strings.Repeat("x", 64),
-		)
-	}
-	transcript := strings.Join([]string{
-		"# HTTP transcript",
-		"# provider: codex",
-		`data: {"type":"response.completed","response":{"usage":{"attribution":{` +
-			strings.TrimSuffix(attribution.String(), ",") +
-			`},"input_tokens":153188,"input_tokens_details":{"cache_write_tokens":0,"cached_tokens":152448},` +
-			`"output_tokens":104,"output_tokens_details":{"reasoning_tokens":64},"total_tokens":153292}}}`,
-	}, "\n")
-
-	_, reports, err := readTranscript(strings.NewReader(transcript))
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := []usageReport{{inputTokens: 153188, cachedTokens: 152448, outputTokens: 104}}
-	if !reflect.DeepEqual(reports, want) {
-		t.Errorf("got reports %#v, want %#v", reports, want)
-	}
-}
-
-func TestANumberSplitAcrossTwoFragmentsIsStillRead(t *testing.T) {
-	for padding := 4000; padding < 4120; padding++ {
-		transcript := strings.Join([]string{
-			"# provider: codex",
-			`data: {"type":"response.completed","padding":"` + strings.Repeat("x", padding) +
-				`","response":{"usage":{"input_tokens":123456,"output_tokens":780,` +
-				`"input_tokens_details":{"cached_tokens":120000}}}}`,
-		}, "\n")
-
-		_, reports, err := readTranscript(strings.NewReader(transcript))
-		if err != nil {
-			t.Fatal(err)
-		}
-		want := []usageReport{{inputTokens: 123456, cachedTokens: 120000, outputTokens: 780}}
-		if !reflect.DeepEqual(reports, want) {
-			t.Fatalf("with %d bytes of padding, got reports %#v, want %#v", padding, reports, want)
-		}
-	}
-}
-
-func TestAProviderQuotingNoCachedTokensStillReportsItsUsage(t *testing.T) {
-	transcript := strings.Join([]string{
-		"# HTTP transcript",
-		"# provider: ollama",
-		`data: {"usage":{"prompt_tokens":48240,"completion_tokens":278,"total_tokens":48518}}`,
-	}, "\n")
-
-	provider, reports, err := readTranscript(strings.NewReader(transcript))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if provider != "ollama" {
-		t.Errorf("got provider %q, want ollama", provider)
-	}
-	want := []usageReport{{inputTokens: 48240, outputTokens: 278}}
-	if !reflect.DeepEqual(reports, want) {
-		t.Errorf("got reports %#v, want %#v", reports, want)
-	}
-}
-
-func TestSessionsWithoutWireUsageDoNotAffectTheAnalysis(t *testing.T) {
-	directory := t.TempDir()
-	writeTranscript(t, directory, "with-usage", strings.Join([]string{
-		"# provider: codex",
-		`data: {"type":"response.completed","response":{"usage":{"input_tokens":9000,"input_tokens_details":{"cached_tokens":0}}}}`,
-	}, "\n"))
-	writeJournal(t, directory, "without-usage")
-
-	analysis, err := analyseSessions(directory, []string{"with-usage", "without-usage"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(analysis.PromptCache.Providers) != 1 {
-		t.Fatalf("got %d providers, want 1", len(analysis.PromptCache.Providers))
-	}
-	statistics := analysis.PromptCache.Providers[0]
-	if statistics.Sessions != 1 || statistics.Misses != 1 {
-		t.Errorf("got sessions=%d misses=%d, want 1 and 1", statistics.Sessions, statistics.Misses)
-	}
-}
-
 func TestHistoricalAnalysisCacheIsReusedAndInvalidated(t *testing.T) {
 	directory := t.TempDir()
-	name := "cached-wire"
-	firstReport := strings.Join([]string{
-		"# provider: codex",
-		`data: {"type":"response.completed","response":{"usage":{"input_tokens":9000,"input_tokens_details":{"cached_tokens":8000}}}}`,
-	}, "\n")
-	writeTranscript(t, directory, name, firstReport)
+	name := "cached-otter"
+	firstRequest := event("00:00:01",
+		`{"kind":"model_message","usage":{"input_tokens":9000,"output_tokens":120,"cache":{"read_tokens":8000}}}`)
+	writeJournal(t, directory, name, firstRequest)
 	cachePath := filepath.Join(t.TempDir(), "analysis.json")
 
 	first, err := analyseWithCache(directory, cachePath, []string{name})
@@ -204,35 +53,14 @@ func TestHistoricalAnalysisCacheIsReusedAndInvalidated(t *testing.T) {
 		t.Fatalf("cache or first analysis was incomplete: %#v %#v", readCache, first)
 	}
 
-	secondReport := `data: {"type":"response.completed","response":{"usage":{"input_tokens":10000,"input_tokens_details":{"cached_tokens":0}}}}`
-	writeTranscript(t, directory, name, firstReport+"\n"+secondReport)
+	writeJournal(t, directory, name, firstRequest, event("00:00:02",
+		`{"kind":"model_message","usage":{"input_tokens":10000,"output_tokens":60,"cache":{"read_tokens":0}}}`))
 	second, err := analyseWithCache(directory, cachePath, []string{name})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if second.PromptCache.Total.Requests != 2 || second.PromptCache.Total.Misses != 1 {
-		t.Errorf("changed wire transcript did not invalidate the cache: %#v", second)
-	}
-}
-
-func TestCompleteJournalUsageAvoidsTheWireTranscript(t *testing.T) {
-	directory := t.TempDir()
-	writeTranscript(t, directory, "journal-usage", strings.Join([]string{
-		"# provider: codex",
-		`data: {"type":"response.completed","response":{"usage":{"input_tokens":9000,"input_tokens_details":{"cached_tokens":0}}}}`,
-	}, "\n"))
-	writeJournal(
-		t,
-		directory,
-		"journal-usage",
-		event("00:00:01",
-			`{"kind":"model_message","text":"hello","usage":{"input_tokens":9000,"output_tokens":120,`+
-				`"cache":{"read_tokens":8000}}}`),
-	)
-
-	statistics := analyseOne(t, directory, "journal-usage")
-	if statistics.Cache.Hits != 1 || statistics.Cache.Misses != 0 {
-		t.Errorf("got statistics %#v", statistics.Cache)
+		t.Errorf("a changed journal did not invalidate the cache: %#v", second)
 	}
 }
 
@@ -252,44 +80,6 @@ func TestOutputTokensArrivingAfterTheirRequestAreCounted(t *testing.T) {
 	}
 	if statistics.Cache.OutputTokens != 567 {
 		t.Errorf("got %d output tokens, want 567", statistics.Cache.OutputTokens)
-	}
-}
-
-func TestAJournalRecordingNoOutputFallsBackToTheWireTranscript(t *testing.T) {
-	directory := t.TempDir()
-	writeTranscript(t, directory, "quiet-marmot", strings.Join([]string{
-		"# provider: codex",
-		`data: {"type":"response.completed","response":{"usage":{"input_tokens":9000,"output_tokens":480,` +
-			`"input_tokens_details":{"cached_tokens":8000}}}}`,
-	}, "\n"))
-	writeJournal(t, directory, "quiet-marmot",
-		event("00:00:01", `{"kind":"model_message","text":"hello","usage":{"input_tokens":9000,`+
-			`"cache":{"read_tokens":8000}}}`),
-	)
-
-	statistics := analyseOne(t, directory, "quiet-marmot")
-
-	if statistics.Cache.Requests != 1 || statistics.Cache.OutputTokens != 480 {
-		t.Errorf("got statistics %#v", statistics.Cache)
-	}
-}
-
-func TestAWireTranscriptKnowingLessThanTheJournalIsNotRead(t *testing.T) {
-	directory := t.TempDir()
-	writeTranscript(t, directory, "torn-transcript", strings.Join([]string{
-		"# provider: codex",
-		`data: {"type":"response.completed","response":{"usage":{"input_tokens":9000,` +
-			`"input_tokens_details":{"cached_tokens":8000}}}}`,
-	}, "\n"))
-	writeJournal(t, directory, "torn-transcript",
-		event("00:00:01", `{"kind":"model_message","usage":{"input_tokens":9000,"cache":{"read_tokens":8000}}}`),
-		event("00:00:02", `{"kind":"model_message","usage":{"input_tokens":9500,"cache":{"read_tokens":9000}}}`),
-	)
-
-	statistics := analyseOne(t, directory, "torn-transcript")
-
-	if statistics.Cache.Requests != 2 || statistics.Cache.Sessions != 1 {
-		t.Errorf("got statistics %#v", statistics.Cache)
 	}
 }
 
@@ -323,7 +113,7 @@ func TestAJournalReportsTurnsToolsAndFaults(t *testing.T) {
 		t.Errorf("got provider %q, want %q", statistics.Provider, journalProvider)
 	}
 	activity := statistics.Activity
-	if activity.Turns != 1 || activity.TurnTimings != 1 || activity.Prompts != 1 || activity.Replies != 1 ||
+	if activity.Turns != 1 || activity.Prompts != 1 || activity.Replies != 1 ||
 		activity.ReasoningBlocks != 1 || activity.ToolCalls != 2 {
 		t.Errorf("got activity %#v", activity)
 	}
@@ -355,20 +145,67 @@ func TestAJournalReportsTurnsToolsAndFaults(t *testing.T) {
 	}
 }
 
-func TestATurnCountsEvenWhenItsDurationWasNotRecorded(t *testing.T) {
+func TestEverySessionTheJournalCannotAnswerForIsSkipped(t *testing.T) {
+	const wholeRequest = `{"kind":"model_message","usage":{"input_tokens":9000,"output_tokens":120,` +
+		`"cache":{"read_tokens":8000}}}`
+
+	journals := map[string][]string{
+		"whole-heron": {
+			event("00:00:01", wholeRequest),
+			`{"kind":"turn_completion","time":"2026-09-01T00:00:05Z","turn":{"took":4000000000}}`,
+		},
+		"untimed-crane": {
+			event("00:00:01", wholeRequest),
+			`{"kind":"turn_completion","time":"2026-09-01T00:00:05Z"}`,
+		},
+		"outputless-marmot": {
+			event("00:00:01", `{"kind":"model_message","usage":{"input_tokens":9000,"cache":{"read_tokens":8000}}}`),
+		},
+		"cacheless-vole": {
+			event("00:00:01", `{"kind":"model_message","usage":{"input_tokens":9000,"output_tokens":120}}`),
+		},
+		"silent-swift": {
+			event("00:00:01", `{"kind":"model_message","text":"hello"}`),
+		},
+	}
+
+	directory := t.TempDir()
+	names := make([]string, 0, len(journals))
+	for name, events := range journals {
+		writeJournal(t, directory, name, events...)
+		names = append(names, name)
+	}
+	slices.Sort(names)
+
+	sessions, skippedCount, err := readSessions(directory, "", names)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(sessions) != 1 || sessions[0].Name != "whole-heron" {
+		t.Fatalf("got sessions %#v, want only whole-heron", sessions)
+	}
+	if skippedCount != len(journals)-1 {
+		t.Errorf("got %d skipped, want %d", skippedCount, len(journals)-1)
+	}
+}
+
+func TestAnAverageTurnCoversEveryTurnThatWasRead(t *testing.T) {
 	directory := t.TempDir()
 	writeJournal(t, directory, "hasty-crane",
-		`{"kind":"turn_completion","time":"2026-09-01T00:00:05Z"}`,
+		event("00:00:01",
+			`{"kind":"model_message","usage":{"input_tokens":9000,"output_tokens":120,"cache":{"read_tokens":8000}}}`),
+		`{"kind":"turn_completion","time":"2026-09-01T00:00:05Z","turn":{"took":2000000000}}`,
 		`{"kind":"turn_completion","time":"2026-09-01T00:00:09Z","turn":{"took":4000000000}}`,
 	)
 
 	activity := analyseOne(t, directory, "hasty-crane").Activity
 
-	if activity.Turns != 2 || activity.TurnTimings != 1 {
-		t.Errorf("got %d turns and %d timings, want 2 and 1", activity.Turns, activity.TurnTimings)
+	if activity.Turns != 2 {
+		t.Errorf("got %d turns, want 2", activity.Turns)
 	}
-	if activity.AverageTurn() != 4*time.Second {
-		t.Errorf("got an average turn of %s, want 4s", activity.AverageTurn())
+	if activity.AverageTurn() != 3*time.Second {
+		t.Errorf("got an average turn of %s, want 3s", activity.AverageTurn())
 	}
 }
 
@@ -377,7 +214,8 @@ func TestARebuiltCacheIsNotCountedAsUsage(t *testing.T) {
 	writeJournal(t, directory, "rebuilt-heron",
 		event("00:00:02", `{"kind":"cache_rebuild","name":"reopened","usage":{"input_tokens":50,"cache":{"write_tokens":9000}}}`),
 		event("00:00:03",
-			`{"kind":"model_message","usage":{"input_tokens":9000,"cache":{"read_tokens":0,"write_tokens":9000}}}`),
+			`{"kind":"model_message","usage":{"input_tokens":9000,"output_tokens":140,`+
+				`"cache":{"read_tokens":0,"write_tokens":9000}}}`),
 	)
 
 	statistics := analyseOne(t, directory, "rebuilt-heron")
@@ -474,7 +312,6 @@ func TestOneOfEverythingNeedsNoTotalsAndDrawsNoFaults(t *testing.T) {
 		Activity: ActivityStatistics{
 			Sessions:    1,
 			Turns:       2,
-			TurnTimings: 2,
 			Prompts:     2,
 			Replies:     2,
 			ToolCalls:   3,
@@ -513,7 +350,6 @@ func TestSeveralUnpricedModelsAreCountedTogether(t *testing.T) {
 			Activity: ActivityStatistics{
 				Sessions:    1,
 				Turns:       1,
-				TurnTimings: 1,
 				Prompts:     1,
 				TurnTime:    30 * time.Second,
 				LongestTurn: 30 * time.Second,
@@ -524,19 +360,26 @@ func TestSeveralUnpricedModelsAreCountedTogether(t *testing.T) {
 			Provider: "ollama",
 			Model:    "qwen3.8:27b",
 			Cache:    CacheStatistics{Sessions: 1, Requests: 3, Misses: 3, InputTokens: 9000, OutputTokens: 600},
-			Activity: ActivityStatistics{Sessions: 1, Turns: 2, Prompts: 2},
+			Activity: ActivityStatistics{
+				Sessions:    1,
+				Turns:       2,
+				Prompts:     2,
+				TurnTime:    50 * time.Second,
+				LongestTurn: 40 * time.Second,
+			},
 		},
 		{
 			Name:     "third-vole",
 			Provider: "codex",
 			Model:    "gpt-5.6-sol",
-			Activity: ActivityStatistics{Sessions: 1, Turns: 3, Prompts: 3},
-		},
-		{
-			Name:     "fourth-vole",
-			Provider: "ollama",
-			Model:    "qwen3.8:70b",
-			Activity: ActivityStatistics{Sessions: 1, Turns: 1, Prompts: 1},
+			Cache:    CacheStatistics{Sessions: 1, Requests: 3, Hits: 3, InputTokens: 30_000, CachedTokens: 24_000, OutputTokens: 900},
+			Activity: ActivityStatistics{
+				Sessions:    1,
+				Turns:       3,
+				Prompts:     3,
+				TurnTime:    90 * time.Second,
+				LongestTurn: 45 * time.Second,
+			},
 		},
 	}
 
@@ -566,6 +409,27 @@ func TestEveryReportWithoutATotalMatchesTheGolden(t *testing.T) {
 		{
 			name:     "nothing was recorded",
 			analysis: Analysis{},
+		},
+		{
+			name:     "nothing was read, and every session was skipped",
+			analysis: Analysis{SkippedSessions: 496},
+		},
+		{
+			name: "one session skipped beside one unpriced model",
+			analysis: Analysis{
+				Models: ModelAnalysis{
+					Models: []ModelStatistics{{
+						Provider:     "ollama",
+						Model:        "qwen3.8:27b",
+						Sessions:     1,
+						Requests:     3,
+						InputTokens:  9000,
+						OutputTokens: 600,
+					}},
+					UnpricedModels: 1,
+				},
+				SkippedSessions: 1,
+			},
 		},
 		{
 			name: "one provider, which is its own total",
@@ -617,7 +481,6 @@ func TestEveryReportWithoutATotalMatchesTheGolden(t *testing.T) {
 						Provider:        "codex",
 						Sessions:        186,
 						Turns:           4102,
-						TurnTimings:     4102,
 						Prompts:         4102,
 						Replies:         3980,
 						ReasoningBlocks: 51_400,
@@ -682,7 +545,10 @@ func TestArchivedSessionsAreNotAnalysed(t *testing.T) {
 }
 
 func goldenAnalysis() Analysis {
-	return aggregate(goldenSessions(), goldenPricebook())
+	analysis := aggregate(goldenSessions(), goldenPricebook())
+	analysis.SkippedSessions = 12
+
+	return analysis
 }
 
 func goldenPricebook() pricebook {
@@ -717,7 +583,6 @@ func goldenSessions() []SessionStatistics {
 			Activity: ActivityStatistics{
 				Sessions:        1,
 				Turns:           5,
-				TurnTimings:     5,
 				Prompts:         5,
 				Replies:         5,
 				ReasoningBlocks: 12,
@@ -757,7 +622,6 @@ func goldenSessions() []SessionStatistics {
 			Activity: ActivityStatistics{
 				Sessions:    1,
 				Turns:       3,
-				TurnTimings: 3,
 				Prompts:     3,
 				Replies:     3,
 				ToolCalls:   4,
@@ -789,7 +653,6 @@ func goldenSessions() []SessionStatistics {
 			Activity: ActivityStatistics{
 				Sessions:        1,
 				Turns:           10,
-				TurnTimings:     10,
 				Prompts:         11,
 				Replies:         9,
 				ReasoningBlocks: 44,
@@ -817,9 +680,16 @@ func goldenSessions() []SessionStatistics {
 			Model:     "kimi-k2-thinking",
 			StartedAt: startedAt.Add(5 * time.Hour),
 			EndedAt:   startedAt.Add(5*time.Hour + 3*time.Minute),
+			Cache: CacheStatistics{
+				Sessions:        1,
+				Requests:        1,
+				Misses:          1,
+				InputTokens:     12_000,
+				OutputTokens:    150,
+				PeakInputTokens: 12_000,
+			},
 			Activity: ActivityStatistics{
 				Sessions:    1,
-				Turns:       1,
 				Prompts:     1,
 				SessionTime: 3 * time.Minute,
 			},
@@ -845,6 +715,8 @@ func goldenSessions() []SessionStatistics {
 				Prompts:     4,
 				Replies:     4,
 				ToolCalls:   6,
+				TurnTime:    2 * time.Minute,
+				LongestTurn: 45 * time.Second,
 				SessionTime: 12 * time.Minute,
 			},
 			Faults: FaultStatistics{Sessions: 1},
@@ -854,18 +726,21 @@ func goldenSessions() []SessionStatistics {
 }
 
 func analyseWithCache(directory string, cachePath string, names []string) (Analysis, error) {
-	sessions, err := readSessions(directory, cachePath, names)
+	sessions, skippedCount, err := readSessions(directory, cachePath, names)
 	if err != nil {
 		return Analysis{}, err
 	}
 
-	return aggregate(sessions, pricebook{}), nil
+	analysis := aggregate(sessions, pricebook{})
+	analysis.SkippedSessions = skippedCount
+
+	return analysis, nil
 }
 
 func analyseOne(t *testing.T, directory string, name string) SessionStatistics {
 	t.Helper()
 
-	sessions, err := readSessions(directory, "", []string{name})
+	sessions, _, err := readSessions(directory, "", []string{name})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -874,15 +749,6 @@ func analyseOne(t *testing.T, directory string, name string) SessionStatistics {
 	}
 
 	return sessions[0]
-}
-
-func writeTranscript(t *testing.T, directory string, name string, content string) {
-	t.Helper()
-	writeJournal(t, directory, name)
-	path := filepath.Join(directory, name, wireTranscriptName)
-	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
-		t.Fatal(err)
-	}
 }
 
 func event(clockTime string, encodedEvent string) string {

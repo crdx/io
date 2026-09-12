@@ -62,10 +62,10 @@ func drawText(analysis Analysis, report presentation, writer io.Writer) error {
 		sections = append(sections, sessionSection(analysis.Sessions, report.currency))
 	}
 
-	return writeSections(writer, sections)
+	return writeSections(writer, sections, analysis.SkippedSessions)
 }
 
-func writeSections(writer io.Writer, sections []section) error {
+func writeSections(writer io.Writer, sections []section, skippedCount int) error {
 	isFirstSection := true
 
 	for _, part := range sections {
@@ -93,11 +93,33 @@ func writeSections(writer io.Writer, sections []section) error {
 	}
 
 	if isFirstSection {
-		_, err := fmt.Fprintln(writer, style.Subtle("Nothing was recorded."))
-		return err
+		if _, err := fmt.Fprintln(writer, style.Subtle("Nothing was recorded.")); err != nil {
+			return err
+		}
 	}
 
-	return nil
+	return writeSkipped(writer, skippedCount, isFirstSection)
+}
+
+func writeSkipped(writer io.Writer, skippedCount int, isReportEmpty bool) error {
+	if skippedCount == 0 {
+		return nil
+	}
+
+	if !isReportEmpty {
+		if _, err := fmt.Fprintln(writer); err != nil {
+			return err
+		}
+	}
+
+	_, err := fmt.Fprintln(writer, style.Subtle(fmt.Sprintf(
+		"%s %s in a legacy format and %s not considered.",
+		util.FormatCount(skippedCount),
+		pluralise(skippedCount, "session is", "sessions are"),
+		pluralise(skippedCount, "was", "were"),
+	)))
+
+	return err
 }
 
 func cacheSection(analysis PromptCacheAnalysis) section {
@@ -273,8 +295,8 @@ func activityRow(name string, statistics ActivityStatistics, appearance style.St
 			util.FormatCount(statistics.Replies),
 			util.FormatCount(statistics.ReasoningBlocks),
 			util.FormatCount(statistics.ToolCalls),
-			formatTurn(statistics.AverageTurn(), statistics.TurnTimings > 0),
-			formatTurn(statistics.LongestTurn, statistics.TurnTimings > 0),
+			formatTurn(statistics.AverageTurn(), statistics.Turns > 0),
+			formatTurn(statistics.LongestTurn, statistics.Turns > 0),
 			formatDuration(statistics.SessionTime),
 		},
 	}
