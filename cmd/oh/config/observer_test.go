@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -33,8 +34,8 @@ func awaitObservedConfig(t *testing.T, observer *Observer) (Config, error) {
 			if !isOpen {
 				t.Fatal("config watch closed before reporting the change")
 			}
-			settings, changed, err := observer.refresh(failure)
-			if err != nil || changed {
+			settings, changes, err := observer.refresh(failure)
+			if err != nil || len(changes) > 0 {
 				return settings, err
 			}
 		case <-timeout.C:
@@ -340,8 +341,8 @@ func TestAnInvalidObservedRevisionIsReportedOnlyOnce(t *testing.T) {
 	if _, err := awaitObservedConfig(t, observer); err == nil {
 		t.Fatal("expected the invalid revision to fail")
 	}
-	if _, changed, err := observer.refresh(nil); err != nil || changed {
-		t.Errorf("repeated revision changed=%t err=%v", changed, err)
+	if _, changes, err := observer.refresh(nil); err != nil || len(changes) > 0 {
+		t.Errorf("repeated revision changes=%v err=%v", changes, err)
 	}
 }
 
@@ -358,8 +359,8 @@ func TestAnUnrelatedDirectoryEventDoesNotChangeTheObservedConfig(t *testing.T) {
 
 	select {
 	case failure := <-observer.Changes():
-		if _, changed, err := observer.refresh(failure); err != nil || changed {
-			t.Errorf("unrelated event changed=%t err=%v", changed, err)
+		if _, changes, err := observer.refresh(failure); err != nil || len(changes) > 0 {
+			t.Errorf("unrelated event changes=%v err=%v", changes, err)
 		}
 	case <-time.After(watchTestTimeout):
 		t.Fatal("timed out waiting for the directory event")
@@ -387,6 +388,140 @@ func TestAValidReloadAfterAFailureIsApplied(t *testing.T) {
 	}
 	if applied.LiveConfig.ContinueMessage != "recovered" {
 		t.Errorf("applied message=%q", applied.LiveConfig.ContinueMessage)
+	}
+}
+
+func TestAnAppliedReloadNamesTheFileThatChangedAndWhatItSupplies(t *testing.T) {
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "config.toml")
+	overridePath := filepath.Join(directory, "oh.toml")
+	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"first\"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	_, observer, err := ObserveSources(
+		Source{Path: globalPath},
+		Source{Path: overridePath, IsOverride: true},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(observer.Close)
+
+	if err := os.WriteFile(overridePath, []byte("[editor]\ncommand = [\"vi\"]\n\n[ui]\nstreaming = \"asap\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	applied := observer.Reload(nil, testSegments())
+	if applied.Status != ReloadApplied {
+		t.Fatalf("reload status=%v failure=%v", applied.Status, applied.Failure)
+	}
+	if len(applied.Changes) != 1 {
+		t.Fatalf("got %d changes, want the override alone: %v", len(applied.Changes), applied.Changes)
+	}
+	change := applied.Changes[0]
+	if !strings.HasSuffix(change.Path, "oh.toml") || change.IsRemoved {
+		t.Errorf("got path %q removed=%t", change.Path, change.IsRemoved)
+	}
+	if want := []string{"editor.command", "ui.streaming"}; !slices.Equal(change.Settings, want) {
+		t.Errorf("got settings %v, want %v", change.Settings, want)
+	}
+
+	if err := os.WriteFile(overridePath, []byte("[editor]\ncommand = [\"vi\"]\n\n[ui]\nstreaming = \"line\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	again := observer.Reload(nil, testSegments())
+	if again.Status != ReloadApplied {
+		t.Fatalf("second reload status=%v failure=%v", again.Status, again.Failure)
+	}
+	if want := []string{"ui.streaming"}; !slices.Equal(again.Changes[0].Settings, want) {
+		t.Errorf("got settings %v, want only the one that changed: %v", again.Changes[0].Settings, want)
+	}
+}
+
+func TestAReloadOfAnUnchangedSettingBesideACommentNamesNoSetting(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
+		t.Fatal(err)
+	}
+	_, observer := observeConfig(t, path)
+
+	if err := writeConfigFile(path, "# a note to self\n[input]\ncontinue = \"first\"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	applied := observer.Reload(nil, testSegments())
+	if applied.Status != ReloadApplied {
+		t.Fatalf("reload status=%v failure=%v", applied.Status, applied.Failure)
+	}
+	if len(applied.Changes) != 1 || len(applied.Changes[0].Settings) != 0 {
+		t.Errorf("got %v, want the file named with no setting", applied.Changes)
+	}
+}
+
+func TestAReloadReportsAnOverrideThatWentAway(t *testing.T) {
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "config.toml")
+	overridePath := filepath.Join(directory, "oh.toml")
+	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"first\"\n"); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(overridePath, []byte("[ui]\nstreaming = \"asap\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, observer, err := ObserveSources(
+		Source{Path: globalPath},
+		Source{Path: overridePath, IsOverride: true},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(observer.Close)
+
+	if err := os.Remove(overridePath); err != nil {
+		t.Fatal(err)
+	}
+
+	applied := observer.Reload(nil, testSegments())
+	if applied.Status != ReloadApplied {
+		t.Fatalf("reload status=%v failure=%v", applied.Status, applied.Failure)
+	}
+	if len(applied.Changes) != 1 || !applied.Changes[0].IsRemoved {
+		t.Fatalf("got %v, want the override reported as gone", applied.Changes)
+	}
+	if want := []string{"ui.streaming"}; !slices.Equal(applied.Changes[0].Settings, want) {
+		t.Errorf("got %v, want the settings it stopped supplying: %v", applied.Changes[0].Settings, want)
+	}
+}
+
+func TestAChangedSnippetFileIsNamedBesideTheConfigThatReferencesIt(t *testing.T) {
+	directory := t.TempDir()
+	snippetsDirectory := filepath.Join(directory, "snippets")
+	if err := os.Mkdir(snippetsDirectory, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	snippetPath := filepath.Join(snippetsDirectory, "review.md")
+	if err := os.WriteFile(snippetPath, []byte("Review the first revision."), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	configPath := filepath.Join(directory, "config.toml")
+	if err := writeConfigFile(configPath, "[snippets]\nreview = { file = \"snippets/review.md\" }\n"); err != nil {
+		t.Fatal(err)
+	}
+	_, observer := observeConfig(t, configPath)
+
+	if err := os.WriteFile(snippetPath, []byte("Review the reloaded revision."), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	applied := observer.Reload(nil, testSegments())
+	if applied.Status != ReloadApplied {
+		t.Fatalf("reload status=%v failure=%v", applied.Status, applied.Failure)
+	}
+	if len(applied.Changes) != 1 || !strings.HasSuffix(applied.Changes[0].Path, "review.md") {
+		t.Fatalf("got %v, want the snippet file alone", applied.Changes)
 	}
 }
 

@@ -7480,6 +7480,43 @@ func settleLiveConfig(t *testing.T, self *App) {
 	}
 }
 
+func TestTheReloadConfirmationNamesEveryFileAndWhatItChanged(t *testing.T) {
+	cases := map[string]struct {
+		changes []config.SourceChange
+		want    string
+	}{
+		"one setting": {
+			changes: []config.SourceChange{{Path: "oh.toml", Settings: []string{"editor.command"}}},
+			want:    "Configuration reloaded automatically\noh.toml: editor.command",
+		},
+		"several files": {
+			changes: []config.SourceChange{
+				{Path: "config.toml", Settings: []string{"ui.theme.dim"}},
+				{Path: "oh.toml", Settings: []string{"snippets.fix", "tool.output"}},
+			},
+			want: "Configuration reloaded automatically\n" +
+				"config.toml: ui.theme.dim\n" +
+				"oh.toml: snippets.fix, tool.output",
+		},
+		"file gone": {
+			changes: []config.SourceChange{
+				{Path: "oh.toml", Settings: []string{"ui.streaming"}, IsRemoved: true},
+			},
+			want: "Configuration reloaded automatically\noh.toml: gone, dropping ui.streaming",
+		},
+		"nothing of consequence": {
+			changes: []config.SourceChange{{Path: "oh.toml"}},
+			want:    "Configuration reloaded automatically\noh.toml: no setting changed",
+		},
+	}
+
+	for name, testCase := range cases {
+		if got := reloadConfirmation(testCase.changes); got != testCase.want {
+			t.Errorf("%s drew %q, want %q", name, got, testCase.want)
+		}
+	}
+}
+
 func TestReloadingAThemeClearsScrollbackAndReplaysTheWholeConversation(t *testing.T) {
 	stream := themeReloadStream(t)
 

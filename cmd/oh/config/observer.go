@@ -8,9 +8,12 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
+	"strings"
 	"sync"
 
+	"github.com/BurntSushi/toml"
 	"golang.org/x/sys/unix"
 
 	"crdx.org/io/cmd/oh/segment"
@@ -63,6 +66,96 @@ func (self revision) equal(other revision) bool {
 		}
 	}
 	return true
+}
+
+func (self revision) changesSince(previous revision) []SourceChange {
+	changes := make([]SourceChange, 0, len(self.sourceSnapshots))
+
+	for i, source := range self.sourceSnapshots {
+		var was snapshot
+		if i < len(previous.sourceSnapshots) {
+			was = previous.sourceSnapshots[i].snapshot
+			if source.snapshot.equal(was) {
+				continue
+			}
+		}
+		changes = append(changes, SourceChange{
+			Path:      filepath.Base(source.source.Path),
+			Settings:  changedSettings(was, source.snapshot),
+			IsRemoved: source.snapshot.isMissing,
+		})
+	}
+
+	for _, path := range slices.Sorted(maps.Keys(self.snippetFileSnapshots)) {
+		current := self.snippetFileSnapshots[path]
+		if was, isKnown := previous.snippetFileSnapshots[path]; isKnown && current.equal(was) {
+			continue
+		}
+		changes = append(changes, SourceChange{
+			Path:      filepath.Base(path),
+			IsRemoved: current.isMissing,
+		})
+	}
+
+	return changes
+}
+
+func changedSettings(previous snapshot, current snapshot) []string {
+	was, isPreviousRead := flattenSettings(previous)
+	now, isCurrentRead := flattenSettings(current)
+	if !isPreviousRead || !isCurrentRead {
+		return nil
+	}
+
+	names := make(map[string]struct{})
+	for name, value := range now {
+		if !reflect.DeepEqual(was[name], value) {
+			names[name] = struct{}{}
+		}
+	}
+	for name := range was {
+		if _, isKept := now[name]; !isKept {
+			names[name] = struct{}{}
+		}
+	}
+
+	return slices.Sorted(maps.Keys(names))
+}
+
+func flattenSettings(source snapshot) (map[string]any, bool) {
+	if source.isMissing {
+		return map[string]any{}, true
+	}
+	if source.failure != nil {
+		return nil, false
+	}
+
+	var tables map[string]any
+	if _, err := toml.Decode(string(source.data), &tables); err != nil {
+		return nil, false
+	}
+
+	settings := make(map[string]any)
+	flatten(settings, nil, tables)
+	delete(settings, versionSetting)
+
+	return settings, true
+}
+
+func flatten(into map[string]any, prefix []string, values map[string]any) {
+	for name, value := range values {
+		path := append(slices.Clone(prefix), name)
+		table, isTable := value.(map[string]any)
+		if isTable && len(table) > 0 && !isLeafTable(path) {
+			flatten(into, path, table)
+			continue
+		}
+		into[strings.Join(path, ".")] = value
+	}
+}
+
+func isLeafTable(path []string) bool {
+	return len(path) == 2 && path[0] == snippetsSetting
 }
 
 func (self revision) getPaths() []string {
@@ -127,8 +220,15 @@ const (
 	ReloadFailed
 )
 
+type SourceChange struct {
+	Path      string
+	Settings  []string
+	IsRemoved bool
+}
+
 type ReloadResult struct {
 	LiveConfig LiveConfig
+	Changes    []SourceChange
 	Status     ReloadStatus
 	Failure    error
 }
@@ -141,12 +241,12 @@ func (self *Observer) Changes() <-chan error {
 }
 
 func (self *Observer) Reload(watchFailure error, registry segment.Registry) ReloadResult {
-	settings, hasChanged, err := self.refresh(watchFailure)
-	if err == nil && hasChanged {
+	settings, changes, err := self.refresh(watchFailure)
+	if err == nil && len(changes) > 0 {
 		var live LiveConfig
 		live, err = settings.BuildLive(registry)
 		if err == nil {
-			return ReloadResult{LiveConfig: live, Status: ReloadApplied}
+			return ReloadResult{LiveConfig: live, Changes: changes, Status: ReloadApplied}
 		}
 	}
 	if err != nil {
@@ -161,22 +261,22 @@ func (self *Observer) Close() {
 	}
 }
 
-func (self *Observer) refresh(watchFailure error) (Config, bool, error) {
+func (self *Observer) refresh(watchFailure error) (Config, []SourceChange, error) {
 	if self == nil {
-		return Config{}, false, nil
+		return Config{}, nil, nil
 	}
 	if watchFailure != nil {
-		return Config{}, false, fmt.Errorf("could not watch config: %w", watchFailure)
+		return Config{}, nil, fmt.Errorf("could not watch config: %w", watchFailure)
 	}
 
 	settings, current, err := readRevision(self.sources)
 	if watchErr := self.watcher.addPaths(current.getPaths()...); watchErr != nil {
-		return Config{}, false, fmt.Errorf("could not watch config: %w", watchErr)
+		return Config{}, nil, fmt.Errorf("could not watch config: %w", watchErr)
 	}
 
 	latestSettings, latest, latestErr := readRevision(self.sources)
 	if watchErr := self.watcher.addPaths(latest.getPaths()...); watchErr != nil {
-		return Config{}, false, fmt.Errorf("could not watch config: %w", watchErr)
+		return Config{}, nil, fmt.Errorf("could not watch config: %w", watchErr)
 	}
 	if !latest.equal(current) {
 		settings = latestSettings
@@ -185,13 +285,14 @@ func (self *Observer) refresh(watchFailure error) (Config, bool, error) {
 	}
 
 	if current.equal(self.handledRevision) {
-		return Config{}, false, nil
+		return Config{}, nil, nil
 	}
+	previous := self.handledRevision
 	self.handledRevision = current
 	if err != nil {
-		return Config{}, false, err
+		return Config{}, nil, err
 	}
-	return settings, true, nil
+	return settings, current.changesSince(previous), nil
 }
 
 const watchMask = unix.IN_ATTRIB |

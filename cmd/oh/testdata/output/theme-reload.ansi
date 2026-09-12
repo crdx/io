@@ -35,7 +35,8 @@
 \r
 \e[?7l\r\e[K\e[3m\e[38;2;1;2;3mstill thinking\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r
-\e[38;2;76;154;44mConfiguration reloaded automatically \e[38;2;1;2;3m(dismissing in 10s)\e[0m\r
+\e[38;2;76;154;44mConfiguration reloaded automatically\e[0m\r
+config.toml: ui.theme.dim \e[38;2;1;2;3m(dismissing in 10s)\e[0m\r
 \e[38;2;1;2;3m────────────────────────────────────────────────────────────────────────────────────────────────────\e[0m\r
 half written\r
 \e[38;2;1;2;3m────────────────────────────────────────────────────────────────────────────────────────────────────\e[0m\e[1A\r\e[10C\e[?25h\e[?2026l

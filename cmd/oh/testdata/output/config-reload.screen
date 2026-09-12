@@ -7,7 +7,9 @@
 
 ──────────────────────────────────────── GPT Sol 5.6 ▫▫▫▪·· ────────────────────────────────────────
 === deleted config restores defaults ===
-Configuration reloaded automatically (dismissing in 10s)
+Configuration reloaded automatically
+config.toml: gone, dropping bar.bottom.center, bar.bottom.left, bar.bottom.right, bar.top.center,
+bar.top.left, bar.top.right, input.continue (dismissing in 10s)
 ── ·✦· ──────────────────────────── GPT Sol 5.6 ▫▫▫▪·· ─ ?% 0/? ────────────────────────────────────
 
 ── rxw ngl ─ workspace ───────────────────── usage n/a ─────────────────────────── brave-otter 🦦 ──
@@ -22,7 +24,9 @@ The configuration could not be reloaded: could not watch config: inotify stopped
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === invalid revision then recovery ===
-Configuration reloaded automatically (dismissing in 10s)
+Configuration reloaded automatically
+config.toml: bar.bottom.center, bar.bottom.left, bar.bottom.right, bar.top.center, bar.top.left,
+bar.top.right, input.continue (dismissing in 10s)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 
 ──────────────────────────────────────── GPT Sol 5.6 ▫▫▫▪·· ────────────────────────────────────────
@@ -37,12 +41,14 @@ Snippets:
 
 ──────────────────────────────────────── GPT Sol 5.6 ▫▫▫▪·· ────────────────────────────────────────
 === revision to a setting that only a restart picks up ===
-Configuration reloaded automatically (dismissing in 10s)
+Configuration reloaded automatically
+config.toml: model.round_robin (dismissing in 10s)
 ── brave-otter ─────────────────────────────────────────────────────────────────────────────────────
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === valid revision ===
-Configuration reloaded automatically (dismissing in 10s)
+Configuration reloaded automatically
+config.toml: bar.bottom.center, bar.top.left, input.continue (dismissing in 10s)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 
 ──────────────────────────────────────── GPT Sol 5.6 ▫▫▫▪·· ────────────────────────────────────────

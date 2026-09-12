@@ -32,7 +32,8 @@ config.toml: toml: line 3
 
 still thinking
 
-Configuration reloaded automatically (dismissing in 10s)
+Configuration reloaded automatically
+config.toml: ui.theme.dim (dismissing in 10s)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 half written
 ────────────────────────────────────────────────────────────────────────────────────────────────────

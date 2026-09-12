@@ -1115,13 +1115,33 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		}
 		if self.feedback.Message().Status != agent.ErrorStatus {
 			self.showFeedback(feedback.Confirmation, feedback.Message{
-				Text:         "Configuration reloaded automatically",
+				Text:         reloadConfirmation(result.Changes),
 				Status:       agent.SuccessStatus,
 				DismissAfter: configReloadConfirmationDuration,
 			})
 		}
 	}
 	return true
+}
+
+func reloadConfirmation(changes []config.SourceChange) string {
+	rows := make([]string, 0, len(changes)+1)
+	rows = append(rows, "Configuration reloaded automatically")
+
+	for _, change := range changes {
+		switch {
+		case change.IsRemoved && len(change.Settings) > 0:
+			rows = append(rows, change.Path+": gone, dropping "+strings.Join(change.Settings, ", "))
+		case change.IsRemoved:
+			rows = append(rows, change.Path+": gone")
+		case len(change.Settings) == 0:
+			rows = append(rows, change.Path+": no setting changed")
+		default:
+			rows = append(rows, change.Path+": "+strings.Join(change.Settings, ", "))
+		}
+	}
+
+	return strings.Join(rows, "\n")
 }
 
 func (self *App) notifyUnknownSettings(reports []string) {

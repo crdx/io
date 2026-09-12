@@ -32,6 +32,11 @@ var defaultsTOML string
 
 const minimumToolOutputBytes = 1024
 
+const (
+	versionSetting  = "version"
+	snippetsSetting = "snippets"
+)
+
 type Config struct {
 	Version  int                            `toml:"version"`
 	Caps     Caps                           `toml:"caps"`
