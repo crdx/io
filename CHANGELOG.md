@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Pick at least high effort level
 - Add `[permissions]` for granular control
 - Ask for approval inside the input frame
 - Tell the agent more accurate information

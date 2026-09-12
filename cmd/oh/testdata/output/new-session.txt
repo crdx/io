@@ -19,38 +19,88 @@
 "@high"                      error: model must be written as provider/model or provider/model@effort[+fast], got "@high"
 "sol@none@high"              error: effort "none@high" does not match any of: none, high
 "claude"                     error: model "claude" is ambiguous; matches: anthropic/claude-opus-5, anthropic/claude-sonnet-5
+"mystery"                    error: model gpt-5.6-mystery has no recognised effort levels
 "nope"                       error: model "nope" does not match any known model
 
-=== effort fallback ===
-"none"         of {low,high}           -> "low"
-"low"          of {low,high}           -> "low"
+=== effort autoselection ===
+""             of {low,high}           -> "high"
+"none"         of {low,high}           -> "high"
+"minimal"      of {low,high}           -> "high"
+"low"          of {low,high}           -> "high"
 "medium"       of {low,high}           -> "high"
 "high"         of {low,high}           -> "high"
+"xhigh"        of {low,high}           -> "high"
 "max"          of {low,high}           -> "high"
-"unrecognised" of {low,high}           -> "low"
-"none"         of {medium}             -> "medium"
-"low"          of {medium}             -> "medium"
-"medium"       of {medium}             -> "medium"
-"high"         of {medium}             -> "medium"
-"max"          of {medium}             -> "medium"
-"unrecognised" of {medium}             -> "medium"
-"none"         of {none,minimal}       -> "none"
-"low"          of {none,minimal}       -> "minimal"
-"medium"       of {none,minimal}       -> "minimal"
-"high"         of {none,minimal}       -> "minimal"
-"max"          of {none,minimal}       -> "minimal"
-"unrecognised" of {none,minimal}       -> "none"
+"unrecognised" of {low,high}           -> "high"
+""             of {medium,high,xhigh}  -> "xhigh"
+"none"         of {medium,high,xhigh}  -> "high"
+"minimal"      of {medium,high,xhigh}  -> "high"
+"low"          of {medium,high,xhigh}  -> "high"
+"medium"       of {medium,high,xhigh}  -> "high"
+"high"         of {medium,high,xhigh}  -> "high"
+"xhigh"        of {medium,high,xhigh}  -> "xhigh"
+"max"          of {medium,high,xhigh}  -> "xhigh"
+"unrecognised" of {medium,high,xhigh}  -> "high"
+""             of {low,xhigh,max}      -> "max"
+"none"         of {low,xhigh,max}      -> "xhigh"
+"minimal"      of {low,xhigh,max}      -> "xhigh"
+"low"          of {low,xhigh,max}      -> "xhigh"
+"medium"       of {low,xhigh,max}      -> "xhigh"
+"high"         of {low,xhigh,max}      -> "xhigh"
+"xhigh"        of {low,xhigh,max}      -> "xhigh"
+"max"          of {low,xhigh,max}      -> "max"
+"unrecognised" of {low,xhigh,max}      -> "xhigh"
+""             of {medium,xhigh}       -> "xhigh"
+"none"         of {medium,xhigh}       -> "xhigh"
+"minimal"      of {medium,xhigh}       -> "xhigh"
+"low"          of {medium,xhigh}       -> "xhigh"
+"medium"       of {medium,xhigh}       -> "xhigh"
+"high"         of {medium,xhigh}       -> "xhigh"
+"xhigh"        of {medium,xhigh}       -> "xhigh"
+"max"          of {medium,xhigh}       -> "xhigh"
+"unrecognised" of {medium,xhigh}       -> "xhigh"
+""             of {medium,max}         -> "max"
+"none"         of {medium,max}         -> "max"
+"minimal"      of {medium,max}         -> "max"
+"low"          of {medium,max}         -> "max"
+"medium"       of {medium,max}         -> "max"
+"high"         of {medium,max}         -> "max"
+"xhigh"        of {medium,max}         -> "max"
+"max"          of {medium,max}         -> "max"
+"unrecognised" of {medium,max}         -> "max"
+""             of {xhigh,max}          -> "max"
 "none"         of {xhigh,max}          -> "xhigh"
+"minimal"      of {xhigh,max}          -> "xhigh"
 "low"          of {xhigh,max}          -> "xhigh"
 "medium"       of {xhigh,max}          -> "xhigh"
 "high"         of {xhigh,max}          -> "xhigh"
+"xhigh"        of {xhigh,max}          -> "xhigh"
 "max"          of {xhigh,max}          -> "max"
 "unrecognised" of {xhigh,max}          -> "xhigh"
+""             of {medium}             -> "medium"
+"none"         of {medium}             -> "medium"
+"minimal"      of {medium}             -> "medium"
+"low"          of {medium}             -> "medium"
+"medium"       of {medium}             -> "medium"
+"high"         of {medium}             -> "medium"
+"xhigh"        of {medium}             -> "medium"
+"max"          of {medium}             -> "medium"
+"unrecognised" of {medium}             -> "medium"
+""             of {none,minimal}       -> "minimal"
+"none"         of {none,minimal}       -> "none"
+"minimal"      of {none,minimal}       -> "minimal"
+"low"          of {none,minimal}       -> "minimal"
+"medium"       of {none,minimal}       -> "minimal"
+"high"         of {none,minimal}       -> "minimal"
+"xhigh"        of {none,minimal}       -> "minimal"
+"max"          of {none,minimal}       -> "minimal"
+"unrecognised" of {none,minimal}       -> "none"
 
 === fork model globs ===
 ""                           new --from able-dolphin
-"opus-5"                     new -m anthropic/claude-opus-5@medium --from able-dolphin
+"opus-5"                     new -m anthropic/claude-opus-5@max --from able-dolphin
 "opus-5@max"                 new -m anthropic/claude-opus-5@max --from able-dolphin
+"haiku"                      new -m anthropic/claude-haiku-5@high --from able-dolphin
 "gpt"                        new -m codex/gpt-5.6-sol@high+fast --from able-dolphin
 "gpt@high"                   new -m codex/gpt-5.6-sol@high --from able-dolphin
 "gpt@high+fast"              new -m codex/gpt-5.6-sol@high+fast --from able-dolphin
@@ -60,13 +110,14 @@
 ""                           new 
 "opus"                       error: model "opus" is ambiguous; matches: anthropic/claude-opus-4-5, anthropic/claude-opus-5
 "OPUS"                       error: model "OPUS" is ambiguous; matches: anthropic/claude-opus-4-5, anthropic/claude-opus-5
-"opus-5"                     new -m anthropic/claude-opus-5@medium
+"opus-5"                     new -m anthropic/claude-opus-5@max
 "anthropic/claude-opus-4-5"  new -m anthropic/claude-opus-4-5@high
 "sonnet"                     new -m anthropic/claude-sonnet-4-5@medium
 "gpt"                        new -m codex/gpt-5.6-sol@high
 "opus-5@high"                error: effort "high" does not match any of: medium, max
 "opus-4-5@high"              new -m anthropic/claude-opus-4-5@high
 "opus-4-5@hi"                new -m anthropic/claude-opus-4-5@high
+"haiku"                      new -m anthropic/claude-haiku-5@high
 "gpt@off"                    new -m codex/gpt-5.6-sol@none
 "gpt@high+fast"              new -m codex/gpt-5.6-sol@high+fast
 "sonnet@high+fast"           error: anthropic does not support fast mode

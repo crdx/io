@@ -5061,7 +5061,7 @@ func TestAnEffortWrittenAsAnAliasInTheConfigIsResolved(t *testing.T) {
 func TestWhatSessionTransitionsMakeOfAModelGlob(t *testing.T) {
 	compareWithGolden(t, "new-session", ".txt", map[string]func() string{
 		"command line selections": func() string { return resolveCommandLineSelections(t) },
-		"effort fallback":         resolveNearestEfforts,
+		"effort autoselection":    resolveAutomaticEfforts,
 		"fork model globs":        func() string { return resolveForkedSessionGlobs(t) },
 		"new session model globs": func() string { return resolveNewSessionGlobs(t) },
 	})
@@ -5077,7 +5077,8 @@ func useCommandLineModelCache(t *testing.T) string {
 	}
 
 	data := checkedModelCache(`{` +
-		`"codex":{"models":[{"id":"gpt-5.6-sol","efforts":["none","high"],"output":128000}]},` +
+		`"codex":{"models":[{"id":"gpt-5.6-sol","efforts":["none","high"],"output":128000},` +
+		`{"id":"gpt-5.6-mystery","efforts":["whatever"],"output":128000}]},` +
 		`"opencode-go":{"models":[{"id":"deepseek-v4-pro","efforts":["medium"],"output":128000}]},` +
 		`"anthropic":{"models":[` +
 		`{"id":"claude-opus-5","efforts":["medium","max"],"output":128000},` +
@@ -5117,6 +5118,7 @@ func resolveCommandLineSelections(t *testing.T) string {
 		"@high",
 		"sol@none@high",
 		"claude",
+		"mystery",
 		"nope",
 	} {
 		chosen, err := model.ParseSelection(path, selection, model.Defaults{})
@@ -5134,6 +5136,7 @@ func resolveCommandLineSelections(t *testing.T) string {
 
 func newSessionFixtureChoices() []model.Choice {
 	return []model.Choice{
+		{Provider: "anthropic", ID: "claude-haiku-5", EffortLevels: []string{"low", "medium", "high", "xhigh"}},
 		{Provider: "anthropic", ID: "claude-opus-4-5", EffortLevels: []string{"low", "high"}},
 		{Provider: "anthropic", ID: "claude-opus-5", EffortLevels: []string{"medium", "max"}},
 		{Provider: "anthropic", ID: "claude-sonnet-4-5", EffortLevels: []string{"medium"}},
@@ -5147,7 +5150,7 @@ func resolveForkedSessionGlobs(t *testing.T) string {
 	choices := newSessionFixtureChoices()
 	var written strings.Builder
 
-	for _, glob := range []string{"", "opus-5", "opus-5@max", "gpt", "gpt@high", "gpt@high+fast", "nope"} {
+	for _, glob := range []string{"", "opus-5", "opus-5@max", "haiku", "gpt", "gpt@high", "gpt@high+fast", "nope"} {
 		transition, err := cycle.ForkedSessionTransition(glob, choices, model.Defaults{Effort: "medium", IsFast: true}, "able-dolphin")
 		if err != nil {
 			fmt.Fprintf(&written, "%-28q error: %v\n", glob, err)
@@ -5178,6 +5181,7 @@ func resolveNewSessionGlobs(t *testing.T) string {
 		"opus-5@high",
 		"opus-4-5@high",
 		"opus-4-5@hi",
+		"haiku",
 		"gpt@off",
 		"gpt@high+fast",
 		"sonnet@high+fast",
@@ -5215,17 +5219,22 @@ func transitionKindName(kind cycle.TransitionKind) string {
 	return "unknown"
 }
 
-func resolveNearestEfforts() string {
+func resolveAutomaticEfforts() string {
 	var written strings.Builder
 
 	for _, available := range [][]string{
 		{"low", "high"},
+		{"medium", "high", "xhigh"},
+		{"low", "xhigh", "max"},
+		{"medium", "xhigh"},
+		{"medium", "max"},
+		{"xhigh", "max"},
 		{"medium"},
 		{"none", "minimal"},
-		{"xhigh", "max"},
 	} {
-		for _, current := range []string{"none", "low", "medium", "high", "max", "unrecognised"} {
-			fmt.Fprintf(&written, "%-14q of %-20s -> %q\n", current, "{"+strings.Join(available, ",")+"}", model.NearestEffort(current, available))
+		for _, wantedEffort := range []string{"", "none", "minimal", "low", "medium", "high", "xhigh", "max", "unrecognised"} {
+			defaults := model.Defaults{Effort: model.Effort(wantedEffort)}
+			fmt.Fprintf(&written, "%-14q of %-20s -> %q\n", wantedEffort, "{"+strings.Join(available, ",")+"}", defaults.EffortFor(available))
 		}
 	}
 

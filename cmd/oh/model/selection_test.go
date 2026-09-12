@@ -78,13 +78,13 @@ func TestCodexSelectionsMayEnableFastMode(t *testing.T) {
 func TestTheConfiguredDefaultsApplyOnlyWhereNoEffortIsWritten(t *testing.T) {
 	useCachedModels(t)
 
-	defaults := Defaults{Effort: "low", IsFast: true}
+	defaults := Defaults{Effort: "xhigh", IsFast: true}
 
 	for writtenSelection, want := range map[string]string{
-		"sol":                         "codex/gpt-5.6-sol@low+fast",
+		"sol":                         "codex/gpt-5.6-sol@xhigh+fast",
 		"sol@high":                    "codex/gpt-5.6-sol@high",
-		"anthropic/claude-opus-5":     "anthropic/claude-opus-5@low",
-		"opencode-go/deepseek-v4-pro": "opencode-go/deepseek-v4-pro@high",
+		"anthropic/claude-opus-5":     "anthropic/claude-opus-5@xhigh",
+		"opencode-go/deepseek-v4-pro": "opencode-go/deepseek-v4-pro@max",
 	} {
 		selection, err := ParseSelection(modelCachePath(), writtenSelection, defaults)
 		if err != nil {
@@ -93,6 +93,47 @@ func TestTheConfiguredDefaultsApplyOnlyWhereNoEffortIsWritten(t *testing.T) {
 		}
 		if selection.String() != want {
 			t.Errorf("%s: got %s, want %s", writtenSelection, selection, want)
+		}
+	}
+}
+
+func TestAnAutomaticEffortIsHighOrAbove(t *testing.T) {
+	for _, test := range []struct {
+		wantedEffort Effort
+		available    []string
+		want         string
+	}{
+		{wantedEffort: "medium", available: []string{"medium", "xhigh"}, want: "xhigh"},
+		{wantedEffort: "medium", available: []string{"medium", "max"}, want: "max"},
+		{wantedEffort: "medium", available: []string{"medium", "high", "xhigh"}, want: "high"},
+		{wantedEffort: "low", available: []string{"low", "medium", "high", "xhigh", "max"}, want: "high"},
+		{wantedEffort: "none", available: []string{"none", "low", "medium", "high"}, want: "high"},
+		{wantedEffort: "", available: []string{"low", "high"}, want: "high"},
+		{wantedEffort: "high", available: []string{"medium", "high", "xhigh"}, want: "high"},
+		{wantedEffort: "xhigh", available: []string{"high", "xhigh", "max"}, want: "xhigh"},
+		{wantedEffort: "xhigh", available: []string{"high", "max"}, want: "max"},
+	} {
+		got := Defaults{Effort: test.wantedEffort}.EffortFor(test.available)
+		if got != test.want {
+			t.Errorf("%q of %v: got %q, want %q", test.wantedEffort, test.available, got, test.want)
+		}
+	}
+}
+
+func TestAnAutomaticEffortFallsBackToWhatTheModelOffers(t *testing.T) {
+	for _, test := range []struct {
+		wantedEffort Effort
+		available    []string
+		want         string
+	}{
+		{wantedEffort: "none", available: []string{"none", "minimal"}, want: "none"},
+		{wantedEffort: "medium", available: []string{"none", "minimal"}, want: "minimal"},
+		{wantedEffort: "high", available: []string{"low", "medium"}, want: "medium"},
+		{wantedEffort: "max", available: []string{"none", "low", "medium"}, want: "medium"},
+	} {
+		got := Defaults{Effort: test.wantedEffort}.EffortFor(test.available)
+		if got != test.want {
+			t.Errorf("%q of %v: got %q, want %q", test.wantedEffort, test.available, got, test.want)
 		}
 	}
 }

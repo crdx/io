@@ -162,7 +162,10 @@ func SupportsFastMode(providerName string) bool {
 
 var EffortOrder = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
-var highestEffort = EffortOrder[len(EffortOrder)-1]
+var (
+	highestEffort = EffortOrder[len(EffortOrder)-1]
+	effortFloor   = "high"
+)
 
 type Effort string
 
@@ -187,7 +190,27 @@ func (self Defaults) EffortFor(available []string) string {
 		wantedEffort = highestEffort
 	}
 
+	if allowedEfforts := effortsAtOrAbove(effortFloor, available); len(allowedEfforts) > 0 {
+		if slices.Index(EffortOrder, wantedEffort) < slices.Index(EffortOrder, effortFloor) {
+			wantedEffort = effortFloor
+		}
+
+		available = allowedEfforts
+	}
+
 	return NearestEffort(wantedEffort, available)
+}
+
+func effortsAtOrAbove(level string, available []string) []string {
+	var levels []string
+
+	for _, candidate := range available {
+		if slices.Index(EffortOrder, candidate) >= slices.Index(EffortOrder, level) {
+			levels = append(levels, candidate)
+		}
+	}
+
+	return levels
 }
 
 func (self Defaults) IsFastFor(providerName string) bool {

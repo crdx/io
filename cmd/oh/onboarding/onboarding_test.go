@@ -95,20 +95,20 @@ func TestOnboardingSavesTheConfiguredModelDefaults(t *testing.T) {
 			return []model.Choice{{
 				Provider:     model.CodexProvider,
 				ID:           "gpt-5.6-sol",
-				EffortLevels: []string{"low", "medium", "high"},
+				EffortLevels: []string{"low", "medium", "high", "xhigh"},
 			}}
 		},
 		setInitialModel: func(selection string) error {
 			savedSelection = selection
 			return nil
 		},
-		defaults: model.Defaults{Effort: "medium", IsFast: true},
+		defaults: model.Defaults{Effort: "xhigh", IsFast: true},
 	}
 
 	if err := onboarding.castSpell(); err != nil {
 		t.Fatal(err)
 	}
-	if savedSelection != "codex/gpt-5.6-sol@medium+fast" {
+	if savedSelection != "codex/gpt-5.6-sol@xhigh+fast" {
 		t.Errorf("saved %q", savedSelection)
 	}
 }
