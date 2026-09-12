@@ -12,7 +12,7 @@ import (
 
 const FileReadState = "file_read"
 
-var ErrNotRead = errors.New("file has not been read yet")
+var ErrNotRead = errors.New("read the file first")
 
 var ErrChangedSinceRead = errors.New("file has changed since it was last read")
 

@@ -22,7 +22,7 @@ Editing the target without reading it again.
 ## Tool calls · +3s
 
 ```
-edit: target.txt [error, 1 line, 75B, call_1]
+edit: target.txt [error, 1 line, 19B, call_1]
 ```
 
 ## Assistant · +5s

@@ -3,7 +3,6 @@ package edit
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 
 	"crdx.org/io/internal/file"
@@ -61,7 +60,7 @@ func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.T
 		return "", tool.ToolCallMetrics{}, err
 	}
 	if err := snapshots.Check(root, name, data); err != nil {
-		return "", tool.ToolCallMetrics{}, fmt.Errorf("%w — ensure you read %s before editing it", err, args.Path)
+		return "", tool.ToolCallMetrics{}, err
 	}
 
 	content := string(data)
