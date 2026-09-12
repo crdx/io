@@ -154,10 +154,6 @@ covhtml package:
     go test ./... -coverpkg=./{{ package }}/... -coverprofile="$PROFILE" -count=1 > /dev/null
     go tool cover -html="$PROFILE"
 
-build:
-    go build -trimpath -o dist/oh ./cmd/oh
-    go build -trimpath -o dist/ohctl ./cmd/ohctl
-
 check:
     steps fmt vet lint1 lint2 lint3 mega test sandbox
 
