@@ -179,7 +179,7 @@ func TestHostNetworkingRequiresItsCapability(t *testing.T) {
 	)
 
 	execute := func() error {
-		call, parseErr := shell.Parse(`{"command":"true","network":true}`)
+		call, parseErr := shell.Parse(`{"command":"true","network":"host"}`)
 		if parseErr != nil {
 			t.Fatal(parseErr)
 		}

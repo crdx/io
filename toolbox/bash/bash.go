@@ -18,9 +18,16 @@ import (
 	"crdx.org/io/tool"
 )
 
+type Network string
+
+const (
+	LoopbackNetwork Network = "loopback"
+	HostNetwork     Network = "host"
+)
+
 type Args struct {
-	Command string `json:"command"`
-	Network bool   `json:"network,omitempty"`
+	Command string  `json:"command"`
+	Network Network `json:"network,omitempty"`
 }
 
 func New(
@@ -35,7 +42,12 @@ func New(
 			Description: "run a shell command",
 			Schema: tool.Schema{
 				tool.String("command", "the command line"),
-				tool.Boolean("network", "run on the host network").Optional(),
+				tool.Enum(
+					"network",
+					"the networking state available to run on: loopback (default, your sandbox env) or host (the user's)",
+					string(LoopbackNetwork),
+					string(HostNetwork),
+				).Optional(),
 			},
 		},
 		Describe,
@@ -47,12 +59,13 @@ func New(
 			if err != nil {
 				return "", tool.ToolCallMetrics{}, err
 			}
-			if args.Network {
+			isHostNetwork := args.Network == HostNetwork
+			if isHostNetwork {
 				if err := approveNetwork(ctx, args.Command); err != nil {
 					return "", tool.ToolCallMetrics{}, err
 				}
 			}
-			policy.Network = args.Network
+			policy.Network = isHostNetwork
 			return exec(ctx, runner, root, policy, args)
 		})
 }
@@ -131,7 +144,61 @@ func validate(args Args) error {
 		return fmt.Errorf("invalid Bash command: %w", err)
 	}
 
+	switch args.Network {
+	case "", LoopbackNetwork, HostNetwork:
+	default:
+		return fmt.Errorf(
+			"network must be %q or %q, got %q",
+			LoopbackNetwork, HostNetwork, args.Network,
+		)
+	}
+
 	return nil
+}
+
+func Steps(command string) []string {
+	parsedScript, err := parse(command)
+	if err != nil || len(parsedScript.Stmts) != 1 {
+		return []string{command}
+	}
+
+	var steps []string
+
+	var walk func(statement *syntax.Stmt)
+	walk = func(statement *syntax.Stmt) {
+		binary, isBinary := statement.Cmd.(*syntax.BinaryCmd)
+		if !isBinary || (binary.Op != syntax.AndStmt && binary.Op != syntax.OrStmt) {
+			steps = append(steps, command[statement.Pos().Offset():statement.End().Offset()])
+			return
+		}
+
+		walk(binary.X)
+		steps[len(steps)-1] += " " + binary.Op.String()
+		walk(binary.Y)
+	}
+	walk(parsedScript.Stmts[0])
+
+	sentMeaning, sentErr := canonical(command)
+	stepMeaning, stepErr := canonical(strings.Join(steps, "\n"))
+	if sentErr != nil || stepErr != nil || sentMeaning != stepMeaning {
+		return []string{command}
+	}
+
+	return steps
+}
+
+func canonical(command string) (string, error) {
+	parsedScript, err := parse(command)
+	if err != nil {
+		return "", err
+	}
+
+	var out bytes.Buffer
+	if err := syntax.NewPrinter(syntax.SingleLine(true)).Print(&out, parsedScript); err != nil {
+		return "", err
+	}
+
+	return out.String(), nil
 }
 
 func parse(command string) (*syntax.File, error) {

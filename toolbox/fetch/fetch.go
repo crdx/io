@@ -42,7 +42,7 @@ func newTool(isAllowed func() bool, client *http.Client) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
 			Name:        "fetch",
-			Description: "fetch a web page as markdown, clean HTML, text, or raw HTML",
+			Description: "fetch a web page as markdown, clean HTML, text, or raw",
 			Schema: tool.Schema{
 				tool.String("url", "URL to fetch"),
 				tool.String("type", "one of: markdown, clean_html, text, raw"),

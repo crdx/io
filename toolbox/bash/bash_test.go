@@ -130,7 +130,8 @@ func TestNetworkingFollowsTheArgument(t *testing.T) {
 		want      bool
 	}{
 		{name: "omitted", arguments: `{"command":"true"}`},
-		{name: "enabled", arguments: `{"command":"true","network":true}`, want: true},
+		{name: "loopback", arguments: `{"command":"true","network":"loopback"}`},
+		{name: "host", arguments: `{"command":"true","network":"host"}`, want: true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			runner := &recordingRunner{}
@@ -171,6 +172,20 @@ func TestNetworkingFollowsTheArgument(t *testing.T) {
 	}
 }
 
+func TestANetworkNobodyOffersIsRefused(t *testing.T) {
+	root, _ := testRoot(t)
+	shell := bash.New(
+		root,
+		func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
+		func(context.Context, string) error { return nil },
+		&recordingRunner{},
+	)
+
+	if _, err := shell.Parse(`{"command":"true","network":"elsewhere"}`); err == nil {
+		t.Fatal("a network nobody offers was accepted")
+	}
+}
+
 func TestDeniedNetworkingDoesNotRun(t *testing.T) {
 	root, _ := testRoot(t)
 	runner := &recordingRunner{}
@@ -182,7 +197,7 @@ func TestDeniedNetworkingDoesNotRun(t *testing.T) {
 		runner,
 	)
 
-	call, err := shell.Parse(`{"command":"true","network":true}`)
+	call, err := shell.Parse(`{"command":"true","network":"host"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -700,5 +715,66 @@ func TestThePolicyIsAskedForEveryCommand(t *testing.T) {
 
 	if output := run(); !strings.Contains(output, "denied") {
 		t.Errorf("expected the write to be refused, got %q", output)
+	}
+}
+
+func TestAChainIsSplitIntoTheStepsItRuns(t *testing.T) {
+	for name, test := range map[string]struct {
+		command string
+		want    []string
+	}{
+		"one command": {
+			command: "curl example.com",
+			want:    []string{"curl example.com"},
+		},
+		"a chain": {
+			command: "cd /tmp && curl -sS example.com | jq .name && echo done || echo failed",
+			want: []string{
+				"cd /tmp &&",
+				"curl -sS example.com | jq .name &&",
+				"echo done ||",
+				"echo failed",
+			},
+		},
+		"a loop keeps its body": {
+			command: "for f in *.go; do gofmt -w $f && echo $f; done",
+			want:    []string{"for f in *.go; do gofmt -w $f && echo $f; done"},
+		},
+		"several statements": {
+			command: "echo one; echo two",
+			want:    []string{"echo one; echo two"},
+		},
+		"a heredoc keeps its body": {
+			command: "cat <<EOF > /tmp/note.txt\n  body\nEOF",
+			want:    []string{"cat <<EOF > /tmp/note.txt\n  body\nEOF"},
+		},
+		"a chain ending in a heredoc keeps every word": {
+			command: "cd /tmp && cat <<EOF > note.txt\nbody\nEOF",
+			want:    []string{"cd /tmp && cat <<EOF > note.txt\nbody\nEOF"},
+		},
+		"nothing that parses": {
+			command: "curl example.com && ",
+			want:    []string{"curl example.com && "},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			got := bash.Steps(test.command)
+			if !slices.Equal(got, test.want) {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestACommandWhoseMeaningWouldChangeIsLeftWhole(t *testing.T) {
+	for name, command := range map[string]string{
+		"a word ending in a continuation": "\\0$0\\\n",
+		"a heredoc of its own":            "cat <<EOF > note\nbody\nEOF",
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := bash.Steps(command); !slices.Equal(got, []string{command}) {
+				t.Errorf("got %q, want the command left whole", got)
+			}
+		})
 	}
 }
