@@ -145,8 +145,8 @@ func TestClosingTheManagerKillsAJobThatIsStillRunning(t *testing.T) {
 		t.Fatalf("could not close the manager: %v", err)
 	}
 
-	if elapsed := time.Since(startedAt); elapsed > gracePeriod+2*time.Second {
-		t.Errorf("closing took %s, want the grace period at most", elapsed)
+	if elapsed := time.Since(startedAt); elapsed > shutdownGracePeriod+2*time.Second {
+		t.Errorf("closing took %s, want the shutdown grace period at most", elapsed)
 	}
 
 	snapshot, err := manager.Status("sleeper")
@@ -180,7 +180,7 @@ func TestSeveralJobsAreClosedTogetherRatherThanOneAfterAnother(t *testing.T) {
 		t.Fatalf("could not close the manager: %v", err)
 	}
 
-	if elapsed := time.Since(startedAt); elapsed > gracePeriod+2*time.Second {
+	if elapsed := time.Since(startedAt); elapsed > shutdownGracePeriod+2*time.Second {
 		t.Errorf("closing three jobs took %s, want them ended together rather than in turn", elapsed)
 	}
 }
@@ -208,7 +208,7 @@ func TestAJobThatHandlesTerminationStopsWithoutWaitingForTheGracePeriod(t *testi
 		t.Fatalf("could not stop the job: %v", err)
 	}
 
-	if elapsed := time.Since(startedAt); elapsed >= gracePeriod {
+	if elapsed := time.Since(startedAt); elapsed >= normalGracePeriod {
 		t.Errorf("stopping took %s, want a handled termination to be prompt", elapsed)
 	}
 }

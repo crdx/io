@@ -23,6 +23,7 @@
 - Rename `web_search` to `lookup`, toggled with `l` cap
 - Rename `web_fetch` to `fetch`, toggled with `n` cap
 - Add max job wait time
+- Limit background job cleanup to one second on close
 - Save truncated remains in the session drops directory
 - Shorten file refusal messages
 

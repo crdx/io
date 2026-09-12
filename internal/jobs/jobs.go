@@ -16,7 +16,8 @@ import (
 )
 
 const (
-	gracePeriod           = 5 * time.Second
+	normalGracePeriod     = 5 * time.Second
+	shutdownGracePeriod   = time.Second
 	reportedBytePrecision = 3
 )
 
@@ -210,7 +211,7 @@ func (self *Manager) Stop(name string) (Snapshot, error) {
 		return Snapshot{}, ErrNotFound
 	}
 
-	self.end(found)
+	self.end(found, normalGracePeriod)
 
 	return self.snapshot(found), nil
 }
@@ -318,7 +319,7 @@ func (self *Manager) Discard(name string) (Snapshot, error) {
 		return Snapshot{}, ErrNotFound
 	}
 
-	self.end(found)
+	self.end(found, normalGracePeriod)
 
 	discardedJob := self.snapshot(found)
 
@@ -361,7 +362,7 @@ func (self *Manager) StopHolding(holds func(sandbox.Policy) bool) []string {
 	names := make([]string, 0, len(stoppingJobs))
 	for _, endingJob := range stoppingJobs {
 		_ = self.beginEnd(endingJob)
-		self.watchers.Go(func() { self.end(endingJob) })
+		self.watchers.Go(func() { self.end(endingJob, normalGracePeriod) })
 		names = append(names, endingJob.name)
 	}
 
@@ -381,7 +382,7 @@ func (self *Manager) Close() error {
 
 	var endingJobs sync.WaitGroup
 	for _, found := range live {
-		endingJobs.Go(func() { self.end(found) })
+		endingJobs.Go(func() { self.end(found, shutdownGracePeriod) })
 	}
 	endingJobs.Wait()
 
@@ -539,7 +540,7 @@ func (self *Manager) beginEnd(endingJob *job) bool {
 	return true
 }
 
-func (self *Manager) end(endingJob *job) {
+func (self *Manager) end(endingJob *job, patience time.Duration) {
 	if !self.beginEnd(endingJob) {
 		return
 	}
@@ -559,7 +560,7 @@ func (self *Manager) end(endingJob *job) {
 	select {
 	case <-endingJob.over:
 		return
-	case <-time.After(gracePeriod):
+	case <-time.After(patience):
 	}
 
 	runningCommand.Stop()
