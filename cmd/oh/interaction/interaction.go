@@ -33,8 +33,8 @@ type Handler struct {
 	OnJobEnded            func(jobs.Conclusion)
 	HostToSandboxChanges  <-chan agent.Event
 	OnHostToSandboxChange func(agent.Event)
-	ApprovalChanges       <-chan struct{}
-	OnApprovalChange      func()
+	QuestionChanges       <-chan struct{}
+	OnQuestionChange      func()
 	OnDraw                func()
 }
 
@@ -58,7 +58,7 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan t
 	changes := handler.Changes
 	conclusions := handler.Conclusions
 	hostToSandboxChanges := handler.HostToSandboxChanges
-	approvalChanges := handler.ApprovalChanges
+	questionChanges := handler.QuestionChanges
 	for {
 		schedule()
 
@@ -97,12 +97,12 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan t
 				continue
 			}
 			handler.OnHostToSandboxChange(event)
-		case _, isOpen := <-approvalChanges:
+		case _, isOpen := <-questionChanges:
 			if !isOpen {
-				approvalChanges = nil
+				questionChanges = nil
 				continue
 			}
-			handler.OnApprovalChange()
+			handler.OnQuestionChange()
 		case failure, isOpen := <-changes:
 			if !isOpen {
 				changes = nil

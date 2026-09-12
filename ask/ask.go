@@ -1,33 +1,47 @@
-package approval
+package ask
 
 import (
 	"context"
 	"errors"
 	"sync"
+	"time"
 )
 
 var (
-	ErrDenied      = errors.New("approval was denied")
-	ErrUnavailable = errors.New("interactive approval is unavailable")
+	ErrCancelled   = errors.New("the question was cancelled")
+	ErrUnavailable = errors.New("there is nobody to ask")
 )
 
-type Prompt struct {
-	Question string
-	Detail   string
-	Language string
-}
+const noChoice = -1
 
 type Request struct {
-	Prompt     Prompt
-	answer     chan bool
+	Question   Question
+	deadline   time.Time
+	answer     chan int
 	answerOnce sync.Once
 	finishOnce sync.Once
 	finish     func()
 }
 
-func (self *Request) Answer(isApproved bool) {
+func (self *Request) Deadline() (time.Time, bool) {
+	return self.deadline, !self.deadline.IsZero()
+}
+
+func (self *Request) Choose(index int) {
+	if index < 0 || index >= len(self.Question.Options) {
+		return
+	}
+
+	self.settle(index)
+}
+
+func (self *Request) Cancel() {
+	self.settle(noChoice)
+}
+
+func (self *Request) settle(index int) {
 	self.answerOnce.Do(func() {
-		self.answer <- isApproved
+		self.answer <- index
 		self.finishRequest()
 	})
 }
@@ -74,14 +88,17 @@ func (self *Broker) Current() *Request {
 	return self.requests[0]
 }
 
-func (self *Broker) Ask(ctx context.Context, prompt Prompt) error {
-	request := &Request{Prompt: prompt, answer: make(chan bool, 1)}
+func (self *Broker) Ask(ctx context.Context, question Question) (int, error) {
+	request := &Request{Question: question, answer: make(chan int, 1)}
 	request.finish = func() { self.finish(request) }
+	if deadline, hasDeadline := ctx.Deadline(); hasDeadline {
+		request.deadline = deadline
+	}
 
 	self.mutex.Lock()
 	if !self.isInteractive {
 		self.mutex.Unlock()
-		return ErrUnavailable
+		return noChoice, ErrUnavailable
 	}
 	self.requests = append(self.requests, request)
 	self.mutex.Unlock()
@@ -90,13 +107,13 @@ func (self *Broker) Ask(ctx context.Context, prompt Prompt) error {
 	defer request.finishRequest()
 
 	select {
-	case isApproved := <-request.answer:
-		if !isApproved {
-			return ErrDenied
+	case index := <-request.answer:
+		if index == noChoice {
+			return noChoice, ErrCancelled
 		}
-		return nil
+		return index, nil
 	case <-ctx.Done():
-		return ctx.Err()
+		return noChoice, ctx.Err()
 	}
 }
 

@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Ask for approval inside the input frame
 - Tell the agent more information
 - Save truncated remains in session drops dir
 - Handle pending notices correctly

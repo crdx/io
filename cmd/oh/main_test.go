@@ -40,7 +40,7 @@ import (
 	"github.com/yuin/goldmark/text"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/approval"
+	"crdx.org/io/ask"
 	"crdx.org/io/cmd/oh/backend"
 	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/call"
@@ -486,64 +486,208 @@ func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 	}
 }
 
-func TestApprovalAcceptsYesAndDeniesNoEnterOrEscape(t *testing.T) {
+func TestAConfirmationAcceptsYesAndDeniesNoEnterOrEscape(t *testing.T) {
 	for name, test := range map[string]struct {
 		keypress key.Key
 		wantErr  error
 	}{
-		"yes":    {keypress: key.Key{Code: key.Rune, Value: 'y'}},
-		"no":     {keypress: key.Key{Code: key.Rune, Value: 'n'}, wantErr: approval.ErrDenied},
-		"enter":  {keypress: key.Key{Code: key.Enter}, wantErr: approval.ErrDenied},
-		"escape": {keypress: key.Key{Code: key.Escape}, wantErr: approval.ErrDenied},
+		"yes":         {keypress: key.Key{Code: key.Rune, Value: 'y'}},
+		"capital yes": {keypress: key.Key{Code: key.Rune, Value: 'Y'}},
+		"no":          {keypress: key.Key{Code: key.Rune, Value: 'n'}, wantErr: ask.ErrDenied},
+		"enter":       {keypress: key.Key{Code: key.Enter}},
+		"escape":      {keypress: key.Key{Code: key.Escape}, wantErr: ask.ErrDenied},
 	} {
 		t.Run(name, func(t *testing.T) {
-			broker := approval.New()
+			broker := ask.New()
 			closeBroker := broker.Open()
 			defer closeBroker()
 
 			result := make(chan error, 1)
 			go func() {
-				result <- broker.Ask(t.Context(), approval.Prompt{Question: "Continue?"})
+				result <- ask.Confirm(t.Context(), broker, ask.Confirmation{Label: "Continue?"})
 			}()
 			<-broker.Changes()
 
-			self := &App{approval: approvalState{broker: broker}}
-			self.onApprovalChange()
-			self.answerApproval(test.keypress)
+			self := &App{question: questionState{broker: broker}}
+			self.onQuestionChange()
+			self.answerQuestion(test.keypress)
 
 			if err := <-result; !errors.Is(err, test.wantErr) {
 				t.Errorf("got %v, want %v", err, test.wantErr)
 			}
-			if self.approval.request != nil || !self.feedback.IsEmpty() {
-				t.Error("the answered approval remained visible")
+			if self.question.request != nil {
+				t.Error("the answered question remained visible")
 			}
 		})
 	}
 }
 
-func TestApprovalIgnoresOtherKeys(t *testing.T) {
+func TestAQuestionIgnoresOtherKeys(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
 
-	broker := approval.New()
+	broker := ask.New()
 	closeBroker := broker.Open()
 	defer closeBroker()
 
 	result := make(chan error, 1)
-	go func() { result <- broker.Ask(ctx, approval.Prompt{Question: "Continue?"}) }()
+	go func() { result <- ask.Confirm(ctx, broker, ask.Confirmation{Label: "Continue?"}) }()
 	<-broker.Changes()
 
-	self := &App{approval: approvalState{broker: broker}}
-	self.onApprovalChange()
-	self.answerApproval(key.Key{Code: key.Rune, Value: 'x'})
+	self := &App{question: questionState{broker: broker}}
+	self.onQuestionChange()
+	self.answerQuestion(key.Key{Code: key.Rune, Value: 'x'})
 
 	select {
 	case err := <-result:
-		t.Fatalf("an unrelated key answered the approval with %v", err)
+		t.Fatalf("an unrelated key answered the question with %v", err)
 	default:
 	}
-	if self.approval.request == nil || self.feedback.IsEmpty() {
-		t.Error("an unrelated key cleared the approval")
+	if self.question.request == nil {
+		t.Error("an unrelated key cleared the question")
+	}
+}
+
+func TestAQuestionMovesItsCursorAndAnswersWhereItRests(t *testing.T) {
+	for name, test := range map[string]struct {
+		keypresses []key.Key
+		wantErr    error
+	}{
+		"left from the approving option": {
+			keypresses: []key.Key{{Code: key.Left}, {Code: key.Enter}},
+			wantErr:    ask.ErrDenied,
+		},
+		"tab from the approving option": {
+			keypresses: []key.Key{{Code: key.Rune, Value: '\t'}, {Code: key.Enter}},
+			wantErr:    ask.ErrDenied,
+		},
+		"right and back again": {
+			keypresses: []key.Key{{Code: key.Right}, {Code: key.Up}, {Code: key.Enter}},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			broker := ask.New()
+			closeBroker := broker.Open()
+			defer closeBroker()
+
+			result := make(chan error, 1)
+			go func() {
+				result <- ask.Confirm(t.Context(), broker, ask.Confirmation{Label: "Continue?"})
+			}()
+			<-broker.Changes()
+
+			self := &App{question: questionState{broker: broker}}
+			self.onQuestionChange()
+			for _, keypress := range test.keypresses {
+				self.answerQuestion(keypress)
+			}
+
+			if err := <-result; !errors.Is(err, test.wantErr) {
+				t.Errorf("got %v, want %v", err, test.wantErr)
+			}
+		})
+	}
+}
+
+func TestARefusedHostNetworkSaysSoInWordsTheModelCanAct(t *testing.T) {
+	for name, test := range map[string]struct {
+		prepare func(t *testing.T, broker *ask.Broker) context.Context
+		want    string
+	}{
+		"denied": {
+			prepare: func(t *testing.T, broker *ask.Broker) context.Context {
+				t.Helper()
+				t.Cleanup(broker.Open())
+				go func() {
+					<-broker.Changes()
+					broker.Current().Cancel()
+				}()
+
+				return t.Context()
+			},
+			want: "refused",
+		},
+		"unanswered": {
+			prepare: func(t *testing.T, broker *ask.Broker) context.Context {
+				t.Helper()
+				t.Cleanup(broker.Open())
+				ctx, cancel := context.WithDeadline(t.Context(), time.Now().Add(-time.Second))
+				t.Cleanup(cancel)
+
+				return ctx
+			},
+			want: "nobody answered the request to let this command reach the host network within 1m",
+		},
+		"nobody to ask": {
+			prepare: func(t *testing.T, _ *ask.Broker) context.Context {
+				t.Helper()
+
+				return t.Context()
+			},
+			want: "nobody here",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			broker := ask.New()
+			ctx := test.prepare(t, broker)
+
+			err := approveHostNetwork(ctx, broker, "curl example.com")
+			if err == nil {
+				t.Fatal("a command nobody allowed was approved")
+			}
+			if !strings.Contains(err.Error(), test.want) {
+				t.Errorf("got %q, want it to mention %q", err, test.want)
+			}
+			if strings.Contains(err.Error(), "context") {
+				t.Errorf("got %q, want words rather than plumbing", err)
+			}
+		})
+	}
+}
+
+func TestAnApprovedHostNetworkRunsTheCommand(t *testing.T) {
+	broker := ask.New()
+	t.Cleanup(broker.Open())
+
+	go func() {
+		<-broker.Changes()
+		broker.Current().Choose(0)
+	}()
+
+	if err := approveHostNetwork(t.Context(), broker, "curl example.com"); err != nil {
+		t.Errorf("got %v, want the approved command to run", err)
+	}
+}
+
+func TestAQuestionCountsDownToItsDeadline(t *testing.T) {
+	broker := ask.New()
+	closeBroker := broker.Open()
+	defer closeBroker()
+
+	deadline := time.Now().Add(time.Hour)
+	askedAt := deadline.Add(-time.Minute)
+	ctx, cancel := context.WithDeadline(t.Context(), deadline)
+	defer cancel()
+
+	go func() { _ = ask.Confirm(ctx, broker, ask.Confirmation{Label: "Continue?"}) }()
+	<-broker.Changes()
+
+	self := &App{question: questionState{broker: broker}, now: func() time.Time { return askedAt }}
+	self.onQuestionChange()
+
+	if len(self.questionRows(80)) == 0 {
+		t.Fatal("a question awaiting an answer drew nothing")
+	}
+	head := painter.QuestionHead(self.question.request.Question, self.remainingAnswerTime(askedAt))
+	if got := style.Plain(head); !strings.Contains(got, "auto-denies in 1m") {
+		t.Errorf("got head %q, want a countdown", got)
+	}
+
+	if got := self.nextAnswerRefresh(askedAt); !got.Equal(askedAt.Truncate(time.Second).Add(time.Second)) {
+		t.Errorf("got next refresh %v, want the next second", got)
+	}
+	if got := self.nextAnswerRefresh(deadline.Add(time.Second)); !got.IsZero() {
+		t.Errorf("got next refresh %v after the deadline, want none", got)
 	}
 }
 
@@ -7578,6 +7722,8 @@ const (
 	feedbackTallAnswer
 	feedbackNetworkApproval
 	feedbackConcurrentApproval
+	feedbackChainedApproval
+	feedbackHeredocApproval
 )
 
 func TestConfirmationFeedbackSchedulesItsOwnDismissal(t *testing.T) {
@@ -7623,6 +7769,8 @@ func TestFeedbackDrawsEveryVisibleState(t *testing.T) {
 		"tall answer stays untouched": feedbackTallAnswer,
 		"network approval":            feedbackNetworkApproval,
 		"next concurrent approval":    feedbackConcurrentApproval,
+		"chained command approval":    feedbackChainedApproval,
+		"heredoc approval":            feedbackHeredocApproval,
 	})
 
 	compareWithGolden(t, "feedback", ".ansi", passes)
@@ -7683,6 +7831,10 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		inputLine.SetText("what is out there?")
 	case feedbackConcurrentApproval:
 		inputLine.SetText("waiting for approvals")
+	case feedbackChainedApproval:
+		inputLine.SetText("fetch and tidy up")
+	case feedbackHeredocApproval:
+		inputLine.SetText("write the note")
 	case feedbackStartupInfo, feedbackStorageWarnings, feedbackUnknownSettings:
 	}
 	self.show(inputLine)
@@ -7721,50 +7873,71 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 			"oh.toml: unknown: bar.top.center.loudly",
 		})
 		self.show(inputLine)
-	case feedbackNetworkApproval:
-		broker := approval.New()
+	case feedbackChainedApproval, feedbackHeredocApproval:
+		broker := ask.New()
 		closeBroker := broker.Open()
 		defer closeBroker()
+		command := "cd /tmp && curl -sS https://example.com/a/long/path | jq -r .name && rm -rf build || echo failed"
+		if scenario == feedbackHeredocApproval {
+			command = "cat <<EOF > /tmp/note.txt\n  keep every word\nEOF"
+		}
 		go func() {
-			_ = broker.Ask(t.Context(), approval.Prompt{
-				Question: "Run this command on the host network? [y/N] (denies in 1m)",
+			_ = ask.Confirm(t.Context(), broker, ask.Confirmation{
+				Label:    "Run this command on the host network?",
+				Detail:   strings.Join(bash.Steps(command), "\n"),
+				Language: "bash",
+			})
+		}()
+		<-broker.Changes()
+		self.question.broker = broker
+		self.onQuestionChange()
+		self.show(inputLine)
+	case feedbackNetworkApproval:
+		broker := ask.New()
+		closeBroker := broker.Open()
+		defer closeBroker()
+		questionContext, cancelQuestion := context.WithDeadline(t.Context(), self.getNow().Add(time.Minute))
+		defer cancelQuestion()
+		go func() {
+			_ = ask.Confirm(questionContext, broker, ask.Confirmation{
+				Label:    "Run this command on the host network?",
 				Detail:   "curl example.com",
 				Language: "bash",
 			})
 		}()
 		<-broker.Changes()
-		self.approval.broker = broker
-		self.onApprovalChange()
+		self.question.broker = broker
+		self.onQuestionChange()
 		self.show(inputLine)
 	case feedbackConcurrentApproval:
-		broker := approval.New()
+		broker := ask.New()
 		closeBroker := broker.Open()
 		defer closeBroker()
 
 		firstResult := make(chan error, 1)
 		go func() {
-			firstResult <- broker.Ask(t.Context(), approval.Prompt{
-				Question: "Approve the first operation? [y/N]",
-				Detail:   "first operation",
+			firstResult <- ask.Confirm(t.Context(), broker, ask.Confirmation{
+				Label:  "Approve the first operation?",
+				Detail: "first operation",
 			})
 		}()
 		<-broker.Changes()
 		go func() {
-			_ = broker.Ask(t.Context(), approval.Prompt{
-				Question: "Approve the second operation? [y/N]",
-				Detail:   "second operation",
+			_ = ask.Confirm(t.Context(), broker, ask.Confirmation{
+				Label:  "Approve the second operation?",
+				Detail: "second operation",
 			})
 		}()
 		<-broker.Changes()
 
-		self.approval.broker = broker
-		self.onApprovalChange()
+		self.question.broker = broker
+		self.onQuestionChange()
 		self.show(inputLine)
-		self.answerApproval(key.Key{Code: key.Rune, Value: 'y'})
+		self.answerQuestion(key.Key{Code: key.Rune, Value: 'y'})
 		if err := <-firstResult; err != nil {
 			t.Fatal(err)
 		}
-		self.onApprovalChange()
+		self.onQuestionChange()
 		self.show(inputLine)
 	case feedbackTallAnswer:
 		const answer = "01 alpha\n\n02 bravo\n\n03 charlie\n\n04 delta\n\n05 echo\n\n06 foxtrot\n\n07 golf"
@@ -11129,6 +11302,7 @@ type sessionGoldenTool struct {
 	StateKey              string   `toml:"state-key"`
 	ShellWithheld         bool     `toml:"shell-withheld"`
 	ShouldWithholdNetwork bool     `toml:"network-withheld"`
+	ShouldRefuseNetwork   bool     `toml:"network-refused"`
 	LookupWithheld        bool     `toml:"lookup-withheld"`
 	FetchWithheld         bool     `toml:"fetch-withheld"`
 	LookupAnswer          string   `toml:"lookup-answer"`
@@ -11422,6 +11596,11 @@ func newSessionGoldenTools(
 			continue
 		}
 
+		if specification.ShouldRefuseNetwork {
+			tools = append(tools, newSessionGoldenRefusingShell(t))
+			continue
+		}
+
 		if specification.Name == title.Name {
 			tools = append(tools, title.New())
 			continue
@@ -11569,6 +11748,52 @@ func newSessionGoldenShell(t *testing.T, grantedCaps caps.Set, isYolo bool) tool
 	return shell.New(
 		workspace, t.TempDir(), t.TempDir(), pathAccess, mode, files, isYolo,
 		func(context.Context, string) error { return nil }, sandbox.Direct(),
+	)
+}
+
+func newRefusingAskBroker(t *testing.T) *ask.Broker {
+	t.Helper()
+
+	broker := ask.New()
+	t.Cleanup(broker.Open())
+
+	go func() {
+		for range broker.Changes() {
+			if request := broker.Current(); request != nil {
+				request.Choose(1)
+			}
+		}
+	}()
+
+	return broker
+}
+
+func newSessionGoldenRefusingShell(t *testing.T) tool.Tool {
+	t.Helper()
+
+	broker := newRefusingAskBroker(t)
+
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = workspaceRoot.Close() })
+
+	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
+	mode := caps.NewMode(caps.Read | caps.Shell | caps.Network)
+	pathAccess, err := shell.NewPathAccess(files, mode, shell.Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(pathAccess.Close)
+
+	return shell.New(
+		workspace, t.TempDir(), t.TempDir(), pathAccess, mode, files, true,
+		func(ctx context.Context, command string) error {
+			return approveHostNetwork(ctx, broker, command)
+		},
+		sandbox.Direct(),
 	)
 }
 

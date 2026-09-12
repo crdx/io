@@ -8,9 +8,10 @@ import (
 	"slices"
 	"strings"
 	"time"
+	"unicode"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/approval"
+	"crdx.org/io/ask"
 	"crdx.org/io/cmd/oh/access"
 	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/caps"
@@ -28,7 +29,6 @@ import (
 	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/location"
-	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/painter"
@@ -126,9 +126,10 @@ type slashState struct {
 	completion slash.Completion
 }
 
-type approvalState struct {
-	broker  *approval.Broker
-	request *approval.Request
+type questionState struct {
+	broker  *ask.Broker
+	request *ask.Request
+	cursor  int
 }
 
 type App struct {
@@ -160,7 +161,7 @@ type App struct {
 	display         displayState
 	runMode         runMode
 	slash           slashState
-	approval        approvalState
+	question        questionState
 	transition      cycle.Transition
 	queuedTurn      turn.Queue
 	currentTurn     Turn
@@ -199,11 +200,11 @@ func (self *App) begin(message string) cycle.Transition {
 
 	restoreTitle := self.terminal.Begin(self.mode.Current())
 	restoreCursor := self.screen.BeginEditing()
-	closeApproval := func() {}
-	if self.approval.broker != nil {
-		closeApproval = self.approval.broker.Open()
+	closeQuestions := func() {}
+	if self.question.broker != nil {
+		closeQuestions = self.question.broker.Open()
 	}
-	defer closeApproval()
+	defer closeQuestions()
 
 	restoreTerminal := func() {
 		restoreTerminalState(
@@ -246,8 +247,8 @@ func (self *App) begin(message string) cycle.Transition {
 		OnJobEnded:            self.jobEnded,
 		HostToSandboxChanges:  self.hostToSandboxChanges(),
 		OnHostToSandboxChange: self.notify,
-		ApprovalChanges:       self.approvalChanges(),
-		OnApprovalChange:      self.onApprovalChange,
+		QuestionChanges:       self.questionChanges(),
+		OnQuestionChange:      self.onQuestionChange,
 		OnDraw:                func() { self.show(inputLine) },
 	})
 
@@ -276,9 +277,9 @@ func restoreTerminalState(screen *output.Screen, isPersisted bool, restorers ...
 }
 
 func (self *App) handleKeypressAndShowInput(inputLine *edit.Input, history *edit.History, keypress key.Key) bool {
-	if self.isAwaitingApproval() {
+	if self.isAwaitingAnswer() {
 		self.screen.Sync(func() {
-			self.answerApproval(keypress)
+			self.answerQuestion(keypress)
 			self.show(inputLine)
 		})
 		return true
@@ -302,30 +303,35 @@ func (self *App) handleKeypressAndShowInput(inputLine *edit.Input, history *edit
 	return shouldContinue
 }
 
-func (self *App) answerApproval(keypress key.Key) {
-	var isApproved bool
-	isAnswered := false
+func (self *App) answerQuestion(keypress key.Key) {
+	request := self.question.request
+	options := len(request.Question.Options)
 
 	switch {
-	case keypress.Code == key.Enter || keypress.Code == key.Escape:
-		isAnswered = true
+	case keypress.Code == key.Escape:
+		request.Cancel()
+	case keypress.Code == key.Enter:
+		request.Choose(self.question.cursor)
+	case keypress.Code == key.Up || keypress.Code == key.Left:
+		self.question.cursor = (self.question.cursor + options - 1) % max(options, 1)
+		return
+	case keypress.Code == key.Down || keypress.Code == key.Right:
+		self.question.cursor = (self.question.cursor + 1) % max(options, 1)
+		return
+	case keypress.Code == key.Rune && keypress.Value == '\t':
+		self.question.cursor = (self.question.cursor + 1) % max(options, 1)
+		return
 	case keypress.Code == key.Rune && !keypress.Mod.Has(key.Ctrl) && !keypress.Mod.Has(key.Alt):
-		switch keypress.Value {
-		case 'y', 'Y':
-			isApproved = true
-			isAnswered = true
-		case 'n', 'N':
-			isAnswered = true
+		index := request.Question.IndexForKey(unicode.ToLower(keypress.Value))
+		if index < 0 {
+			return
 		}
-	}
-
-	if !isAnswered {
+		request.Choose(index)
+	default:
 		return
 	}
 
-	self.approval.request.Answer(isApproved)
-	self.approval.request = nil
-	self.feedback.Clear(feedback.Approval)
+	self.question.request = nil
 }
 
 func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress key.Key) bool {
@@ -805,14 +811,21 @@ func (self *App) show(inputLine *edit.Input) {
 			Center: self.renderBar(segment.BottomCenter, frame),
 			Right:  bottomRight,
 		},
-		Status:     self.statusRows(columns),
-		Rule:       self.ruleStyle(),
-		IsDisabled: self.isAwaitingApproval(),
+		Status:   self.statusRows(columns),
+		Question: self.questionRows(columns),
+		Rule:     self.ruleStyle(),
+	}
+
+	if self.isAwaitingAnswer() {
+		block.Top.Center = painter.QuestionHead(
+			self.question.request.Question,
+			self.remainingAnswerTime(self.getNow()),
+		)
 	}
 
 	rows, cursorRow, cursorColumn := block.Rows(columns)
 
-	if self.isAwaitingApproval() {
+	if self.isAwaitingAnswer() {
 		self.screen.InertFooter(rows, cursorRow)
 		return
 	}
@@ -820,16 +833,42 @@ func (self *App) show(inputLine *edit.Input) {
 	self.screen.Footer(rows, cursorRow, cursorColumn)
 }
 
-func (self *App) isAwaitingApproval() bool {
-	return self.approval.request != nil
+func (self *App) isAwaitingAnswer() bool {
+	return self.question.request != nil
+}
+
+func (self *App) questionRows(columns int) []string {
+	request := self.question.request
+	if request == nil {
+		return nil
+	}
+
+	return painter.RenderQuestion(request.Question, self.question.cursor, columns)
+}
+
+func (self *App) remainingAnswerTime(at time.Time) time.Duration {
+	request := self.question.request
+	if request == nil {
+		return 0
+	}
+
+	deadline, hasDeadline := request.Deadline()
+	if !hasDeadline {
+		return 0
+	}
+
+	return deadline.Sub(at)
 }
 
 func (self *App) ruleStyle() style.Style {
-	if self.runMode.isYolo {
+	switch {
+	case self.isAwaitingAnswer():
+		return style.Change
+	case self.runMode.isYolo:
 		return style.Hazard
+	default:
+		return style.Rule
 	}
-
-	return style.Rule
 }
 
 func (self *App) statusRows(columns int) []string {
@@ -898,31 +937,21 @@ func (self *App) getJobs() []jobs.Snapshot {
 	return self.jobs.manager.List()
 }
 
-func (self *App) approvalChanges() <-chan struct{} {
-	if self.approval.broker == nil {
+func (self *App) questionChanges() <-chan struct{} {
+	if self.question.broker == nil {
 		return nil
 	}
 
-	return self.approval.broker.Changes()
+	return self.question.broker.Changes()
 }
 
-func (self *App) onApprovalChange() {
-	self.approval.request = self.approval.broker.Current()
-	if self.approval.request == nil {
-		self.feedback.Clear(feedback.Approval)
+func (self *App) onQuestionChange() {
+	self.question.request = self.question.broker.Current()
+	if self.question.request == nil {
 		return
 	}
 
-	prompt := self.approval.request.Prompt
-	text := painter.NoticeStyle(agent.WarningStatus).Over(prompt.Question)
-	if prompt.Detail != "" {
-		detail := prompt.Detail
-		if prompt.Language != "" {
-			detail = markdown.Highlight(detail, detail, prompt.Language, false)
-		}
-		text += "\n" + detail
-	}
-	self.showFeedback(feedback.Approval, feedback.Message{Text: text, HasOwnStyle: true})
+	self.question.cursor = self.question.request.Question.DefaultIndex()
 }
 
 func (self *App) hostToSandboxChanges() <-chan agent.Event {
@@ -1022,7 +1051,19 @@ func (self *App) nextBarRefresh(at time.Time) time.Time {
 }
 
 func (self *App) nextRefresh(at time.Time) time.Time {
-	return schedule.Soonest(self.nextBarRefresh(at), self.feedback.NextRefresh(at))
+	return schedule.Soonest(
+		self.nextBarRefresh(at),
+		self.feedback.NextRefresh(at),
+		self.nextAnswerRefresh(at),
+	)
+}
+
+func (self *App) nextAnswerRefresh(at time.Time) time.Time {
+	if self.remainingAnswerTime(at) <= 0 {
+		return time.Time{}
+	}
+
+	return schedule.NextTick(at, time.Second)
 }
 
 func (self *App) reloadConfig(watchFailure error) bool {

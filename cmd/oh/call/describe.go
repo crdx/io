@@ -122,6 +122,14 @@ func getLabel(name string, subject string, qualifier string, emphasis tool.Empha
 	return label
 }
 
+func ToolMark(name string) (string, style.Style) {
+	if toolLabel, isKnown := toolLabels[name]; isKnown {
+		return toolLabel.name, toolLabel.style
+	}
+
+	return "", nil
+}
+
 var toolLabels = map[string]struct {
 	name  string
 	style style.Style

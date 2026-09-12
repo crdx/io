@@ -253,24 +253,37 @@ func TestABlockDrawsItsRulesInTheStyleItWasGiven(t *testing.T) {
 	}
 }
 
-func TestADisabledBlockDimsTheInputItCannotTake(t *testing.T) {
+func TestAQuestionTakesTheRoomTheInputWouldHave(t *testing.T) {
 	block := Block{
-		Input:      edit.Frame{Rows: []string{"one", "two"}, Row: 1, Column: 3},
-		IsDisabled: true,
+		Input:    edit.Frame{Rows: []string{"one", "two"}, Row: 1, Column: 3},
+		Question: []string{"Continue?", "[y] yes"},
+	}
+
+	rows, cursorRow, cursorColumn := block.Rows(40)
+
+	if len(rows) != 4 {
+		t.Fatalf("got %d rows, want a rule, two question rows and a rule", len(rows))
+	}
+	if rows[1] != "Continue?" || rows[2] != "[y] yes" {
+		t.Errorf("got body rows %q and %q", rows[1], rows[2])
+	}
+	if cursorRow != 2 {
+		t.Errorf("got cursor row %d, want the last question row", cursorRow)
+	}
+	if cursorColumn != 0 {
+		t.Errorf("got cursor column %d, want none while nobody may type", cursorColumn)
+	}
+}
+
+func TestAQuestionKeepsTheSearchPromptAway(t *testing.T) {
+	block := Block{
+		Input:    edit.Frame{Rows: []string{"one"}, IsSearching: true, SearchQuery: "curl"},
+		Question: []string{"Continue?"},
 	}
 
 	rows, _, _ := block.Rows(40)
 
-	for _, row := range rows[1:3] {
-		if row == style.Plain(row) {
-			t.Errorf("expected a disabled input row to be painted, got %q", row)
-		}
-	}
-
-	if got := style.Plain(rows[1]); got != "one" {
-		t.Errorf("expected the first input row to read the same, got %q", got)
-	}
-	if got := style.Plain(rows[2]); got != "two" {
-		t.Errorf("expected the second input row to read the same, got %q", got)
+	if strings.Contains(style.Plain(rows[0]), "reverse-i-search") {
+		t.Errorf("a question was headed by the search prompt: %q", style.Plain(rows[0]))
 	}
 }

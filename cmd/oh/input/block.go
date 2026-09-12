@@ -24,19 +24,19 @@ func LeftContentWidth(width int, right string) int {
 }
 
 type Block struct {
-	Top        Ruler
-	Input      edit.Frame
-	Bottom     Ruler
-	Status     []string
-	Rule       style.Style
-	IsDisabled bool
+	Top      Ruler
+	Input    edit.Frame
+	Bottom   Ruler
+	Status   []string
+	Question []string
+	Rule     style.Style
 }
 
 func (self Block) Rows(width int) ([]string, int, int) {
 	rows := make([]string, 0, len(self.Input.Rows)+3)
 
 	top := self.Top
-	if self.Input.IsSearching {
+	if self.Input.IsSearching && !self.isAsking() {
 		top.Left = style.Subtle("reverse-i-search: " + self.Input.SearchQuery)
 	}
 
@@ -45,26 +45,26 @@ func (self Block) Rows(width int) ([]string, int, int) {
 		bottom.Right = ""
 	}
 
+	body, bodyRow, bodyColumn := self.body()
+
 	rows = append(rows, self.Status...)
 	rows = append(rows, top.render(width, self.rule()))
-	rows = append(rows, self.inputRows()...)
+	rows = append(rows, body...)
 	rows = append(rows, bottom.render(width, self.rule()))
 
-	return rows, len(self.Status) + self.Input.Row + 1, self.Input.Column
+	return rows, len(self.Status) + bodyRow + 1, bodyColumn
 }
 
-func (self Block) inputRows() []string {
-	if !self.IsDisabled {
-		return self.Input.Rows
+func (self Block) isAsking() bool {
+	return len(self.Question) > 0
+}
+
+func (self Block) body() ([]string, int, int) {
+	if !self.isAsking() {
+		return self.Input.Rows, self.Input.Row, self.Input.Column
 	}
 
-	rows := make([]string, 0, len(self.Input.Rows))
-
-	for _, row := range self.Input.Rows {
-		rows = append(rows, style.DisabledInput.Over(row))
-	}
-
-	return rows
+	return self.Question, len(self.Question) - 1, 0
 }
 
 func (self Block) rule() style.Style {

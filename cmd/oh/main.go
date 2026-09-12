@@ -22,13 +22,14 @@ import (
 	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
+	"crdx.org/io/toolbox/bash"
 	"crdx.org/io/toolbox/expose"
 	"crdx.org/io/toolbox/fetch"
 	"crdx.org/io/toolbox/lookup"
 	"crdx.org/io/toolbox/notify"
 	"crdx.org/io/toolbox/title"
 
-	"crdx.org/io/approval"
+	"crdx.org/io/ask"
 	"crdx.org/io/cmd/oh/backend"
 	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/caps"
@@ -70,6 +71,55 @@ import (
 	"crdx.org/io/cmd/oh/usage"
 	"crdx.org/io/cmd/oh/work"
 )
+
+const approvalLimit = time.Minute
+
+type approval struct {
+	label    string
+	language string
+	action   string
+	outcome  string
+	advice   string
+}
+
+var hostNetworkApproval = approval{
+	label:    "Run this command on the host network?",
+	language: "bash",
+	action:   "let this command reach the host network",
+	outcome:  "it did not run",
+	advice:   "run it again without the host network, or ask what to do instead",
+}
+
+func (self approval) ask(ctx context.Context, broker *ask.Broker, subject string) error {
+	questionContext, cancel := context.WithTimeout(ctx, approvalLimit)
+	defer cancel()
+
+	err := ask.Confirm(questionContext, broker, ask.Confirmation{
+		Label:    self.label,
+		Detail:   subject,
+		Language: self.language,
+	})
+
+	switch {
+	case errors.Is(err, ask.ErrDenied):
+		return errors.New(
+			"the user refused to " + self.action + ", so " + self.outcome + "; " + self.advice,
+		)
+	case errors.Is(err, context.DeadlineExceeded):
+		return errors.New(
+			"nobody answered the request to " + self.action + " within " +
+				util.CompactDuration(approvalLimit) + ", so " + self.outcome,
+		)
+	case errors.Is(err, ask.ErrUnavailable):
+		return errors.New("there is nobody here to ask, so " + self.outcome)
+	}
+
+	return err
+}
+
+func approveHostNetwork(ctx context.Context, broker *ask.Broker, command string) error {
+	return hostNetworkApproval.ask(ctx, broker, strings.Join(bash.Steps(command), "\n"))
+}
 
 var completableToolNames = []string{
 	"read",
@@ -649,16 +699,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	snapshots := file.NewSnapshots()
 	toolboxTools := toolbox.Rummage(files, snapshots)
-	approvalBroker := approval.New()
+	askBroker := ask.New()
 	approveNetwork := func(ctx context.Context, command string) error {
-		approvalContext, cancel := context.WithTimeout(ctx, time.Minute)
-		defer cancel()
-
-		return approvalBroker.Ask(approvalContext, approval.Prompt{
-			Question: "Run this command on the host network? [y/N] (denies in 1m)",
-			Detail:   command,
-			Language: "bash",
-		})
+		return approveHostNetwork(ctx, askBroker, command)
 	}
 	shellTool := shell.New(
 		workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files, args.Yolo, approveNetwork, sandboxRunner,
@@ -831,7 +874,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		},
 		configObserver: configObserver,
 		runMode:        runMode{isPrinting: args.IsPrinting, isYolo: args.Yolo},
-		approval:       approvalState{broker: approvalBroker},
+		question:       questionState{broker: askBroker},
 		startedAt:      util.WallClock(time.Now()),
 		keyboard:       keyboard,
 	}

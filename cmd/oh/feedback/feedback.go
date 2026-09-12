@@ -18,14 +18,13 @@ const (
 	Command
 	Config
 	Confirmation
-	Approval
 )
 
 func (self Source) IsDismissedByTyping() bool {
 	switch self {
 	case Command, Confirmation:
 		return true
-	case System, Config, Approval:
+	case System, Config:
 		return false
 	default:
 		return false

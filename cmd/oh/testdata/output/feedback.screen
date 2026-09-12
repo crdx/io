@@ -1,3 +1,14 @@
+=== chained command approval ===
+──────────────────────────────────────────────── ⚠ ─────────────────────────────────────────────────
+Run this command on the host network?
+
+$ cd /tmp &&
+  curl -sS https://example.com/a/long/path | jq -r .name &&
+  rm -rf build ||
+  echo failed
+
+[Yes]  No
+────────────────────────────────────────────────────────────────────────────────────────────────────
 === combined storage warnings ===
 chat.md recording disabled: transcript append failed
 wire.http recording disabled: wire append failed
@@ -13,6 +24,16 @@ Command not found: /unknown (alt+enter to send)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 /unknownx
 ────────────────────────────────────────────────────────────────────────────────────────────────────
+=== heredoc approval ===
+──────────────────────────────────────────────── ⚠ ─────────────────────────────────────────────────
+Run this command on the host network?
+
+$ cat <<EOF > /tmp/note.txt
+    keep every word
+  EOF
+
+[Yes]  No
+────────────────────────────────────────────────────────────────────────────────────────────────────
 === multiline help ===
 Commands:
   /conf
@@ -21,16 +42,20 @@ Commands:
 /help
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === network approval ===
-Run this command on the host network? [y/N] (denies in 1m)
-curl example.com
-────────────────────────────────────────────────────────────────────────────────────────────────────
-what is out there?
+─────────────────────────────────────── ⚠ auto-denies in 1m ────────────────────────────────────────
+Run this command on the host network?
+
+$ curl example.com
+
+[Yes]  No
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === next concurrent approval ===
-Approve the second operation? [y/N]
-second operation
-────────────────────────────────────────────────────────────────────────────────────────────────────
-waiting for approvals
+──────────────────────────────────────────────── ⚠ ─────────────────────────────────────────────────
+Approve the second operation?
+
+❯ second operation
+
+[Yes]  No
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === settings nothing reads ===
 Unknown settings were ignored.

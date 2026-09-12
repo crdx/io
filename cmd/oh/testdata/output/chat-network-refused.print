@@ -1,0 +1,13 @@
+
+ run a command the user will refuse the host network
+
+
+$ curl example.com ✗ 1L the user refused to let this command reach the host network, so it did not …
+
+I will not run that command.
+
+
+ continue after the refusal
+
+
+Carrying on without the host network.
