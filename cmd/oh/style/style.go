@@ -98,6 +98,8 @@ var (
 	Border  Style = Dim
 )
 
+var MarkdownHeading Style = decorate(col.Bold, Heading)
+
 var (
 	Comment     Style = Dim
 	Keyword     Style = hex(mauve)

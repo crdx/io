@@ -3,23 +3,28 @@ Nothing was recorded.
 
 === one provider, which is its own total ===
 Prompt cache
+
 Provider  Sessions  Requests  Hits  Misses  Hit Rate  Input Cached  Tokens Read
 Codex            1         2     1       1     50.0%         66.7%          8Kt
 
 Tokens
+
 Provider  Average Input  Peak Input  Total Input  Cache Reads  Cache Writes  Fresh Input  Output
 Codex               6Kt         9Kt         12Kt          8Kt           1Kt          3Kt     3Kt
 
 === counts in their thousands, tokens in their billions, and nothing written ===
 Prompt cache
+
 Provider  Sessions  Requests  Hits  Misses  Hit Rate  Input Cached  Tokens Read
 Codex          186       22K   22K     335     98.5%         98.4%        3.8Bt
 
 Tokens
+
 Provider  Average Input  Peak Input  Total Input  Cache Reads  Cache Writes  Fresh Input  Output
 Codex             172Kt       614Kt        3.8Bt        3.8Bt            0t         60Mt    12Mt
 
 Conversation
+
 Provider  Sessions  Turns  Prompts  Replies  Reasoning  Tool Calls  Average Turn  Longest Turn  Open For
 Codex          186   4.1K     4.1K       4K        51K         88K        10m49s           52m    87d12h
 

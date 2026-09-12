@@ -13,7 +13,9 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/model"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/money"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/session"
@@ -422,6 +424,17 @@ func TestAnUnknownModelHasNoSpend(t *testing.T) {
 
 	if analysis.Models.UnpricedModels != 1 || analysis.Models.Total.IsPriced {
 		t.Errorf("got models %#v", analysis.Models)
+	}
+}
+
+func TestASectionTitleIsDrawnLikeAMarkdownHeading(t *testing.T) {
+	const title = "Prompt cache"
+
+	rows := markdown.Render("# "+title, 80)
+	drawn := style.MarkdownHeading(title)
+
+	if len(rows) != 1 || rows[0] != drawn {
+		t.Errorf("markdown drew %q, and a section title draws %q", rows, drawn)
 	}
 }
 

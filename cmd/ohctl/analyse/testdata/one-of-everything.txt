@@ -1,23 +1,29 @@
 Prompt cache
+
 Provider  Sessions  Requests  Hits  Misses  Hit Rate  Input Cached  Tokens Read
 Codex            1         2     2       0    100.0%         75.0%         30Kt
 
 Tokens
+
 Provider  Average Input  Peak Input  Total Input  Cache Reads  Cache Writes  Fresh Input  Output
 Codex              20Kt        25Kt         40Kt         30Kt            0t         10Kt   1.2Kt
 
 Models
+
 Provider  Model        Sessions  Requests  Fresh Input  Cache Reads  Cache Writes  Output  Spend
 Codex     gpt-5.6-sol         1         2         10Kt         30Kt            0t   1.2Kt  $0.03
 
 Conversation
+
 Provider  Sessions  Turns  Prompts  Replies  Reasoning  Tool Calls  Average Turn  Longest Turn  Open For
 Codex            1      2        2        2          0           3           25s           30s        4m
 
 Tools
+
 Tool  Calls  Failures  Cancelled  Failure Rate  Total Time  Average Call
 read      3         0          0          0.0%        0.3s          0.1s
 
 Sessions
+
 Session      Model        Turns  Requests  Hit Rate  Input  Output  Tool Calls  Open For  Spend
 lone-marten  gpt-5.6-sol      2         2    100.0%   40Kt   1.2Kt           3        4m  $0.03

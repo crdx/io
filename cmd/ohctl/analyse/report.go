@@ -79,7 +79,7 @@ func writeSections(writer io.Writer, sections []section) error {
 		}
 		isFirstSection = false
 
-		if _, err := fmt.Fprintln(writer, style.Subject(part.title)); err != nil {
+		if _, err := fmt.Fprintf(writer, "%s\n\n", style.MarkdownHeading(part.title)); err != nil {
 			return err
 		}
 		if err := writeReportTable(writer, part, part.rows); err != nil {

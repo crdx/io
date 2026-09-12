@@ -1,4 +1,5 @@
 Prompt cache
+
 Provider   Sessions  Requests  Hits  Misses  Hit Rate  Input Cached  Tokens Read
 Anthropic         2         8     6       2     75.0%         90.0%        450Kt
 Codex             1        10     7       3     70.0%         70.0%        175Kt
@@ -6,6 +7,7 @@ Ollama            1         4     0       4      0.0%          0.0%           0t
 Total             4        22    13       9     59.1%         77.2%        625Kt
 
 Tokens
+
 Provider   Average Input  Peak Input  Total Input  Cache Reads  Cache Writes  Fresh Input  Output
 Anthropic           62Kt       100Kt        500Kt        450Kt          25Kt         25Kt    13Kt
 Codex               25Kt        40Kt        250Kt        175Kt          10Kt         65Kt    22Kt
@@ -13,6 +15,7 @@ Ollama              15Kt        20Kt         60Kt           0t            0t    
 Total               37Kt       100Kt        810Kt        625Kt          35Kt        150Kt    38Kt
 
 Models
+
 Provider    Model              Sessions  Requests  Fresh Input  Cache Reads  Cache Writes  Output  Spend
 Anthropic   claude-sonnet-4-6         2         8         25Kt        450Kt          25Kt    13Kt  $0.50
 Codex       gpt-5.6-sol               1        10         65Kt        175Kt          10Kt    22Kt  $0.32
@@ -22,6 +25,7 @@ Total                                 5        22        150Kt        625Kt     
 1 model has no listed price, so its spend is unknown and missing from the total.
 
 Conversation
+
 Provider    Sessions  Turns  Prompts  Replies  Reasoning  Tool Calls  Average Turn  Longest Turn  Open For
 Anthropic          2      8        8        8         12          35           56s            2m       50m
 Codex              1     10       11        9         44         120         2m30s            5m     1h35m
@@ -30,6 +34,7 @@ Openrouter         1      1        1        0          0           0            
 Total              5     23       24       21         56         161         1m48s            5m     2h40m
 
 Faults
+
 Provider    Retries  Interruptions  Failures  Silent Turns  Rewrites  Rebuilds  Rebuilt Tokens
 Anthropic         1              2         0             1         0         1            15Kt
 Codex             3              0         1             0         2         3            30Kt
@@ -37,6 +42,7 @@ Openrouter        0              0         1             0         0         0  
 Total             4              2         2             1         2         4            45Kt
 
 Tools
+
 Tool   Calls  Failures  Cancelled  Failure Rate  Total Time  Average Call
 bash      72         6          1          8.3%       9m40s            8s
 read      49         0          0          0.0%          8s          0.2s
