@@ -24,17 +24,29 @@
                 "writtenTokens": 10000,
                 "outputTokens": 22000,
                 "peakInputTokens": 40000
+            },
+            {
+                "provider": "ollama",
+                "sessions": 1,
+                "requests": 4,
+                "hits": 0,
+                "misses": 4,
+                "inputTokens": 60000,
+                "cachedTokens": 0,
+                "writtenTokens": 0,
+                "outputTokens": 2500,
+                "peakInputTokens": 20000
             }
         ],
         "total": {
-            "sessions": 3,
-            "requests": 18,
+            "sessions": 4,
+            "requests": 22,
             "hits": 13,
-            "misses": 5,
-            "inputTokens": 750000,
+            "misses": 9,
+            "inputTokens": 810000,
             "cachedTokens": 625000,
             "writtenTokens": 35000,
-            "outputTokens": 35000,
+            "outputTokens": 37500,
             "peakInputTokens": 100000
         }
     },
@@ -65,6 +77,18 @@
                 "isPriced": true
             },
             {
+                "provider": "ollama",
+                "model": "qwen3.8:27b",
+                "sessions": 1,
+                "requests": 4,
+                "inputTokens": 60000,
+                "cachedTokens": 0,
+                "writtenTokens": 0,
+                "outputTokens": 2500,
+                "spend": 0,
+                "isPriced": false
+            },
+            {
                 "provider": "openrouter",
                 "model": "kimi-k2-thinking",
                 "sessions": 1,
@@ -80,12 +104,12 @@
         "total": {
             "provider": "",
             "model": "",
-            "sessions": 4,
-            "requests": 18,
-            "inputTokens": 750000,
+            "sessions": 5,
+            "requests": 22,
+            "inputTokens": 810000,
             "cachedTokens": 625000,
             "writtenTokens": 35000,
-            "outputTokens": 35000,
+            "outputTokens": 37500,
             "spend": 0.8218749999999999,
             "isPriced": true
         },
@@ -120,6 +144,19 @@
                 "sessionTime": 5700000000000
             },
             {
+                "provider": "ollama",
+                "sessions": 1,
+                "turns": 4,
+                "turnTimings": 0,
+                "prompts": 4,
+                "replies": 4,
+                "reasoningBlocks": 0,
+                "toolCalls": 6,
+                "turnTime": 0,
+                "longestTurn": 0,
+                "sessionTime": 720000000000
+            },
+            {
                 "provider": "openrouter",
                 "sessions": 1,
                 "turns": 1,
@@ -134,16 +171,16 @@
             }
         ],
         "total": {
-            "sessions": 4,
-            "turns": 19,
+            "sessions": 5,
+            "turns": 23,
             "turnTimings": 18,
-            "prompts": 20,
-            "replies": 17,
+            "prompts": 24,
+            "replies": 21,
             "reasoningBlocks": 56,
-            "toolCalls": 155,
+            "toolCalls": 161,
             "turnTime": 1950000000000,
             "longestTurn": 300000000000,
-            "sessionTime": 8880000000000
+            "sessionTime": 9600000000000
         }
     },
     "faults": {
@@ -181,6 +218,22 @@
                 }
             },
             {
+                "provider": "ollama",
+                "sessions": 1,
+                "retries": 0,
+                "interruptions": 0,
+                "failures": 0,
+                "silentTurns": 0,
+                "prefixRewrites": 0,
+                "cacheRebuilds": {
+                    "reopenings": 0,
+                    "expiries": 0,
+                    "settlements": 0,
+                    "rebuilds": 0,
+                    "writtenTokens": 0
+                }
+            },
+            {
                 "provider": "openrouter",
                 "sessions": 1,
                 "retries": 0,
@@ -198,7 +251,7 @@
             }
         ],
         "total": {
-            "sessions": 4,
+            "sessions": 5,
             "retries": 4,
             "interruptions": 2,
             "failures": 2,
@@ -224,10 +277,10 @@
             },
             {
                 "name": "read",
-                "calls": 43,
+                "calls": 49,
                 "failures": 0,
                 "cancellations": 0,
-                "took": 6000000000
+                "took": 8000000000
             },
             {
                 "name": "edit",
@@ -239,10 +292,10 @@
         ],
         "total": {
             "name": "",
-            "calls": 155,
+            "calls": 161,
             "failures": 7,
             "cancellations": 1,
-            "took": 606000000000
+            "took": 608000000000
         }
     },
     "sessions": [
@@ -482,6 +535,62 @@
                     "writtenTokens": 0
                 }
             },
+            "spend": 0,
+            "isPriced": false
+        },
+        {
+            "name": "still-ibex",
+            "provider": "ollama",
+            "model": "qwen3.8:27b",
+            "started": "2026-09-01T15:00:00Z",
+            "ended": "2026-09-01T15:12:00Z",
+            "cache": {
+                "sessions": 1,
+                "requests": 4,
+                "hits": 0,
+                "misses": 4,
+                "inputTokens": 60000,
+                "cachedTokens": 0,
+                "writtenTokens": 0,
+                "outputTokens": 2500,
+                "peakInputTokens": 20000
+            },
+            "activity": {
+                "sessions": 1,
+                "turns": 4,
+                "turnTimings": 0,
+                "prompts": 4,
+                "replies": 4,
+                "reasoningBlocks": 0,
+                "toolCalls": 6,
+                "turnTime": 0,
+                "longestTurn": 0,
+                "sessionTime": 720000000000
+            },
+            "faults": {
+                "sessions": 1,
+                "retries": 0,
+                "interruptions": 0,
+                "failures": 0,
+                "silentTurns": 0,
+                "prefixRewrites": 0,
+                "cacheRebuilds": {
+                    "reopenings": 0,
+                    "expiries": 0,
+                    "settlements": 0,
+                    "rebuilds": 0,
+                    "writtenTokens": 0
+                }
+            },
+            "tools": [
+                {
+                    "name": "read",
+                    "calls": 6,
+                    "failures": 0,
+                    "cancellations": 0,
+                    "took": 2000000000
+                }
+            ],
             "spend": 0,
             "isPriced": false
         }

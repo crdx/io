@@ -1,14 +1,27 @@
+Prompt cache
+Provider    Sessions  Requests  Hits  Misses  Hit Rate  Input Cached  Tokens Read
+Ollama             1         3     0       3      0.0%          0.0%           0t
+Openrouter         1         2     0       2      0.0%          0.0%           0t
+Total              2         5     0       5      0.0%          0.0%           0t
+
+Tokens
+Provider    Average Input  Peak Input  Total Input  Cache Reads  Cache Writes  Fresh Input  Output
+Ollama                3Kt          0t          9Kt           0t            0t          9Kt    600t
+Openrouter            2Kt          0t          4Kt           0t            0t          4Kt    300t
+Total               2.6Kt          0t         13Kt           0t            0t         13Kt    900t
+
 Models
 Provider    Model             Sessions  Requests  Fresh Input  Cache Reads  Cache Writes  Output  Spend
 Codex       gpt-5.6-sol              1         0           0t           0t            0t      0t  $0.00
-Ollama      qwen3.8:27b              1         0           0t           0t            0t      0t      —
-Openrouter  kimi-k2-thinking         1         0           0t           0t            0t      0t      —
-Total                                3         0           0t           0t            0t      0t  $0.00
+Ollama      qwen3.8:27b              1         3          9Kt           0t            0t    600t      —
+Ollama      qwen3.8:70b              1         0           0t           0t            0t      0t      —
+Openrouter  kimi-k2-thinking         1         2          4Kt           0t            0t    300t      —
+Total                                4         5         13Kt           0t            0t    900t  $0.00
 2 models have no listed price, so their spend is unknown and missing from the total.
 
 Conversation
 Provider    Sessions  Turns  Prompts  Replies  Reasoning  Tool Calls  Average Turn  Longest Turn  Open For
-Codex              1      3        3        0          0           0            0s            0s        0s
-Ollama             1      2        2        0          0           0            0s            0s        0s
-Openrouter         1      1        1        0          0           0            0s            0s        0s
-Total              3      6        6        0          0           0            0s            0s        0s
+Codex              1      3        3        0          0           0             —             —        0s
+Ollama             2      3        3        0          0           0             —             —        0s
+Openrouter         1      1        1        0          0           0           30s           30s        0s
+Total              4      7        7        0          0           0           30s           30s        0s

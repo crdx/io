@@ -143,7 +143,12 @@ func (self *journalTally) recordRebuild(event agent.Event) {
 }
 
 func (self *journalTally) recordUsage(event agent.Event) {
-	if event.Usage == nil || event.Usage.InputTokens <= 0 {
+	if event.Usage == nil {
+		return
+	}
+
+	if event.Usage.InputTokens <= 0 {
+		self.statistics.Cache.recordLateOutput(int64(event.Usage.OutputTokens))
 		return
 	}
 
@@ -178,8 +183,11 @@ func (self *journalTally) finish() (SessionStatistics, bool) {
 		return strings.Compare(first.Name, second.Name)
 	})
 
-	isUsageComplete := self.usageReports > 0 && statistics.Cache.Requests == self.usageReports
-	if isUsageComplete {
+	isUsageComplete := self.usageReports > 0 &&
+		statistics.Cache.Requests == self.usageReports &&
+		statistics.Cache.OutputTokens > 0
+
+	if statistics.Cache.Requests > 0 {
 		statistics.Cache.Sessions = 1
 	}
 

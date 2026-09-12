@@ -119,6 +119,14 @@ func (self *CacheStatistics) record(report usageReport) {
 	}
 }
 
+func (self *CacheStatistics) recordLateOutput(outputTokens int64) {
+	if outputTokens <= 0 || self.Requests == 0 {
+		return
+	}
+
+	self.OutputTokens += outputTokens
+}
+
 func (self *CacheStatistics) add(statisticsToAdd CacheStatistics) {
 	self.Sessions += statisticsToAdd.Sessions
 	self.Requests += statisticsToAdd.Requests

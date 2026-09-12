@@ -273,8 +273,8 @@ func activityRow(name string, statistics ActivityStatistics, appearance style.St
 			util.FormatCount(statistics.Replies),
 			util.FormatCount(statistics.ReasoningBlocks),
 			util.FormatCount(statistics.ToolCalls),
-			formatDuration(statistics.AverageTurn()),
-			formatDuration(statistics.LongestTurn),
+			formatTurn(statistics.AverageTurn(), statistics.TurnTimings > 0),
+			formatTurn(statistics.LongestTurn, statistics.TurnTimings > 0),
 			formatDuration(statistics.SessionTime),
 		},
 	}
@@ -446,6 +446,14 @@ func formatDuration(took time.Duration) string {
 	}
 
 	return util.CompactDuration(took)
+}
+
+func formatTurn(took time.Duration, isTimed bool) string {
+	if !isTimed {
+		return unknownCell
+	}
+
+	return formatDuration(took)
 }
 
 func formatSpend(spend float64, isPriced bool, currency money.Currency) string {

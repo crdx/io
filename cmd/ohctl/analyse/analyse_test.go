@@ -49,6 +49,7 @@ func TestCacheReportsAreReadFromEverySupportedWireShape(t *testing.T) {
 		{inputTokens: 2600, cachedTokens: 2000, writtenTokens: 400, outputTokens: 780},
 		{inputTokens: 100298, cachedTokens: 100000, writtenTokens: 248, outputTokens: 1290},
 		{inputTokens: 2006, cachedTokens: 1920, outputTokens: 64},
+		{inputTokens: 900},
 	}
 	if !reflect.DeepEqual(reports, want) {
 		t.Errorf("got reports %#v, want %#v", reports, want)
@@ -89,6 +90,75 @@ func TestZeroCachedTokensAreAMiss(t *testing.T) {
 
 	if statistics.Requests != 2 || statistics.Hits != 1 || statistics.Misses != 1 {
 		t.Errorf("got requests=%d hits=%d misses=%d", statistics.Requests, statistics.Hits, statistics.Misses)
+	}
+}
+
+func TestTheTotalsOfALongLineOutrankTheAttributionBeforeThem(t *testing.T) {
+	var attribution strings.Builder
+	for index := range 200 {
+		fmt.Fprintf(
+			&attribution,
+			`"item%d":{"cached_tokens":11,"input_tokens":22,"output_tokens":33,"padding":"%s"},`,
+			index,
+			strings.Repeat("x", 64),
+		)
+	}
+	transcript := strings.Join([]string{
+		"# HTTP transcript",
+		"# provider: codex",
+		`data: {"type":"response.completed","response":{"usage":{"attribution":{` +
+			strings.TrimSuffix(attribution.String(), ",") +
+			`},"input_tokens":153188,"input_tokens_details":{"cache_write_tokens":0,"cached_tokens":152448},` +
+			`"output_tokens":104,"output_tokens_details":{"reasoning_tokens":64},"total_tokens":153292}}}`,
+	}, "\n")
+
+	_, reports, err := readTranscript(strings.NewReader(transcript))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []usageReport{{inputTokens: 153188, cachedTokens: 152448, outputTokens: 104}}
+	if !reflect.DeepEqual(reports, want) {
+		t.Errorf("got reports %#v, want %#v", reports, want)
+	}
+}
+
+func TestANumberSplitAcrossTwoFragmentsIsStillRead(t *testing.T) {
+	for padding := 4000; padding < 4120; padding++ {
+		transcript := strings.Join([]string{
+			"# provider: codex",
+			`data: {"type":"response.completed","padding":"` + strings.Repeat("x", padding) +
+				`","response":{"usage":{"input_tokens":123456,"output_tokens":780,` +
+				`"input_tokens_details":{"cached_tokens":120000}}}}`,
+		}, "\n")
+
+		_, reports, err := readTranscript(strings.NewReader(transcript))
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := []usageReport{{inputTokens: 123456, cachedTokens: 120000, outputTokens: 780}}
+		if !reflect.DeepEqual(reports, want) {
+			t.Fatalf("with %d bytes of padding, got reports %#v, want %#v", padding, reports, want)
+		}
+	}
+}
+
+func TestAProviderQuotingNoCachedTokensStillReportsItsUsage(t *testing.T) {
+	transcript := strings.Join([]string{
+		"# HTTP transcript",
+		"# provider: ollama",
+		`data: {"usage":{"prompt_tokens":48240,"completion_tokens":278,"total_tokens":48518}}`,
+	}, "\n")
+
+	provider, reports, err := readTranscript(strings.NewReader(transcript))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if provider != "ollama" {
+		t.Errorf("got provider %q, want ollama", provider)
+	}
+	want := []usageReport{{inputTokens: 48240, outputTokens: 278}}
+	if !reflect.DeepEqual(reports, want) {
+		t.Errorf("got reports %#v, want %#v", reports, want)
 	}
 }
 
@@ -153,11 +223,70 @@ func TestCompleteJournalUsageAvoidsTheWireTranscript(t *testing.T) {
 		t,
 		directory,
 		"journal-usage",
-		`{"kind":"event","time":"2026-09-01T00:00:01Z","event":{"kind":"model_message","text":"hello","usage":{"input_tokens":9000,"cache":{"read_tokens":8000}}}}`,
+		event("00:00:01",
+			`{"kind":"model_message","text":"hello","usage":{"input_tokens":9000,"output_tokens":120,`+
+				`"cache":{"read_tokens":8000}}}`),
 	)
 
 	statistics := analyseOne(t, directory, "journal-usage")
 	if statistics.Cache.Hits != 1 || statistics.Cache.Misses != 0 {
+		t.Errorf("got statistics %#v", statistics.Cache)
+	}
+}
+
+func TestOutputTokensArrivingAfterTheirRequestAreCounted(t *testing.T) {
+	directory := t.TempDir()
+	writeJournal(t, directory, "thoughtful-ibis",
+		event("00:00:01",
+			`{"kind":"model_reasoning","usage":{"input_tokens":11417,"cache":{"read_tokens":10839,`+
+				`"write_tokens":576}}}`),
+		event("00:00:02", `{"kind":"tool_call_request","name":"bash","id":"1","usage":{"output_tokens":567}}`),
+	)
+
+	statistics := analyseOne(t, directory, "thoughtful-ibis")
+
+	if statistics.Cache.Requests != 1 {
+		t.Errorf("got %d requests, want 1", statistics.Cache.Requests)
+	}
+	if statistics.Cache.OutputTokens != 567 {
+		t.Errorf("got %d output tokens, want 567", statistics.Cache.OutputTokens)
+	}
+}
+
+func TestAJournalRecordingNoOutputFallsBackToTheWireTranscript(t *testing.T) {
+	directory := t.TempDir()
+	writeTranscript(t, directory, "quiet-marmot", strings.Join([]string{
+		"# provider: codex",
+		`data: {"type":"response.completed","response":{"usage":{"input_tokens":9000,"output_tokens":480,` +
+			`"input_tokens_details":{"cached_tokens":8000}}}}`,
+	}, "\n"))
+	writeJournal(t, directory, "quiet-marmot",
+		event("00:00:01", `{"kind":"model_message","text":"hello","usage":{"input_tokens":9000,`+
+			`"cache":{"read_tokens":8000}}}`),
+	)
+
+	statistics := analyseOne(t, directory, "quiet-marmot")
+
+	if statistics.Cache.Requests != 1 || statistics.Cache.OutputTokens != 480 {
+		t.Errorf("got statistics %#v", statistics.Cache)
+	}
+}
+
+func TestAWireTranscriptKnowingLessThanTheJournalIsNotRead(t *testing.T) {
+	directory := t.TempDir()
+	writeTranscript(t, directory, "torn-transcript", strings.Join([]string{
+		"# provider: codex",
+		`data: {"type":"response.completed","response":{"usage":{"input_tokens":9000,` +
+			`"input_tokens_details":{"cached_tokens":8000}}}}`,
+	}, "\n"))
+	writeJournal(t, directory, "torn-transcript",
+		event("00:00:01", `{"kind":"model_message","usage":{"input_tokens":9000,"cache":{"read_tokens":8000}}}`),
+		event("00:00:02", `{"kind":"model_message","usage":{"input_tokens":9500,"cache":{"read_tokens":9000}}}`),
+	)
+
+	statistics := analyseOne(t, directory, "torn-transcript")
+
+	if statistics.Cache.Requests != 2 || statistics.Cache.Sessions != 1 {
 		t.Errorf("got statistics %#v", statistics.Cache)
 	}
 }
@@ -367,12 +496,21 @@ func TestSeveralUnpricedModelsAreCountedTogether(t *testing.T) {
 			Name:     "first-vole",
 			Provider: "openrouter",
 			Model:    "kimi-k2-thinking",
-			Activity: ActivityStatistics{Sessions: 1, Turns: 1, Prompts: 1},
+			Cache:    CacheStatistics{Sessions: 1, Requests: 2, Misses: 2, InputTokens: 4000, OutputTokens: 300},
+			Activity: ActivityStatistics{
+				Sessions:    1,
+				Turns:       1,
+				TurnTimings: 1,
+				Prompts:     1,
+				TurnTime:    30 * time.Second,
+				LongestTurn: 30 * time.Second,
+			},
 		},
 		{
 			Name:     "second-vole",
 			Provider: "ollama",
 			Model:    "qwen3.8:27b",
+			Cache:    CacheStatistics{Sessions: 1, Requests: 3, Misses: 3, InputTokens: 9000, OutputTokens: 600},
 			Activity: ActivityStatistics{Sessions: 1, Turns: 2, Prompts: 2},
 		},
 		{
@@ -380,6 +518,12 @@ func TestSeveralUnpricedModelsAreCountedTogether(t *testing.T) {
 			Provider: "codex",
 			Model:    "gpt-5.6-sol",
 			Activity: ActivityStatistics{Sessions: 1, Turns: 3, Prompts: 3},
+		},
+		{
+			Name:     "fourth-vole",
+			Provider: "ollama",
+			Model:    "qwen3.8:70b",
+			Activity: ActivityStatistics{Sessions: 1, Turns: 1, Prompts: 1},
 		},
 	}
 
@@ -667,6 +811,31 @@ func goldenSessions() []SessionStatistics {
 				SessionTime: 3 * time.Minute,
 			},
 			Faults: FaultStatistics{Sessions: 1, Failures: 1},
+		},
+		{
+			Name:      "still-ibex",
+			Provider:  "ollama",
+			Model:     "qwen3.8:27b",
+			StartedAt: startedAt.Add(6 * time.Hour),
+			EndedAt:   startedAt.Add(6*time.Hour + 12*time.Minute),
+			Cache: CacheStatistics{
+				Sessions:        1,
+				Requests:        4,
+				Misses:          4,
+				InputTokens:     60_000,
+				OutputTokens:    2_500,
+				PeakInputTokens: 20_000,
+			},
+			Activity: ActivityStatistics{
+				Sessions:    1,
+				Turns:       4,
+				Prompts:     4,
+				Replies:     4,
+				ToolCalls:   6,
+				SessionTime: 12 * time.Minute,
+			},
+			Faults: FaultStatistics{Sessions: 1},
+			Tools:  []ToolStatistics{{Name: "read", Calls: 6, Took: 2 * time.Second}},
 		},
 	}
 }

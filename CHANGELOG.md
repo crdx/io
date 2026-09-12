@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Count every output token, and every provider, in `ohctl analyse`
 - Shorten file refusal messages
 - Gather consecutive mid-round notices into one panel
 - Pick at least high effort level

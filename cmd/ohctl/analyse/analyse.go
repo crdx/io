@@ -84,7 +84,7 @@ type ToolAnalysis struct {
 	Total ToolStatistics   `json:"total"`
 }
 
-const analysisCacheFormat = 3
+const analysisCacheFormat = 4
 
 type analysisCache struct {
 	Format   int                      `json:"format"`
@@ -341,7 +341,7 @@ func aggregate(sessions []SessionStatistics, prices pricebook) Analysis {
 	}
 	for _, statistics := range analysis.Models.Models {
 		analysis.Models.Total.add(statistics)
-		if !statistics.IsPriced {
+		if !statistics.IsPriced && statistics.Requests > 0 {
 			analysis.Models.UnpricedModels++
 		}
 	}
@@ -514,15 +514,20 @@ func (self sessionFiles) readWireUsage(statistics *SessionStatistics) error {
 		return err
 	}
 
+	if statistics.Provider == unknownProvider && provider != "" {
+		statistics.Provider = provider
+	}
+
+	if len(reports) < statistics.Cache.Requests {
+		return nil
+	}
+
 	statistics.Cache = CacheStatistics{}
 	for _, report := range reports {
 		statistics.Cache.record(report)
 	}
 	if len(reports) > 0 {
 		statistics.Cache.Sessions = 1
-	}
-	if statistics.Provider == unknownProvider && provider != "" {
-		statistics.Provider = provider
 	}
 
 	return nil

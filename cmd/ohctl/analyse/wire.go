@@ -65,11 +65,11 @@ func readTranscript(reader io.Reader) (string, []usageReport, error) {
 			line.start(fragment)
 		}
 		if line.kind != unknownWireLine {
-			line.inspect(fragment)
 			if len(overlap) > 0 {
 				boundary := append(slices.Clone(overlap), fragment[:min(len(fragment), fragmentOverlap)]...)
 				line.inspect(boundary)
 			}
+			line.inspect(fragment)
 			overlap = trailingBytes(overlap, fragment)
 		}
 
@@ -169,7 +169,7 @@ func (self *wireLine) report() (usageReport, bool) {
 	if self.kind == anthropicDeltaWireLine {
 		return usageReport{outputTokens: self.outputTokens}, self.hasOutputTokens
 	}
-	if !self.hasInputTokens || !self.hasCachedTokens {
+	if !self.hasInputTokens {
 		return usageReport{}, false
 	}
 	if self.kind == anthropicWireLine {
