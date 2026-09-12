@@ -26,7 +26,7 @@ const (
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
-func TestAnUpdateWithNothingReachableMatchesTheGolden(t *testing.T) {
+func TestGoldenAnUpdateWithNothingReachableMatchesTheGolden(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	var output bytes.Buffer
@@ -41,7 +41,7 @@ func TestAnUpdateWithNothingReachableMatchesTheGolden(t *testing.T) {
 	}, ""))
 }
 
-func TestAnUpdateFromTheRegistryAloneMatchesTheGolden(t *testing.T) {
+func TestGoldenAnUpdateFromTheRegistryAloneMatchesTheGolden(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	var output bytes.Buffer
@@ -52,7 +52,7 @@ func TestAnUpdateFromTheRegistryAloneMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "update-from-registry.ansi", report(t, output.String()))
 }
 
-func TestAnUpdateAProviderListsItselfMatchesTheGolden(t *testing.T) {
+func TestGoldenAnUpdateAProviderListsItselfMatchesTheGolden(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	listedByProvider := map[string][]agent.Model{
@@ -142,7 +142,7 @@ func listingIgnoredModels(t *testing.T) ProviderLister {
 	}
 }
 
-func TestAnUpdateNamesEveryModelItIgnoresAndWhy(t *testing.T) {
+func TestGoldenAnUpdateNamesEveryModelItIgnoresAndWhy(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	var output bytes.Buffer
@@ -202,7 +202,7 @@ func number(t *testing.T, field string) int {
 	return value
 }
 
-func TestAnUpdateWithoutTheFlagCountsWhatItIgnoredAndSaysHowToSeeIt(t *testing.T) {
+func TestGoldenAnUpdateWithoutTheFlagCountsWhatItIgnoredAndSaysHowToSeeIt(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	var output bytes.Buffer
@@ -213,7 +213,7 @@ func TestAnUpdateWithoutTheFlagCountsWhatItIgnoredAndSaysHowToSeeIt(t *testing.T
 	assertGolden(t, "update-counting-ignored.ansi", report(t, output.String()))
 }
 
-func TestAnUpdateWithoutColourKeepsItsColumns(t *testing.T) {
+func TestGoldenAnUpdateWithoutColourKeepsItsColumns(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	var output bytes.Buffer
@@ -227,7 +227,7 @@ func TestAnUpdateWithoutColourKeepsItsColumns(t *testing.T) {
 	assertGolden(t, "update-ignoring-models-plain.txt", report(t, output.String()))
 }
 
-func TestAProviderWhoseModelsAreAllIgnoredSaysSoAndOneIgnoredModelReadsAsOne(t *testing.T) {
+func TestGoldenAProviderWhoseModelsAreAllIgnoredSaysSoAndOneIgnoredModelReadsAsOne(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	var output bytes.Buffer
@@ -245,7 +245,7 @@ func TestAProviderWhoseModelsAreAllIgnoredSaysSoAndOneIgnoredModelReadsAsOne(t *
 	assertGolden(t, "update-ignoring-every-model.ansi", report(t, output.String()))
 }
 
-func TestAnUpdateThatRecordsNothingStillNamesWhatItIgnored(t *testing.T) {
+func TestGoldenAnUpdateThatRecordsNothingStillNamesWhatItIgnored(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	var output bytes.Buffer
@@ -271,7 +271,7 @@ func TestAnUpdateThatRecordsNothingStillNamesWhatItIgnored(t *testing.T) {
 	}, ""))
 }
 
-func TestAStartupRefreshThatRecordsNothingShowsWhatItIgnored(t *testing.T) {
+func TestGoldenAStartupRefreshThatRecordsNothingShowsWhatItIgnored(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	writeCheckedModelCache(t, time.Now().Add(-8*24*time.Hour))
 

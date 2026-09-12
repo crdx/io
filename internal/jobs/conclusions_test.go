@@ -5,6 +5,7 @@ import (
 	"strings"
 	"syscall"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"crdx.org/io/internal/sandbox"
@@ -119,54 +120,58 @@ func TestAJobStoppedFromTheKeyboardAnnouncesNothing(t *testing.T) {
 }
 
 func TestAJobBeingWaitedOnAnnouncesNothing(t *testing.T) {
-	runner := newHeldRunner(sandbox.Result{})
-	manager := New(runner)
+	synctest.Test(t, func(t *testing.T) {
+		runner := newHeldRunner(sandbox.Result{})
+		manager := New(runner)
 
-	if _, err := manager.Start(t.Context(), "build", t.TempDir(), "just build", sandbox.Policy{}); err != nil {
-		t.Fatal(err)
-	}
-
-	waiting := make(chan struct{})
-	go func() {
-		defer close(waiting)
-		if _, err := manager.Wait(t.Context(), []string{"build"}); err != nil {
-			t.Error(err)
+		if _, err := manager.Start(t.Context(), "build", t.TempDir(), "just build", sandbox.Policy{}); err != nil {
+			t.Fatal(err)
 		}
-	}()
 
-	time.Sleep(50 * time.Millisecond)
-	close(runner.release)
-	<-waiting
+		waiting := make(chan struct{})
+		go func() {
+			defer close(waiting)
+			if _, err := manager.Wait(t.Context(), []string{"build"}); err != nil {
+				t.Error(err)
+			}
+		}()
 
-	select {
-	case conclusion := <-manager.Conclusions():
-		t.Errorf("got %#v, want a job that was waited on to announce nothing", conclusion)
-	default:
-	}
+		synctest.Wait()
+		close(runner.release)
+		<-waiting
+
+		select {
+		case conclusion := <-manager.Conclusions():
+			t.Errorf("got %#v, want a job that was waited on to announce nothing", conclusion)
+		default:
+		}
+	})
 }
 
 func TestAJobThatEndsAfterAWaitGaveUpAnnouncesItself(t *testing.T) {
-	runner := newHeldRunner(sandbox.Result{})
-	manager := New(runner)
+	synctest.Test(t, func(t *testing.T) {
+		runner := newHeldRunner(sandbox.Result{})
+		manager := New(runner)
 
-	if _, err := manager.Start(t.Context(), "build", t.TempDir(), "just build", sandbox.Policy{}); err != nil {
-		t.Fatal(err)
-	}
+		if _, err := manager.Start(t.Context(), "build", t.TempDir(), "just build", sandbox.Policy{}); err != nil {
+			t.Fatal(err)
+		}
 
-	waiting, giveUp := context.WithTimeout(t.Context(), 50*time.Millisecond)
-	defer giveUp()
+		waiting, giveUp := context.WithTimeout(t.Context(), 50*time.Millisecond)
+		defer giveUp()
 
-	if _, err := manager.Wait(waiting, []string{"build"}); err == nil {
-		t.Fatal("the wait returned before the job ended")
-	}
+		if _, err := manager.Wait(waiting, []string{"build"}); err == nil {
+			t.Fatal("the wait returned before the job ended")
+		}
 
-	close(runner.release)
+		close(runner.release)
 
-	conclusion, isAnnounced := nextConclusion(t, manager)
-	if !isAnnounced {
-		t.Fatal("a job that ended after its wait gave up announced nothing")
-	}
-	if conclusion.Snapshot.Name != "build" {
-		t.Errorf("got %#v, want the job that ended", conclusion.Snapshot)
-	}
+		conclusion, isAnnounced := nextConclusion(t, manager)
+		if !isAnnounced {
+			t.Fatal("a job that ended after its wait gave up announced nothing")
+		}
+		if conclusion.Snapshot.Name != "build" {
+			t.Errorf("got %#v, want the job that ended", conclusion.Snapshot)
+		}
+	})
 }

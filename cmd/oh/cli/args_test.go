@@ -18,7 +18,7 @@ const helpProcessVariable = "OH_TEST_HELP_PROCESS"
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
-func TestUsageMatchesTheGolden(t *testing.T) {
+func TestGoldenUsageMatchesTheGolden(t *testing.T) {
 	if os.Getenv(helpProcessVariable) != "" {
 		os.Args = []string{"oh", "--help"}
 		Bind()
@@ -26,7 +26,7 @@ func TestUsageMatchesTheGolden(t *testing.T) {
 	}
 
 	//nolint:gosec // rerun this test binary as its help subprocess
-	command := exec.CommandContext(t.Context(), os.Args[0], "-test.run=^TestUsageMatchesTheGolden$")
+	command := exec.CommandContext(t.Context(), os.Args[0], "-test.run=^TestGoldenUsageMatchesTheGolden$")
 	command.Env = append(os.Environ(), helpProcessVariable+"=1")
 	output, err := command.CombinedOutput()
 	var exitError *exec.ExitError

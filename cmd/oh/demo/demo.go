@@ -40,6 +40,10 @@ type Session struct {
 }
 
 func Start() (*Session, error) {
+	return start(scenario())
+}
+
+func start(script *sim.Scenario) (*Session, error) {
 	inheritedStateDir, hasInheritedStateDir := os.LookupEnv(location.StateDirVariable)
 
 	stateDir, lock, err := openStateDir()
@@ -67,7 +71,7 @@ func Start() (*Session, error) {
 		return nil, err
 	}
 
-	endpoint := sim.NewResponder(scenario(), answer)
+	endpoint := sim.NewResponder(script, answer)
 	server := &http.Server{Handler: endpoint, ReadHeaderTimeout: headerTimeout}
 
 	self.server = server

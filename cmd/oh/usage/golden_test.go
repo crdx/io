@@ -195,11 +195,11 @@ func drawEachCase(t *testing.T, isPlain bool) string {
 	return drawn.String()
 }
 
-func TestEveryViewMatchesTheGolden(t *testing.T) {
+func TestGoldenEveryViewMatchesTheGolden(t *testing.T) {
 	checkGolden(t, "views.txt", drawEachCase(t, true))
 }
 
-func TestEveryStyledViewMatchesTheGolden(t *testing.T) {
+func TestGoldenEveryStyledViewMatchesTheGolden(t *testing.T) {
 	checkGolden(t, "views.ansi", drawEachCase(t, false))
 }
 
@@ -328,15 +328,15 @@ func drawEachStandingLimit(t *testing.T, isPlain bool) string {
 	return drawn.String()
 }
 
-func TestASnapshotUnderAStandingLimitMatchesTheGolden(t *testing.T) {
+func TestGoldenASnapshotUnderAStandingLimitMatchesTheGolden(t *testing.T) {
 	checkGolden(t, "standing-limit.txt", drawEachStandingLimit(t, true))
 }
 
-func TestAStyledSnapshotUnderAStandingLimitMatchesTheGolden(t *testing.T) {
+func TestGoldenAStyledSnapshotUnderAStandingLimitMatchesTheGolden(t *testing.T) {
 	checkGolden(t, "standing-limit.ansi", drawEachStandingLimit(t, false))
 }
 
-func TestProviderLimitFailuresMatchTheGolden(t *testing.T) {
+func TestGoldenProviderLimitFailuresMatchTheGolden(t *testing.T) {
 	windows := []agent.UsageWindow{
 		{Duration: 5 * time.Hour, ResetsAt: collectedAt.Add(time.Hour), IsLimited: true},
 		{Duration: 7 * 24 * time.Hour, ResetsAt: collectedAt.Add(2 * time.Hour), IsLimited: true},
@@ -347,7 +347,7 @@ func TestProviderLimitFailuresMatchTheGolden(t *testing.T) {
 	checkGolden(t, "limits.txt", text)
 }
 
-func TestEveryDrawnGaugeMatchesTheGolden(t *testing.T) {
+func TestGoldenEveryDrawnGaugeMatchesTheGolden(t *testing.T) {
 	drawing := Graphics{CellWidth: 9, CellHeight: 18}
 	expected := 40
 
@@ -415,7 +415,7 @@ func TestEveryDrawnGaugeMatchesTheGolden(t *testing.T) {
 	checkGolden(t, "gauges.txt", drawn.String())
 }
 
-func TestTheCollectionMatchesTheGolden(t *testing.T) {
+func TestGoldenTheCollectionMatchesTheGolden(t *testing.T) {
 	sources := append(everyProvider(),
 		Source{Provider: "anthropic", Label: "Anthropic", Reporter: &scriptedReporter{err: refusal(500)}},
 		Source{Provider: "ollama", Label: "Ollama", Reporter: reporting()},

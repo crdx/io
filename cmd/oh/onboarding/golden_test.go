@@ -19,7 +19,7 @@ import (
 
 const authorisationURL = "https://example.test/authorise"
 
-func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
+func TestGoldenAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 	tests := map[string]func(*testing.T, *bytes.Buffer) error{
 		"login-picker": func(t *testing.T, output *bytes.Buffer) error {
 			t.Helper()
@@ -249,7 +249,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 	}
 }
 
-func TestThePaintedWizardMatchesTheGolden(t *testing.T) {
+func TestGoldenThePaintedWizardMatchesTheGolden(t *testing.T) {
 	var output bytes.Buffer
 
 	harry := wizard{
@@ -272,7 +272,7 @@ func TestThePaintedWizardMatchesTheGolden(t *testing.T) {
 	assertANSIGolden(t, "first-run-painted", output.String())
 }
 
-func TestThePaintedSimulationRowMatchesTheGolden(t *testing.T) {
+func TestGoldenThePaintedSimulationRowMatchesTheGolden(t *testing.T) {
 	var output bytes.Buffer
 
 	harry := wizard{
@@ -291,7 +291,7 @@ func TestThePaintedSimulationRowMatchesTheGolden(t *testing.T) {
 	assertANSIGolden(t, "first-run-simulation-painted", output.String())
 }
 
-func TestThePaintedWizardShowsWhatWentWrongMatchingTheGolden(t *testing.T) {
+func TestGoldenThePaintedWizardShowsWhatWentWrongMatchingTheGolden(t *testing.T) {
 	var output bytes.Buffer
 
 	harry := wizard{
@@ -318,7 +318,7 @@ func TestThePaintedWizardShowsWhatWentWrongMatchingTheGolden(t *testing.T) {
 	assertANSIGolden(t, "login-failure-painted", output.String())
 }
 
-func TestOpenCodeGoOnboardingMatchesTheGolden(t *testing.T) {
+func TestGoldenOpenCodeGoOnboardingMatchesTheGolden(t *testing.T) {
 	var output bytes.Buffer
 	restoreStyle := style.Init(&output)
 	t.Cleanup(restoreStyle)

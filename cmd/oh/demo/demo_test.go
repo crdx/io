@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/cmd/oh/backend"
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/model"
+	"crdx.org/io/internal/sim"
 )
 
 func TestMain(runner *testing.M) {
@@ -131,7 +132,7 @@ func TestTheSimulationKeepsItsStateSomewhereItCanThrowAway(t *testing.T) {
 func TestTheSimulationAnswersTheProviderItNames(t *testing.T) {
 	t.Setenv(location.StateDirVariable, t.TempDir())
 
-	session, err := Start()
+	session, err := start(&sim.Scenario{Model: simulatedModel})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -143,7 +143,7 @@ import (
 
 const terminalInputColumns = 40
 
-func TestSpecialLinksDrawWhatTheyDrewBefore(t *testing.T) {
+func TestGoldenSpecialLinksDrawWhatTheyDrewBefore(t *testing.T) {
 	passes := map[string]func() string{
 		"email autolink": func() string {
 			return drawEmailLink(t)
@@ -291,7 +291,7 @@ func drawPendingMarkdown(t *testing.T) string {
 	return screenOutput.String()
 }
 
-func TestTerminalEscapeDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenTerminalEscapeDrawsWhatItDrewBefore(t *testing.T) {
 	passes := map[string]func() string{
 		"bare escape keeps the following key": func() string {
 			return drawBareEscapeFollowedByKey(t)
@@ -419,7 +419,7 @@ func (self terminalInput) apply(t *testing.T, app *App, editor *edit.Input, hist
 	}
 }
 
-func TestLegacyAltEnterDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenLegacyAltEnterDrawsWhatItDrewBefore(t *testing.T) {
 	compareWithGolden(t, "legacy-alt-enter", ".ansi", map[string]func() string{
 		"force sends an unknown command": func() string {
 			return drawLegacyAltEnter(t)
@@ -2168,7 +2168,7 @@ func addWireLifecycleFeatures(features map[string]struct{}, provider string, pay
 	}
 }
 
-func TestPickerMenuAlignmentMatchesTheGolden(t *testing.T) {
+func TestGoldenPickerMenuAlignmentMatchesTheGolden(t *testing.T) {
 	stream := menu.RenderMenu("Choose your provider:", []string{"ChatGPT", "Anthropic", "OpenCode Go"}, 0)
 	compareWithGolden(t, "picker-menu", ".ansi", map[string]func() string{
 		"initial frame": func() string { return stream },
@@ -2180,7 +2180,7 @@ func TestPickerMenuAlignmentMatchesTheGolden(t *testing.T) {
 	})
 }
 
-func TestLongAuthorisationURLMatchesTheGolden(t *testing.T) {
+func TestGoldenLongAuthorisationURLMatchesTheGolden(t *testing.T) {
 	address := "https://auth.example.test/oauth/authorize?client_id=oh-desktop&code_challenge=abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ&code_challenge_method=S256&redirect_uri=http%3A%2F%2Flocalhost%3A1455%2Fauth%2Fcallback&response_type=code&scope=openid%20profile%20email%20offline_access"
 	stream := link.RenderURL(address, address)
 	compareWithGolden(t, "authorisation-url", ".ansi", map[string]func() string{
@@ -2193,7 +2193,7 @@ func TestLongAuthorisationURLMatchesTheGolden(t *testing.T) {
 	})
 }
 
-func TestCompletionProtocolMatchesTheGolden(t *testing.T) {
+func TestGoldenCompletionProtocolMatchesTheGolden(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	cachePath := location.GetModelCachePath(os.Getenv(backend.EndpointVariable) != "")
 	if err := os.MkdirAll(filepath.Dir(cachePath), 0o700); err != nil { //nolint:gosec // the path is the test's own state directory
@@ -2256,7 +2256,7 @@ func TestCompletionProtocolMatchesTheGolden(t *testing.T) {
 	}
 }
 
-func TestResumeArgumentsMatchTheGolden(t *testing.T) {
+func TestGoldenResumeArgumentsMatchTheGolden(t *testing.T) {
 	originalArgs := os.Args
 	t.Cleanup(func() { os.Args = originalArgs })
 
@@ -2283,7 +2283,7 @@ func TestResumeArgumentsMatchTheGolden(t *testing.T) {
 	compareTextWithGolden(t, "resume-arguments.txt", output.String())
 }
 
-func TestPrintArgumentsMatchTheGolden(t *testing.T) {
+func TestGoldenPrintArgumentsMatchTheGolden(t *testing.T) {
 	originalArgs := os.Args
 	t.Cleanup(func() { os.Args = originalArgs })
 
@@ -2327,7 +2327,7 @@ func TestPrintArgumentsMatchTheGolden(t *testing.T) {
 	compareTextWithGolden(t, "print-arguments.txt", output.String())
 }
 
-func TestModelArgumentsMatchTheGolden(t *testing.T) {
+func TestGoldenModelArgumentsMatchTheGolden(t *testing.T) {
 	originalArgs := os.Args
 	t.Cleanup(func() { os.Args = originalArgs })
 
@@ -2355,7 +2355,7 @@ func TestModelArgumentsMatchTheGolden(t *testing.T) {
 	compareTextWithGolden(t, "model-arguments.txt", output.String())
 }
 
-func TestRefusingAModelOnResumeMatchesTheGolden(t *testing.T) {
+func TestGoldenRefusingAModelOnResumeMatchesTheGolden(t *testing.T) {
 	originalArgs := os.Args
 	t.Cleanup(func() { os.Args = originalArgs })
 
@@ -2391,7 +2391,7 @@ func TestRefusingAModelOnResumeMatchesTheGolden(t *testing.T) {
 	compareTextWithGolden(t, "resume-model-arguments.txt", output.String())
 }
 
-func TestTheUsageArgumentsMatchTheGolden(t *testing.T) {
+func TestGoldenTheUsageArgumentsMatchTheGolden(t *testing.T) {
 	originalArgs := os.Args
 	t.Cleanup(func() { os.Args = originalArgs })
 
@@ -2418,7 +2418,7 @@ func TestTheUsageArgumentsMatchTheGolden(t *testing.T) {
 	compareTextWithGolden(t, "usage-arguments.txt", output.String())
 }
 
-func TestTheUsageReportMatchesTheGolden(t *testing.T) {
+func TestGoldenTheUsageReportMatchesTheGolden(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	cachePath := location.GetUsageCachePath("codex", false)
@@ -3566,7 +3566,7 @@ func TestASuccessfulNoticeUsesTheSuccessStyle(t *testing.T) {
 	}
 }
 
-func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
+func TestGoldenFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 	expected := map[string]string{}
 	claimFixtureOutputs(t, expected, "replay input", "testdata/input", ".jsonl", []string{
 		".ansi",
@@ -3805,7 +3805,14 @@ func TestTestdataContainsNoPersonalOrSecretMaterial(t *testing.T) {
 func TestMain(testingMain *testing.M) {
 	sandbox.Init()
 	unsetInheritedStateDirectory()
-	os.Exit(testingMain.Run())
+
+	status := testingMain.Run()
+
+	if testBinaryDirectory != "" {
+		_ = os.RemoveAll(testBinaryDirectory)
+	}
+
+	os.Exit(status)
 }
 
 func unsetInheritedStateDirectory() {
@@ -3814,7 +3821,7 @@ func unsetInheritedStateDirectory() {
 	}
 }
 
-func TestAResumedConversationDrawsItsRecordedMode(t *testing.T) {
+func TestGoldenAResumedConversationDrawsItsRecordedMode(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{Model: "gpt"})
 	if err != nil {
@@ -3855,7 +3862,7 @@ func TestAResumedConversationDrawsItsRecordedMode(t *testing.T) {
 	compareWithGolden(t, "resume-mode", ".ansi", passes)
 }
 
-func TestAResumedConversationDrawsItsRecordedConfinement(t *testing.T) {
+func TestGoldenAResumedConversationDrawsItsRecordedConfinement(t *testing.T) {
 	drawnRules := func(isYolo bool) func() string {
 		return func() string {
 			directory := t.TempDir()
@@ -4119,7 +4126,7 @@ func TestAModeChangeSaysItselfInTheScrollback(t *testing.T) {
 	}
 }
 
-func TestPendingModeMessagesAreSeparatedFromStartupAndEachOther(t *testing.T) {
+func TestGoldenPendingModeMessagesAreSeparatedFromStartupAndEachOther(t *testing.T) {
 	requireSameVisibleScreen(
 		t,
 		"messages a turn has taken differ from independently submitted messages",
@@ -4193,7 +4200,7 @@ func submittedModeMessagesStream() string {
 	return screenOutput.String()
 }
 
-func TestTakingBackAModeChangeDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenTakingBackAModeChangeDrawsWhatItDrewBefore(t *testing.T) {
 	completeInteraction := func(letter rune, laterLine string) func() string {
 		return func() string {
 			stream := modeTakebackStream(t, letter, 2, laterLine)
@@ -4246,7 +4253,7 @@ func modeTakebackStream(t *testing.T, letter rune, toggleCount int, laterLine st
 	return screenOutput.String()
 }
 
-func TestMermaidStreamingDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenMermaidStreamingDrawsWhatItDrewBefore(t *testing.T) {
 	compareWithGolden(t, "mermaid-streaming", ".screen", map[string]func() string{
 		"1 first valid prefix": func() string {
 			return mermaidStreamingScreen(t, "```mermaid\ngraph LR\nA --> B")
@@ -4327,7 +4334,7 @@ func everyStreamingMode() map[string]output.StreamingMode {
 	}
 }
 
-func TestLineStreamingDrawsEveryFrameAcrossANarrowerResize(t *testing.T) {
+func TestGoldenLineStreamingDrawsEveryFrameAcrossANarrowerResize(t *testing.T) {
 	compareWithGolden(t, "line-resize", ".screen", map[string]func() string{
 		"wide to narrow": func() string { return lineResizeFrames(t) },
 	})
@@ -4378,7 +4385,7 @@ func lineResizeFrames(t *testing.T) string {
 	return strings.TrimSuffix(frames.String(), "\n")
 }
 
-func TestAStreamThatStopsStillShowsEverythingThatArrived(t *testing.T) {
+func TestGoldenAStreamThatStopsStillShowsEverythingThatArrived(t *testing.T) {
 	passes := map[string]func() string{}
 
 	for name, streamingMode := range everyStreamingMode() {
@@ -4574,14 +4581,33 @@ func checkedModelCache(providers string) []byte {
 	)
 }
 
+var testBinaryDirectory string
+
+var testBinary = sync.OnceValues(func() (string, error) {
+	directory, err := os.MkdirTemp("", "oh-binary")
+	if err != nil {
+		return "", err
+	}
+
+	testBinaryDirectory = directory
+	binary := filepath.Join(directory, "oh")
+
+	command := exec.Command("go", "build", "-o", binary, ".") //nolint:gosec // building the binary under test
+	if output, err := command.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("build oh: %w\n%s", err, output)
+	}
+
+	return binary, nil
+})
+
 func buildTestBinary(t *testing.T) string {
 	t.Helper()
 
-	binary := filepath.Join(t.TempDir(), "oh")
-	command := exec.CommandContext(t.Context(), "go", "build", "-o", binary, ".") //nolint:gosec // building the binary under test
-	if output, err := command.CombinedOutput(); err != nil {
-		t.Fatalf("build oh: %v\n%s", err, output)
+	binary, err := testBinary()
+	if err != nil {
+		t.Fatal(err)
 	}
+
 	return binary
 }
 
@@ -4804,7 +4830,7 @@ func testBinaryEnvironment(t *testing.T, stateDirectory string) []string {
 	)
 }
 
-func TestCorruptedSessionFailureMatchesGolden(t *testing.T) {
+func TestGoldenCorruptedSessionFailureMatchesGolden(t *testing.T) {
 	binary := buildTestBinary(t)
 	compareWithGolden(t, "corrupt-session", ".txt", map[string]func() string{
 		"record split across lines": func() string {
@@ -5058,7 +5084,7 @@ func TestAnEffortWrittenAsAnAliasInTheConfigIsResolved(t *testing.T) {
 	}
 }
 
-func TestWhatSessionTransitionsMakeOfAModelGlob(t *testing.T) {
+func TestGoldenWhatSessionTransitionsMakeOfAModelGlob(t *testing.T) {
 	compareWithGolden(t, "new-session", ".txt", map[string]func() string{
 		"command line selections": func() string { return resolveCommandLineSelections(t) },
 		"effort autoselection":    resolveAutomaticEfforts,
@@ -5587,7 +5613,7 @@ func TestPick(t *testing.T) {
 	screen.End()
 }
 
-func TestForkMessageMatchesGolden(t *testing.T) {
+func TestGoldenForkMessageMatchesGolden(t *testing.T) {
 	directory := t.TempDir()
 	workspaceDirectory := t.TempDir()
 	writer, err := store.Create(directory, store.Meta{WorkspaceDir: workspaceDirectory})
@@ -5630,7 +5656,7 @@ type promptGolden struct {
 	readsTheScratchRoot bool
 }
 
-func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
+func TestGoldenTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 	for name, shape := range map[string]promptGolden{
 		"context":               {},
 		"context-yolo":          {isYolo: true},
@@ -5783,7 +5809,7 @@ type replayEntry struct {
 	Event *agent.Event `json:"event,omitempty"`
 }
 
-func TestEveryScenarioShowsWhatItShowedBefore(t *testing.T) {
+func TestGoldenEveryScenarioShowsWhatItShowedBefore(t *testing.T) {
 	for _, journal := range everyJournal(t) {
 		t.Run(journal.name, func(t *testing.T) {
 			entries := readJournal(t, journal.path)
@@ -5862,7 +5888,7 @@ func replayUnderGrouping(t *testing.T, groups []string, isPrinted bool) string {
 	return replayInto(newGroupedRig(t, groups, isPrinted), entries)
 }
 
-func TestEveryGroupingSpacesTheOutputAsItSays(t *testing.T) {
+func TestGoldenEveryGroupingSpacesTheOutputAsItSays(t *testing.T) {
 	passes := map[string]func() string{}
 
 	for _, groups := range everyGrouping() {
@@ -5955,7 +5981,7 @@ func everyThinkingWidth() map[string]int {
 	}
 }
 
-func TestEveryReasoningRenderingDrawsAThoughtAsItSays(t *testing.T) {
+func TestGoldenEveryReasoningRenderingDrawsAThoughtAsItSays(t *testing.T) {
 	shownPasses := map[string]func() string{}
 	writtenPasses := map[string]func() string{}
 
@@ -6042,7 +6068,7 @@ func shownPasses(t *testing.T, passes map[string]func() string) map[string]func(
 	return shownAt
 }
 
-func TestEveryScenarioDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenEveryScenarioDrawsWhatItDrewBefore(t *testing.T) {
 	for _, journal := range everyJournal(t) {
 		t.Run(journal.name, func(t *testing.T) {
 			entries := readJournal(t, journal.path)
@@ -6065,7 +6091,7 @@ func TestEveryScenarioDrawsWhatItDrewBefore(t *testing.T) {
 
 const shortLines = 3
 
-func TestATallRegionOnAShortTerminalIsRepairedRatherThanFrozen(t *testing.T) {
+func TestGoldenATallRegionOnAShortTerminalIsRepairedRatherThanFrozen(t *testing.T) {
 	scenarios := map[string]string{
 		"streamed taller than the terminal":      tallRegionScenario,
 		"a panel grown taller than the terminal": noticePanelScenario,
@@ -6110,7 +6136,7 @@ func TestAPrintedSessionShowsWhatTheInterfaceShowed(t *testing.T) {
 	}
 }
 
-func TestEverySessionIsWrittenDownTheSameWay(t *testing.T) {
+func TestGoldenEverySessionIsWrittenDownTheSameWay(t *testing.T) {
 	for _, journal := range everyJournal(t) {
 		t.Run(journal.name, func(t *testing.T) {
 			entries := readJournal(t, journal.path)
@@ -6164,7 +6190,7 @@ func writeTranscript(t *testing.T, entries []replayEntry) string {
 
 var transcriptTime = time.Date(2001, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-func TestTheScreenAroundAConversationDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenTheScreenAroundAConversationDrawsWhatItDrewBefore(t *testing.T) {
 	entries := readJournal(t, filepath.Join("testdata", "input", lifecycleScenario))
 
 	passes := map[string]func() string{}
@@ -6204,7 +6230,7 @@ func TestTheScreenAroundAConversationDrawsWhatItDrewBefore(t *testing.T) {
 
 const signalGoldenProcessVariable = "OH_TEST_SIGNAL_GOLDEN_PROCESS"
 
-func TestFatalSignalTerminalRestorationMatchesTheGolden(t *testing.T) {
+func TestGoldenFatalSignalTerminalRestorationMatchesTheGolden(t *testing.T) {
 	if os.Getenv(signalGoldenProcessVariable) != "" {
 		screen := output.NewTerminalOfSize(os.Stdout, replayColumns, replayLines)
 		restoreCursor := screen.BeginEditing()
@@ -6231,7 +6257,7 @@ func TestFatalSignalTerminalRestorationMatchesTheGolden(t *testing.T) {
 
 	//nolint:gosec // rerun this test binary as its signalled subprocess
 	command := exec.CommandContext(
-		t.Context(), os.Args[0], "-test.run=^TestFatalSignalTerminalRestorationMatchesTheGolden$",
+		t.Context(), os.Args[0], "-test.run=^TestGoldenFatalSignalTerminalRestorationMatchesTheGolden$",
 	)
 	command.Env = append(os.Environ(), signalGoldenProcessVariable+"=1")
 	output, err := command.CombinedOutput()
@@ -6274,7 +6300,7 @@ func onATerminal(passes map[string]func() string) map[string]func() string {
 	return kept
 }
 
-func TestATurnStillRunningDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenATurnStillRunningDrawsWhatItDrewBefore(t *testing.T) {
 	entries := readJournal(t, filepath.Join("testdata", "input", lifecycleScenario))
 
 	passes := map[string]func() string{
@@ -6791,7 +6817,7 @@ func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
 	}
 }
 
-func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	passes := map[string]func() string{}
 
 	for _, flags := range []string{"", "r", "rw", "rx", "rxw", "rxwn", "rxwng", "rxwngl", "rn", "rg", "rl"} {
@@ -6853,7 +6879,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	compareWithGolden(t, "banner", ".screen", shownPasses(t, passes))
 }
 
-func TestTheBarConfiguredByDefaultDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenTheBarConfiguredByDefaultDrawsWhatItDrewBefore(t *testing.T) {
 	t.Setenv("HOME", "/home/tester")
 
 	passes := map[string]func() string{}
@@ -6904,7 +6930,7 @@ func TestTheBarConfiguredByDefaultDrawsWhatItDrewBefore(t *testing.T) {
 	compareWithGolden(t, "default-bar", ".screen", shownPasses(t, passes))
 }
 
-func TestTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 	bannerInfo := func(sessionName string, localConfig *startup.LocalConfig) startup.Info {
 		return startup.Info{
 			Session:       sessionName,
@@ -7013,7 +7039,7 @@ func TestTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 	compareWithGolden(t, "startup-sized-output", ".screen", shownStreamPasses)
 }
 
-func TestLocalConfigsDrawMegathoroughly(t *testing.T) {
+func TestGoldenLocalConfigsDrawMegathoroughly(t *testing.T) {
 	profiles := map[string]startup.Info{
 		"no local config": {},
 		"empty local config": {
@@ -7101,7 +7127,7 @@ func TestLocalConfigsDrawMegathoroughly(t *testing.T) {
 	compareWithGolden(t, "startup-local-config", ".screen", screenPasses)
 }
 
-func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 	frames := map[string]edit.Frame{
 		"one row": {
 			Rows: []string{"> what is the weather"}, Row: 0, Column: 21,
@@ -7176,7 +7202,7 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 	compareWithGolden(t, "inputblock", ".screen", shownPassesAtWidth)
 }
 
-func TestVerticalInputMovementDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenVerticalInputMovementDrawsWhatItDrewBefore(t *testing.T) {
 	up := key.Key{Code: key.Up}
 	down := key.Key{Code: key.Down}
 
@@ -7226,7 +7252,7 @@ func verticalInputMovementStream(t *testing.T, keypresses ...key.Key) string {
 	return screenOutput.String()
 }
 
-func TestReadlineInputBindingsDrawWhatTheyDrewBefore(t *testing.T) {
+func TestGoldenReadlineInputBindingsDrawWhatTheyDrewBefore(t *testing.T) {
 	control := func(value rune) key.Key {
 		return key.Key{Code: key.Rune, Value: value, Mod: key.Ctrl}
 	}
@@ -7644,7 +7670,7 @@ func TestReloadingConfigReplacesSnippetsAtomically(t *testing.T) {
 	}
 }
 
-func TestWorkspacePathsInCallLabelsLoseTheirPrefix(t *testing.T) {
+func TestGoldenWorkspacePathsInCallLabelsLoseTheirPrefix(t *testing.T) {
 	passes := map[string]func() string{
 		"paths named against the workspace": func() string { return drawWorkspacePathLabels(t) },
 	}
@@ -7696,7 +7722,7 @@ func drawWorkspacePathLabels(t *testing.T) string {
 	return rig.drawn()
 }
 
-func TestAnExistingPathDrawsAsAConversationMessage(t *testing.T) {
+func TestGoldenAnExistingPathDrawsAsAConversationMessage(t *testing.T) {
 	passes := map[string]func() string{
 		"existing path sent": func() string { return drawExistingPathMessage(t) },
 	}
@@ -7726,7 +7752,7 @@ func drawExistingPathMessage(t *testing.T) string {
 	return screenOutput.String()
 }
 
-func TestUserMessagePathsAreLinkedAtConversationWidths(t *testing.T) {
+func TestGoldenUserMessagePathsAreLinkedAtConversationWidths(t *testing.T) {
 	passes := map[string]func() string{}
 	columnsByName := map[string]int{
 		"wide":       replayColumns,
@@ -7809,7 +7835,7 @@ func TestCommandFeedbackHasNoAutomaticDismissal(t *testing.T) {
 	}
 }
 
-func TestFeedbackDrawsEveryVisibleState(t *testing.T) {
+func TestGoldenFeedbackDrawsEveryVisibleState(t *testing.T) {
 	passes := streamPasses(t, feedbackStream, map[string]feedbackScenario{
 		"command error":               feedbackCommandError,
 		"multiline help":              feedbackHelp,
@@ -8021,7 +8047,7 @@ const (
 	queuedTallerThanTheTerminal
 )
 
-func TestQueuedMessagesDrawEveryVisibleState(t *testing.T) {
+func TestGoldenQueuedMessagesDrawEveryVisibleState(t *testing.T) {
 	passes := map[string]func() string{
 		"one queued":                 func() string { return queuedMessagesStream(t, queuedOne) },
 		"a path queued":              func() string { return queuedMessagesStream(t, queuedPath) },
@@ -8198,7 +8224,7 @@ const (
 	configReloadPreservedFailure
 )
 
-func TestReloadingConfigDrawsEveryVisibleState(t *testing.T) {
+func TestGoldenReloadingConfigDrawsEveryVisibleState(t *testing.T) {
 	passes := map[string]func() string{
 		"valid revision":                   func() string { return configReloadStream(t, configReloadValid) },
 		"invalid revision then recovery":   func() string { return configReloadStream(t, configReloadInvalidRecovery) },
@@ -9099,7 +9125,7 @@ func filmstrip(
 	}
 }
 
-func TestTheRedrawScheduleRunsWhenItRanBefore(t *testing.T) {
+func TestGoldenTheRedrawScheduleRunsWhenItRanBefore(t *testing.T) {
 	t.Setenv("HOME", "/home/tester")
 
 	passes := map[string]func() string{
@@ -9118,7 +9144,7 @@ func TestTheRedrawScheduleRunsWhenItRanBefore(t *testing.T) {
 	compareWithGolden(t, "schedule", ".screen", shownPasses(t, passes))
 }
 
-func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
+func TestGoldenEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 	t.Setenv("HOME", "/home/tester")
 
 	at := time.Date(2026, time.August, 23, 14, 32, 9, 0, time.UTC)
@@ -10309,7 +10335,7 @@ const (
 	pathGrantReplaced
 )
 
-func TestPathGrantLifecycleDrawsEveryVisibleState(t *testing.T) {
+func TestGoldenPathGrantLifecycleDrawsEveryVisibleState(t *testing.T) {
 	passes := map[string]func() string{
 		"active turn interrupted":       func() string { return pathGrantGoldenStream(t, pathGrantInterrupted) },
 		"duplicate grant rejected":      func() string { return pathGrantGoldenStream(t, pathGrantDuplicate) },
@@ -10333,7 +10359,7 @@ func TestPathGrantLifecycleDrawsEveryVisibleState(t *testing.T) {
 	compareWithGolden(t, "path-grant-lifecycle", ".screen", shownPasses(t, passes))
 }
 
-func TestPortDirectionNoticesMatchGolden(t *testing.T) {
+func TestGoldenPortDirectionNoticesMatchGolden(t *testing.T) {
 	passes := map[string]func() string{
 		"pending sandbox to host": func() string {
 			var screenOutput bytes.Buffer
@@ -10651,7 +10677,7 @@ const (
 	plainInputPipedUnsized
 )
 
-func TestPlainInputDrawsEveryVisibleState(t *testing.T) {
+func TestGoldenPlainInputDrawsEveryVisibleState(t *testing.T) {
 	passes := map[string]func() string{
 		"a piped prompt asks once": func() string { return plainInputStream(t, plainInputPiped) },
 		"a piped prompt follows a given one": func() string {
@@ -11418,7 +11444,7 @@ type sessionGoldenScenario struct {
 	CredentialRecovery func()              `toml:"-"`
 }
 
-func TestScenariosProduceCanonicalOutputs(t *testing.T) {
+func TestGoldenScenariosProduceCanonicalOutputs(t *testing.T) {
 	paths, err := filepath.Glob(filepath.Join("testdata", "scenarios", "*.toml"))
 	if err != nil {
 		t.Fatal(err)
@@ -13508,7 +13534,7 @@ func (self *frameRecordingWriter) Write(value []byte) (int, error) {
 	return len(value), nil
 }
 
-func TestOrdinaryTabDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenOrdinaryTabDrawsWhatItDrewBefore(t *testing.T) {
 	pass := func() string {
 		self := slashCommandFixture(t, caps.Read)
 		var screenOutput strings.Builder
@@ -13689,7 +13715,7 @@ const (
 	pasteFinished
 )
 
-func TestAPasteDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenAPasteDrawsWhatItDrewBefore(t *testing.T) {
 	passes := map[string]func() string{
 		"1 before the paste": func() string {
 			return pasteStream(t, "pasted text", pasteNotStarted)
@@ -13874,7 +13900,7 @@ func pasteStream(t *testing.T, text string, stage pasteStage) string {
 	return screenOutput.String()
 }
 
-func TestControlCDrawsWhatItDrewBefore(t *testing.T) {
+func TestGoldenControlCDrawsWhatItDrewBefore(t *testing.T) {
 	written := "a line worth keeping"
 	controlC := key.Key{Code: key.Rune, Value: 'c', Mod: key.Ctrl}
 	controlU := key.Key{Code: key.Rune, Value: 'u', Mod: key.Ctrl}
@@ -14321,7 +14347,7 @@ func (self *plainTurnProvider) Send(_ context.Context, yield agent.Yield) (agent
 	return agent.Reply{}, nil
 }
 
-func TestTheAppWritesAndResumesASessionOnItsOwn(t *testing.T) {
+func TestGoldenTheAppWritesAndResumesASessionOnItsOwn(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	directory := t.TempDir()
@@ -14925,8 +14951,15 @@ type stoppableCommand struct {
 }
 
 func (self stoppableCommand) Wait() (sandbox.Result, error) { return <-self.outcome, nil }
-func (self stoppableCommand) Signal(syscall.Signal) error   { return nil }
 func (self stoppableCommand) Stop()                         { self.outcome <- sandbox.Result{ExitCode: 137} }
+
+func (self stoppableCommand) Signal(signal syscall.Signal) error {
+	if signal == syscall.SIGTERM {
+		self.outcome <- sandbox.Result{ExitCode: 143}
+	}
+
+	return nil
+}
 
 type stoppableRunner struct{}
 
@@ -15696,7 +15729,7 @@ func TestAPictureNamedInAnAnswerIsSentOnlyOnceWhileTheAnswerArrives(t *testing.T
 	}
 }
 
-func TestAPictureIsDrawnUnderTheCallThatReadIt(t *testing.T) {
+func TestGoldenAPictureIsDrawnUnderTheCallThatReadIt(t *testing.T) {
 	passes := map[string]func() string{
 		"1 a picture sent to the terminal": func() string {
 			return pictureStream(t, false, 0, false)

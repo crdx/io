@@ -57,7 +57,7 @@ func yoloGoldenPolicy() sandbox.Policy {
 	return sandbox.Policy{Yolo: true, Timeout: 5 * time.Minute}
 }
 
-func TestEveryWholeReportACommandCanEndOnMatchesTheGolden(t *testing.T) {
+func TestGoldenEveryWholeReportACommandCanEndOnMatchesTheGolden(t *testing.T) {
 	reports := []struct {
 		name   string
 		result sandbox.Result

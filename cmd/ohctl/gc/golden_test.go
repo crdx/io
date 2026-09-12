@@ -17,11 +17,11 @@ const goldenName = "stored-session"
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
-func TestUsageMatchesTheGolden(t *testing.T) {
+func TestGoldenUsageMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "usage.txt", strings.ReplaceAll(usage, "$0", "ohctl"))
 }
 
-func TestEveryCacheIsRemovedAndReported(t *testing.T) {
+func TestGoldenEveryCacheIsRemovedAndReported(t *testing.T) {
 	directories, name := populated(t)
 
 	var screen, failure strings.Builder
@@ -39,7 +39,7 @@ func TestEveryCacheIsRemovedAndReported(t *testing.T) {
 	}
 }
 
-func TestAnAggressiveSweepTakesTheCachesWithinACheckout(t *testing.T) {
+func TestGoldenAnAggressiveSweepTakesTheCachesWithinACheckout(t *testing.T) {
 	directories, name := populated(t)
 
 	var screen, failure strings.Builder
@@ -52,7 +52,7 @@ func TestAnAggressiveSweepTakesTheCachesWithinACheckout(t *testing.T) {
 	assertGone(t, filepath.Join(directories.Farm, name, "checkout", ".cache"))
 }
 
-func TestADryRunReportsWhatItWouldRemoveAndRemovesNothing(t *testing.T) {
+func TestGoldenADryRunReportsWhatItWouldRemoveAndRemovesNothing(t *testing.T) {
 	directories, name := populated(t)
 
 	var screen, failure strings.Builder
@@ -68,7 +68,7 @@ func TestADryRunReportsWhatItWouldRemoveAndRemovesNothing(t *testing.T) {
 	}
 }
 
-func TestARunningSessionKeepsItsCaches(t *testing.T) {
+func TestGoldenARunningSessionKeepsItsCaches(t *testing.T) {
 	directories, name := populated(t)
 
 	heldLock, err := session.AcquireLock(directories.Sessions, name)
@@ -107,7 +107,7 @@ func TestAReadOnlyModuleCacheIsStillRemoved(t *testing.T) {
 	assertGone(t, filepath.Join(directories.Farm, name, ".cache"))
 }
 
-func TestNothingToRemoveIsStillReported(t *testing.T) {
+func TestGoldenNothingToRemoveIsStillReported(t *testing.T) {
 	directories := Directories{Farm: t.TempDir(), Sessions: t.TempDir(), Home: t.TempDir()}
 
 	var screen, failure strings.Builder

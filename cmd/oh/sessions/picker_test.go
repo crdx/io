@@ -379,7 +379,7 @@ func TestAListingInAnOlderFormatIsWrittenAgainRatherThanRefused(t *testing.T) {
 	}
 }
 
-func TestAnOlderRunningSessionDoesNotKeepTriggeringListingRebuilds(t *testing.T) {
+func TestGoldenAnOlderRunningSessionDoesNotKeepTriggeringListingRebuilds(t *testing.T) {
 	directory := t.TempDir()
 	workspaceDir := t.TempDir()
 	writer, err := store.Create(directory, store.Meta{WorkspaceDir: workspaceDir, Model: "gpt-5.6-sol"})
@@ -438,7 +438,7 @@ func TestAnOlderRunningSessionDoesNotKeepTriggeringListingRebuilds(t *testing.T)
 	}, ""))
 }
 
-func TestOnlyTheListingOfTheResumedSessionIsWrittenAgainAtStartup(t *testing.T) {
+func TestGoldenOnlyTheListingOfTheResumedSessionIsWrittenAgainAtStartup(t *testing.T) {
 	directory := t.TempDir()
 	workspaceDir := t.TempDir()
 	resumed := writeIdleSession(t, directory, store.Meta{WorkspaceDir: workspaceDir})

@@ -10,7 +10,7 @@ import (
 	"crdx.org/io/session"
 )
 
-func TestAnArchivedSessionInAnOlderFormatIsReportedOnlyWhereArchivesAreRead(t *testing.T) {
+func TestGoldenAnArchivedSessionInAnOlderFormatIsReportedOnlyWhereArchivesAreRead(t *testing.T) {
 	directory := t.TempDir()
 	writeOutdatedJournal(t, directory, "able-dolphin")
 	archive(t, directory, "able-dolphin")
@@ -33,7 +33,7 @@ func TestAnArchivedSessionInAnOlderFormatIsReportedOnlyWhereArchivesAreRead(t *t
 	}, ""))
 }
 
-func TestAStoredSessionInAnOlderFormatIsReportedAtStartup(t *testing.T) {
+func TestGoldenAStoredSessionInAnOlderFormatIsReportedAtStartup(t *testing.T) {
 	directory := t.TempDir()
 	writeOutdatedJournal(t, directory, "able-dolphin")
 

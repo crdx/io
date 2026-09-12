@@ -200,7 +200,7 @@ func TestAContextWindowIsWrittenTheWayEveryTokenCountIs(t *testing.T) {
 	}
 }
 
-func TestTheRowsOfTheModelPickerMatchTheGolden(t *testing.T) {
+func TestGoldenTheRowsOfTheModelPickerMatchTheGolden(t *testing.T) {
 	models := &modelList{models: availableModels()}
 
 	var output strings.Builder
@@ -225,7 +225,7 @@ func TestTheRowsOfTheModelPickerMatchTheGolden(t *testing.T) {
 	compareWithGolden(t, "rows.golden", output.String())
 }
 
-func TestWhatTheModelPickerPaintsMatchesTheGolden(t *testing.T) {
+func TestGoldenWhatTheModelPickerPaintsMatchesTheGolden(t *testing.T) {
 	frames := []struct {
 		name   string
 		room   int

@@ -9,6 +9,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"crdx.org/io/agent"
@@ -196,142 +197,148 @@ func (self *batchProvider) Send(_ context.Context, _ agent.Yield) (agent.Reply, 
 }
 
 func TestStreamCapsConcurrentCalls(t *testing.T) {
-	const concurrencyLimit = 16
+	synctest.Test(t, func(t *testing.T) {
+		const concurrencyLimit = 16
 
-	started := make(chan struct{}, concurrencyLimit+1)
-	release := make(chan struct{})
-	var releaseOnce sync.Once
-	releaseCalls := func() {
-		releaseOnce.Do(func() { close(release) })
-	}
-	t.Cleanup(releaseCalls)
+		started := make(chan struct{}, concurrencyLimit+1)
+		release := make(chan struct{})
+		var releaseOnce sync.Once
+		releaseCalls := func() {
+			releaseOnce.Do(func() { close(release) })
+		}
+		t.Cleanup(releaseCalls)
 
-	barrierTool := tool.Implement(
-		tool.Definition{
-			Name:        "noop",
-			Description: "",
-			Schema:      tool.Schema{},
-		},
-		func(struct{}) (string, string) { return "", "" },
-	).IsEmbarrassinglyParallel().Plain(func(context.Context, struct{}) (string, error) {
-		started <- struct{}{}
-		<-release
-		return "done", nil
-	})
+		barrierTool := tool.Implement(
+			tool.Definition{
+				Name:        "noop",
+				Description: "",
+				Schema:      tool.Schema{},
+			},
+			func(struct{}) (string, string) { return "", "" },
+		).IsEmbarrassinglyParallel().Plain(func(context.Context, struct{}) (string, error) {
+			started <- struct{}{}
+			<-release
+			return "done", nil
+		})
 
-	provider := &batchProvider{calls: concurrencyLimit + 1}
-	done := make(chan error, 1)
-	go func() {
-		_, err := agent.New("", provider, []tool.Tool{barrierTool}).Send(t.Context(), "go")
-		done <- err
-	}()
+		provider := &batchProvider{calls: concurrencyLimit + 1}
+		done := make(chan error, 1)
+		go func() {
+			_, err := agent.New("", provider, []tool.Tool{barrierTool}).Send(t.Context(), "go")
+			done <- err
+		}()
 
-	for range concurrencyLimit {
+		for range concurrencyLimit {
+			select {
+			case <-started:
+			case <-time.After(time.Second):
+				t.Fatal("timed out waiting for calls to start")
+			}
+		}
+
 		select {
 		case <-started:
-		case <-time.After(time.Second):
-			t.Fatal("timed out waiting for calls to start")
+			t.Fatal("more calls than the concurrency limit started")
+		case <-time.After(20 * time.Millisecond):
 		}
-	}
 
-	select {
-	case <-started:
-		t.Fatal("more calls than the concurrency limit started")
-	case <-time.After(20 * time.Millisecond):
-	}
-
-	releaseCalls()
-	if err := <-done; err != nil {
-		t.Fatal(err)
-	}
-
-	if got := len(provider.results); got != concurrencyLimit+1 {
-		t.Errorf("got %d results, want %d", got, concurrencyLimit+1)
-	}
-}
-
-func TestStreamLeavesACallThatIsNotConcurrentOnItsOwn(t *testing.T) {
-	var mutex sync.Mutex
-
-	runningCalls, maxRunningCalls := 0, 0
-
-	serialTool := tool.Implement(
-		tool.Definition{
-			Name:        "noop",
-			Description: "",
-			Schema:      tool.Schema{},
-		},
-		func(struct{}) (string, string) { return "", "" },
-	).Plain(func(context.Context, struct{}) (string, error) {
-		mutex.Lock()
-		runningCalls++
-		maxRunningCalls = max(maxRunningCalls, runningCalls)
-		mutex.Unlock()
-
-		time.Sleep(20 * time.Millisecond)
-
-		mutex.Lock()
-		runningCalls--
-		mutex.Unlock()
-
-		return "done", nil
-	})
-
-	provider := &callProvider{}
-
-	if _, err := agent.New("", provider, []tool.Tool{serialTool}).Send(t.Context(), "go"); err != nil {
-		t.Fatal(err)
-	}
-
-	if maxRunningCalls != 1 {
-		t.Errorf("expected the calls to be run one at a time, got %d at once", maxRunningCalls)
-	}
-
-	if got := resultOutputs(provider); !slices.Equal(got, []string{"a:done", "b:done"}) {
-		t.Errorf("expected both to be answered, got %v", got)
-	}
-}
-
-func TestAResultSaysHowLongItsCallTook(t *testing.T) {
-	const slept = 50 * time.Millisecond
-
-	slow := tool.Implement(
-		tool.Definition{
-			Name:        "noop",
-			Description: "",
-			Schema:      tool.Schema{},
-		},
-		func(struct{}) (string, string) { return "", "" },
-	).IsEmbarrassinglyParallel().Plain(func(context.Context, struct{}) (string, error) {
-		time.Sleep(slept)
-		return "done", nil
-	})
-
-	assistant := agent.New("", &callProvider{}, []tool.Tool{slow})
-
-	timedResults := 0
-
-	for update, err := range assistant.Stream(t.Context(), "go", nil) {
-		if err != nil {
+		releaseCalls()
+		if err := <-done; err != nil {
 			t.Fatal(err)
 		}
 
-		if update.Event == nil {
-			continue
+		if got := len(provider.results); got != concurrencyLimit+1 {
+			t.Errorf("got %d results, want %d", got, concurrencyLimit+1)
+		}
+	})
+}
+
+func TestStreamLeavesACallThatIsNotConcurrentOnItsOwn(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		var mutex sync.Mutex
+
+		runningCalls, maxRunningCalls := 0, 0
+
+		serialTool := tool.Implement(
+			tool.Definition{
+				Name:        "noop",
+				Description: "",
+				Schema:      tool.Schema{},
+			},
+			func(struct{}) (string, string) { return "", "" },
+		).Plain(func(context.Context, struct{}) (string, error) {
+			mutex.Lock()
+			runningCalls++
+			maxRunningCalls = max(maxRunningCalls, runningCalls)
+			mutex.Unlock()
+
+			time.Sleep(20 * time.Millisecond)
+
+			mutex.Lock()
+			runningCalls--
+			mutex.Unlock()
+
+			return "done", nil
+		})
+
+		provider := &callProvider{}
+
+		if _, err := agent.New("", provider, []tool.Tool{serialTool}).Send(t.Context(), "go"); err != nil {
+			t.Fatal(err)
 		}
 
-		if update.Event.Kind == agent.ToolCallResultEvent {
-			timedResults++
+		if maxRunningCalls != 1 {
+			t.Errorf("expected the calls to be run one at a time, got %d at once", maxRunningCalls)
+		}
 
-			if update.Event.Took < slept {
-				t.Errorf("expected the call to have taken at least %s, got %s", slept, update.Event.Took)
+		if got := resultOutputs(provider); !slices.Equal(got, []string{"a:done", "b:done"}) {
+			t.Errorf("expected both to be answered, got %v", got)
+		}
+	})
+}
+
+func TestAResultSaysHowLongItsCallTook(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		const slept = 50 * time.Millisecond
+
+		slow := tool.Implement(
+			tool.Definition{
+				Name:        "noop",
+				Description: "",
+				Schema:      tool.Schema{},
+			},
+			func(struct{}) (string, string) { return "", "" },
+		).IsEmbarrassinglyParallel().Plain(func(context.Context, struct{}) (string, error) {
+			time.Sleep(slept)
+			return "done", nil
+		})
+
+		assistant := agent.New("", &callProvider{}, []tool.Tool{slow})
+
+		timedResults := 0
+
+		for update, err := range assistant.Stream(t.Context(), "go", nil) {
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if update.Event == nil {
+				continue
+			}
+
+			if update.Event.Kind == agent.ToolCallResultEvent {
+				timedResults++
+
+				if update.Event.Took < slept {
+					t.Errorf("expected the call to have taken at least %s, got %s", slept, update.Event.Took)
+				}
 			}
 		}
-	}
 
-	if timedResults != 2 {
-		t.Errorf("expected both calls to have been timed, got %d", timedResults)
-	}
+		if timedResults != 2 {
+			t.Errorf("expected both calls to have been timed, got %d", timedResults)
+		}
+	})
 }
 
 func TestStreamAnswersEveryCallOfAFinishedTurn(t *testing.T) {

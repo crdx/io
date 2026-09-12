@@ -56,7 +56,7 @@ func compareWithGolden(t *testing.T, name string, drawn string) {
 	}
 }
 
-func TestWhatAMenuPaintsMatchesTheGolden(t *testing.T) {
+func TestGoldenWhatAMenuPaintsMatchesTheGolden(t *testing.T) {
 	frames := []struct {
 		name   string
 		room   int
@@ -84,7 +84,7 @@ func TestWhatAMenuPaintsMatchesTheGolden(t *testing.T) {
 	compareWithGolden(t, "painted.ansi", output.String())
 }
 
-func TestTheCompleteMenuLifecycleMatchesTheGolden(t *testing.T) {
+func TestGoldenTheCompleteMenuLifecycleMatchesTheGolden(t *testing.T) {
 	keys := make(chan key.Key, 3)
 	keys <- key.Key{Code: key.Down}
 	keys <- key.Key{Code: key.Rune, Value: 'f'}
@@ -109,7 +109,7 @@ func TestTheCompleteMenuLifecycleMatchesTheGolden(t *testing.T) {
 	compareWithGolden(t, "lifecycle.ansi", strutil.VisibleEscapes(output.String()))
 }
 
-func TestTheCompleteRemovalLifecycleMatchesTheGolden(t *testing.T) {
+func TestGoldenTheCompleteRemovalLifecycleMatchesTheGolden(t *testing.T) {
 	rows := &removableList{
 		fakeList: fakeList{
 			rows: []string{
@@ -156,7 +156,7 @@ func TestTheCompleteRemovalLifecycleMatchesTheGolden(t *testing.T) {
 	compareWithGolden(t, "removal.ansi", strutil.VisibleEscapes(output.String()))
 }
 
-func TestTheCompleteSwitchingLifecycleMatchesTheGolden(t *testing.T) {
+func TestGoldenTheCompleteSwitchingLifecycleMatchesTheGolden(t *testing.T) {
 	rows := &switchableList{
 		removableList: removableList{
 			fakeList: fakeList{
@@ -198,7 +198,7 @@ func TestTheCompleteSwitchingLifecycleMatchesTheGolden(t *testing.T) {
 	compareWithGolden(t, "switching.ansi", strutil.VisibleEscapes(output.String()))
 }
 
-func TestTheCompletePreviewLifecycleMatchesTheGolden(t *testing.T) {
+func TestGoldenTheCompletePreviewLifecycleMatchesTheGolden(t *testing.T) {
 	rows := &previewableList{
 		fakeList: fakeList{
 			rows: []string{

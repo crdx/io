@@ -25,7 +25,7 @@ import (
 	"crdx.org/io/toolbox/write"
 )
 
-func TestToolResultsRenderForTheUser(t *testing.T) {
+func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 	cases := []struct {
 		name     string
 		exchange internaltoolresult.Exchange

@@ -14,7 +14,7 @@ import (
 	"crdx.org/io/cmd/oh/snippets"
 )
 
-func TestCompletionMatchesGolden(t *testing.T) {
+func TestGoldenCompletionMatchesGolden(t *testing.T) {
 	commands := newCommandRegistryWithSnippets(t, fixtureEnvironment(t), fixtureSnippets())
 	var output strings.Builder
 
@@ -115,7 +115,7 @@ func fixtureSnippets() map[string]snippets.Definition {
 	}
 }
 
-func TestGrantListingMatchesGolden(t *testing.T) {
+func TestGoldenGrantListingMatchesGolden(t *testing.T) {
 	var output strings.Builder
 	for _, test := range []struct {
 		label         string
@@ -158,7 +158,7 @@ func TestGrantListingMatchesGolden(t *testing.T) {
 	assertGolden(t, "grants.txt", output.String())
 }
 
-func TestSnippetHelpMatchesGolden(t *testing.T) {
+func TestGoldenSnippetHelpMatchesGolden(t *testing.T) {
 	var output strings.Builder
 	for _, test := range []struct {
 		label              string
@@ -191,7 +191,7 @@ func expansionSnippets() map[string]snippets.Definition {
 	}
 }
 
-func TestSnippetExpansionMatchesGolden(t *testing.T) {
+func TestGoldenSnippetExpansionMatchesGolden(t *testing.T) {
 	commands := newCommandRegistryWithSnippets(t, fixtureEnvironment(t), expansionSnippets())
 	var output strings.Builder
 
@@ -248,7 +248,7 @@ func (self *promptContext) Notice(string)      {}
 func (self *promptContext) PlainNotice(string) {}
 func (self *promptContext) Success(string)     {}
 
-func TestInfoMatchesGolden(t *testing.T) {
+func TestGoldenInfoMatchesGolden(t *testing.T) {
 	commands := newCommandRegistry(t, fixtureEnvironment(t))
 	invocation, found := commands.Find("/info")
 	if !found {
@@ -262,7 +262,7 @@ func TestInfoMatchesGolden(t *testing.T) {
 	assertGolden(t, "info.txt", context.notice+"\n")
 }
 
-func TestHelpMatchesGolden(t *testing.T) {
+func TestGoldenHelpMatchesGolden(t *testing.T) {
 	commands := newCommandRegistryWithSnippets(t, fixtureEnvironment(t), fixtureSnippets())
 	invocation, found := commands.Find("/help")
 	if !found {

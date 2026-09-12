@@ -96,7 +96,10 @@ func turns(t *testing.T, scripted ...string) (*httptest.Server, *[]string) {
 func newAgent(t *testing.T, url string, tools []tool.Tool) *agent.Agent {
 	t.Helper()
 
-	return agent.New("You are a helpful assistant", newClient(t, url), tools)
+	assistant := agent.New("You are a helpful assistant", newClient(t, url), tools)
+	assistant.TakeRetryWaitsAtOnce()
+
+	return assistant
 }
 
 func newClient(t *testing.T, url string) *codex.Client {

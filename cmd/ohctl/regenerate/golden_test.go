@@ -19,11 +19,11 @@ const (
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
-func TestUsageMatchesTheGolden(t *testing.T) {
+func TestGoldenUsageMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "usage.txt", helpText(usage))
 }
 
-func TestWhatIsWrittenAgainMatchesTheGolden(t *testing.T) {
+func TestGoldenWhatIsWrittenAgainMatchesTheGolden(t *testing.T) {
 	directory := t.TempDir()
 	name := storedSession(t, directory)
 
@@ -35,7 +35,7 @@ func TestWhatIsWrittenAgainMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "report.txt", report(screen.String(), failure.String(), name))
 }
 
-func TestWhatCannotBeWrittenAgainMatchesTheGolden(t *testing.T) {
+func TestGoldenWhatCannotBeWrittenAgainMatchesTheGolden(t *testing.T) {
 	directory := t.TempDir()
 	name := storedSession(t, directory)
 
@@ -51,7 +51,7 @@ func TestWhatCannotBeWrittenAgainMatchesTheGolden(t *testing.T) {
 	}, ""))
 }
 
-func TestAnEmptyDirectoryMatchesTheGolden(t *testing.T) {
+func TestGoldenAnEmptyDirectoryMatchesTheGolden(t *testing.T) {
 	directory := t.TempDir()
 
 	var screen, failure strings.Builder

@@ -214,11 +214,11 @@ func withoutPayload(drawn string) string {
 	return colourPattern.ReplaceAllString(drawn, "38;2;<identifier>m\U0010EEEE")
 }
 
-func TestEverySegmentMatchesTheGolden(t *testing.T) {
+func TestGoldenEverySegmentMatchesTheGolden(t *testing.T) {
 	checkGolden(t, "segment.txt", drawEachCase(t, true))
 }
 
-func TestEveryStyledSegmentMatchesTheGolden(t *testing.T) {
+func TestGoldenEveryStyledSegmentMatchesTheGolden(t *testing.T) {
 	checkGolden(t, "segment.ansi", drawEachCase(t, false))
 }
 

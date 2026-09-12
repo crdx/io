@@ -83,7 +83,7 @@ func TestOutputTokensArrivingAfterTheirRequestAreCounted(t *testing.T) {
 	}
 }
 
-func TestUsageMatchesTheGolden(t *testing.T) {
+func TestGoldenUsageMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "usage.txt", strings.ReplaceAll(usage, "$0", "ohctl"))
 }
 
@@ -276,7 +276,7 @@ func TestASectionTitleIsDrawnLikeAMarkdownHeading(t *testing.T) {
 	}
 }
 
-func TestTheWholeAnalysisMatchesTheGolden(t *testing.T) {
+func TestGoldenTheWholeAnalysisMatchesTheGolden(t *testing.T) {
 	var output bytes.Buffer
 	if err := writeText(goldenAnalysis(), presentation{currency: money.Dollar()}, &output); err != nil {
 		t.Fatal(err)
@@ -284,7 +284,7 @@ func TestTheWholeAnalysisMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "report.txt", output.String())
 }
 
-func TestTheColouredAnalysisMatchesTheGolden(t *testing.T) {
+func TestGoldenTheColouredAnalysisMatchesTheGolden(t *testing.T) {
 	var output bytes.Buffer
 	shown := presentation{currency: money.Dollar(), isPerSession: true}
 	if err := drawText(goldenAnalysis(), shown, &output); err != nil {
@@ -293,7 +293,7 @@ func TestTheColouredAnalysisMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "report.ansi", strutil.VisibleEscapes(output.String()))
 }
 
-func TestOneOfEverythingNeedsNoTotalsAndDrawsNoFaults(t *testing.T) {
+func TestGoldenOneOfEverythingNeedsNoTotalsAndDrawsNoFaults(t *testing.T) {
 	sessions := []SessionStatistics{{
 		Name:      "lone-marten",
 		Provider:  "codex",
@@ -340,7 +340,7 @@ func TestOneOfEverythingNeedsNoTotalsAndDrawsNoFaults(t *testing.T) {
 	assertGolden(t, "one-of-everything.txt", output.String())
 }
 
-func TestSeveralUnpricedModelsAreCountedTogether(t *testing.T) {
+func TestGoldenSeveralUnpricedModelsAreCountedTogether(t *testing.T) {
 	sessions := []SessionStatistics{
 		{
 			Name:     "first-vole",
@@ -392,7 +392,7 @@ func TestSeveralUnpricedModelsAreCountedTogether(t *testing.T) {
 	assertGolden(t, "unpriced-models.txt", output.String())
 }
 
-func TestNamedSessionsAreDrawnRowByRowInTheChosenCurrency(t *testing.T) {
+func TestGoldenNamedSessionsAreDrawnRowByRowInTheChosenCurrency(t *testing.T) {
 	var output bytes.Buffer
 	shown := presentation{currency: money.In("GBP", 0.8), isPerSession: true}
 	if err := writeText(goldenAnalysis(), shown, &output); err != nil {
@@ -401,7 +401,7 @@ func TestNamedSessionsAreDrawnRowByRowInTheChosenCurrency(t *testing.T) {
 	assertGolden(t, "sessions.txt", output.String())
 }
 
-func TestEveryReportWithoutATotalMatchesTheGolden(t *testing.T) {
+func TestGoldenEveryReportWithoutATotalMatchesTheGolden(t *testing.T) {
 	reports := []struct {
 		name     string
 		analysis Analysis
@@ -506,7 +506,7 @@ func TestEveryReportWithoutATotalMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "sparse.txt", drawn.String())
 }
 
-func TestTheJSONAnalysisMatchesTheGolden(t *testing.T) {
+func TestGoldenTheJSONAnalysisMatchesTheGolden(t *testing.T) {
 	var output bytes.Buffer
 	if err := writeJSON(goldenAnalysis(), &output); err != nil {
 		t.Fatal(err)
@@ -514,7 +514,7 @@ func TestTheJSONAnalysisMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "analysis.json", output.String())
 }
 
-func TestTheJSONOfAnEmptyAnalysisMatchesTheGolden(t *testing.T) {
+func TestGoldenTheJSONOfAnEmptyAnalysisMatchesTheGolden(t *testing.T) {
 	var output bytes.Buffer
 	if err := writeJSON(aggregate(nil, pricebook{}), &output); err != nil {
 		t.Fatal(err)

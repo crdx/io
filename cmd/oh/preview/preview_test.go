@@ -59,7 +59,7 @@ func exposedPorts(t *testing.T) []agent.Event {
 	return events
 }
 
-func TestWhatAConversationLooksLikeBeforeItIsOpenedMatchesTheGolden(t *testing.T) {
+func TestGoldenWhatAConversationLooksLikeBeforeItIsOpenedMatchesTheGolden(t *testing.T) {
 	var drawn strings.Builder
 
 	for _, room := range []int{100, 46} {

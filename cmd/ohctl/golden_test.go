@@ -9,7 +9,7 @@ import (
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
-func TestUsageMatchesTheGolden(t *testing.T) {
+func TestGoldenUsageMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "usage.txt", usage)
 }
 

@@ -11,7 +11,7 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
-func TestOnboardingEdgeCasesMatchTheGoldens(t *testing.T) {
+func TestGoldenOnboardingEdgeCasesMatchTheGoldens(t *testing.T) {
 	tests := map[string]func(*testing.T, *bytes.Buffer) error{
 		"first-run-anthropic": func(t *testing.T, output *bytes.Buffer) error {
 			t.Helper()

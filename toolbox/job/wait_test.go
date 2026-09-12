@@ -7,6 +7,7 @@ import (
 	"strings"
 	"syscall"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"crdx.org/io/internal/jobs"
@@ -14,116 +15,126 @@ import (
 )
 
 func TestAWaitReportsTheJobAndItsOutputOnceItHasEnded(t *testing.T) {
-	manager := jobs.New(endingRunner{after: 50 * time.Millisecond, output: "all done\n"})
-	defer func() { _ = manager.Close() }()
+	synctest.Test(t, func(t *testing.T) {
+		manager := jobs.New(endingRunner{after: 50 * time.Millisecond, output: "all done\n"})
+		defer func() { _ = manager.Close() }()
 
-	if _, err := manager.Start(t.Context(), "build", t.TempDir(), "just build", sandbox.Policy{}); err != nil {
-		t.Fatal(err)
-	}
+		if _, err := manager.Start(t.Context(), "build", t.TempDir(), "just build", sandbox.Policy{}); err != nil {
+			t.Fatal(err)
+		}
 
-	report, err := waited(t.Context(), manager, []string{"build"}, waitForAny, time.Minute)
-	if err != nil {
-		t.Fatalf("the wait failed: %v", err)
-	}
+		report, err := waited(t.Context(), manager, []string{"build"}, waitForAny, time.Minute)
+		if err != nil {
+			t.Fatalf("the wait failed: %v", err)
+		}
 
-	if !strings.Contains(report, "build: complete") || !strings.Contains(report, "all done") {
-		t.Errorf("got %q, want the finished job described with what it printed", report)
-	}
+		if !strings.Contains(report, "build: complete") || !strings.Contains(report, "all done") {
+			t.Errorf("got %q, want the finished job described with what it printed", report)
+		}
+	})
 }
 
 func TestAWaitOnAJobThatKeepsRunningGivesUpAndSaysSo(t *testing.T) {
-	manager := jobs.New(endingRunner{after: time.Hour, output: "serving\n"})
-	defer func() { _ = manager.Close() }()
+	synctest.Test(t, func(t *testing.T) {
+		manager := jobs.New(endingRunner{after: time.Hour, output: "serving\n"})
+		defer func() { _ = manager.Close() }()
 
-	if _, err := manager.Start(t.Context(), "docs", t.TempDir(), "python3 -m http.server", sandbox.Policy{}); err != nil {
-		t.Fatal(err)
-	}
+		if _, err := manager.Start(t.Context(), "docs", t.TempDir(), "python3 -m http.server", sandbox.Policy{}); err != nil {
+			t.Fatal(err)
+		}
 
-	report, err := waited(t.Context(), manager, []string{"docs"}, waitForAny, 100*time.Millisecond)
-	if err != nil {
-		t.Fatalf("the wait failed: %v", err)
-	}
+		report, err := waited(t.Context(), manager, []string{"docs"}, waitForAny, 100*time.Millisecond)
+		if err != nil {
+			t.Fatalf("the wait failed: %v", err)
+		}
 
-	if !strings.Contains(report, "docs: running") {
-		t.Errorf("got %q, want the job still described as running", report)
-	}
-	if !strings.Contains(report, "the wait gave up after 0.1s") {
-		t.Errorf("got %q, want it to say how long it waited", report)
-	}
-	if !strings.Contains(report, "serving") {
-		t.Errorf("got %q, want what the job has printed so far", report)
-	}
+		if !strings.Contains(report, "docs: running") {
+			t.Errorf("got %q, want the job still described as running", report)
+		}
+		if !strings.Contains(report, "the wait gave up after 0.1s") {
+			t.Errorf("got %q, want it to say how long it waited", report)
+		}
+		if !strings.Contains(report, "serving") {
+			t.Errorf("got %q, want what the job has printed so far", report)
+		}
+	})
 }
 
 func TestAWaitOnSeveralJobsReportsEveryStatusWhenItsLimitIsReached(t *testing.T) {
-	manager := jobs.New(endingRunner{after: time.Hour})
-	defer func() { _ = manager.Close() }()
+	synctest.Test(t, func(t *testing.T) {
+		manager := jobs.New(endingRunner{after: time.Hour})
+		defer func() { _ = manager.Close() }()
 
-	for _, name := range []string{"build", "docs"} {
-		if _, err := manager.Start(t.Context(), name, t.TempDir(), name, sandbox.Policy{}); err != nil {
-			t.Fatal(err)
+		for _, name := range []string{"build", "docs"} {
+			if _, err := manager.Start(t.Context(), name, t.TempDir(), name, sandbox.Policy{}); err != nil {
+				t.Fatal(err)
+			}
 		}
-	}
 
-	report, err := waited(t.Context(), manager, []string{"build", "docs"}, waitForAll, time.Millisecond)
-	if err != nil {
-		t.Fatalf("the wait failed: %v", err)
-	}
-
-	for _, wanted := range []string{"build: running", "docs: running", "before all watched jobs ended"} {
-		if !strings.Contains(report, wanted) {
-			t.Errorf("got %q, want it to carry %q", report, wanted)
+		report, err := waited(t.Context(), manager, []string{"build", "docs"}, waitForAll, time.Millisecond)
+		if err != nil {
+			t.Fatalf("the wait failed: %v", err)
 		}
-	}
 
-	report, err = waited(t.Context(), manager, []string{"build", "docs"}, waitForAny, time.Millisecond)
-	if err != nil {
-		t.Fatalf("the second wait failed: %v", err)
-	}
-	if !strings.Contains(report, "before any watched job ended") {
-		t.Errorf("got %q, want the any condition named", report)
-	}
+		for _, wanted := range []string{"build: running", "docs: running", "before all watched jobs ended"} {
+			if !strings.Contains(report, wanted) {
+				t.Errorf("got %q, want it to carry %q", report, wanted)
+			}
+		}
+
+		report, err = waited(t.Context(), manager, []string{"build", "docs"}, waitForAny, time.Millisecond)
+		if err != nil {
+			t.Fatalf("the second wait failed: %v", err)
+		}
+		if !strings.Contains(report, "before any watched job ended") {
+			t.Errorf("got %q, want the any condition named", report)
+		}
+	})
 }
 
 func TestAWaitOnSeveralJobsCarriesWhatEachHasPrintedWhenItGivesUp(t *testing.T) {
-	manager := jobs.New(endingRunner{after: time.Hour, output: "listening on 8080\n"})
-	defer func() { _ = manager.Close() }()
+	synctest.Test(t, func(t *testing.T) {
+		manager := jobs.New(endingRunner{after: time.Hour, output: "listening on 8080\n"})
+		defer func() { _ = manager.Close() }()
 
-	for _, name := range []string{"build", "docs"} {
-		if _, err := manager.Start(t.Context(), name, t.TempDir(), name, sandbox.Policy{}); err != nil {
-			t.Fatal(err)
+		for _, name := range []string{"build", "docs"} {
+			if _, err := manager.Start(t.Context(), name, t.TempDir(), name, sandbox.Policy{}); err != nil {
+				t.Fatal(err)
+			}
 		}
-	}
 
-	time.Sleep(50 * time.Millisecond)
+		synctest.Wait()
 
-	report, err := waited(t.Context(), manager, []string{"build", "docs"}, waitForAll, time.Millisecond)
-	if err != nil {
-		t.Fatalf("the wait failed: %v", err)
-	}
+		report, err := waited(t.Context(), manager, []string{"build", "docs"}, waitForAll, time.Millisecond)
+		if err != nil {
+			t.Fatalf("the wait failed: %v", err)
+		}
 
-	if strings.Count(report, "listening on 8080") != 2 {
-		t.Errorf("got %q, want what each job has printed rather than a call to fetch it", report)
-	}
+		if strings.Count(report, "listening on 8080") != 2 {
+			t.Errorf("got %q, want what each job has printed rather than a call to fetch it", report)
+		}
+	})
 }
 
 func TestAWaitEndsWhenTheTurnDoes(t *testing.T) {
-	manager := jobs.New(endingRunner{after: time.Hour})
-	defer func() { _ = manager.Close() }()
+	synctest.Test(t, func(t *testing.T) {
+		manager := jobs.New(endingRunner{after: time.Hour})
+		defer func() { _ = manager.Close() }()
 
-	if _, err := manager.Start(t.Context(), "docs", t.TempDir(), "python3 -m http.server", sandbox.Policy{}); err != nil {
-		t.Fatal(err)
-	}
+		if _, err := manager.Start(t.Context(), "docs", t.TempDir(), "python3 -m http.server", sandbox.Policy{}); err != nil {
+			t.Fatal(err)
+		}
 
-	turn, endTurn := context.WithCancel(t.Context())
-	go func() {
-		time.Sleep(50 * time.Millisecond)
-		endTurn()
-	}()
+		turn, endTurn := context.WithCancel(t.Context())
+		go func() {
+			time.Sleep(50 * time.Millisecond)
+			endTurn()
+		}()
 
-	if _, err := waited(turn, manager, []string{"docs"}, waitForAny, time.Hour); !errors.Is(err, context.Canceled) {
-		t.Errorf("got %v, want the wait to end with the turn that asked for it", err)
-	}
+		if _, err := waited(turn, manager, []string{"docs"}, waitForAny, time.Hour); !errors.Is(err, context.Canceled) {
+			t.Errorf("got %v, want the wait to end with the turn that asked for it", err)
+		}
+	})
 }
 
 func TestAWaitTakesTheAskedForLimitAndNeverExceedsTheCeiling(t *testing.T) {
@@ -142,25 +153,27 @@ func TestAWaitTakesTheAskedForLimitAndNeverExceedsTheCeiling(t *testing.T) {
 }
 
 func TestAWaitGivesUpAfterTheNumberOfSecondsItWasGiven(t *testing.T) {
-	manager := jobs.New(endingRunner{after: time.Hour})
-	defer func() { _ = manager.Close() }()
+	synctest.Test(t, func(t *testing.T) {
+		manager := jobs.New(endingRunner{after: time.Hour})
+		defer func() { _ = manager.Close() }()
 
-	if _, err := manager.Start(t.Context(), "docs", t.TempDir(), "python3 -m http.server", sandbox.Policy{}); err != nil {
-		t.Fatal(err)
-	}
+		if _, err := manager.Start(t.Context(), "docs", t.TempDir(), "python3 -m http.server", sandbox.Policy{}); err != nil {
+			t.Fatal(err)
+		}
 
-	started := time.Now()
-	report, err := waited(t.Context(), manager, []string{"docs"}, waitForAny, getWaitLimit(Args{WaitSeconds: 1}))
-	if err != nil {
-		t.Fatalf("the wait failed: %v", err)
-	}
+		started := time.Now()
+		report, err := waited(t.Context(), manager, []string{"docs"}, waitForAny, getWaitLimit(Args{WaitSeconds: 1}))
+		if err != nil {
+			t.Fatalf("the wait failed: %v", err)
+		}
 
-	if elapsed := time.Since(started); elapsed < time.Second || elapsed > 30*time.Second {
-		t.Errorf("the wait took %s, want about the second it was given", elapsed)
-	}
-	if !strings.Contains(report, "the wait gave up after 1s") {
-		t.Errorf("got %q, want it to say it waited the second it was given", report)
-	}
+		if elapsed := time.Since(started); elapsed != time.Second {
+			t.Errorf("the wait took %s, want the second it was given", elapsed)
+		}
+		if !strings.Contains(report, "the wait gave up after 1s") {
+			t.Errorf("got %q, want it to say it waited the second it was given", report)
+		}
+	})
 }
 
 func TestAWaitOnAnUnknownJobSaysSo(t *testing.T) {

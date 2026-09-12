@@ -21,7 +21,7 @@ import (
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
-func TestFirstRunOnboardingMatchesTheGolden(t *testing.T) {
+func TestGoldenFirstRunOnboardingMatchesTheGolden(t *testing.T) {
 	var output bytes.Buffer
 	restoreStyle := style.Init(&output)
 	t.Cleanup(restoreStyle)

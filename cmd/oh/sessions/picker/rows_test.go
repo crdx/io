@@ -128,7 +128,7 @@ func compareWithGolden(t *testing.T, name string, drawn string) {
 	}
 }
 
-func TestTheRowsOfTheSessionPickerMatchTheGolden(t *testing.T) {
+func TestGoldenTheRowsOfTheSessionPickerMatchTheGolden(t *testing.T) {
 	sessions := &sessionList{store: Store{Sessions: storedSessions()}}
 
 	var output strings.Builder
@@ -147,7 +147,7 @@ func TestTheRowsOfTheSessionPickerMatchTheGolden(t *testing.T) {
 	compareWithGolden(t, "rows.golden", output.String())
 }
 
-func TestWhatTheSessionPickerPaintsMatchesTheGolden(t *testing.T) {
+func TestGoldenWhatTheSessionPickerPaintsMatchesTheGolden(t *testing.T) {
 	frames := []struct {
 		name     string
 		room     int

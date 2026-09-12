@@ -10,7 +10,7 @@ import (
 
 var updateGoldens = flag.Bool("update", false, "write what was refused back to the golden files")
 
-func TestTheRefusalOfAMachineThatCannotSandboxMatchesTheGolden(t *testing.T) {
+func TestGoldenTheRefusalOfAMachineThatCannotSandboxMatchesTheGolden(t *testing.T) {
 	drawn := sandboxRefusal(errors.New("landlock is not available on this kernel")).Error() + "\n"
 
 	goldenPath := filepath.Join("testdata", "refusal.txt")

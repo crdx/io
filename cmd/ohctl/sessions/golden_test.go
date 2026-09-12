@@ -14,11 +14,11 @@ import (
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
-func TestUsageMatchesTheGolden(t *testing.T) {
+func TestGoldenUsageMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "usage.txt", strings.ReplaceAll(usage, "$0", "ohctl"))
 }
 
-func TestTheListingMatchesTheGolden(t *testing.T) {
+func TestGoldenTheListingMatchesTheGolden(t *testing.T) {
 	var drawn strings.Builder
 	if err := writeTable(goldenListings(time.Now()), &drawn); err != nil {
 		t.Fatal(err)
@@ -27,7 +27,7 @@ func TestTheListingMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "listing.txt", drawn.String())
 }
 
-func TestTheJSONListingMatchesTheGolden(t *testing.T) {
+func TestGoldenTheJSONListingMatchesTheGolden(t *testing.T) {
 	var written strings.Builder
 	fixed := time.Date(2026, time.August, 28, 14, 15, 25, 0, time.UTC)
 	if err := writeJSON(goldenListings(fixed), &written); err != nil {
@@ -37,7 +37,7 @@ func TestTheJSONListingMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "listing.json", written.String())
 }
 
-func TestAnEmptyListingMatchesTheGolden(t *testing.T) {
+func TestGoldenAnEmptyListingMatchesTheGolden(t *testing.T) {
 	t.Setenv(location.StateDirVariable, t.TempDir())
 
 	var screen, failure strings.Builder
@@ -62,7 +62,7 @@ func TestAnEmptyListingMatchesTheGolden(t *testing.T) {
 	}, ""))
 }
 
-func TestTheNoticeThatCapsTheListingMatchesTheGolden(t *testing.T) {
+func TestGoldenTheNoticeThatCapsTheListingMatchesTheGolden(t *testing.T) {
 	var failure strings.Builder
 
 	withinLimit(manyListings(listLimit), listLimit+7, "", &failure)

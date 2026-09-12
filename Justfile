@@ -73,14 +73,64 @@ sandbox *args:
 fuzz package target time='1m':
     go test ./{{ package }} -run '^$' -fuzz '^{{ target }}$' -fuzztime {{ time }}
 
-# write what the tests drew back to the golden files
+# generate every golden
 golden:
-    go test ./cmd/oh ./cmd/oh/cli ./cmd/oh/commands ./cmd/oh/onboarding ./cmd/oh/shell -update
-    go test ./cmd/oh/segment/subUsage ./cmd/oh/usage ./cmd/oh/toolresult -update
-    go test ./cmd/oh/menu ./cmd/oh/sessions ./cmd/oh/sessions/picker ./cmd/oh/model/picker -update
-    go test ./toolbox/bash -update
-    go test ./cmd/ohctl/... -update
-    go test ./cmd/oh/model -update
+    #!/bin/bash
+    set -euo pipefail
+    RED='\e[31m'
+    GREEN='\e[32m'
+    YELLOW='\e[33m'
+    NC='\e[0m'
+
+    PIDS=()
+    LOGS=()
+    trap 'rm -f "${LOGS[@]}"' EXIT
+    function generate_goldens {
+        local LOG
+        LOG=$(mktemp -t io-golden.XXXXXX)
+        go test "$@" -count=1 -update >"$LOG" 2>&1 &
+        PIDS+=("$!")
+        LOGS+=("$LOG")
+    }
+
+    echo -e "${YELLOW}Generating goldens…${NC}"
+
+    # isolate shards because the generator harness mutates process-wide state
+    for PATTERN in '[A-D]' '[E-L]' '[M-R]' '[S-Z]'; do
+        generate_goldens ./cmd/oh -run "^TestGolden${PATTERN}"
+    done
+
+    generate_goldens \
+        ./cmd/oh/cli \
+        ./cmd/oh/commands \
+        ./cmd/oh/menu \
+        ./cmd/oh/model \
+        ./cmd/oh/model/picker \
+        ./cmd/oh/onboarding \
+        ./cmd/oh/preview \
+        ./cmd/oh/segment/subUsage \
+        ./cmd/oh/sessions \
+        ./cmd/oh/sessions/picker \
+        ./cmd/oh/shell \
+        ./cmd/oh/toolresult \
+        ./cmd/oh/usage \
+        ./cmd/ohctl/... \
+        ./toolbox/bash \
+        -run '^TestGolden'
+
+    STATUS=0
+    for i in "${!PIDS[@]}"; do
+        if ! wait "${PIDS[$i]}"; then
+            cat "${LOGS[$i]}"
+            STATUS=1
+        fi
+    done
+    if [[ $STATUS -eq 0 ]]; then
+        echo -e "${GREEN}Goldens generated${NC}"
+    else
+        echo -e "${RED}Golden generation failed${NC}"
+    fi
+    exit "$STATUS"
 
 # what every package covers, least covered first
 cov *args:

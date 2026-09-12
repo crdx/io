@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"crdx.org/io/internal/sandbox"
@@ -98,18 +99,20 @@ func TestWaitingOnSeveralJobsReturnsAsSoonAsAnyHasEnded(t *testing.T) {
 }
 
 func TestWaitingEndsWithTheContextThatAskedForIt(t *testing.T) {
-	manager := New(nil)
+	synctest.Test(t, func(t *testing.T) {
+		manager := New(nil)
 
-	if _, err := manager.claim("docs", "python3", sandbox.Policy{}); err != nil {
-		t.Fatal(err)
-	}
+		if _, err := manager.claim("docs", "python3", sandbox.Policy{}); err != nil {
+			t.Fatal(err)
+		}
 
-	waiting, stopWaiting := context.WithTimeout(t.Context(), 50*time.Millisecond)
-	defer stopWaiting()
+		waiting, stopWaiting := context.WithTimeout(t.Context(), 50*time.Millisecond)
+		defer stopWaiting()
 
-	if _, err := manager.Wait(waiting, []string{"docs"}); !errors.Is(err, context.DeadlineExceeded) {
-		t.Errorf("got %v, want the wait to end with its context", err)
-	}
+		if _, err := manager.Wait(waiting, []string{"docs"}); !errors.Is(err, context.DeadlineExceeded) {
+			t.Errorf("got %v, want the wait to end with its context", err)
+		}
+	})
 }
 
 func TestWaitingOnAJobThatCouldNotBeStartedReturnsAtOnce(t *testing.T) {

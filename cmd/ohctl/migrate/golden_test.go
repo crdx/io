@@ -21,23 +21,23 @@ const (
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
-func TestUsageMatchesTheGolden(t *testing.T) {
+func TestGoldenUsageMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "usage.txt", strings.ReplaceAll(usage, "$0", "ohctl"))
 }
 
-func TestADryRunMatchesTheGolden(t *testing.T) {
+func TestGoldenADryRunMatchesTheGolden(t *testing.T) {
 	directory := goldenSessions(t, oldJournal())
 
 	assertGolden(t, "dry-run.txt", migration(t, directory, &inputOpts{DryRun: true}))
 }
 
-func TestAMigrationMatchesTheGolden(t *testing.T) {
+func TestGoldenAMigrationMatchesTheGolden(t *testing.T) {
 	directory := goldenSessions(t, oldJournal())
 
 	assertGolden(t, "migrated.txt", migration(t, directory, &inputOpts{}))
 }
 
-func TestASessionInUseMatchesTheGolden(t *testing.T) {
+func TestGoldenASessionInUseMatchesTheGolden(t *testing.T) {
 	directory := goldenSessions(t, oldJournal())
 
 	heldLock, err := session.AcquireLock(directory, goldenName)
@@ -49,7 +49,7 @@ func TestASessionInUseMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "in-use.txt", migration(t, directory, &inputOpts{Sessions: []string{goldenName}}))
 }
 
-func TestNothingLeftToMigrateMatchesTheGolden(t *testing.T) {
+func TestGoldenNothingLeftToMigrateMatchesTheGolden(t *testing.T) {
 	head := fmt.Sprintf(
 		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":"one","name":%q,"meta":{"workspaceDir":"/workspace"}}`,
 		session.JournalFormat,
@@ -60,21 +60,21 @@ func TestNothingLeftToMigrateMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "nothing-to-do.txt", migration(t, directory, &inputOpts{}))
 }
 
-func TestAnArchivedSessionIsMigratedLikeAnyOtherMatchingTheGolden(t *testing.T) {
+func TestGoldenAnArchivedSessionIsMigratedLikeAnyOtherMatchingTheGolden(t *testing.T) {
 	directory := goldenSessions(t, currentCodexJournal()...)
 	archiveWithAnOldListing(t, directory)
 
 	assertGolden(t, "archived-session.txt", migration(t, directory, &inputOpts{}))
 }
 
-func TestAnArchivedSessionDryRunMatchesTheGolden(t *testing.T) {
+func TestGoldenAnArchivedSessionDryRunMatchesTheGolden(t *testing.T) {
 	directory := goldenSessions(t, currentCodexJournal()...)
 	archiveWithAnOldListing(t, directory)
 
 	assertGolden(t, "archived-session-dry-run.txt", migration(t, directory, &inputOpts{DryRun: true}))
 }
 
-func TestAnArchivedSessionInAnOlderFormatIsMigratedAndPutBack(t *testing.T) {
+func TestGoldenAnArchivedSessionInAnOlderFormatIsMigratedAndPutBack(t *testing.T) {
 	directory := goldenSessions(t, oldJournal())
 	archiveWithAnOldListing(t, directory)
 
@@ -112,7 +112,7 @@ func archiveWithAnOldListing(t *testing.T, directory string) {
 	}
 }
 
-func TestAConfigMigrationMatchesTheGolden(t *testing.T) {
+func TestGoldenAConfigMigrationMatchesTheGolden(t *testing.T) {
 	directory := goldenSessions(t)
 	storedConfig(t, `provider = "codex"
 model = "gpt-5.6-sol"
@@ -122,7 +122,7 @@ effort = "medium"
 	assertGolden(t, "config.txt", migration(t, directory, &inputOpts{}))
 }
 
-func TestNoStoredSessionsMatchesTheGolden(t *testing.T) {
+func TestGoldenNoStoredSessionsMatchesTheGolden(t *testing.T) {
 	directory := goldenSessions(t)
 
 	assertGolden(t, "no-sessions.txt", migration(t, directory, &inputOpts{}))

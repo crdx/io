@@ -55,7 +55,7 @@ func writeStoredJournal(t *testing.T, directory string, name string) {
 	}
 }
 
-func TestWhatEachKindOffersMatchesTheGolden(t *testing.T) {
+func TestGoldenWhatEachKindOffersMatchesTheGolden(t *testing.T) {
 	directory := t.TempDir()
 	t.Setenv(location.StateDirVariable, directory)
 

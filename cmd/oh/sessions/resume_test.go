@@ -365,7 +365,7 @@ func TestAResumedConversationOpensInTheConfinementItWasLeftIn(t *testing.T) {
 	}
 }
 
-func TestTheRefusalOfAConfinementChangeMatchesTheGolden(t *testing.T) {
+func TestGoldenTheRefusalOfAConfinementChangeMatchesTheGolden(t *testing.T) {
 	_, err := OpeningConfinement(true, &store.Session{Meta: store.Meta{}})
 	if err == nil {
 		t.Fatal("expected a sandboxed conversation to refuse being reopened without its sandbox")
