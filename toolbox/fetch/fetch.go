@@ -34,11 +34,15 @@ func defaultClient() *http.Client {
 	return &http.Client{Timeout: fetchTimeout, Transport: publicTransport()}
 }
 
-func New(isAllowed func() bool) tool.Tool {
-	return newTool(isAllowed, defaultClient())
+func New(isAllowed func() bool, approve func(context.Context, string) error) tool.Tool {
+	return newTool(isAllowed, approve, defaultClient())
 }
 
-func newTool(isAllowed func() bool, client *http.Client) tool.Tool {
+func newTool(
+	isAllowed func() bool,
+	approve func(context.Context, string) error,
+	client *http.Client,
+) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
 			Name:        "fetch",
@@ -56,6 +60,10 @@ func newTool(isAllowed func() bool, client *http.Client) tool.Tool {
 		ChangesNothing().
 		Requires(isAllowed, ErrWithheld).
 		Exec(func(ctx context.Context, args Args) (string, tool.ToolCallMetrics, error) {
+			if err := approve(ctx, args.URL); err != nil {
+				return "", tool.ToolCallMetrics{}, err
+			}
+
 			output, err := fetchPage(ctx, client, args)
 			if err != nil {
 				return "", tool.ToolCallMetrics{}, err

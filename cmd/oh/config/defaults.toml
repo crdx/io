@@ -18,6 +18,11 @@ currency = ""
 [tool]
 output = "12K"
 
+[permissions]
+network = "ask"
+lookup = "allow"
+fetch = "allow"
+
 [snippets]
 
 [experimental]

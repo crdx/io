@@ -8,19 +8,24 @@ import (
 )
 
 type searchStub struct {
-	query  string
-	output string
-	err    error
+	query   string
+	queries int
+	output  string
+	err     error
 }
 
 func (self *searchStub) Search(_ context.Context, query string) (string, error) {
 	self.query = query
+	self.queries++
+
 	return self.output, self.err
 }
 
+func allowLookup(context.Context, string) error { return nil }
+
 func TestLookupDelegatesToTheConfiguredSearcher(t *testing.T) {
 	searcher := &searchStub{output: "cited answer"}
-	call, err := New(func() bool { return true }, searcher).Parse(`{"query":"current weather"}`)
+	call, err := New(func() bool { return true }, allowLookup, searcher).Parse(`{"query":"current weather"}`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,7 +41,7 @@ func TestLookupDelegatesToTheConfiguredSearcher(t *testing.T) {
 
 func TestLookupReportsTheSearchersFailure(t *testing.T) {
 	failure := errors.New("search failed")
-	call, err := New(func() bool { return true }, &searchStub{err: failure}).Parse(`{"query":"weather"}`)
+	call, err := New(func() bool { return true }, allowLookup, &searchStub{err: failure}).Parse(`{"query":"weather"}`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,13 +52,13 @@ func TestLookupReportsTheSearchersFailure(t *testing.T) {
 }
 
 func TestLookupRejectsAnEmptyQuery(t *testing.T) {
-	if _, err := New(func() bool { return true }, &searchStub{}).Parse(`{"query":"  "}`); err == nil {
+	if _, err := New(func() bool { return true }, allowLookup, &searchStub{}).Parse(`{"query":"  "}`); err == nil {
 		t.Error("expected an empty query to be rejected")
 	}
 }
 
 func TestLookupIsAReadOnlyConcurrentTool(t *testing.T) {
-	offeredTool := New(func() bool { return true }, &searchStub{})
+	offeredTool := New(func() bool { return true }, allowLookup, &searchStub{})
 
 	if offeredTool.Name() != "lookup" {
 		t.Errorf("got name %q", offeredTool.Name())
@@ -69,7 +74,7 @@ func TestLookupIsAReadOnlyConcurrentTool(t *testing.T) {
 func TestLookupIsRefusedWithoutLookupAccess(t *testing.T) {
 	searcher := &searchStub{output: "cited answer"}
 
-	call, err := New(func() bool { return false }, searcher).Parse(`{"query":"weather"}`)
+	call, err := New(func() bool { return false }, allowLookup, searcher).Parse(`{"query":"weather"}`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,12 +88,56 @@ func TestLookupIsRefusedWithoutLookupAccess(t *testing.T) {
 }
 
 func TestLookupReportsAnAnswerWithNoContent(t *testing.T) {
-	call, err := New(func() bool { return true }, &searchStub{}).Parse(`{"query":"weather"}`)
+	call, err := New(func() bool { return true }, allowLookup, &searchStub{}).Parse(`{"query":"weather"}`)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if _, err := call.Exec(t.Context()); err == nil || !strings.Contains(err.Error(), "no content") {
 		t.Errorf("got %v", err)
+	}
+}
+
+func TestARefusedLookupSearchesForNothing(t *testing.T) {
+	searcher := &searchStub{output: "cited answer"}
+	refusal := errors.New("the user refused this lookup")
+
+	call, err := New(
+		func() bool { return true },
+		func(context.Context, string) error { return refusal },
+		searcher,
+	).Parse(`{"query":"weather"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if _, err := call.Exec(t.Context()); !errors.Is(err, refusal) {
+		t.Errorf("got %v, want the refusal", err)
+	}
+	if searcher.queries != 0 {
+		t.Errorf("the searcher was asked %d times", searcher.queries)
+	}
+}
+
+func TestALookupIsAskedAboutTheQueryItWasGiven(t *testing.T) {
+	asked := ""
+
+	call, err := New(
+		func() bool { return true },
+		func(_ context.Context, query string) error {
+			asked = query
+			return nil
+		},
+		&searchStub{output: "cited answer"},
+	).Parse(`{"query":"current weather"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, err := call.Exec(t.Context()); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if asked != "current weather" {
+		t.Errorf("got approval for %q, want the query", asked)
 	}
 }

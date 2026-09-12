@@ -18,7 +18,11 @@ type Searcher interface {
 	Search(context context.Context, query string) (string, error)
 }
 
-func New(isAllowed func() bool, searcher Searcher) tool.Tool {
+func New(
+	isAllowed func() bool,
+	approve func(context.Context, string) error,
+	searcher Searcher,
+) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
 			Name:        "lookup",
@@ -34,6 +38,10 @@ func New(isAllowed func() bool, searcher Searcher) tool.Tool {
 		ChangesNothing().
 		Requires(isAllowed, ErrWithheld).
 		Exec(func(ctx context.Context, args Args) (string, tool.ToolCallMetrics, error) {
+			if err := approve(ctx, args.Query); err != nil {
+				return "", tool.ToolCallMetrics{}, err
+			}
+
 			output, err := searcher.Search(ctx, args.Query)
 			if err != nil {
 				return "", tool.ToolCallMetrics{}, err

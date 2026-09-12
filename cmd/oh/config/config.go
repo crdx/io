@@ -16,6 +16,7 @@ import (
 	"crdx.org/io/cmd/oh/experimental"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/permission"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/slash"
@@ -44,6 +45,8 @@ type Config struct {
 	Bar      Bar                            `toml:"bar"`
 	Ui       Ui                             `toml:"ui"`
 	Tool     Tool                           `toml:"tool"`
+
+	Permissions Permissions `toml:"permissions"`
 
 	Experimental map[string]any `toml:"experimental"`
 
@@ -126,6 +129,38 @@ type Tool struct {
 	Output Size `toml:"output"`
 }
 
+type Permissions struct {
+	Network string `toml:"network"`
+	Lookup  string `toml:"lookup"`
+	Fetch   string `toml:"fetch"`
+}
+
+func (self Config) BuildPermissions() (permission.Set, error) {
+	return self.Permissions.build()
+}
+
+func (self Permissions) build() (permission.Set, error) {
+	var set permission.Set
+
+	for _, entry := range []struct {
+		key   string
+		value string
+		rule  *permission.Rule
+	}{
+		{key: "network", value: self.Network, rule: &set.Network},
+		{key: "lookup", value: self.Lookup, rule: &set.Lookup},
+		{key: "fetch", value: self.Fetch, rule: &set.Fetch},
+	} {
+		rule, err := permission.ParseRule(entry.value)
+		if err != nil {
+			return permission.Set{}, fmt.Errorf("permissions.%s: %w", entry.key, err)
+		}
+		*entry.rule = rule
+	}
+
+	return set, nil
+}
+
 type SkillPaths struct {
 	Include []string `toml:"include"`
 	Exclude []string `toml:"exclude"`
@@ -153,6 +188,7 @@ type LiveConfig struct {
 	Grouping           output.Grouping
 	ReasoningRendering output.ReasoningRendering
 	ToolOutputBytes    int
+	Permissions        permission.Set
 	Experimental       map[string]any
 	UnknownSettings    []string
 }
@@ -170,6 +206,14 @@ func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
 		}
 		return LiveConfig{}, fmt.Errorf("%s: snippets: %w", path, err)
 	}
+	permissions, err := self.Permissions.build()
+	if err != nil {
+		path := self.getSourcePath("permissions")
+		if path == "" {
+			return LiveConfig{}, err
+		}
+		return LiveConfig{}, fmt.Errorf("%s: %w", path, err)
+	}
 	return LiveConfig{
 		ContinueMessage:    self.Input.Continue,
 		EditorCommand:      self.Editor.Command,
@@ -179,6 +223,7 @@ func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
 		Grouping:           self.Ui.Grouping,
 		ReasoningRendering: self.Ui.ReasoningRendering,
 		ToolOutputBytes:    self.Tool.Output.Bytes,
+		Permissions:        permissions,
 		Experimental:       maps.Clone(self.Experimental),
 		UnknownSettings:    self.UnknownSettings(),
 	}, nil

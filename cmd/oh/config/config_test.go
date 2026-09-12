@@ -14,6 +14,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/permission"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
 	"crdx.org/io/cmd/oh/segment/workspaceDir"
@@ -1332,5 +1333,44 @@ func TestAnExperimentalToggleWrittenAsATableIsReportedOnlyAsItsOwnSetting(t *tes
 	}
 	if !strings.Contains(reports[0], "experimental.grouping") {
 		t.Errorf("got report %q", reports[0])
+	}
+}
+
+func TestPermissionsDefaultToAskingOnlyForTheNetwork(t *testing.T) {
+	settings, err := Load(filepath.Join(t.TempDir(), "config.toml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	permissions, err := settings.BuildPermissions()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if permissions.Network != permission.Ask {
+		t.Errorf("got network %q, want the host network to be asked about", permissions.Network)
+	}
+	if permissions.Lookup != permission.Allow || permissions.Fetch != permission.Allow {
+		t.Errorf("got %+v, want lookup and fetch allowed", permissions)
+	}
+}
+
+func TestAPermissionNobodyOffersIsRefusedWithItsKey(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[permissions]\nlookup = \"sometimes\"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = settings.BuildPermissions()
+	if err == nil {
+		t.Fatal("a permission nobody offers was accepted")
+	}
+	if !strings.Contains(err.Error(), "permissions.lookup") {
+		t.Errorf("got %q, want it to name the setting", err)
 	}
 }

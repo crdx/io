@@ -67,6 +67,7 @@ import (
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/painter"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/permission"
 	"crdx.org/io/cmd/oh/pictures"
 	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/preview"
@@ -631,7 +632,7 @@ func TestARefusedHostNetworkSaysSoInWordsTheModelCanAct(t *testing.T) {
 			broker := ask.New()
 			ctx := test.prepare(t, broker)
 
-			err := approveHostNetwork(ctx, broker, "curl example.com")
+			err := approveHostNetwork(ctx, broker, permission.Ask, "curl example.com")
 			if err == nil {
 				t.Fatal("a command nobody allowed was approved")
 			}
@@ -654,7 +655,7 @@ func TestAnApprovedHostNetworkRunsTheCommand(t *testing.T) {
 		broker.Current().Choose(0)
 	}()
 
-	if err := approveHostNetwork(t.Context(), broker, "curl example.com"); err != nil {
+	if err := approveHostNetwork(t.Context(), broker, permission.Ask, "curl example.com"); err != nil {
 		t.Errorf("got %v, want the approved command to run", err)
 	}
 }
@@ -6457,8 +6458,8 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 		),
 	)
 	tools = append(tools,
-		lookup.New(func() bool { return true }, sessionGoldenSearcher{}),
-		fetch.New(func() bool { return true }),
+		lookup.New(func() bool { return true }, allowApproval, sessionGoldenSearcher{}),
+		fetch.New(func() bool { return true }, allowApproval),
 	)
 	log := testLog(t)
 
@@ -11304,6 +11305,7 @@ type sessionGoldenTool struct {
 	ShouldWithholdNetwork bool     `toml:"network-withheld"`
 	ShouldRefuseNetwork   bool     `toml:"network-refused"`
 	LookupWithheld        bool     `toml:"lookup-withheld"`
+	ShouldRefuseLookup    bool     `toml:"lookup-refused"`
 	FetchWithheld         bool     `toml:"fetch-withheld"`
 	LookupAnswer          string   `toml:"lookup-answer"`
 	Blocks                bool     `toml:"blocks"`
@@ -11606,11 +11608,23 @@ func newSessionGoldenTools(
 			continue
 		}
 
+		if specification.ShouldRefuseLookup {
+			broker := newRefusingAskBroker(t)
+			tools = append(tools, lookup.New(
+				func() bool { return true },
+				func(ctx context.Context, query string) error {
+					return lookupApproval.ask(ctx, broker, permission.Ask, query)
+				},
+				sessionGoldenSearcher{answer: specification.LookupAnswer},
+			))
+			continue
+		}
+
 		if specification.LookupWithheld || specification.FetchWithheld || specification.LookupAnswer != "" {
 			searcher := sessionGoldenSearcher{answer: specification.LookupAnswer}
 			tools = append(tools,
-				lookup.New(func() bool { return !specification.LookupWithheld }, searcher),
-				fetch.New(func() bool { return !specification.FetchWithheld }),
+				lookup.New(func() bool { return !specification.LookupWithheld }, allowApproval, searcher),
+				fetch.New(func() bool { return !specification.FetchWithheld }, allowApproval),
 			)
 			continue
 		}
@@ -11751,6 +11765,8 @@ func newSessionGoldenShell(t *testing.T, grantedCaps caps.Set, isYolo bool) tool
 	)
 }
 
+func allowApproval(context.Context, string) error { return nil }
+
 func newRefusingAskBroker(t *testing.T) *ask.Broker {
 	t.Helper()
 
@@ -11791,7 +11807,7 @@ func newSessionGoldenRefusingShell(t *testing.T) tool.Tool {
 	return shell.New(
 		workspace, t.TempDir(), t.TempDir(), pathAccess, mode, files, true,
 		func(ctx context.Context, command string) error {
-			return approveHostNetwork(ctx, broker, command)
+			return approveHostNetwork(ctx, broker, permission.Ask, command)
 		},
 		sandbox.Direct(),
 	)
@@ -15603,4 +15619,78 @@ func TestAPictureIsDrawnUnderTheCallThatReadIt(t *testing.T) {
 
 	compareWithGolden(t, "pictures", ".ansi", passes)
 	compareWithGolden(t, "pictures", ".screen", shownPasses(t, passes))
+}
+
+func TestAnAllowedPermissionAsksNobody(t *testing.T) {
+	broker := ask.New()
+	closeBroker := broker.Open()
+	defer closeBroker()
+
+	go func() {
+		<-broker.Changes()
+		t.Error("an allowed permission asked anyway")
+	}()
+
+	for name, ask := range map[string]func() error{
+		"network": func() error {
+			return approveHostNetwork(t.Context(), broker, permission.Allow, "curl example.com")
+		},
+		"lookup": func() error {
+			return lookupApproval.ask(t.Context(), broker, permission.Allow, "weather")
+		},
+		"fetch": func() error {
+			return fetchApproval.ask(t.Context(), broker, permission.Allow, "https://example.com")
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if err := ask(); err != nil {
+				t.Errorf("got %v, want an allowed permission to pass straight through", err)
+			}
+		})
+	}
+}
+
+func TestEveryPermissionRefusesInWordsOfItsOwn(t *testing.T) {
+	for name, test := range map[string]struct {
+		ask  func(broker *ask.Broker) error
+		want string
+	}{
+		"network": {
+			ask: func(broker *ask.Broker) error {
+				return approveHostNetwork(t.Context(), broker, permission.Ask, "curl example.com")
+			},
+			want: "so it did not run",
+		},
+		"lookup": {
+			ask: func(broker *ask.Broker) error {
+				return lookupApproval.ask(t.Context(), broker, permission.Ask, "weather")
+			},
+			want: "so nothing was searched for",
+		},
+		"fetch": {
+			ask: func(broker *ask.Broker) error {
+				return fetchApproval.ask(t.Context(), broker, permission.Ask, "https://example.com")
+			},
+			want: "so nothing was downloaded",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			broker := ask.New()
+			closeBroker := broker.Open()
+			defer closeBroker()
+
+			go func() {
+				<-broker.Changes()
+				broker.Current().Choose(1)
+			}()
+
+			err := test.ask(broker)
+			if err == nil {
+				t.Fatal("a refused permission was allowed")
+			}
+			if !strings.Contains(err.Error(), test.want) {
+				t.Errorf("got %q, want it to say %q", err, test.want)
+			}
+		})
+	}
 }

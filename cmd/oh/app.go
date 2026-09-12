@@ -34,6 +34,7 @@ import (
 	"crdx.org/io/cmd/oh/painter"
 	"crdx.org/io/cmd/oh/paste"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/permission"
 	"crdx.org/io/cmd/oh/pictures"
 	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/record"
@@ -153,6 +154,7 @@ type App struct {
 	metrics         metrics.Tracker
 	toolOutputLimit *truncate.Limit
 	experimental    *experimental.Toggles
+	permissions     *permission.Live
 	onFailure       func(failure error)
 	savePastedImage func(mediaType string, data []byte) (string, error)
 	pasteExchange   paste.Exchange
@@ -1093,6 +1095,9 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		self.screen.SetGrouping(result.LiveConfig.Grouping)
 		self.toolOutputLimit.Replace(result.LiveConfig.ToolOutputBytes)
 		self.experimental.Replace(result.LiveConfig.Experimental)
+		if self.permissions != nil {
+			self.permissions.Replace(result.LiveConfig.Permissions)
+		}
 		self.display.bar.ReplaceLayout(result.LiveConfig.SegmentLayout)
 		self.feedback.Clear(feedback.Config)
 		if len(result.LiveConfig.UnknownSettings) > 0 {

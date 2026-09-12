@@ -1,6 +1,7 @@
 package fetch
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -19,6 +20,8 @@ const testHTML = `<!DOCTYPE html>
 <script>doBadThings()</script>
 </body>
 </html>`
+
+func allowFetch(context.Context, string) error { return nil }
 
 func TestFetchReturnsEverySupportedFormat(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
@@ -109,7 +112,7 @@ func TestFetchReportsHTTPFailures(t *testing.T) {
 }
 
 func TestFetchIsAReadOnlyConcurrentTool(t *testing.T) {
-	offeredTool := New(func() bool { return true })
+	offeredTool := New(func() bool { return true }, allowFetch)
 
 	if offeredTool.Name() != "fetch" {
 		t.Errorf("got name %q", offeredTool.Name())
@@ -131,7 +134,7 @@ func TestFetchIsRefusedWithoutNetworkAccess(t *testing.T) {
 	}))
 	defer server.Close()
 
-	call, err := newTool(func() bool { return false }, server.Client()).
+	call, err := newTool(func() bool { return false }, allowFetch, server.Client()).
 		Parse(`{"url":"` + server.URL + `","type":"text"}`)
 	if err != nil {
 		t.Fatal(err)
@@ -149,7 +152,7 @@ func TestFetchReportsAPageWithNoContent(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 	defer server.Close()
 
-	call, err := newTool(func() bool { return true }, server.Client()).
+	call, err := newTool(func() bool { return true }, allowFetch, server.Client()).
 		Parse(`{"url":"` + server.URL + `","type":"text"}`)
 	if err != nil {
 		t.Fatal(err)
@@ -157,5 +160,39 @@ func TestFetchReportsAPageWithNoContent(t *testing.T) {
 
 	if _, err := call.Exec(t.Context()); err == nil || !strings.Contains(err.Error(), "no content") {
 		t.Errorf("got %v", err)
+	}
+}
+
+func TestARefusedFetchReachesNothing(t *testing.T) {
+	wasReached := false
+	refusal := errors.New("the user refused this fetch")
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		wasReached = true
+		_, _ = writer.Write([]byte(testHTML))
+	}))
+	defer server.Close()
+
+	asked := ""
+	call, err := newTool(
+		func() bool { return true },
+		func(_ context.Context, address string) error {
+			asked = address
+			return refusal
+		},
+		server.Client(),
+	).Parse(`{"url":"` + server.URL + `","type":"text"}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := call.Exec(t.Context()); !errors.Is(err, refusal) {
+		t.Errorf("got %v, want the refusal", err)
+	}
+	if wasReached {
+		t.Error("the page was fetched anyway")
+	}
+	if asked != server.URL {
+		t.Errorf("got approval for %q, want %q", asked, server.URL)
 	}
 }

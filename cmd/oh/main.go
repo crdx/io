@@ -51,6 +51,7 @@ import (
 	"crdx.org/io/cmd/oh/onboarding"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/permission"
 	"crdx.org/io/cmd/oh/pictures"
 	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/prompt"
@@ -82,15 +83,42 @@ type approval struct {
 	advice   string
 }
 
-var hostNetworkApproval = approval{
-	label:    "Run this command on the host network?",
-	language: "bash",
-	action:   "let this command reach the host network",
-	outcome:  "it did not run",
-	advice:   "run it again without the host network, or ask what to do instead",
+var (
+	hostNetworkApproval = approval{
+		label:    "Run this command on the host network?",
+		language: "bash",
+		action:   "let this command reach the host network",
+		outcome:  "it did not run",
+		advice:   "run it again without the host network, or ask what to do instead",
+	}
+	lookupApproval = approval{
+		label:   "Look this up on the web?",
+		action:  "look this up",
+		outcome: "nothing was searched for",
+		advice:  "ask what to do instead",
+	}
+	fetchApproval = approval{
+		label:   "Fetch this page?",
+		action:  "fetch this page",
+		outcome: "nothing was downloaded",
+		advice:  "ask what to do instead",
+	}
+)
+
+func (self approval) ask(
+	ctx context.Context,
+	broker *ask.Broker,
+	rule permission.Rule,
+	subject string,
+) error {
+	if rule == permission.Allow {
+		return nil
+	}
+
+	return self.confirm(ctx, broker, subject)
 }
 
-func (self approval) ask(ctx context.Context, broker *ask.Broker, subject string) error {
+func (self approval) confirm(ctx context.Context, broker *ask.Broker, subject string) error {
 	questionContext, cancel := context.WithTimeout(ctx, approvalLimit)
 	defer cancel()
 
@@ -117,8 +145,13 @@ func (self approval) ask(ctx context.Context, broker *ask.Broker, subject string
 	return err
 }
 
-func approveHostNetwork(ctx context.Context, broker *ask.Broker, command string) error {
-	return hostNetworkApproval.ask(ctx, broker, strings.Join(bash.Steps(command), "\n"))
+func approveHostNetwork(
+	ctx context.Context,
+	broker *ask.Broker,
+	rule permission.Rule,
+	command string,
+) error {
+	return hostNetworkApproval.ask(ctx, broker, rule, strings.Join(bash.Steps(command), "\n"))
 }
 
 var completableToolNames = []string{
@@ -700,8 +733,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	snapshots := file.NewSnapshots()
 	toolboxTools := toolbox.Rummage(files, snapshots)
 	askBroker := ask.New()
+	permissionSet, err := settings.BuildPermissions()
+	if err != nil {
+		return "", err
+	}
+	permissions := permission.New(permissionSet)
 	approveNetwork := func(ctx context.Context, command string) error {
-		return approveHostNetwork(ctx, askBroker, command)
+		return approveHostNetwork(ctx, askBroker, permissions.Network(), command)
 	}
 	shellTool := shell.New(
 		workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files, args.Yolo, approveNetwork, sandboxRunner,
@@ -733,8 +771,19 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	toolboxTools = append(toolboxTools, title.New())
 	toolboxTools = append(
 		toolboxTools,
-		lookup.New(func() bool { return mode.Current().Has(caps.Lookup) }, client.Search),
-		fetch.New(func() bool { return mode.Current().Has(caps.Network) }),
+		lookup.New(
+			func() bool { return mode.Current().Has(caps.Lookup) },
+			func(ctx context.Context, query string) error {
+				return lookupApproval.ask(ctx, askBroker, permissions.Lookup(), query)
+			},
+			client.Search,
+		),
+		fetch.New(
+			func() bool { return mode.Current().Has(caps.Network) },
+			func(ctx context.Context, address string) error {
+				return fetchApproval.ask(ctx, askBroker, permissions.Fetch(), address)
+			},
+		),
 	)
 	toolboxTools = truncate.Tools(toolboxTools, toolOutputLimit)
 
@@ -933,6 +982,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 	app.slash.commands = commandRegistry
+	app.permissions = permissions
 	app.notifyUnknownSettings(liveConfig.UnknownSettings)
 	app.continueMessage = liveConfig.ContinueMessage
 	app.display.streamingMode = liveConfig.StreamingMode
