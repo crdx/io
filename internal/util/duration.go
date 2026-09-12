@@ -5,23 +5,25 @@ import (
 	"time"
 )
 
-func CompactDuration(took time.Duration) string {
-	if took > -time.Second && took < time.Second {
-		tenths := took.Round(100 * time.Millisecond).Seconds()
+func CompactDuration(elapsedTime time.Duration) string {
+	if elapsedTime > -time.Second && elapsedTime < time.Second {
+		tenths := elapsedTime.Round(100 * time.Millisecond).Seconds()
 		if tenths == 0 {
 			return "0s"
 		}
 		return fmt.Sprintf("%.1fs", tenths)
 	}
+	elapsedTime = elapsedTime.Truncate(time.Second)
+
 	switch {
-	case took%time.Second == 0 && took < time.Minute:
-		return fmt.Sprintf("%ds", int(took.Seconds()))
-	case took%time.Minute == 0 && took < time.Hour:
-		return fmt.Sprintf("%dm", int(took.Minutes()))
-	case took%time.Hour == 0 && took < 100*time.Hour:
-		return fmt.Sprintf("%dh", int(took.Hours()))
+	case elapsedTime%time.Second == 0 && elapsedTime < time.Minute:
+		return fmt.Sprintf("%ds", int(elapsedTime.Seconds()))
+	case elapsedTime%time.Minute == 0 && elapsedTime < time.Hour:
+		return fmt.Sprintf("%dm", int(elapsedTime.Minutes()))
+	case elapsedTime%time.Hour == 0 && elapsedTime < 100*time.Hour:
+		return fmt.Sprintf("%dh", int(elapsedTime.Hours()))
 	}
-	return FormatDuration(took)
+	return FormatDuration(elapsedTime)
 }
 
 func CoarseDuration(elapsedTime time.Duration) string {
@@ -46,22 +48,22 @@ func Ago(when time.Time) string {
 	return CoarseDuration(elapsedTime) + " ago"
 }
 
-func FormatDuration(took time.Duration) string {
+func FormatDuration(elapsedTime time.Duration) string {
 	switch {
-	case took < time.Second:
-		return fmt.Sprintf("0.%ds", int(took.Milliseconds()%1000)/100)
-	case took < time.Minute:
-		return fmt.Sprintf("%ds", int(took.Seconds()))
-	case took < time.Hour:
-		return fmt.Sprintf("%dm%02ds", int(took.Minutes()), int(took.Seconds())%60)
-	case took < 100*time.Hour:
-		return fmt.Sprintf("%dh%02dm", int(took.Hours()), int(took.Minutes())%60)
+	case elapsedTime < time.Second:
+		return fmt.Sprintf("0.%ds", int(elapsedTime.Milliseconds()%1000)/100)
+	case elapsedTime < time.Minute:
+		return fmt.Sprintf("%ds", int(elapsedTime.Seconds()))
+	case elapsedTime < time.Hour:
+		return fmt.Sprintf("%dm%02ds", int(elapsedTime.Minutes()), int(elapsedTime.Seconds())%60)
+	case elapsedTime < 100*time.Hour:
+		return fmt.Sprintf("%dh%02dm", int(elapsedTime.Hours()), int(elapsedTime.Minutes())%60)
 	}
 
-	days := int(took.Hours()) / 24
+	days := int(elapsedTime.Hours()) / 24
 	switch {
 	case days < 100:
-		return fmt.Sprintf("%dd%02dh", days, int(took.Hours())%24)
+		return fmt.Sprintf("%dd%02dh", days, int(elapsedTime.Hours())%24)
 	case days <= 9999:
 		return fmt.Sprintf("%dd", days)
 	default:
