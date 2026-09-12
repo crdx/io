@@ -105,7 +105,7 @@ func TestNothingIsPaintedWhereTheScreenIsNotATerminal(t *testing.T) {
 	t.Cleanup(Init(&strings.Builder{}))
 
 	if isColorEnabled {
-		t.Fatal("expected colour to be off where the screen is not a terminal")
+		t.Fatal("expected colour to be off when the screen is not a terminal")
 	}
 
 	for name, paint := range map[string]Style{

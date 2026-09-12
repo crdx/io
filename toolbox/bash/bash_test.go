@@ -50,6 +50,7 @@ func fixedShell(root *file.Root, policy func() sandbox.Policy) tool.Tool {
 		func(context.Context) (sandbox.Policy, error) { return policy(), nil },
 		func(context.Context, string) error { return nil },
 		sandbox.Direct(),
+		true,
 	)
 }
 
@@ -149,6 +150,7 @@ func TestNetworkingFollowsTheArgument(t *testing.T) {
 					return nil
 				},
 				runner,
+				true,
 			)
 
 			call, err := shell.Parse(test.arguments)
@@ -179,6 +181,7 @@ func TestANetworkNobodyOffersIsRefused(t *testing.T) {
 		func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
 		func(context.Context, string) error { return nil },
 		&recordingRunner{},
+		true,
 	)
 
 	if _, err := shell.Parse(`{"command":"true","network":"elsewhere"}`); err == nil {
@@ -195,6 +198,7 @@ func TestDeniedNetworkingDoesNotRun(t *testing.T) {
 		func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
 		func(context.Context, string) error { return approvalFailure },
 		runner,
+		true,
 	)
 
 	call, err := shell.Parse(`{"command":"true","network":"host"}`)
@@ -776,5 +780,37 @@ func TestACommandWhoseMeaningWouldChangeIsLeftWhole(t *testing.T) {
 				t.Errorf("got %q, want the command left whole", got)
 			}
 		})
+	}
+}
+
+func TestAnUnconfinedShellOffersNoNetworkChoice(t *testing.T) {
+	root, _ := testRoot(t)
+	runner := &recordingRunner{}
+	shell := bash.New(
+		root,
+		func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{Yolo: true}, nil },
+		func(context.Context, string) error {
+			t.Error("an unconfined shell asked for approval")
+			return nil
+		},
+		runner,
+		false,
+	)
+
+	for _, parameter := range shell.Schema() {
+		if parameter.Name == "network" {
+			t.Error("an unconfined shell offers a network parameter")
+		}
+	}
+
+	call, err := shell.Parse(`{"command":"true","network":"host"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, err := call.Exec(t.Context()); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if runner.policy.Network {
+		t.Error("an unconfined shell took the network argument as a request")
 	}
 }

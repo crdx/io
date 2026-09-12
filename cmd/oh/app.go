@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/cmd/oh/access"
 	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/conditions"
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/cycle"
 	"crdx.org/io/cmd/oh/dispatch"
@@ -143,6 +144,7 @@ type App struct {
 	inputLine       *edit.Input
 	editorConfig    *editor.Config
 	mode            *caps.Mode
+	conditions      *conditions.State
 	pathGrants      *pathgrant.Grants
 	hostToSandbox   *portgrant.HostToSandbox
 	sandboxToHost   *portgrant.SandboxToHost
@@ -1409,6 +1411,9 @@ func (self *App) prelude() string {
 
 func (self *App) accessTellers() access.Group {
 	tellers := []access.Teller{self.mode}
+	if self.conditions != nil {
+		tellers = append(tellers, self.conditions)
+	}
 	if self.pathGrants != nil {
 		tellers = append(tellers, self.pathGrants)
 	}

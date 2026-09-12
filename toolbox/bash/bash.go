@@ -35,35 +35,38 @@ func New(
 	buildPolicy func(context.Context) (sandbox.Policy, error),
 	approveNetwork func(context.Context, string) error,
 	runner sandbox.Runner,
+	hasNetworkChoice bool,
 ) tool.Tool {
+	schema := tool.Schema{tool.String("command", "the command line")}
+	if hasNetworkChoice {
+		schema = append(schema, tool.Enum(
+			"network",
+			"the networking state available to run on: loopback (default, your sandbox env) or host (the user's)",
+			string(LoopbackNetwork),
+			string(HostNetwork),
+		).Optional())
+	}
+
 	return tool.Implement(
 		tool.Definition{
 			Name:        "bash",
 			Description: "run a shell command",
-			Schema: tool.Schema{
-				tool.String("command", "the command line"),
-				tool.Enum(
-					"network",
-					"the networking state available to run on: loopback (default, your sandbox env) or host (the user's)",
-					string(LoopbackNetwork),
-					string(HostNetwork),
-				).Optional(),
-			},
+			Schema:      schema,
 		},
 		Describe,
 	).
-		Validate(validate).
+		Validate(func(args Args) error { return validate(args, hasNetworkChoice) }).
 		SyntaxFrom("bash", emphasisSource).
 		Exec(func(ctx context.Context, args Args) (string, tool.ToolCallMetrics, error) {
-			policy, err := buildPolicy(ctx)
-			if err != nil {
-				return "", tool.ToolCallMetrics{}, err
-			}
-			isHostNetwork := args.Network == HostNetwork
+			isHostNetwork := hasNetworkChoice && args.Network == HostNetwork
 			if isHostNetwork {
 				if err := approveNetwork(ctx, args.Command); err != nil {
 					return "", tool.ToolCallMetrics{}, err
 				}
+			}
+			policy, err := buildPolicy(ctx)
+			if err != nil {
+				return "", tool.ToolCallMetrics{}, err
 			}
 			policy.Network = isHostNetwork
 			return exec(ctx, runner, root, policy, args)
@@ -135,13 +138,17 @@ func hasHereDocument(parsedScript *syntax.File) bool {
 	return isFound
 }
 
-func validate(args Args) error {
+func validate(args Args, hasNetworkChoice bool) error {
 	if strings.TrimSpace(args.Command) == "" {
 		return errors.New("command is required")
 	}
 
 	if _, err := parse(args.Command); err != nil {
 		return fmt.Errorf("invalid Bash command: %w", err)
+	}
+
+	if !hasNetworkChoice {
+		return nil
 	}
 
 	switch args.Network {

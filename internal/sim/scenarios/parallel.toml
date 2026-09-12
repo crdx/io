@@ -55,6 +55,6 @@ arguments = '{"path":"nowhere/at/all.go"}'
 
 [[turn]]
 say = """
-That is the lot: four together, then three together, then a pair where only one of them could be \
+That is the lot: four together, then three together, then a pair, only one of which could be \
 answered.
 """

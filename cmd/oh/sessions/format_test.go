@@ -22,7 +22,7 @@ func TestAnArchivedSessionInAnOlderFormatIsReportedOnlyWhereArchivesAreRead(t *t
 
 	pickerError := ValidateFormats(directory)
 	if pickerError == nil {
-		t.Fatal("expected the archived session to be reported where every session is read")
+		t.Fatal("expected the archived session to be reported in the listing that reads every session")
 	}
 
 	comparePickerGolden(t, "archived-format-refusal.txt", strings.Join([]string{

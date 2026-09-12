@@ -1589,7 +1589,7 @@ func TestACommandThatEndsOfItsOwnAccordReportsNoSignal(t *testing.T) {
 	}
 
 	if result.Signal != 0 {
-		t.Errorf("got signal %d, want none where nothing killed the command", result.Signal)
+		t.Errorf("got signal %d, want no signal when nothing killed the command", result.Signal)
 	}
 }
 

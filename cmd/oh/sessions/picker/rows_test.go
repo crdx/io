@@ -160,10 +160,10 @@ func TestWhatTheSessionPickerPaintsMatchesTheGolden(t *testing.T) {
 		isArchivedView     bool
 		hasNothingArchived bool
 	}{
-		{name: "a wide terminal, where the title has the room", room: 150, height: 24, cursor: 1},
+		{name: "a wide terminal, with room for the title", room: 150, height: 24, cursor: 1},
 		{name: "a terminal wide enough for the model that answered", room: 120, height: 24, cursor: 1},
 		{name: "no room for the model, so the room goes to the title", room: 80, height: 24, cursor: 3},
-		{name: "a narrow terminal, where the columns are clipped", room: 46, height: 24, cursor: 1},
+		{name: "a narrow terminal, with the columns clipped", room: 46, height: 24, cursor: 1},
 		{name: "a filter narrowing the list to the model that answered", room: 120, height: 24, cursor: 0, query: "codex"},
 		{name: "a filter matching the mode a session ran in", room: 120, height: 24, cursor: 0, query: "fast"},
 		{name: "a filter no session answers to", room: 120, height: 24, cursor: 0, query: "kimi"},
@@ -177,8 +177,8 @@ func TestWhatTheSessionPickerPaintsMatchesTheGolden(t *testing.T) {
 		{name: "the confirmation asked before a session is deleted for good", room: 120, height: 24, cursor: 1, keypress: new(deleteKeypress())},
 		{name: "the deletion confirmation clipped by a narrow terminal", room: 46, height: 24, cursor: 1, keypress: new(deleteKeypress())},
 		{name: "deleting an archived session for good", room: 120, height: 24, cursor: 0, isArchivedView: true, keypress: new(deleteKeypress())},
-		{name: "the conversation read where it all fits", room: 120, height: 24, cursor: 1, keypress: new(openKeypress()), read: reading()},
-		{name: "the conversation read where the terminal is too short for it", room: 120, height: 8, cursor: 1, keypress: new(openKeypress()), read: reading()},
+		{name: "the whole conversation read", room: 120, height: 24, cursor: 1, keypress: new(openKeypress()), read: reading()},
+		{name: "the conversation read with the terminal too short for it", room: 120, height: 8, cursor: 1, keypress: new(openKeypress()), read: reading()},
 		{name: "a conversation read in a narrow terminal", room: 46, height: 12, cursor: 1, keypress: new(openKeypress()), read: reading()},
 		{name: "a conversation that could not be read", room: 120, height: 12, cursor: 1, keypress: new(openKeypress()), read: unreadable()},
 		{name: "an archived session, which is opened rather than read", room: 120, height: 24, cursor: 1, isArchivedView: true, keypress: new(openKeypress()), read: reading()},

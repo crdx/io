@@ -17,7 +17,7 @@ const usage = `ohctl regenerate — write stored transcripts again
 Usage:
     $0 regenerate [<session>...]
 
-Sessions are named on the command line, or every stored session is done when none is.
+Sessions are named on the command line, or every stored session is done when the command names no session.
 `
 
 type inputOpts struct {

@@ -1,0 +1,14 @@
+{"kind":"head","version":13,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant.","conditions":{"unix_sockets":true,"ipv6":false,"interactive":false}}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
+{"kind":"event","event":{"kind":"user_message","text":"bind a listener on ::1"}}
+{"kind":"event","event":{"kind":"model_message","text":"There is no IPv6 here, so 127.0.0.1 instead."}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"bind a listener on ::1"}]}}
+{"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"There is no IPv6 here, so 127.0.0.1 instead."}]}}
+{"kind":"turn_completion","turn":{}}
+{"kind":"event","event":{"kind":"conditions_change","state":{"known":{"unix_sockets":true,"ipv6":false,"interactive":false},"current":{"unix_sockets":true,"ipv6":true,"interactive":true}}}}
+{"kind":"event","event":{"kind":"user_message","text":"try ::1 again"}}
+{"kind":"event","event":{"kind":"model_message","text":"::1 answers now."}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"This machine has IPv6 again, so ::1 reaches the sandbox loopback. The user has returned, so you can ask them a question."}]}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"try ::1 again"}]}}
+{"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"::1 answers now."}]}}
+{"kind":"turn_completion","turn":{}}

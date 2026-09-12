@@ -1,0 +1,16 @@
+
+ bind a listener on ::1
+
+
+There is no IPv6 here, so 127.0.0.1 instead.
+
+
+ 🤖 This machine has IPv6 again, so ::1 reaches the sandbox loopback. The user has returned, so you
+    can ask them a question.
+
+
+
+ try ::1 again
+
+
+::1 answers now.

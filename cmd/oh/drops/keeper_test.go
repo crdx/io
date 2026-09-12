@@ -76,7 +76,7 @@ func TestWhatAKeeperSavesCanBeReadBack(t *testing.T) {
 			}
 
 			if !isReadable(t, keeper, path) {
-				t.Errorf("%s was saved to %q, where nothing can read it", name, path)
+				t.Errorf("%s was saved to %q, which nothing can read", name, path)
 			}
 		})
 	}

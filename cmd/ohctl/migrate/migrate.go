@@ -31,7 +31,7 @@ Options:
     -n, --dry-run    Say what would be migrated without writing anything
 
 The configuration is always considered. Sessions are named on the command line, or every outdated
-stored session is done when none is.
+stored session is done when the command names no session.
 
 The configuration file and each session bundle are copied aside before anything is written. A
 session transcript is written again from the journal it was migrated into.

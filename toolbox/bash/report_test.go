@@ -158,7 +158,7 @@ func TestASignalTheCommandItselfDiedOfIsReportedWithoutHedging(t *testing.T) {
 		t.Errorf("got %q, want an observed kill stated outright", got)
 	}
 	if strings.Contains(got, "the shell reports") {
-		t.Errorf("got %q, want no hedge where the kill was seen rather than inferred", got)
+		t.Errorf("got %q, want no hedge when the kill was seen rather than inferred", got)
 	}
 	if !strings.Contains(got, "each process 1h of processor time") {
 		t.Errorf("got %q, want the processor limit named", got)
@@ -194,6 +194,6 @@ func TestAKillUnderNoProcessorLimitNamesTheSignalAlone(t *testing.T) {
 		t.Errorf("got %q, want the signal named", got)
 	}
 	if strings.Contains(got, "processor time") {
-		t.Errorf("got %q, want no limit named where the policy sets none", got)
+		t.Errorf("got %q, want no limit named when the policy sets no limit", got)
 	}
 }

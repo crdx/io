@@ -98,7 +98,7 @@ func TestAPipedInputKeepsItselfWhereThereIsNoControllingTerminal(t *testing.T) {
 	defer release()
 
 	if keyboard != piped {
-		t.Error("expected the piped input back where there is no controlling terminal")
+		t.Error("expected the piped input back when there is no controlling terminal")
 	}
 }
 

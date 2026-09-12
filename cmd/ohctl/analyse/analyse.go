@@ -32,7 +32,7 @@ Options:
     -j, --json    Write the analysis as JSON
     -h, --help    Show this help
 
-Sessions are named on the command line, or every stored session is analysed when none is. Naming
+Sessions are named on the command line, or every stored session is analysed when the command names no session. Naming
 sessions also reports each of them on a row of its own.
 `
 

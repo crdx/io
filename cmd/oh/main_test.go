@@ -47,6 +47,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cli"
 	"crdx.org/io/cmd/oh/commands"
+	"crdx.org/io/cmd/oh/conditions"
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/cycle"
 	"crdx.org/io/cmd/oh/dispatch"
@@ -3600,6 +3601,11 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"context-network":          {".prompt"},
 		"context-network-loopback": {".prompt"},
 		"context-network-print":    {".prompt"},
+		"context-print":            {".prompt"},
+		"context-file-tools":       {".prompt"},
+		"context-no-sockets":       {".prompt"},
+		"context-repository":       {".prompt"},
+		"context-scratch-root":     {".prompt"},
 		"context-yolo":             {".prompt"},
 		"inputblock":               {".ansi", ".screen"},
 		"legacy-alt-enter":         {".ansi", ".screen"},
@@ -5609,6 +5615,10 @@ type promptGolden struct {
 	hasHostLoopbackPort bool
 	isNetworkGranted    bool
 	isPrinting          bool
+	offeredTools        []string
+	hasNoSockets        bool
+	isRepository        bool
+	readsTheScratchRoot bool
 }
 
 func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
@@ -5620,6 +5630,11 @@ func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 		"context-loopback":      {hasHostLoopbackPort: true},
 		"context-network":       {isNetworkGranted: true},
 		"context-network-print": {isNetworkGranted: true, isPrinting: true},
+		"context-print":         {isPrinting: true},
+		"context-file-tools":    {offeredTools: []string{"read", "ls", "grep"}},
+		"context-no-sockets":    {hasNoSockets: true},
+		"context-repository":    {isRepository: true},
+		"context-scratch-root":  {readsTheScratchRoot: true},
 		"context-network-loopback": {
 			hasHostLoopbackPort: true,
 			isNetworkGranted:    true,
@@ -5644,6 +5659,12 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 		}
 	}
 
+	if shape.isRepository {
+		if err := os.MkdirAll(filepath.Join(workspaceDirectory, ".git"), 0o700); err != nil {
+			t.Fatal(err)
+		}
+	}
+
 	workspace := openTestWorkspace(t, workspaceDirectory)
 
 	configDirectory := t.TempDir()
@@ -5655,6 +5676,11 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 	dropsDirectory := ""
 	if shape.hasClipboardDrops {
 		dropsDirectory = "/state/sessions/brave-otter/drops"
+	}
+
+	readPaths := []string{"/reference"}
+	if shape.readsTheScratchRoot {
+		readPaths = []string{"/state/farm", "/state/sessions"}
 	}
 
 	var hostLoopback []uint16
@@ -5679,7 +5705,7 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 		CurrentCaps: currentCaps,
 		ExtraPaths: shell.Paths{
 			HostLoopback: hostLoopback,
-			Read:         []string{"/reference"},
+			Read:         readPaths,
 			Write:        []string{"/output"},
 			Exec:         []string{"/commands"},
 		},
@@ -5689,9 +5715,14 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 			Description: "Exercise complete prompt assembly.",
 			Location:    "/skills/golden/SKILL.md",
 		}},
+		OfferedTools: shape.offeredTools,
+		Conditions: conditions.Conditions{
+			UnixSockets: !shape.hasNoSockets,
+			IPv6:        !shape.hasNoSockets,
+			Interactive: !shape.isPrinting,
+		},
 		JobsGranted:    shape.areJobsGiven,
 		NetworkGranted: shape.isNetworkGranted,
-		IsInteractive:  !shape.isPrinting,
 		Yolo:           shape.isYolo,
 	})
 	if err != nil {
@@ -6448,6 +6479,7 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 			func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
 			func(context.Context, string) error { return nil },
 			sandbox.Direct(),
+			true,
 		),
 		notify.New(screen.WriteEscape),
 		job.New(
@@ -11325,6 +11357,8 @@ type sessionGoldenScenario struct {
 	FirstTokenError    string              `toml:"first-token-error"`
 	CredentialRefresh  string              `toml:"credential-refresh"`
 	ToggleBeforeFirst  string              `toml:"toggle-before-first"`
+	Conditions         string              `toml:"conditions"`
+	ConditionsOnResume string              `toml:"conditions-on-resume"`
 	EndJobBeforeFirst  string              `toml:"end-job-before-first"`
 	Tools              []sessionGoldenTool `toml:"tool"`
 	FirstTurn          sessionGoldenTurn   `toml:"first"`
@@ -11594,7 +11628,7 @@ func newSessionGoldenTools(
 		}
 
 		if specification.ShouldWithholdNetwork {
-			tools = append(tools, newSessionGoldenShell(t, caps.Read|caps.Shell, true))
+			tools = append(tools, newSessionGoldenShell(t, caps.Read|caps.Shell, false))
 			continue
 		}
 
@@ -11805,7 +11839,7 @@ func newSessionGoldenRefusingShell(t *testing.T) tool.Tool {
 	t.Cleanup(pathAccess.Close)
 
 	return shell.New(
-		workspace, t.TempDir(), t.TempDir(), pathAccess, mode, files, true,
+		workspace, t.TempDir(), t.TempDir(), pathAccess, mode, files, false,
 		func(ctx context.Context, command string) error {
 			return approveHostNetwork(ctx, broker, permission.Ask, command)
 		},
@@ -12160,13 +12194,18 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	defer server.Close()
 
 	directory := t.TempDir()
-	log, err := store.Create(directory, store.Meta{
+	firstConditions := sessionGoldenConditions(t, scenario.Conditions)
+	meta := store.Meta{
 		Model:        scenario.Model,
 		Provider:     scenario.Provider,
 		Effort:       scenario.Effort,
 		IsFast:       scenario.IsFast,
 		SystemPrompt: sessionGoldenSystemPrompt,
-	})
+	}
+	if scenario.describesConditions() {
+		meta.Conditions = &firstConditions
+	}
+	log, err := store.Create(directory, meta)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -12189,6 +12228,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	if scenario.Provider == model.CodexProvider {
 		firstHarness.openingEvents = []agent.Event{model.FastModeEvent(scenario.IsFast)}
 	}
+	firstHarness.conditions = conditions.NewRestored(firstConditions, firstConditions)
 	settleSessionGoldenMode(firstHarness)
 	if scenario.ToggleBeforeFirst != "" {
 		toggleSessionGoldenCaps(t, firstHarness, scenario.ToggleBeforeFirst)
@@ -12258,6 +12298,9 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		hostToSandbox:  goldenPorts,
 	}
 	settleResumedSessionGoldenMode(resumedHarness, storedSession.Events)
+	restoredEvents := restoreSessionGoldenConditions(
+		t, resumedHarness, storedSession, sessionGoldenConditions(t, resumeConditionsOf(scenario)),
+	)
 	resumedHarness.currentTurn = Turn{Stream: testRunningTurnStream()}
 	resumedHarness.replay()
 	requireSameVisibleScreen(
@@ -12266,6 +12309,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		firstScreenOutput.String(),
 		screenOutput.String(),
 	)
+	resumedHarness.settleAccess()
 	if note := resumedHarness.prelude(); note != "" {
 		resumedAssistant.AddUserMessage(note)
 	}
@@ -12275,7 +12319,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	printedScreen := printedSessionIsImpossible
 	if !scenario.usesTheInterface() && !scenario.ResumeTurn.usesTheInterface() {
 		printedOutput := drawPrintedSessionGoldenTurn(
-			t, directory, scenario, resumedHarness, storedSession.Events, resumeTurns,
+			t, directory, scenario, resumedHarness, restoredEvents, resumeTurns,
 		)
 		requireNothingWasDrawnOver(t, printedOutput)
 		requireSameVisibleScreen(
@@ -12505,6 +12549,66 @@ func requireSameVisibleScreen(t *testing.T, description string, firstOutput stri
 func settleSessionGoldenMode(testHarness *App) {
 	testHarness.mode = caps.NewMode(caps.All())
 	testHarness.settleAccess()
+}
+
+func sessionGoldenConditions(t *testing.T, written string) conditions.Conditions {
+	t.Helper()
+
+	if written == "" {
+		return conditions.Conditions{UnixSockets: true, IPv6: true, Interactive: true}
+	}
+
+	var current conditions.Conditions
+	for name := range strings.FieldsSeq(written) {
+		switch name {
+		case "unix-sockets":
+			current.UnixSockets = true
+		case "ipv6":
+			current.IPv6 = true
+		case "interactive":
+			current.Interactive = true
+		case "none":
+		default:
+			t.Fatalf("unknown condition %q", name)
+		}
+	}
+
+	return current
+}
+
+func restoreSessionGoldenConditions(
+	t *testing.T,
+	testHarness *App,
+	storedSession *store.Session,
+	current conditions.Conditions,
+) []agent.Event {
+	t.Helper()
+
+	restored, err := conditions.Restore(storedSession.Meta.Conditions, storedSession.Events, current)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testHarness.conditions = restored.State
+	if !restored.IsChanged {
+		return slices.Clone(storedSession.Events)
+	}
+
+	testHarness.pendingNotices.add(restored.Change)
+
+	return append(slices.Clone(storedSession.Events), restored.Change)
+}
+
+func (self sessionGoldenScenario) describesConditions() bool {
+	return self.Conditions != "" || self.ConditionsOnResume != ""
+}
+
+func resumeConditionsOf(scenario sessionGoldenScenario) string {
+	if scenario.ConditionsOnResume != "" {
+		return scenario.ConditionsOnResume
+	}
+
+	return scenario.Conditions
 }
 
 func settleResumedSessionGoldenMode(testHarness *App, events []agent.Event) {
@@ -15597,7 +15701,7 @@ func TestAPictureIsDrawnUnderTheCallThatReadIt(t *testing.T) {
 		"a9 a picture named in an answer beside prose": func() string {
 			return writtenAnswerPictureStream(t, "Look at ![](/pictures/chart.png) closely.", true)
 		},
-		"b1 a picture named where the terminal draws none": func() string {
+		"b1 a picture named for a terminal that draws no pictures": func() string {
 			return writtenAnswerPictureStream(t, answerNaming("/pictures/chart.png"), false)
 		},
 		"b2 a picture named in an answer in a quote": func() string {

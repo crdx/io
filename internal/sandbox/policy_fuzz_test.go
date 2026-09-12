@@ -95,7 +95,7 @@ func FuzzAPolicyMeansTheSameThingOnBothSidesOfTheProcessBoundary(fuzzer *testing
 		}
 
 		if !reflect.DeepEqual(validated, enforced) {
-			t.Fatalf("the child would enforce %+v where the parent validated %+v", enforced, validated)
+			t.Fatalf("the child would enforce %+v, not the %+v the parent validated", enforced, validated)
 		}
 	})
 }

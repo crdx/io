@@ -210,7 +210,7 @@ func TestGraphSubgraphEdgeCases(t *testing.T) {
 		t.Error("external node reported an incoming subgraph edge")
 	}
 	if rendererGraph.hasIncomingEdgeFromOutsideSubgraph(missing) {
-		t.Error("node without an external edge reported one")
+		t.Error("node without an external edge reported an external edge")
 	}
 	if !rendererGraph.hasIncomingEdgeFromOutsideSubgraph(top) {
 		t.Error("top external target was not recognised")

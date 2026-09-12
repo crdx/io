@@ -358,7 +358,7 @@ func TestOnlyTheAsideIsDrawnInItalics(t *testing.T) {
 
 func TestTypingWaitsForNobodyWhereTheScreenIsNotATerminal(t *testing.T) {
 	if typingPause(&bytes.Buffer{}) != nil {
-		t.Error("expected no waiting where the typing cannot be watched")
+		t.Error("expected no waiting when the typing cannot be watched")
 	}
 }
 

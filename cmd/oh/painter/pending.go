@@ -6,6 +6,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/conditions"
 	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/markdown"
@@ -134,6 +135,8 @@ func HarnessNotice(event agent.Event) (string, bool) {
 		return jobrecord.EndedNotice(event)
 	case jobrecord.EndedWithSession:
 		return jobrecord.EndedWithSessionNotice(event)
+	case conditions.Change:
+		return conditions.Notice(event)
 	case pathgrant.Change:
 		return pathgrant.Notice(event)
 	case portgrant.SandboxToHostChange:

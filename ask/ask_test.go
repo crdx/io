@@ -173,6 +173,6 @@ func TestARequestWithoutADeadlineReportsNone(t *testing.T) {
 	<-broker.Changes()
 
 	if _, hasDeadline := broker.Current().Deadline(); hasDeadline {
-		t.Error("a question asked without a deadline reported one")
+		t.Error("a question asked without a deadline reported a deadline")
 	}
 }

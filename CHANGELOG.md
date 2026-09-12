@@ -4,7 +4,8 @@
 
 - Add `[permissions]` for granular control
 - Ask for approval inside the input frame
-- Tell the agent more information
+- Tell the agent more accurate information
+- Detect environment changes on resume, and tell the agent
 - Save truncated remains in session drops dir
 - Handle pending notices correctly
 - Repair region if the terminal is too short
@@ -23,7 +24,7 @@
 - Let a file tool follow a symlinked path to the grant that owns it
 - Add `[experimental]` config section
 - Hold every configured path by its real path
-- Report a configured path that holds one from another list
+- Report a configured path that another list also holds
 
 ## [0.5.0] - 2026-09-10
 

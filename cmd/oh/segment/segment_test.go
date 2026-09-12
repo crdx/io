@@ -297,7 +297,7 @@ func TestTheBranchSegmentFollowsAWorktreePointer(t *testing.T) {
 
 func TestTheBranchSegmentSaysNothingOutsideARepository(t *testing.T) {
 	if got := branchDrawnIn(t, t.TempDir()); got != "" {
-		t.Errorf("expected nothing where there is no repository, got %q", got)
+		t.Errorf("expected nothing when there is no repository, got %q", got)
 	}
 }
 

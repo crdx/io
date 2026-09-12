@@ -1,0 +1,16 @@
+
+ listen on a Unix socket
+
+
+A socket beneath /tmp it is.
+
+
+ 🤖 A Unix socket no longer works at any path, so no service can listen on a Unix socket. This
+    machine has lost IPv6, so only 127.0.0.1 works.
+
+
+
+ listen on it again
+
+
+Not any more, so 127.0.0.1 it is.

@@ -510,7 +510,7 @@ func TestTheAccountUsageIsReadBeforeTheFirstTurn(t *testing.T) {
 
 func TestWindowsReportedByATurnAreKeptOverAFreshProbe(t *testing.T) {
 	usageServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
-		t.Error("expected no probe where a turn already reported its windows")
+		t.Error("expected no probe when a turn already reported its windows")
 		writer.WriteHeader(http.StatusNotFound)
 	}))
 	t.Cleanup(usageServer.Close)

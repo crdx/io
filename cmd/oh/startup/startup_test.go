@@ -143,7 +143,7 @@ func TestAHeadingThatDoesNotFitBesideTheEmojiGetsTheOrdinaryStartupSentence(t *t
 	line := RenderBanner(time.Millisecond, false, info, columns, true)
 
 	if strings.Contains(line, "\x1b]66;") {
-		t.Errorf("expected no sized text where the heading cannot fit, got %q", line)
+		t.Errorf("expected no sized text when the heading cannot fit, got %q", line)
 	}
 }
 

@@ -14,6 +14,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/conditions"
 	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/pathgrant"
@@ -136,6 +137,10 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		if notice, isSaid := caps.ModeNotice(event); isSaid {
 			output.fence(notice)
 		}
+	case conditions.Change:
+		if notice, isSaid := conditions.Notice(event); isSaid {
+			output.fence(notice)
+		}
 	case pathgrant.Change:
 		if notice, isSaid := pathgrant.Notice(event); isSaid {
 			output.fence(notice)
@@ -185,6 +190,9 @@ func heading(event agent.Event) []string {
 	switch event.Kind {
 	case caps.ModeChange:
 		return []string{name, modeFlags(event), prefixed("toggled ", event.Name)}
+	case conditions.Change:
+		summary, _ := conditions.Summary(event)
+		return []string{name, summary}
 	case pathgrant.Change:
 		summary, _ := pathgrant.Summary(event)
 		return []string{name, summary, prefixed("changed ", event.Name)}
@@ -388,6 +396,8 @@ func title(kind agent.Kind) string {
 		return "Tool result"
 	case caps.ModeChange:
 		return "Mode"
+	case conditions.Change:
+		return "Conditions"
 	case pathgrant.Change:
 		return "Path grant"
 	case portgrant.SandboxToHostChange:

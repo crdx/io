@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/conditions"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/work"
@@ -76,7 +77,7 @@ func TestTheGlobalContextReplacesTheBuiltInOpeningButKeepsTheHarnessState(t *tes
 	}
 	for _, want := range []string{
 		"The workspace (" + workspace.GetDir() + ") is read-only",
-		"The .git directory within it (" + filepath.Join(workspace.GetDir(), ".git") + ") is read-only",
+		"The workspace is not a git repository",
 		"The bash tool is refused",
 	} {
 		if !strings.Contains(got, want) {
@@ -159,7 +160,7 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 	for _, want := range []string{
 		"configured path /reference is read-only",
 		"configured path /output is read-write and follows the workspace write state",
-		"shell may execute files at or under /commands",
+		"shell may also execute files at or under /commands",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("system prompt does not contain %q: %q", want, got)
@@ -178,7 +179,7 @@ func TestClipboardDropsAreDisclosedInTheHarnessContext(t *testing.T) {
 		DropsDirectory: dropsDirectory,
 	})
 
-	want := "Clipboard images pasted with ctrl+v are stored under " + dropsDirectory + ", which path tools can read."
+	want := "Pasting a clipboard image with ctrl+v saves it under " + dropsDirectory + ", where path tools can read it."
 	if !strings.Contains(got, want) {
 		t.Errorf("system prompt does not contain %q: %q", want, got)
 	}
@@ -273,16 +274,74 @@ func TestTheHarnessDisclosesPrivateLoopbackNetworking(t *testing.T) {
 		HomeDir:     "/state/home",
 		CurrentCaps: caps.Read,
 		ExtraPaths:  shell.Paths{},
+		Conditions:  conditions.Conditions{UnixSockets: true, IPv6: true},
 	})
 
 	for _, want := range []string{
 		"private loopback interface",
 		"127.0.0.1 and ::1",
+		"A Unix socket works beneath /tmp, and is refused beneath the workspace",
 		"host's loopback interface and external networks are unreachable",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("harness context does not contain %q: %q", want, got)
 		}
+	}
+}
+
+func TestTheHarnessDisclosesWhatThisMachineCannotDo(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/tmp/x",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{},
+	})
+
+	for _, want := range []string{
+		"127.0.0.1, and this machine has no IPv6 at all",
+		"A Unix socket is unavailable whatever its path",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("harness context does not contain %q: %q", want, got)
+		}
+	}
+
+	for _, unwanted := range []string{"and ::1", "A Unix socket works"} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("harness context still promises %q: %q", unwanted, got)
+		}
+	}
+}
+
+func TestTheHarnessSaysWhenHomeCanBeWrittenTo(t *testing.T) {
+	confined := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/tmp/x",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{},
+	})
+
+	want := "HOME is writable only while the workspace is writable, though .cache inside HOME is always writable"
+	if !strings.Contains(confined, want) {
+		t.Errorf("harness context does not contain %q: %q", want, confined)
+	}
+
+	waived := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/tmp/x",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{},
+		Yolo:        true,
+	})
+
+	if want := "- You can write anywhere inside HOME"; !strings.Contains(waived, want) {
+		t.Errorf("harness context does not contain %q: %q", want, waived)
 	}
 }
 
@@ -295,14 +354,15 @@ func TestTheHarnessDisclosesTheHostNetworkACallCanAskFor(t *testing.T) {
 		CurrentCaps:    caps.Read | caps.Shell,
 		ExtraPaths:     shell.Paths{},
 		NetworkGranted: true,
-		IsInteractive:  true,
+		Conditions:     conditions.Conditions{Interactive: true},
 	})
 
 	for _, want := range []string{
 		"By default, the host's loopback interface and external networks are unreachable",
-		"A bash call with network: true runs on the host's own network",
-		"It cannot reach the sandbox's private loopback",
-		"The user is asked to approve each such call",
+		"The bash tool takes network=loopback or network=host",
+		"A call with network=host runs on the host's own network",
+		"A host call cannot reach the sandbox's private loopback",
+		"The user may be asked to approve each host call",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("harness context does not contain %q: %q", want, got)
@@ -316,23 +376,30 @@ func TestTheHarnessDisclosesTheHostNetworkACallCanAskFor(t *testing.T) {
 
 func TestTheHarnessDoesNotOfferTheHostNetworkWhenItIsNotGranted(t *testing.T) {
 	got := harnessContext(Config{
-		Workspace:     work.At("/workspace"),
-		SessionName:   "session-id",
-		TmpDir:        "/tmp/x",
-		HomeDir:       "/state/home",
-		CurrentCaps:   caps.Read | caps.Shell,
-		ExtraPaths:    shell.Paths{},
-		IsInteractive: true,
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/tmp/x",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read | caps.Shell,
+		ExtraPaths:  shell.Paths{},
+		Conditions:  conditions.Conditions{Interactive: true},
 	})
 
-	for _, unwanted := range []string{"network: true", "By default,"} {
+	for _, unwanted := range []string{"A call with network=host runs", "By default,"} {
 		if strings.Contains(got, unwanted) {
 			t.Errorf("harness context offers %q without the network grant: %q", unwanted, got)
 		}
 	}
 
-	if want := "Anything else that requires external networking must be asked of the user"; !strings.Contains(got, want) {
-		t.Errorf("harness context does not contain %q: %q", want, got)
+	for _, want := range []string{
+		"The bash tool takes network=loopback or network=host",
+		"The host network is withheld in this session, so a call asking for network=host is refused",
+		"The user can grant the host network with ctrl+x n",
+		"Ask the user to grant the host network rather than asking the user to run the command",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("harness context does not contain %q: %q", want, got)
+		}
 	}
 }
 
@@ -453,8 +520,8 @@ func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
 		t.Errorf("expected the workspace to be reported as %q, got %q", want, system)
 	}
 
-	if want := "The .git directory within it (/workspace/.git) is " + filesystem(false); !strings.Contains(system, want) {
-		t.Errorf("expected the history to be reported as %q, got %q", want, system)
+	if want := "The workspace is not a git repository"; !strings.Contains(system, want) {
+		t.Errorf("expected the absent repository to be reported as %q, got %q", want, system)
 	}
 
 	if !strings.Contains(system, "which you can always read and write") {
@@ -515,8 +582,8 @@ func TestAWaivedSandboxIsDisclosedRatherThanImplied(t *testing.T) {
 
 	for _, want := range []string{
 		"# No Sandbox",
-		"the bash tool runs with no sandbox at all",
-		"There is no sandbox, so a command reaches whatever network this machine reaches",
+		"the bash tool runs with no sandbox",
+		"There is no network sandbox: everything runs on the host network",
 		"/tmp is the machine's own /tmp",
 		"Your persistent scratch space is /state/farm/session",
 		"The bash tool is granted, and runs unconfined",
@@ -550,5 +617,246 @@ func TestASandboxedSessionIsNeverToldThereIsNoSandbox(t *testing.T) {
 		if strings.Contains(got, unwanted) {
 			t.Errorf("harness context contains %q: %q", unwanted, got)
 		}
+	}
+}
+
+func TestAToolThatIsNotOfferedIsNeverMentioned(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/tmp/x",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read | caps.Shell | caps.Network | caps.Lookup,
+		ExtraPaths:   shell.Paths{Exec: []string{"/commands"}},
+		OfferedTools: []string{"read", "ls", "grep"},
+		JobsGranted:  true,
+	})
+
+	for _, unwanted := range []string{
+		"# Network",
+		"bash",
+		"lookup tool",
+		"fetch tool",
+		"job tool",
+		"The shell may execute files",
+		"git clone --shared",
+	} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("harness context mentions %q with no such tool offered: %q", unwanted, got)
+		}
+	}
+}
+
+func TestAnOfferedToolIsStillMentioned(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/tmp/x",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read | caps.Shell,
+		ExtraPaths:   shell.Paths{Exec: []string{"/commands"}},
+		OfferedTools: []string{"read", "bash", "job"},
+		JobsGranted:  true,
+	})
+
+	for _, want := range []string{
+		"# Network",
+		"The bash tool is granted",
+		"A service started with the job tool",
+		"The shell may also execute files at or under /commands.",
+		"git clone --shared",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("harness context does not contain %q: %q", want, got)
+		}
+	}
+
+	for _, unwanted := range []string{"lookup tool", "fetch tool"} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("harness context mentions %q with no such tool offered: %q", unwanted, got)
+		}
+	}
+}
+
+func TestARepositoryWorkspaceReportsItsGitDirectory(t *testing.T) {
+	workspace := systemWorkspace(t)
+	if err := os.MkdirAll(filepath.Join(workspace.GetDir(), ".git"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	got := harnessContext(Config{
+		Workspace:   workspace,
+		SessionName: "session-id",
+		TmpDir:      "/state/farm/session",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+	})
+
+	want := "The .git directory within it (" + filepath.Join(workspace.GetDir(), ".git") + ") is read-only"
+	if !strings.Contains(got, want) {
+		t.Errorf("harness context does not contain %q: %q", want, got)
+	}
+	if unwanted := "not a git repository"; strings.Contains(got, unwanted) {
+		t.Errorf("harness context contains %q for a repository: %q", unwanted, got)
+	}
+}
+
+func TestAWorkspaceWithNoRepositorySaysSoInsteadOfNamingAGitDirectory(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:   systemWorkspace(t),
+		SessionName: "session-id",
+		TmpDir:      "/state/farm/session",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read | caps.Git,
+	})
+
+	want := "The workspace is not a git repository"
+	if !strings.Contains(got, want) {
+		t.Errorf("harness context does not contain %q: %q", want, got)
+	}
+	if unwanted := ".git directory within it"; strings.Contains(got, unwanted) {
+		t.Errorf("harness context names %q with no repository: %q", unwanted, got)
+	}
+}
+
+func TestAReadOnlyPathHoldingTheScratchReportsTheScratchAsWritable(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "brave-otter",
+		TmpDir:      "/state/farm/brave-otter",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{Read: []string{"/state/farm", "/state/sessions"}},
+	})
+
+	for _, want := range []string{
+		"The configured path /state/farm is read-only, apart from your scratch space at " +
+			"/state/farm/brave-otter, which is writable.",
+		"The configured path /state/sessions is read-only.",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("harness context does not contain %q: %q", want, got)
+		}
+	}
+}
+
+func TestTheShellReportsWhereItMayExecuteFiles(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read | caps.Shell,
+		OfferedTools: []string{"bash"},
+	})
+
+	want := "The shell may execute files under the system directories, every directory in PATH, " +
+		"the workspace, HOME, and /tmp."
+	if !strings.Contains(got, want) {
+		t.Errorf("harness context does not contain %q: %q", want, got)
+	}
+}
+
+func TestTheShellReportsThatItReadsWiderThanThePathTools(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read | caps.Shell,
+		OfferedTools: []string{"bash"},
+	})
+
+	want := "The shell may also read the system directories, but it can only write where the " +
+		"path tools can."
+	if !strings.Contains(got, want) {
+		t.Errorf("harness context does not contain %q: %q", want, got)
+	}
+}
+
+func TestAnUnconfinedShellDoesNotReportWhereItMayRead(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read | caps.Shell,
+		OfferedTools: []string{"bash"},
+		Yolo:         true,
+	})
+
+	if unwanted := "may also read the system directories"; strings.Contains(got, unwanted) {
+		t.Errorf("harness context mentions %q with no sandbox: %q", unwanted, got)
+	}
+}
+
+func TestAnUnconfinedShellReportsNoExecutableDirectories(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read | caps.Shell,
+		ExtraPaths:   shell.Paths{Exec: []string{"/commands"}},
+		OfferedTools: []string{"bash"},
+		Yolo:         true,
+	})
+
+	if unwanted := "may execute files"; strings.Contains(got, unwanted) {
+		t.Errorf("harness context mentions %q with no sandbox: %q", unwanted, got)
+	}
+}
+
+func TestTheHarnessDisclosesThatABashCallTakesItsProcessesWithIt(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read | caps.Shell,
+		OfferedTools: []string{"bash", "job"},
+		JobsGranted:  true,
+	})
+
+	want := "A process a bash call leaves running is killed when that call ends, so start anything " +
+		"that must outlive the call with the job tool"
+	if !strings.Contains(got, want) {
+		t.Errorf("harness context does not contain %q: %q", want, got)
+	}
+}
+
+func TestTheHarnessOffersNoJobToolForAProcessThatMustOutliveACall(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read | caps.Shell,
+		OfferedTools: []string{"bash"},
+	})
+
+	want := "A process a bash call leaves running is killed when that call ends"
+	if !strings.Contains(got, want) {
+		t.Errorf("harness context does not contain %q: %q", want, got)
+	}
+	if unwanted := "with the job tool"; strings.Contains(got, unwanted) {
+		t.Errorf("harness context offers %q with no such tool: %q", unwanted, got)
+	}
+}
+
+func TestAnUnconfinedShellKeepsItsBackgroundProcessesUnmentioned(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read | caps.Shell,
+		OfferedTools: []string{"bash", "job"},
+		JobsGranted:  true,
+		Yolo:         true,
+	})
+
+	if unwanted := "leaves running is killed"; strings.Contains(got, unwanted) {
+		t.Errorf("harness context mentions %q with no sandbox: %q", unwanted, got)
 	}
 }

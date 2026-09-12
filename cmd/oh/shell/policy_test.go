@@ -170,7 +170,7 @@ func TestHostNetworkingRequiresItsCapability(t *testing.T) {
 		pathAccess,
 		mode,
 		files,
-		true,
+		false,
 		func(context.Context, string) error {
 			approvalCount++
 			return approvalFailure

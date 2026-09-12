@@ -326,10 +326,10 @@ func TestASessionCannotBeReadWithoutSomethingToReadItWith(t *testing.T) {
 	self := &sessionList{store: Store{Sessions: []*Session{{Name: "chewy-sardine", IsRunning: true}}}}
 
 	if self.IsReachable(0) {
-		t.Error("expected a running session to be left alone where nothing can read it")
+		t.Error("expected a running session to be left alone when nothing can read it")
 	}
 	if _, isBound := self.Preview(0, key.Key{Code: key.Enter}); isBound {
-		t.Error("expected no preview where nothing can read it")
+		t.Error("expected no preview when nothing can read it")
 	}
 }
 

@@ -13,21 +13,23 @@ import (
 	"crdx.org/io/internal/req"
 	"crdx.org/io/session"
 
+	"crdx.org/io/cmd/oh/conditions"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/cmd/oh/store/wire"
 )
 
 type Meta struct {
-	Model        string   `json:"model"`
-	WorkspaceDir string   `json:"workspaceDir"`
-	Provider     string   `json:"provider"`
-	Effort       string   `json:"effort,omitempty"`
-	IsFast       bool     `json:"fast,omitempty"`
-	SystemPrompt string   `json:"system_prompt,omitempty"`
-	Tools        []string `json:"tools,omitempty"`
-	HostLoopback []uint16 `json:"host_loopback,omitempty"`
-	Yolo         bool     `json:"yolo,omitempty"`
+	Model        string                 `json:"model"`
+	WorkspaceDir string                 `json:"workspaceDir"`
+	Provider     string                 `json:"provider"`
+	Effort       string                 `json:"effort,omitempty"`
+	IsFast       bool                   `json:"fast,omitempty"`
+	SystemPrompt string                 `json:"system_prompt,omitempty"`
+	Tools        []string               `json:"tools,omitempty"`
+	Conditions   *conditions.Conditions `json:"conditions,omitempty"`
+	HostLoopback []uint16               `json:"host_loopback,omitempty"`
+	Yolo         bool                   `json:"yolo,omitempty"`
 }
 
 type listingData struct {

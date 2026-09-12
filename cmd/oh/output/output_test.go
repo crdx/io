@@ -107,7 +107,7 @@ func TestNothingIsSetOffFromNothing(t *testing.T) {
 	screen.Line("> hello")
 
 	if got := screenOutput.String(); got != "> hello" {
-		t.Errorf("expected the conversation to open where it opens, got %q", got)
+		t.Errorf("expected the conversation to open at its start, got %q", got)
 	}
 }
 

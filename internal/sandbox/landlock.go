@@ -192,6 +192,11 @@ func Available() error {
 	return err
 }
 
+func AreUnixSocketsReachable() bool {
+	version, err := landlockVersion()
+	return err == nil && version >= unixSocketsABI
+}
+
 func Supported(ctx context.Context) error {
 	if err := Available(); err != nil {
 		return err

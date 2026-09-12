@@ -356,7 +356,7 @@ func New(
 		return approveNetwork(ctx, command)
 	}
 
-	return bash.New(files, fresh, networkApproval, runner)
+	return bash.New(files, fresh, networkApproval, runner, !isYolo)
 }
 
 func NewJob(

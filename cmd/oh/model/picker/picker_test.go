@@ -233,10 +233,10 @@ func TestWhatTheModelPickerPaintsMatchesTheGolden(t *testing.T) {
 		cursor int
 		query  string
 	}{
-		{name: "a wide terminal, where the columns stay to the left", room: 150, height: 24, cursor: 0},
+		{name: "a wide terminal, with the columns kept to the left", room: 150, height: 24, cursor: 0},
 		{name: "a terminal the columns fill exactly", room: 80, height: 24, cursor: 1},
 		{name: "no room for every row, so the list is scrolled to the cursor", room: 80, height: 3, cursor: 2},
-		{name: "a narrow terminal, where the columns are clipped", room: 46, height: 24, cursor: 0},
+		{name: "a narrow terminal, with the columns clipped", room: 46, height: 24, cursor: 0},
 		{name: "a filter narrowing the list to one provider", room: 80, height: 24, cursor: 0, query: "opencode"},
 		{name: "a filter no model answers to", room: 80, height: 24, cursor: 0, query: "gemini"},
 	}

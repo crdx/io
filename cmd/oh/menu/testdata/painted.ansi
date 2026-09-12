@@ -55,7 +55,7 @@
   funny-badger    the cancelled turn leaves a tool call unanswered\e[K\r
   able-dolphin    (untitled)\e[K\r
 › brave-otter     rename the harness to oh\e[K\e[J
-=== a narrow terminal, where the columns are clipped ===
+=== a narrow terminal, with the columns clipped ===
 \e[H\e[38;2;150;152;150mFilter: \e[0m\e[K\r
 \e[4m\e[38;2;150;152;150m  Agent  Title\e[0m\e[0m\e[K\r
   chewy-sardine   why does the spinner stutte…\e[K\r

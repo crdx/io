@@ -795,7 +795,7 @@ func TestAListThatCannotBePreviewedChoosesOnEnter(t *testing.T) {
 	self := listState(rowsNamed("first", "second"), 1)
 
 	if action := self.apply(key.Key{Code: key.Enter}); action != rowChosen {
-		t.Errorf("expected enter to choose where nothing can be previewed, got %v", action)
+		t.Errorf("expected enter to choose when nothing can be previewed, got %v", action)
 	}
 }
 
@@ -860,7 +860,7 @@ func TestARowThatCannotBeChosenIsReadButNeverOpened(t *testing.T) {
 		t.Errorf("expected a second enter to refuse to open the row, got %v", action)
 	}
 	if !self.preview.isOpen {
-		t.Error("expected the preview to stay open where the row cannot be opened")
+		t.Error("expected the preview to stay open when the row cannot be opened")
 	}
 }
 

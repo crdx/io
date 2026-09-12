@@ -14,6 +14,7 @@ import (
 
 	"crdx.org/io/cmd/oh/call"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/conditions"
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/jobrecord"
@@ -180,7 +181,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		}
 
 	case caps.ModeChange, caps.JobStop, portgrant.SandboxToHostChange, jobrecord.Ended, jobrecord.EndedWithSession,
-		pathgrant.Change, turn.HarnessPoke:
+		conditions.Change, pathgrant.Change, turn.HarnessPoke:
 		if message, isSaid := HarnessNotice(event); isSaid {
 			self.drawSubmitted(message, submittedMarker(true))
 		}

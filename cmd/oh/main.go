@@ -35,6 +35,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cli"
 	"crdx.org/io/cmd/oh/commands"
+	"crdx.org/io/cmd/oh/conditions"
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/cycle"
 	"crdx.org/io/cmd/oh/demo"
@@ -639,6 +640,18 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		))
 	}
 
+	currentConditions := conditions.Probe(args.Yolo, !args.IsPrinting)
+	var createdConditions *conditions.Conditions
+	var recordedEvents []agent.Event
+	if resumedSession != nil {
+		createdConditions = resumedSession.Meta.Conditions
+		recordedEvents = resumedSession.Events
+	}
+	restoredConditions, err := conditions.Restore(createdConditions, recordedEvents, currentConditions)
+	if err != nil {
+		return "", err
+	}
+
 	var systemPrompt string
 	if resumedSession != nil && resumedSession.Meta.SystemPrompt != "" {
 		systemPrompt = resumedSession.Meta.SystemPrompt
@@ -656,9 +669,10 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			ExtraPaths:     settings.Sandbox,
 			DropsDirectory: dropKeeper.GetDirectory(),
 			Skills:         availableSkills,
+			OfferedTools:   args.Tools,
+			Conditions:     currentConditions,
 			JobsGranted:    jobManager != nil,
 			NetworkGranted: args.Caps.Has(caps.Network),
-			IsInteractive:  !args.IsPrinting,
 			Yolo:           args.Yolo,
 		})
 		if err != nil {
@@ -807,6 +821,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if resumedSession == nil {
 		meta.SystemPrompt = systemPrompt
 		meta.Tools = toolset.Names(enabledTools)
+		meta.Conditions = &currentConditions
 		if err := log.SetMeta(meta); err != nil {
 			return "", err
 		}
@@ -914,6 +929,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		experimental:    experimentalToggles,
 		workspace:       workspace,
 		mode:            mode,
+		conditions:      restoredConditions.State,
 		pathGrants:      pathGrants,
 		hostToSandbox:   hostToSandbox,
 		sandboxToHost:   sandboxToHost,
@@ -929,6 +945,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	if resumedSession == nil && model.SupportsFastMode(selection.Provider) {
 		app.openingEvents = []agent.Event{model.FastModeEvent(selection.IsFast)}
+	}
+	if restoredConditions.IsChanged {
+		app.pendingNotices.add(restoredConditions.Change)
 	}
 	app.onFailure = func(failure error) {
 		_ = notification.SendTurnError(context.Background(), screen.WriteEscape, workspace, failure)

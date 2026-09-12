@@ -126,7 +126,7 @@ func TestAFilterWithoutUnixSocketIsolationRefusesThemOutright(t *testing.T) {
 	fd, err := unix.Socket(unix.AF_UNIX, unix.SOCK_STREAM, 0)
 	if err == nil {
 		_ = unix.Close(fd)
-		t.Fatal("a Unix socket was allowed where landlock could not confine it")
+		t.Fatal("a Unix socket was allowed when landlock could not confine it")
 	}
 	if !errors.Is(err, unix.EAFNOSUPPORT) {
 		t.Errorf("got %v, want the filter's refusal", err)

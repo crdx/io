@@ -352,7 +352,7 @@
 \r\e[K\e[38;2;192;128;80m• \e[0mand a word about it\e[?25h\e[?2026l
 === a9 a picture named in an answer beside prose ===
 \e[?2026h\e[?25l\e[?7l\r\e[KLook at \e[38;2;150;152;150m(/pictures/chart.png)\e[0m closely.\e[?25h\e[?2026l
-=== b1 a picture named where the terminal draws none ===
+=== b1 a picture named for a terminal that draws no pictures ===
 \e[?2026h\e[?25l\e[?7l\r\e[KHere is the shape of it:\r
 \r\e[K\r
 \r\e[K\e[38;2;150;152;150m(/pictures/chart.png)\e[0m\r

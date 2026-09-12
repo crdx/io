@@ -154,7 +154,7 @@ func TestACommandStoppedByItsCallerDoesNotBlameTheTimeout(t *testing.T) {
 		t.Errorf("got %v, want a plain stop", err)
 	}
 	if strings.Contains(err.Error(), "because") {
-		t.Errorf("got %v, want no reason where none was given", err)
+		t.Errorf("got %v, want no reason when the caller gave no reason", err)
 	}
 }
 

@@ -1,0 +1,34 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## Mode · rxwngl · +0s
+
+## User · +0s
+
+bind a listener on ::1
+
+## Assistant · +0s
+
+There is no IPv6 here, so 127.0.0.1 instead.
+
+## Conditions · ipv6, asking the user · +0s
+
+```
+This machine has IPv6 again, so ::1 reaches the sandbox loopback. The user has returned, so you can ask them a question.
+```
+
+## User · +0s
+
+try ::1 again
+
+## Assistant · +0s
+
+::1 answers now.
+

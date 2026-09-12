@@ -89,18 +89,18 @@ func branchOf(workspaceDir string) string {
 }
 
 func gitDirOf(workspaceDir string) string {
-	where := filepath.Join(workspaceDir, ".git")
+	gitPath := filepath.Join(workspaceDir, ".git")
 
-	info, err := os.Stat(where)
+	info, err := os.Stat(gitPath)
 	if err != nil {
 		return ""
 	}
 
 	if info.IsDir() {
-		return where
+		return gitPath
 	}
 
-	pointer, err := os.ReadFile(where) //nolint:gosec // the .git of the workspace
+	pointer, err := os.ReadFile(gitPath) //nolint:gosec // the .git of the workspace
 	if err != nil {
 		return ""
 	}

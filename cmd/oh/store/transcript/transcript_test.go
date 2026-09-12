@@ -322,7 +322,7 @@ func TestTranscriptLogsACallWithNoSubject(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(stored), "```\nls [ok, call-1]\n```") {
-		t.Errorf("expected no colon where there is no subject to name, got:\n%s", stored)
+		t.Errorf("expected no colon when there is no subject to name, got:\n%s", stored)
 	}
 }
 

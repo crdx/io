@@ -1,0 +1,16 @@
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m listen on a Unix socket                                                                            \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[KA socket beneath /tmp it is.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 A Unix socket no longer works at any path, so no service can listen on a Unix socket. This      \e[0m\r
+\e[48;2;52;53;65m    machine has lost IPv6, so only 127.0.0.1 works.                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m listen on it again                                                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KNot any more, so 127.0.0.1 it is.\e[?25h\e[?2026l\r
