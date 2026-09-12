@@ -88,11 +88,13 @@ func PriceTiers() []PriceTier {
 	return []PriceTier{PriceLow, PriceMedium, PriceHigh, PriceExtreme}
 }
 
+const square = "◼"
+
 var priceTierNames = map[PriceTier]string{
-	PriceLow:     "cheap",
-	PriceMedium:  "fair",
-	PriceHigh:    "costly",
-	PriceExtreme: "absurd",
+	PriceLow:     square,
+	PriceMedium:  square + square,
+	PriceHigh:    square + square + square,
+	PriceExtreme: square + square + square + square,
 }
 
 func (self PriceTier) String() string {

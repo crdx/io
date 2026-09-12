@@ -184,7 +184,7 @@ var priceTierStyles = map[agent.PriceTier]style.Style{
 	agent.PriceLow:     style.LowPrice,
 	agent.PriceMedium:  style.MediumPrice,
 	agent.PriceHigh:    style.HighPrice,
-	agent.PriceExtreme: style.ExtremePrice,
+	agent.PriceExtreme: style.WtfPrice,
 }
 
 func inputRate(prices agent.TokenPrices) float64 {

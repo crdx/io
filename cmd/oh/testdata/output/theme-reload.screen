@@ -1,0 +1,44 @@
+=== every palette role ===
+normal
+dim
+accent
+status warning
+status success
+status info
+status danger
+syntax type
+syntax literal
+syntax operator
+user background
+harness background
+=== inherited theme restored ===
+
+ inherited
+=== invalid theme left untouched ===
+
+ unchanged
+
+
+The configuration could not be reloaded:
+config.toml: toml: line 3
+(last key "ui.theme.user"): "red" is not a colour; write #rrggbb or "default"
+── ·✦· ──────────────────────────── GPT Sol 5.6 ▫▫▫▪·· ─ ?% 0/? ────────────────────────────────────
+
+── rxw ngl ─ workspace ───────────────────── usage n/a ─────────────────────────── brave-otter 🦦 ──
+=== live turn and input draft ===
+
+ explain it
+
+
+still thinking
+
+Configuration reloaded automatically (dismissing in 10s)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+half written
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== replayed conversation ===
+
+ read it
+
+
+model answer

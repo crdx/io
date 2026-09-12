@@ -15,6 +15,20 @@ grouping = ["notice", "reasoning tool", "answer"]
 reasoning = "plain"
 currency = ""
 
+[ui.theme]
+normal = "default"
+dim = "#969896"
+accent = "#c08050"
+user = "#343541"
+harness = "#303a43"
+status_success = "#4c9a2c"
+status_info = "#81a2be"
+status_warning = "#cfad00"
+status_danger = "#cc6666"
+syntax_type = "#f0c674"
+syntax_literal = "#b5bd68"
+syntax_operator = "#8abeb7"
+
 [tool]
 output = "12K"
 

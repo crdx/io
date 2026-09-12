@@ -465,7 +465,7 @@ func (self *wizard) authenticate(chosenProvider provider, shouldSeparate bool) e
 		_, _ = fmt.Fprintf(
 			self.output,
 			"%s %s\n\n%s\n\n",
-			style.Information(stepMark),
+			style.Info(stepMark),
 			fmt.Sprintf(openingBrowser, style.Subject(chosenProvider.name)),
 			link.RenderURL(style.Link(address), address),
 		)

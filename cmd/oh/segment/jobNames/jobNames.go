@@ -92,7 +92,7 @@ func (self state) isShown(snapshot jobs.Snapshot) bool {
 func describe(snapshot jobs.Snapshot) string {
 	switch snapshot.State {
 	case jobs.StateStarting, jobs.StateRunning:
-		return style.Information(liveMark + " " + snapshot.Name)
+		return style.Info(liveMark + " " + snapshot.Name)
 	case jobs.StateStopping:
 		return style.Change(liveMark + " " + snapshot.Name)
 	case jobs.StateFailed:

@@ -114,6 +114,7 @@ type displayState struct {
 	bar                bar.Config
 	streamingMode      output.StreamingMode
 	reasoningRendering output.ReasoningRendering
+	theme              style.Theme
 	pictures           pictures.Display
 }
 
@@ -1088,6 +1089,12 @@ func (self *App) reloadConfig(watchFailure error) bool {
 				Status: agent.ErrorStatus,
 			})
 			return true
+		}
+		isThemeChanged := self.display.theme != result.LiveConfig.Theme
+		if isThemeChanged {
+			style.ApplyTheme(result.LiveConfig.Theme)
+			self.display.theme = result.LiveConfig.Theme
+			defer self.redraw()
 		}
 		self.slash.completion.Reset()
 		self.continueMessage = result.LiveConfig.ContinueMessage

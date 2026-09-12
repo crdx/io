@@ -383,6 +383,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	defer configObserver.Close()
 
+	style.ApplyTheme(settings.Ui.Theme)
 	editorConfiguration := editor.NewConfiguration(settings.Editor.Command)
 	toolOutputLimit := truncate.NewLimit(settings.Tool.Output.Bytes)
 	experimentalToggles := experimental.New(settings.Experimental)
@@ -1006,6 +1007,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	app.continueMessage = liveConfig.ContinueMessage
 	app.display.streamingMode = liveConfig.StreamingMode
 	app.display.reasoningRendering = liveConfig.ReasoningRendering
+	app.display.theme = liveConfig.Theme
 	screen.SetGrouping(liveConfig.Grouping)
 	app.display.bar = bar.NewConfiguration(barRegistry, liveConfig.SegmentLayout)
 

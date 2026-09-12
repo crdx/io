@@ -311,7 +311,7 @@ func frameSubmitted(content []string, columns int, background style.Style) []str
 func NoticeStyle(severity agent.Status) style.Style {
 	switch severity {
 	case agent.InfoStatus:
-		return style.Information
+		return style.Info
 	case agent.SuccessStatus:
 		return style.Success
 	case agent.ErrorStatus:

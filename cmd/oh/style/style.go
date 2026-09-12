@@ -18,112 +18,94 @@ import (
 type Style func(format any, args ...any) string
 
 const (
-	red    = "#cc6666"
-	copper = "#c08050"
-	gold   = "#cfad00"
-	maize  = "#f0c674"
-	sage   = "#b5bd68"
-	lime   = "#4c9a2c"
-	teal   = "#8abeb7"
-	steel  = "#81a2be"
-	mauve  = "#c9a6d4"
-	orchid = "#e6a8ff"
-	aqua   = "#7ff0dd"
-	grey   = "#969896"
-
-	none = ""
-)
-
-const (
 	reset      = "\x1b[0m"
 	italicCode = "3"
+	orchid     = "#e6a8ff"
+	aqua       = "#7ff0dd"
+	mauve      = "#c9a6d4"
 )
 
 var (
-	Accent Style = hex(copper)
-	Normal Style = hex(none)
-	Dim    Style = hex(grey)
-)
+	Accent Style = accent()
+	Normal Style = normal()
+	Dim    Style = dim()
 
-var (
+	Answer     Style = Normal
+	Call       Style = Normal
+	TypedInput Style = Normal
+
 	Reasoning      Style = decorate(col.Italic, Dim)
-	Answer         Style = Normal
-	Call           Style = Normal
-	Change         Style = hex(gold)
-	Success        Style = hex(lime)
-	Information    Style = hex(steel)
-	CancelledCall  Style = Dim
-	StoppedTurn    Style = hex(gold)
-	Failure        Style = hex(red)
-	Subject        Style = hex(copper)
-	Qualifier      Style = Dim
-	Result         Style = Dim
-	Spinner        Style = hex(copper)
-	Prompt         Style = hex(copper)
-	Rule           Style = Dim
-	Hazard         Style = hex(red)
-	Subtle         Style = Dim
-	Read           Style = hex(lime)
-	Write          Style = hex(gold)
-	Shell          Style = hex(steel)
-	Skill          Style = hex(mauve)
-	History        Style = hex(mauve)
-	Harness        Style = background("#303a43")
-	PendingPrefix  Style = col.Underline
-	ScrolledInput  Style = Dim
-	ChosenRow      Style = hex(copper)
-	LowPrice       Style = hex(lime)
-	MediumPrice    Style = hex(steel)
-	HighPrice      Style = hex(gold)
-	ExtremePrice   Style = hex(red)
 	RunningSession Style = decorate(col.Italic, Dim)
 	Column         Style = decorate(col.Underline, Dim)
-	TypedInput     Style = Normal
-	User           Style = background("#343541")
 	Greeting       Style = col.Italic
-	Lookup         Style = hex(steel)
-	Network        Style = hex(steel)
-	Simulation     Style = gradient(orchid, aqua)
-)
+	PendingPrefix  Style = col.Underline
 
-var ChosenRunningSession Style = decorate(col.Italic, ChosenRow)
+	Success Style = success()
+	Read    Style = success()
 
-var (
-	Heading Style = hex(gold)
-	Link    Style = hex(steel)
+	Change      Style = warning()
+	Write       Style = warning()
+	StoppedTurn Style = warning()
+
+	Info    Style = information()
+	Shell   Style = information()
+	Network Style = information()
+	Lookup  Style = information()
+	Git     Style = information()
+
+	Failure Style = danger()
+	Hazard  Style = danger()
+
+	LowPrice    Style = success()
+	HighPrice   Style = warning()
+	MediumPrice Style = information()
+	WtfPrice    Style = danger()
+
+	CancelledCall Style = Dim
+	Qualifier     Style = Dim
+	Result        Style = Dim
+	Rule          Style = Dim
+	Subtle        Style = Dim
+	ScrolledInput Style = Dim
+
+	Harness Style = harnessBackground()
+	User    Style = userBackground()
+
+	Skill Style = hex(mauve)
+
+	Subject Style = accent()
+	Spinner Style = accent()
+	Prompt  Style = accent()
+
+	ChosenRow            Style = accent()
+	ChosenRunningSession Style = decorate(col.Italic, ChosenRow)
+
+	Simulation Style = gradient(orchid, aqua)
+
+	Heading         Style = warning()
+	MarkdownHeading Style = decorate(col.Bold, Heading)
+
+	Link    Style = information()
 	Address Style = Dim
-	Code    Style = hex(copper)
+	Code    Style = accent()
 	Block   Style = Dim
 	Quote   Style = Dim
-	Bullet  Style = hex(copper)
+	Bullet  Style = accent()
 	Border  Style = Dim
-)
 
-var MarkdownHeading Style = decorate(col.Bold, Heading)
-
-var (
 	Comment     Style = Dim
 	Keyword     Style = hex(mauve)
-	Function    Style = hex(steel)
-	Literal     Style = hex(sage)
-	Number      Style = hex(copper)
-	Type        Style = hex(maize)
-	Operator    Style = hex(teal)
-	Variable    Style = hex(none)
-	Punctuation Style = hex(none)
-)
+	Function    Style = information()
+	Literal     Style = syntaxLiteral()
+	Number      Style = accent()
+	Type        Style = syntaxType()
+	Operator    Style = syntaxOperator()
+	Variable    Style = normal()
+	Punctuation Style = normal()
 
-var (
-	InformationColour, _ = colour(steel)
-	ChangeColour, _      = colour(gold)
-	FailureColour, _     = colour(red)
-	DimColour, _         = colour(grey)
-)
-
-var (
-	InsertedText Style = hex(lime)
-	DeletedText  Style = hex(red)
-	Hunk         Style = hex(steel)
+	InsertedText Style = success()
+	DeletedText  Style = danger()
+	Hunk         Style = information()
 )
 
 func ExecWhenWritable(isWritable bool) Style {
@@ -305,9 +287,55 @@ func hex(value string) Style {
 	}
 }
 
-func background(value string) Style {
-	code := strings.Replace(sgr(value), "38;", "48;", 1)
+func normal() Style {
+	return themedForeground(func(theme *compiledTheme) string { return theme.normal })
+}
 
+func dim() Style {
+	return themedForeground(func(theme *compiledTheme) string { return theme.dim })
+}
+
+func accent() Style {
+	return themedForeground(func(theme *compiledTheme) string { return theme.accent })
+}
+
+func success() Style {
+	return themedForeground(func(theme *compiledTheme) string { return theme.statusSuccess })
+}
+
+func information() Style {
+	return themedForeground(func(theme *compiledTheme) string { return theme.statusInfo })
+}
+
+func warning() Style {
+	return themedForeground(func(theme *compiledTheme) string { return theme.statusWarning })
+}
+
+func danger() Style {
+	return themedForeground(func(theme *compiledTheme) string { return theme.statusDanger })
+}
+
+func syntaxType() Style {
+	return themedForeground(func(theme *compiledTheme) string { return theme.syntaxType })
+}
+
+func syntaxLiteral() Style {
+	return themedForeground(func(theme *compiledTheme) string { return theme.syntaxLiteral })
+}
+
+func syntaxOperator() Style {
+	return themedForeground(func(theme *compiledTheme) string { return theme.syntaxOperator })
+}
+
+func userBackground() Style {
+	return themedBackground(func(theme *compiledTheme) string { return theme.user })
+}
+
+func harnessBackground() Style {
+	return themedBackground(func(theme *compiledTheme) string { return theme.harness })
+}
+
+func themedForeground(selectCode func(*compiledTheme) string) Style {
 	return func(format any, args ...any) string {
 		text := fmt.Sprint(format)
 
@@ -315,16 +343,37 @@ func background(value string) Style {
 			text = fmt.Sprintf(text, args...)
 		}
 
+		code := selectCode(activeTheme.Load())
+		if code == "" || !isColorEnabled {
+			return text
+		}
+
+		return "\x1b[" + code + "m" + text + reset
+	}
+}
+
+func themedBackground(selectCode func(*compiledTheme) string) Style {
+	return func(format any, args ...any) string {
+		text := fmt.Sprint(format)
+
+		if len(args) > 0 {
+			text = fmt.Sprintf(text, args...)
+		}
+
+		code := selectCode(activeTheme.Load())
 		if code == "" || !isColorEnabled {
 			return text
 		}
 
 		openingSequence := "\x1b[" + code + "m"
-
 		text = strings.ReplaceAll(text, reset, reset+openingSequence)
 
 		return openingSequence + text + reset
 	}
+}
+
+func backgroundSequence(value string) string {
+	return strings.Replace(sgr(value), "38;", "48;", 1)
 }
 
 func sgr(value string) string {

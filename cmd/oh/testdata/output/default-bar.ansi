@@ -3,9 +3,9 @@
 === bottom.center while waiting ===
 \e[38;2;150;152;150musage n/a\e[0m
 === bottom.left while running ===
-\e[38;2;76;154;44mr\e[0m\e[38;2;207;173;0mx\e[0m\e[38;2;207;173;0mw\e[0m \e[38;2;129;162;190mn\e[0m\e[38;2;201;166;212mg\e[0m\e[38;2;129;162;190ml\e[0m \e[38;2;150;152;150m─\e[0m workspace
+\e[38;2;76;154;44mr\e[0m\e[38;2;207;173;0mx\e[0m\e[38;2;207;173;0mw\e[0m \e[38;2;129;162;190mn\e[0m\e[38;2;129;162;190mg\e[0m\e[38;2;129;162;190ml\e[0m \e[38;2;150;152;150m─\e[0m workspace
 === bottom.left while waiting ===
-\e[38;2;76;154;44mr\e[0m\e[38;2;207;173;0mx\e[0m\e[38;2;207;173;0mw\e[0m \e[38;2;129;162;190mn\e[0m\e[38;2;201;166;212mg\e[0m\e[38;2;129;162;190ml\e[0m \e[38;2;150;152;150m─\e[0m workspace
+\e[38;2;76;154;44mr\e[0m\e[38;2;207;173;0mx\e[0m\e[38;2;207;173;0mw\e[0m \e[38;2;129;162;190mn\e[0m\e[38;2;129;162;190mg\e[0m\e[38;2;129;162;190ml\e[0m \e[38;2;150;152;150m─\e[0m workspace
 === bottom.right while running ===
 \e[38;2;150;152;150mbrave-otter\e[0m 🦦
 === bottom.right while waiting ===

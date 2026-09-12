@@ -37,6 +37,7 @@
 
 ### Interface
 
+- Support theme colour customisation
 - Theme harness-submitted messages
 - Gather consecutive mid-round notices into one panel
 - Handle pending notices correctly

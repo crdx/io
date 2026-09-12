@@ -1,6 +1,7 @@
 package usage
 
 import (
+	"image/color"
 	"strings"
 	"testing"
 	"time"
@@ -9,6 +10,31 @@ import (
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 )
+
+func TestGaugeColoursFollowTheTheme(t *testing.T) {
+	theme := style.DefaultTheme()
+	theme.Dim = "#0a0c0e"
+	theme.StatusWarning = "#010203"
+	theme.StatusInfo = "#040506"
+	theme.StatusDanger = "#070809"
+	restoreTheme := style.ApplyTheme(theme)
+	defer restoreTheme()
+
+	for pace, want := range map[Pace]color.RGBA{
+		PaceAhead:    {R: 1, G: 2, B: 3, A: 0xff},
+		PaceEven:     {R: 4, G: 5, B: 6, A: 0xff},
+		PaceCritical: {R: 7, G: 8, B: 9, A: 0xff},
+	} {
+		if got := paceColour(pace); got != want {
+			t.Errorf("pace %d colour = %+v, want %+v", pace, got, want)
+		}
+	}
+
+	picture := gaugeImage(0, nil, PaceEven, 1, Graphics{CellWidth: 10, CellHeight: 20})
+	if got, want := picture.RGBAAt(0, 10), (color.RGBA{R: 5, G: 6, B: 7, A: 0xff}); got != want {
+		t.Errorf("track colour = %+v, want %+v", got, want)
+	}
+}
 
 func drawnReport(t *testing.T, at time.Time) string {
 	t.Helper()

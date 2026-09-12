@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"crdx.org/io/cmd/oh/config"
@@ -101,6 +102,25 @@ func TestRenderWithinHandsAFittingSegmentOnlyTheRoomThatRemains(t *testing.T) {
 	}
 	if style.Plain(got) != "abc ─ +50" || style.Width(got) > 10 {
 		t.Errorf("got %q at width %d", style.Plain(got), style.Width(got))
+	}
+}
+
+func TestTheSegmentSeparatorFollowsTheActiveTheme(t *testing.T) {
+	theme := style.DefaultTheme()
+	theme.Dim = "#010203"
+	restoreTheme := style.ApplyTheme(theme)
+	defer restoreTheme()
+
+	layout := segment.Layout{
+		segment.TopLeft: {
+			segment.Instance{Name: "first", Segment: fixedSegment("abc")},
+			segment.Instance{Name: "second", Segment: fixedSegment("def")},
+		},
+	}
+
+	got := Render(layout, segment.TopLeft, segment.Context{})
+	if want := " " + style.Dim("─") + " "; !strings.Contains(got, want) {
+		t.Errorf("got %q, want the separator drawn as %q", got, want)
 	}
 }
 

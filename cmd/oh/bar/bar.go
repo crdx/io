@@ -138,7 +138,9 @@ func NewRegistry(options Options) segment.Registry {
 	}
 }
 
-var segmentSeparator = " " + style.Subtle("─") + " "
+func segmentSeparator() string {
+	return " " + style.Subtle("─") + " "
+}
 
 func Render(layout segment.Layout, position segment.Position, context segment.Context) string {
 	return render(layout, position, context, -1)
@@ -156,7 +158,7 @@ func render(layout segment.Layout, position segment.Position, context segment.Co
 		instance = underlying(instance)
 		separatorCells := 0
 		if len(drawnSegments) > 0 {
-			separatorCells = style.Width(segmentSeparator)
+			separatorCells = style.Width(segmentSeparator())
 		}
 
 		var text string
@@ -177,7 +179,7 @@ func render(layout segment.Layout, position segment.Position, context segment.Co
 		usedCells += separatorCells + textCells
 	}
 
-	return strings.Join(drawnSegments, segmentSeparator)
+	return strings.Join(drawnSegments, segmentSeparator())
 }
 
 func underlying(instance segment.Segment) segment.Segment {
@@ -238,7 +240,7 @@ func (self *Config) RenderInfo(context segment.Context) (string, error) {
 	drawnRows := make([]string, 0, len(rows))
 	for _, row := range rows {
 		padding := strings.Repeat(" ", nameCells-style.Width(row.name)+2)
-		drawnRows = append(drawnRows, style.Information(row.name)+padding+row.value)
+		drawnRows = append(drawnRows, style.Info(row.name)+padding+row.value)
 	}
 	return strings.Join(drawnRows, "\n"), nil
 }

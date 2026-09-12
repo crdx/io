@@ -14,6 +14,147 @@ func enableColor(t *testing.T) {
 	t.Cleanup(func() { apply(previous) })
 }
 
+func TestApplyingAThemeChangesExistingStyles(t *testing.T) {
+	enableColor(t)
+
+	theme := DefaultTheme()
+	theme.Accent = "#010203"
+	theme.User = "#040506"
+	theme.Harness = "#070809"
+	t.Cleanup(ApplyTheme(theme))
+
+	if got := Subject("subject"); !strings.Contains(got, "38;2;1;2;3") {
+		t.Errorf("accent used the wrong theme colour: %q", got)
+	}
+	if got := User("user"); !strings.Contains(got, "48;2;4;5;6") {
+		t.Errorf("user message used the wrong theme background: %q", got)
+	}
+	if got := Harness("harness"); !strings.Contains(got, "48;2;7;8;9") {
+		t.Errorf("harness message used the wrong theme background: %q", got)
+	}
+}
+
+func TestEveryStyleFollowsItsOwnPaletteRole(t *testing.T) {
+	enableColor(t)
+
+	t.Cleanup(ApplyTheme(Theme{
+		Normal:         "#010101",
+		Dim:            "#020202",
+		Accent:         "#030303",
+		StatusSuccess:  "#040404",
+		StatusInfo:     "#050505",
+		StatusWarning:  "#060606",
+		StatusDanger:   "#070707",
+		SyntaxType:     "#080808",
+		SyntaxLiteral:  "#090909",
+		SyntaxOperator: "#0a0a0a",
+	}))
+
+	roles := map[string]map[string]Style{
+		"38;2;1;1;1": {
+			"answer":      Answer,
+			"call":        Call,
+			"normal":      Normal,
+			"punctuation": Punctuation,
+			"typed input": TypedInput,
+			"variable":    Variable,
+		},
+		"38;2;2;2;2": {
+			"address":        Address,
+			"block":          Block,
+			"border":         Border,
+			"cancelled call": CancelledCall,
+			"comment":        Comment,
+			"dim":            Dim,
+			"qualifier":      Qualifier,
+			"quote":          Quote,
+			"result":         Result,
+			"rule":           Rule,
+			"scrolled input": ScrolledInput,
+			"subtle":         Subtle,
+		},
+		"38;2;3;3;3": {
+			"accent":     Accent,
+			"bullet":     Bullet,
+			"chosen row": ChosenRow,
+			"code":       Code,
+			"number":     Number,
+			"prompt":     Prompt,
+			"spinner":    Spinner,
+			"subject":    Subject,
+		},
+		"38;2;4;4;4": {
+			"inserted text": InsertedText,
+			"low price":     LowPrice,
+			"read":          Read,
+			"success":       Success,
+		},
+		"38;2;5;5;5": {
+			"function":     Function,
+			"hunk":         Hunk,
+			"information":  Info,
+			"link":         Link,
+			"lookup":       Lookup,
+			"medium price": MediumPrice,
+			"network":      Network,
+			"shell":        Shell,
+		},
+		"38;2;6;6;6": {
+			"change":       Change,
+			"heading":      Heading,
+			"high price":   HighPrice,
+			"stopped turn": StoppedTurn,
+			"write":        Write,
+		},
+		"38;2;7;7;7": {
+			"deleted text":  DeletedText,
+			"extreme price": WtfPrice,
+			"failure":       Failure,
+			"hazard":        Hazard,
+		},
+		"38;2;8;8;8":    {"type": Type},
+		"38;2;9;9;9":    {"literal": Literal},
+		"38;2;10;10;10": {"operator": Operator},
+	}
+
+	for sequence, styles := range roles {
+		for name, paint := range styles {
+			if got := paint("text"); !strings.Contains(got, sequence) {
+				t.Errorf("%s did not follow its palette role: %q", name, got)
+			}
+		}
+	}
+}
+
+func TestAThemeColourAcceptsTheTerminalDefault(t *testing.T) {
+	var value Colour
+	if err := value.UnmarshalText([]byte(" DEFAULT ")); err != nil {
+		t.Fatal(err)
+	}
+	if value != "" {
+		t.Errorf("got %q, want the terminal default", value)
+	}
+}
+
+func TestAThemeCanUseTheTerminalDefault(t *testing.T) {
+	enableColor(t)
+
+	theme := DefaultTheme()
+	theme.Accent = ""
+	t.Cleanup(ApplyTheme(theme))
+
+	if got := Subject("subject"); got != "subject" {
+		t.Errorf("terminal-default accent was painted %q", got)
+	}
+}
+
+func TestAThemeColourRefusesAnythingOtherThanSixDigitHex(t *testing.T) {
+	var value Colour
+	if err := value.UnmarshalText([]byte("blue")); err == nil {
+		t.Fatal("expected a named colour to be refused")
+	}
+}
+
 func TestDisabledCapabilitiesTakeTheMutedColour(t *testing.T) {
 	enableColor(t)
 
@@ -53,7 +194,7 @@ func TestAUserMessageHasABackgroundThatSurvivesInnerStyles(t *testing.T) {
 func TestAStyleOverAnotherResumesWhereTheInnerOneReset(t *testing.T) {
 	enableColor(t)
 
-	opening := "\x1b[" + sgr(copper) + "m"
+	opening := "\x1b[" + sgr(string(DefaultTheme().Accent)) + "m"
 	got := ChosenRow.Over("row " + Qualifier("note") + " tail")
 
 	if count := strings.Count(got, opening); count != 2 {

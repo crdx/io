@@ -19,6 +19,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
 	"crdx.org/io/cmd/oh/segment/workspaceDir"
 	"crdx.org/io/cmd/oh/snippets"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/work"
 )
 
@@ -977,6 +978,58 @@ func brokenLayout(t *testing.T, body string) (segment.Layout, error) {
 	t.Helper()
 
 	return configFrom(t, body).BuildLayout(testSegments())
+}
+
+func TestAConfigWrittenBeforeThemesExistedNeedsNoMigrating(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, []byte("version = 10\n[input]\ncontinue = \"go on\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatalf("a config from before themes existed was refused: %v", err)
+	}
+	if config.Ui.Theme != style.DefaultTheme() {
+		t.Errorf("got theme %+v, want defaults %+v", config.Ui.Theme, style.DefaultTheme())
+	}
+}
+
+func TestAThemeOverridesOneColourWithoutDroppingTheRest(t *testing.T) {
+	config := configFrom(t, `
+		[ui.theme]
+		accent = "#010203"
+	`)
+
+	if config.Ui.Theme.Accent != "#010203" {
+		t.Errorf("got accent colour %q", config.Ui.Theme.Accent)
+	}
+	if config.Ui.Theme.StatusDanger != style.DefaultTheme().StatusDanger {
+		t.Errorf("got status danger colour %q, want default %q", config.Ui.Theme.StatusDanger, style.DefaultTheme().StatusDanger)
+	}
+}
+
+func TestAThemeColourCanUseTheTerminalDefault(t *testing.T) {
+	config := configFrom(t, `
+		[ui.theme]
+		dim = "default"
+	`)
+
+	if config.Ui.Theme.Dim != "" {
+		t.Errorf("got dim colour %q, want the terminal default", config.Ui.Theme.Dim)
+	}
+}
+
+func TestAnInvalidThemeColourIsRefused(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[ui.theme]\nstatus_danger = \"red\"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil || !strings.Contains(err.Error(), "#rrggbb") {
+		t.Fatalf("got %v, want a colour format error", err)
+	}
 }
 
 func TestEveryStreamingModeIsAccepted(t *testing.T) {

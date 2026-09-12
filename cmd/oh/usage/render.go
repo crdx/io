@@ -87,7 +87,7 @@ func renderProvider(provider Snapshot, now time.Time, labelWidth int, gauges *Ga
 }
 
 func renderHeader(provider Snapshot, now time.Time) string {
-	name := style.Information(provider.Provider.Label)
+	name := style.Info(provider.Provider.Label)
 
 	if provider.Status == StatusFailed {
 		return style.Failure(failureMark) + " " + name + " " + style.Dim(provider.Message)
@@ -262,7 +262,7 @@ func PaceStyle(pace Pace) style.Style {
 	case PaceEven:
 	}
 
-	return style.Information
+	return style.Info
 }
 
 func sameStyle(left style.Style, right style.Style) bool {

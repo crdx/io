@@ -110,7 +110,7 @@ func providerCells(report providerReport) []string {
 }
 
 func sourceCell(report providerReport) string {
-	source := style.Information(report.Source)
+	source := style.Info(report.Source)
 	if report.Why == "" {
 		return source
 	}

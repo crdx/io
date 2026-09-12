@@ -21,6 +21,7 @@ import (
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/snippets"
+	"crdx.org/io/cmd/oh/style"
 
 	"crdx.org/io/internal/format"
 	"crdx.org/io/internal/util/pathutil"
@@ -123,6 +124,7 @@ type Ui struct {
 	Grouping           output.Grouping           `toml:"grouping"`
 	ReasoningRendering output.ReasoningRendering `toml:"reasoning"`
 	Currency           string                    `toml:"currency"`
+	Theme              style.Theme               `toml:"theme"`
 }
 
 type Tool struct {
@@ -187,6 +189,7 @@ type LiveConfig struct {
 	StreamingMode      output.StreamingMode
 	Grouping           output.Grouping
 	ReasoningRendering output.ReasoningRendering
+	Theme              style.Theme
 	ToolOutputBytes    int
 	Permissions        permission.Set
 	Experimental       map[string]any
@@ -222,6 +225,7 @@ func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
 		StreamingMode:      self.Ui.StreamingMode,
 		Grouping:           self.Ui.Grouping,
 		ReasoningRendering: self.Ui.ReasoningRendering,
+		Theme:              self.Ui.Theme,
 		ToolOutputBytes:    self.Tool.Output.Bytes,
 		Permissions:        permissions,
 		Experimental:       maps.Clone(self.Experimental),

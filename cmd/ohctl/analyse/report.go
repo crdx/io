@@ -128,7 +128,7 @@ func cacheSection(analysis PromptCacheAnalysis) section {
 		rows = append(rows, cacheRow(model.ProviderName(statistics.Provider), statistics, style.Answer))
 	}
 	if len(analysis.Providers) > 1 {
-		rows = append(rows, cacheRow(totalName, analysis.Total, style.Information))
+		rows = append(rows, cacheRow(totalName, analysis.Total, style.Info))
 	}
 
 	return section{
@@ -160,7 +160,7 @@ func contextSection(analysis PromptCacheAnalysis) section {
 		rows = append(rows, contextRow(model.ProviderName(statistics.Provider), statistics, style.Answer))
 	}
 	if len(analysis.Providers) > 1 {
-		rows = append(rows, contextRow(totalName, analysis.Total, style.Information))
+		rows = append(rows, contextRow(totalName, analysis.Total, style.Info))
 	}
 
 	return section{
@@ -204,7 +204,7 @@ func modelSection(analysis ModelAnalysis, currency money.Currency) section {
 		total := analysis.Total
 		total.Provider = totalName
 		total.Model = ""
-		rows = append(rows, modelRow(total, currency, style.Information))
+		rows = append(rows, modelRow(total, currency, style.Info))
 	}
 
 	models := section{
@@ -263,7 +263,7 @@ func activitySection(analysis ActivityAnalysis) section {
 		rows = append(rows, activityRow(model.ProviderName(statistics.Provider), statistics, style.Answer))
 	}
 	if len(analysis.Providers) > 1 {
-		rows = append(rows, activityRow(totalName, analysis.Total, style.Information))
+		rows = append(rows, activityRow(totalName, analysis.Total, style.Info))
 	}
 
 	return section{
@@ -315,7 +315,7 @@ func faultSection(analysis FaultAnalysis) section {
 		rows = append(rows, faultRow(model.ProviderName(statistics.Provider), statistics, style.Answer))
 	}
 	if len(rows) > 1 {
-		rows = append(rows, faultRow(totalName, analysis.Total, style.Information))
+		rows = append(rows, faultRow(totalName, analysis.Total, style.Info))
 	}
 
 	return section{
@@ -356,7 +356,7 @@ func toolSection(analysis ToolAnalysis) section {
 		rows = append(rows, toolRow(statistics.Name, statistics, style.Answer))
 	}
 	if len(analysis.Tools) > 1 {
-		rows = append(rows, toolRow(totalName, analysis.Total, style.Information))
+		rows = append(rows, toolRow(totalName, analysis.Total, style.Info))
 	}
 
 	return section{

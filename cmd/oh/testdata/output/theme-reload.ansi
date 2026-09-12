@@ -1,0 +1,48 @@
+=== every palette role ===
+\e[38;2;1;1;1mnormal\e[0m\r
+\e[38;2;2;2;2mdim\e[0m\r
+\e[38;2;3;3;3maccent\e[0m\r
+\e[38;2;4;4;4mstatus warning\e[0m\r
+\e[38;2;5;5;5mstatus success\e[0m\r
+\e[38;2;6;6;6mstatus info\e[0m\r
+\e[38;2;7;7;7mstatus danger\e[0m\r
+\e[38;2;8;8;8msyntax type\e[0m\r
+\e[38;2;9;9;9msyntax literal\e[0m\r
+\e[38;2;10;10;10msyntax operator\e[0m\r
+\e[48;2;12;12;12muser background\e[0m\r
+\e[48;2;13;13;13mharness background\e[0m\r
+
+=== inherited theme restored ===
+\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[48;2;1;2;3m                                                                                                    \e[0m\r
+\e[48;2;1;2;3m inherited                                                                                          \e[0m\r
+\e[48;2;1;2;3m                                                                                                    \e[0m\r
+\e[?25h\e[?2026l
+=== invalid theme left untouched ===
+\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[48;2;1;2;3m                                                                                                    \e[0m\r
+\e[48;2;1;2;3m unchanged                                                                                          \e[0m\r
+\e[48;2;1;2;3m                                                                                                    \e[0m\r
+\e[?25h\e[?2026l\e[?2026h\e[?25l\e[?7l\r
+\e[38;2;204;102;102mThe configuration could not be reloaded:\e[0m\r
+\e[38;2;204;102;102mconfig.toml: toml: line 3\e[0m\r
+\e[38;2;204;102;102m(last key "ui.theme.user"): "red" is not a colour; write #rrggbb or "default"\e[0m\r
+\e[38;2;150;152;150m──\e[0m \e[38;2;150;152;150m·✦·\e[0m \e[38;2;150;152;150m────────────────────────────\e[0m GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫\e[0m\e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m··\e[0m \e[38;2;150;152;150m─\e[0m ?\e[38;2;150;152;150m% \e[0m0\e[38;2;150;152;150m/\e[0m? \e[38;2;150;152;150m────────────────────────────────────\e[0m\r
+\r
+\e[38;2;150;152;150m──\e[0m \e[38;2;76;154;44mr\e[0m\e[38;2;150;152;150mx\e[0m\e[38;2;207;173;0mw\e[0m \e[38;2;150;152;150mn\e[0m\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150ml\e[0m \e[38;2;150;152;150m─\e[0m workspace \e[38;2;150;152;150m─────────────────────\e[0m \e[38;2;150;152;150musage n/a\e[0m \e[38;2;150;152;150m───────────────────────────\e[0m \e[38;2;150;152;150mbrave-otter\e[0m 🦦 \e[38;2;150;152;150m──\e[0m\e[1A\r\e[?25h\e[?2026l
+=== live turn and input draft ===
+\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m explain it                                                                                         \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;1;2;3mstill thinking\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r
+\e[38;2;76;154;44mConfiguration reloaded automatically \e[38;2;1;2;3m(dismissing in 10s)\e[0m\r
+\e[38;2;1;2;3m────────────────────────────────────────────────────────────────────────────────────────────────────\e[0m\r
+half written\r
+\e[38;2;1;2;3m────────────────────────────────────────────────────────────────────────────────────────────────────\e[0m\e[1A\r\e[10C\e[?25h\e[?2026l
+=== replayed conversation ===
+\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[48;2;1;2;3m                                                                                                    \e[0m\r
+\e[48;2;1;2;3m read it                                                                                            \e[0m\r
+\e[48;2;1;2;3m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[Kmodel answer\r
+\e[?25h\e[?2026l

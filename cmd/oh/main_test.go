@@ -3647,6 +3647,7 @@ func TestGoldenFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"startup-sized":            {".ansi", ".screen"},
 		"startup-sized-output":     {".ansi", ".screen"},
 		"terminal-escape":          {".ansi", ".screen"},
+		"theme-reload":             {".ansi", ".screen"},
 		"usage":                    {".json"},
 		"usage-arguments":          {".txt"},
 		"vertical-movement":        {".ansi", ".screen"},
@@ -7453,6 +7454,8 @@ func prepareLiveConfigSources(t *testing.T, self *App, sources ...config.Source)
 	self.continueMessage = live.ContinueMessage
 	self.display.streamingMode = live.StreamingMode
 	self.display.reasoningRendering = live.ReasoningRendering
+	self.display.theme = live.Theme
+	style.ApplyTheme(live.Theme)
 	self.screen.SetGrouping(live.Grouping)
 	self.display.bar = bar.NewConfiguration(registry, live.SegmentLayout)
 }
@@ -7475,6 +7478,240 @@ func settleLiveConfig(t *testing.T, self *App) {
 			t.Fatal("timed out waiting for a config change")
 		}
 	}
+}
+
+func TestReloadingAThemeClearsScrollbackAndReplaysTheWholeConversation(t *testing.T) {
+	stream := themeReloadStream(t)
+
+	if !strings.Contains(stream, "\x1b[H\x1b[2J\x1b[3J") {
+		t.Errorf("theme reload did not clear the screen and scrollback: %q", stream)
+	}
+	plain := style.Plain(stream)
+	for _, text := range []string{"read it", "model answer"} {
+		if !strings.Contains(plain, text) {
+			t.Errorf("replayed conversation does not contain %q: %q", text, plain)
+		}
+	}
+	if !strings.Contains(stream, "\x1b[48;2;1;2;3m") {
+		t.Errorf("replayed conversation did not use the reloaded user background: %q", stream)
+	}
+}
+
+func TestGoldenReloadingAThemeReplaysTheWholeConversation(t *testing.T) {
+	passes := map[string]func() string{
+		"replayed conversation":        func() string { return themeReloadStream(t) },
+		"live turn and input draft":    func() string { return activeThemeReloadStream(t) },
+		"inherited theme restored":     func() string { return inheritedThemeReloadStream(t) },
+		"invalid theme left untouched": func() string { return invalidThemeReloadStream(t) },
+		"every palette role":           func() string { return themePaletteStream(t) },
+	}
+	compareWithGolden(t, "theme-reload", ".ansi", passes)
+	compareWithGolden(t, "theme-reload", ".screen", shownPasses(t, passes))
+}
+
+func themeReloadStream(t *testing.T) string {
+	t.Helper()
+	restoreTheme := style.ApplyTheme(style.DefaultTheme())
+	defer restoreTheme()
+
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, "")
+
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	prepareLiveConfig(t, self, path)
+	self.recordedEvents = []agent.Event{
+		{Kind: agent.UserMessageEvent, Text: "read it"},
+		{Kind: agent.ModelMessageEvent, Text: "model answer"},
+	}
+	self.redraw()
+	screenOutput.Reset()
+
+	writeLiveConfig(t, path, `
+		[ui.theme]
+		user = "#010203"
+	`)
+	settleLiveConfig(t, self)
+
+	return screenOutput.String()
+}
+
+func activeThemeReloadStream(t *testing.T) string {
+	t.Helper()
+	restoreTheme := style.ApplyTheme(style.DefaultTheme())
+	defer restoreTheme()
+
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, `
+		[ui]
+		streaming = "asap"
+
+		[bar.top]
+		left = []
+		center = []
+		right = []
+
+		[bar.bottom]
+		left = []
+		center = []
+		right = []
+	`)
+
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	self.now = func() time.Time { return time.Unix(0, 0) }
+	prepareLiveConfig(t, self, path)
+	self.recordedEvents = []agent.Event{{Kind: agent.UserMessageEvent, Text: "explain it"}}
+	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: "still thinking"})
+
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+	inputLine.SetText("half written")
+	inputLine.Apply(key.Key{Code: key.Left}, true)
+	inputLine.Apply(key.Key{Code: key.Left}, true)
+	beforeFrame := inputLine.Frame(replayColumns)
+	screenOutput.Reset()
+
+	writeLiveConfig(t, path, `
+		[ui]
+		streaming = "asap"
+
+		[ui.theme]
+		dim = "#010203"
+
+		[bar.top]
+		left = []
+		center = []
+		right = []
+
+		[bar.bottom]
+		left = []
+		center = []
+		right = []
+	`)
+	settleLiveConfig(t, self)
+	self.show(inputLine)
+
+	if inputLine.Text() != "half written" {
+		t.Errorf("input draft became %q", inputLine.Text())
+	}
+	afterFrame := inputLine.Frame(replayColumns)
+	if afterFrame.Row != beforeFrame.Row || afterFrame.Column != beforeFrame.Column {
+		t.Errorf("input cursor moved from %d:%d to %d:%d", beforeFrame.Row, beforeFrame.Column, afterFrame.Row, afterFrame.Column)
+	}
+	if provisional := self.currentTurn.painter.ProvisionalDelta(); provisional.Text != "still thinking" {
+		t.Errorf("provisional reasoning became %q", provisional.Text)
+	}
+
+	return screenOutput.String()
+}
+
+func inheritedThemeReloadStream(t *testing.T) string {
+	t.Helper()
+	restoreTheme := style.ApplyTheme(style.DefaultTheme())
+	defer restoreTheme()
+
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "config.toml")
+	overridePath := filepath.Join(directory, "oh.toml")
+	writeLiveConfig(t, globalPath, "[ui.theme]\nuser = \"#010203\"\n")
+	if err := os.WriteFile(overridePath, []byte("[ui.theme]\nuser = \"#040506\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	prepareLiveConfigSources(t, self,
+		config.Source{Path: globalPath},
+		config.Source{Path: overridePath, IsOverride: true},
+	)
+	if got := style.User("overridden"); !strings.Contains(got, "\x1b[48;2;4;5;6m") {
+		t.Errorf("local theme override was not applied: %q", got)
+	}
+	self.recordedEvents = []agent.Event{{Kind: agent.UserMessageEvent, Text: "inherited"}}
+	self.redraw()
+	screenOutput.Reset()
+
+	if err := os.Remove(overridePath); err != nil {
+		t.Fatal(err)
+	}
+	settleLiveConfig(t, self)
+
+	stream := screenOutput.String()
+	if !strings.Contains(stream, "\x1b[48;2;1;2;3m") {
+		t.Errorf("global theme was not restored: %q", stream)
+	}
+	return stream
+}
+
+func invalidThemeReloadStream(t *testing.T) string {
+	t.Helper()
+	restoreTheme := style.ApplyTheme(style.DefaultTheme())
+	defer restoreTheme()
+
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, "[ui.theme]\nuser = \"#010203\"\n")
+
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	prepareLiveConfig(t, self, path)
+	self.recordedEvents = []agent.Event{{Kind: agent.UserMessageEvent, Text: "unchanged"}}
+	self.redraw()
+	beforeReload := screenOutput.Len()
+
+	writeLiveConfig(t, path, "[ui.theme]\nuser = \"red\"\n")
+	settleLiveConfig(t, self)
+	inputLine := edit.NewInput(edit.NewHistory("", historyLimit))
+	self.show(inputLine)
+
+	added := screenOutput.String()[beforeReload:]
+	if strings.Contains(added, "\x1b[H\x1b[2J\x1b[3J") {
+		t.Errorf("invalid theme repainted the conversation: %q", added)
+	}
+	if got := style.User("unchanged"); !strings.Contains(got, "\x1b[48;2;1;2;3m") {
+		t.Errorf("invalid theme replaced the active palette: %q", got)
+	}
+
+	return strings.ReplaceAll(screenOutput.String(), path, "config.toml")
+}
+
+func themePaletteStream(t *testing.T) string {
+	t.Helper()
+	theme := style.DefaultTheme()
+	theme.Normal = "#010101"
+	theme.Dim = "#020202"
+	theme.Accent = "#030303"
+	theme.StatusWarning = "#040404"
+	theme.StatusSuccess = "#050505"
+	theme.StatusInfo = "#060606"
+	theme.StatusDanger = "#070707"
+	theme.SyntaxType = "#080808"
+	theme.SyntaxLiteral = "#090909"
+	theme.SyntaxOperator = "#0a0a0a"
+	theme.User = "#0c0c0c"
+	theme.Harness = "#0d0d0d"
+	restoreTheme := style.ApplyTheme(theme)
+	defer restoreTheme()
+
+	return strings.Join([]string{
+		style.Normal("normal"),
+		style.Dim("dim"),
+		style.Subject("accent"),
+		style.Change("status warning"),
+		style.Success("status success"),
+		style.Info("status info"),
+		style.Failure("status danger"),
+		style.Type("syntax type"),
+		style.Literal("syntax literal"),
+		style.Operator("syntax operator"),
+		style.User("user background"),
+		style.Harness("harness background"),
+	}, "\r\n") + "\r\n"
 }
 
 func TestReloadingConfigChangesTheContinueMessage(t *testing.T) {
@@ -7889,8 +8126,8 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		slash.Command{
 			Name: "info",
 			Run: func(context slash.Context, _ slash.Arguments) error {
-				context.PlainNotice(style.Information("active-model") + "  GPT Sol\n" +
-					style.Information("mode-toggle") + "   " + style.Subtle("rxw ngl"))
+				context.PlainNotice(style.Info("active-model") + "  GPT Sol\n" +
+					style.Info("mode-toggle") + "   " + style.Subtle("rxw ngl"))
 				return nil
 			},
 		},

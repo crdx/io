@@ -125,7 +125,7 @@ func gaugeImage(usedPercent int, expectedPercent *int, pace Pace, cells int, dra
 	}
 
 	fill := paceColour(pace)
-	track := scale(style.DimColour, trackDivisor)
+	track := scale(style.DimColour(), trackDivisor)
 
 	for y := padding; y < pixelHeight-padding; y++ {
 		for x := range pixelWidth {
@@ -137,7 +137,7 @@ func gaugeImage(usedPercent int, expectedPercent *int, pace Pace, cells int, dra
 			}
 
 			if tickColumn >= 0 && absolute(x-tickColumn) <= tickHalf {
-				pixel = style.DimColour
+				pixel = style.DimColour()
 				if isFilled {
 					pixel = scale(fill, tickDivisor)
 				}
@@ -153,13 +153,13 @@ func gaugeImage(usedPercent int, expectedPercent *int, pace Pace, cells int, dra
 func paceColour(pace Pace) color.RGBA {
 	switch pace {
 	case PaceAhead:
-		return style.ChangeColour
+		return style.ChangeColour()
 	case PaceCritical:
-		return style.FailureColour
+		return style.FailureColour()
 	case PaceEven:
 	}
 
-	return style.InformationColour
+	return style.InformationColour()
 }
 
 func scale(value color.RGBA, divisor uint8) color.RGBA {
