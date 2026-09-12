@@ -2,6 +2,7 @@ package usage
 
 import (
 	"context"
+	"slices"
 	"sync"
 	"time"
 
@@ -79,18 +80,28 @@ func (self *sharedReporter) UsageWindows(ctx context.Context) ([]agent.UsageWind
 			return nil
 		}
 
-		windows, err := self.reporter.UsageWindows(ctx)
+		probe, isProbed, err := self.fetch(ctx, *storedCache)
 		if err != nil {
 			return err
 		}
 
+		windows := carryLimits(storedCache.Windows, probe, self.now())
 		if len(windows) == 0 {
 			return nil
 		}
 
 		fetchedAt := self.now()
 
-		*storedCache = cache{Version: cacheFormat, FetchedAt: fetchedAt, Windows: windows}
+		if isProbed {
+			storedCache.Probe = &probeState{
+				AttemptedAt: fetchedAt,
+				NextAt:      fetchedAt.Add(probeDelay(probeInterval(probe), self.store.path, fetchedAt)),
+			}
+		}
+
+		storedCache.Version = cacheFormat
+		storedCache.FetchedAt = fetchedAt
+		storedCache.Windows = windows
 		self.keep(windows, fetchedAt)
 
 		return nil
@@ -108,6 +119,63 @@ func (self *sharedReporter) UsageWindows(ctx context.Context) ([]agent.UsageWind
 	defer self.mutex.Unlock()
 
 	return self.windows, nil
+}
+
+func (self *sharedReporter) fetch(
+	ctx context.Context, storedCache cache,
+) (agent.UsageProbe, bool, error) {
+	prober, canProbe := self.reporter.(agent.UsageProber)
+	if canProbe && hasActiveLimitedWindow(storedCache.Windows, self.now()) {
+		probe, err := prober.ProbeUsage(ctx)
+
+		return probe, true, err
+	}
+
+	windows, err := self.reporter.UsageWindows(ctx)
+
+	return agent.UsageProbe{Windows: windows}, false, err
+}
+
+func probeInterval(probe agent.UsageProbe) time.Duration {
+	if probe.RefreshAfter <= 0 {
+		return defaultProbeInterval
+	}
+
+	return probe.RefreshAfter
+}
+
+func carryLimits(
+	storedWindows []agent.UsageWindow, probe agent.UsageProbe, now time.Time,
+) []agent.UsageWindow {
+	windows := slices.Clone(probe.Windows)
+	if len(windows) == 0 {
+		if probe.Availability != agent.UsageAvailabilityAllowed {
+			return nil
+		}
+
+		windows = slices.Clone(storedWindows)
+	}
+
+	for i, window := range windows {
+		if probe.Availability == agent.UsageAvailabilityAllowed {
+			windows[i].IsLimited = false
+
+			continue
+		}
+
+		windows[i].IsLimited = window.IsLimited || wasLimited(storedWindows, window, now)
+	}
+
+	return windows
+}
+
+func wasLimited(storedWindows []agent.UsageWindow, window agent.UsageWindow, now time.Time) bool {
+	return slices.ContainsFunc(storedWindows, func(candidate agent.UsageWindow) bool {
+		hasNotReset := candidate.ResetsAt.IsZero() || candidate.ResetsAt.After(now)
+
+		return candidate.IsLimited && hasNotReset &&
+			candidate.Scope == window.Scope && candidate.Duration == window.Duration
+	})
 }
 
 func (self *sharedReporter) readSnapshot() ([]agent.UsageWindow, time.Time) {
@@ -132,11 +200,13 @@ func (self *sharedReporter) refreshSnapshot() {
 }
 
 func (self *sharedReporter) isFresh(storedCache cache) bool {
-	if hasActiveLimitedWindow(storedCache.Windows, self.now()) {
-		return true
+	now := self.now()
+
+	if hasActiveLimitedWindow(storedCache.Windows, now) && storedCache.Probe != nil {
+		return now.Before(storedCache.Probe.NextAt)
 	}
 
-	return !storedCache.FetchedAt.IsZero() && self.now().Sub(storedCache.FetchedAt) < self.ttl
+	return !storedCache.FetchedAt.IsZero() && now.Sub(storedCache.FetchedAt) < self.ttl
 }
 
 func (self *sharedReporter) keep(windows []agent.UsageWindow, fetchedAt time.Time) {

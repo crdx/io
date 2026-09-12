@@ -203,6 +203,91 @@ func TestEveryStyledViewMatchesTheGolden(t *testing.T) {
 	checkGolden(t, "views.ansi", drawEachCase(t, false))
 }
 
+func seededCache(t *testing.T, nextProbeAt time.Time) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), "usage", "codex.json")
+	fetchedAt := collectedAt.Add(-23 * time.Hour)
+
+	err := newCacheStore(path).update(func(storedCache *cache) error {
+		storedCache.Version = cacheFormat
+		storedCache.FetchedAt = fetchedAt
+		storedCache.Windows = []agent.UsageWindow{
+			{
+				Duration: 5 * time.Hour,
+				Percent:  96,
+				ResetsAt: collectedAt.Add(-45 * time.Minute),
+			},
+			limitedWeeklyWindow(),
+		}
+		storedCache.Probe = &probeState{AttemptedAt: fetchedAt, NextAt: nextProbeAt}
+
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return path
+}
+
+func refreshedReporter() *scriptedProbeReporter {
+	return &scriptedProbeReporter{
+		probe: agent.UsageProbe{
+			Windows:      []agent.UsageWindow{sessionWindow(6), weeklyWindow(88)},
+			Availability: agent.UsageAvailabilityAllowed,
+		},
+	}
+}
+
+func drawEachStandingLimit(t *testing.T, isPlain bool) string {
+	t.Helper()
+
+	var drawn strings.Builder
+
+	for _, test := range []struct {
+		name        string
+		nextProbeAt time.Time
+	}{
+		{
+			name:        "a standing limit whose probe is not due yet",
+			nextProbeAt: collectedAt.Add(10 * time.Minute),
+		},
+		{
+			name:        "a standing limit whose probe has fallen due",
+			nextProbeAt: collectedAt.Add(-10 * time.Minute),
+		},
+	} {
+		report := Collect(t.Context(), []Source{{
+			Provider:         "codex",
+			Label:            "OpenAI",
+			Reporter:         refreshedReporter(),
+			CachePath:        seededCache(t, test.nextProbeAt),
+			IsSelfRefreshing: true,
+		}}, nowAt(collectedAt))
+
+		text := Render(report, collectedAt, nil)
+		if isPlain {
+			text = style.Plain(text)
+		}
+
+		drawn.WriteString("=== ")
+		drawn.WriteString(test.name)
+		drawn.WriteString(" ===\n")
+		drawn.WriteString(text)
+	}
+
+	return drawn.String()
+}
+
+func TestASnapshotUnderAStandingLimitMatchesTheGolden(t *testing.T) {
+	checkGolden(t, "standing-limit.txt", drawEachStandingLimit(t, true))
+}
+
+func TestAStyledSnapshotUnderAStandingLimitMatchesTheGolden(t *testing.T) {
+	checkGolden(t, "standing-limit.ansi", drawEachStandingLimit(t, false))
+}
+
 func TestProviderLimitFailuresMatchTheGolden(t *testing.T) {
 	windows := []agent.UsageWindow{
 		{Duration: 5 * time.Hour, ResetsAt: collectedAt.Add(time.Hour), IsLimited: true},
@@ -300,11 +385,13 @@ func TestTheCollectionMatchesTheGolden(t *testing.T) {
 
 func TestEveryGoldenIsClaimedByATest(t *testing.T) {
 	claimed := map[string]struct{}{
-		"views.txt":   {},
-		"views.ansi":  {},
-		"limits.txt":  {},
-		"gauges.txt":  {},
-		"report.json": {},
+		"views.txt":           {},
+		"views.ansi":          {},
+		"standing-limit.txt":  {},
+		"standing-limit.ansi": {},
+		"limits.txt":          {},
+		"gauges.txt":          {},
+		"report.json":         {},
 	}
 
 	entries, err := os.ReadDir("testdata")

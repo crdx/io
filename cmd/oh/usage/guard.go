@@ -206,13 +206,9 @@ func (self *guardedProvider) updateFromProbe(ctx context.Context, storedCache *c
 		return
 	}
 
-	refreshAfter := probe.RefreshAfter
-	if refreshAfter <= 0 {
-		refreshAfter = defaultProbeInterval
-	}
 	storedCache.Probe = &probeState{
 		AttemptedAt: now,
-		NextAt:      now.Add(probeDelay(refreshAfter, self.settings.CachePath, now)),
+		NextAt:      now.Add(probeDelay(probeInterval(probe), self.settings.CachePath, now)),
 	}
 	applyProbe(storedCache, probe, now)
 }

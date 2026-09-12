@@ -30,6 +30,19 @@ func (self *scriptedReporter) UsageWindows(context.Context) ([]agent.UsageWindow
 	return self.windows, self.err
 }
 
+type scriptedProbeReporter struct {
+	scriptedReporter
+
+	probe  agent.UsageProbe
+	probed atomic.Int64
+}
+
+func (self *scriptedProbeReporter) ProbeUsage(context.Context) (agent.UsageProbe, error) {
+	self.probed.Add(1)
+
+	return self.probe, nil
+}
+
 func refusal(status int) error {
 	return &req.StatusError{Status: status}
 }

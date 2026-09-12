@@ -27,6 +27,7 @@
 - Add `[experimental]` config section
 - Hold every configured path by its real path
 - Report a configured path that another list also holds
+- Refresh a usage snapshot that a standing limit had frozen
 
 ## [0.5.0] - 2026-09-10
 

@@ -39,6 +39,19 @@ func (self *scriptedReporter) UsageWindows(context.Context) ([]agent.UsageWindow
 	return self.windows, self.err
 }
 
+type scriptedProber struct {
+	scriptedReporter
+
+	probe  agent.UsageProbe
+	probed atomic.Int64
+}
+
+func (self *scriptedProber) ProbeUsage(context.Context) (agent.UsageProbe, error) {
+	self.probed.Add(1)
+
+	return self.probe, nil
+}
+
 type testClock struct {
 	now time.Time
 }
@@ -184,6 +197,121 @@ func TestTheOrdinaryRefreshDoesNotPollWhileARecoveryProbeOwnsALimit(t *testing.T
 	}
 	if len(got) != 1 || !got[0].IsLimited {
 		t.Errorf("got windows %+v", got)
+	}
+}
+
+func seedLimit(t *testing.T, path string, clock *testClock, window agent.UsageWindow) {
+	t.Helper()
+
+	seed := &providerStub{
+		err: &agent.UsageLimitError{
+			Cause:   errors.New("limited"),
+			Windows: []agent.UsageWindow{window},
+		},
+	}
+
+	_, _ = usage.Guard(stoppedContext(t), seed, guardSettings(path, "gpt-5.6-sol", clock)).Send(
+		t.Context(), func(agent.Output) bool { return true },
+	)
+}
+
+func TestAStandingLimitIsAskedAboutOnceItsProbeFallsDue(t *testing.T) {
+	path := cachePath(t)
+	clock := &testClock{now: testNow}
+
+	seedLimit(t, path, clock, agent.UsageWindow{
+		Duration:  7 * 24 * time.Hour,
+		Percent:   100,
+		ResetsAt:  testNow.Add(2 * 24 * time.Hour),
+		IsLimited: true,
+	})
+
+	clock.set(testNow.Add(time.Hour))
+
+	reporter := &scriptedProber{
+		scriptedReporter: scriptedReporter{isAvailable: true},
+		probe: agent.UsageProbe{
+			Windows:      windows(3),
+			Availability: agent.UsageAvailabilityAllowed,
+		},
+	}
+
+	got, err := usage.Shared(reporter, path, rate, clock.read).UsageWindows(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if probed := reporter.probed.Load(); probed != 1 {
+		t.Errorf("the provider was probed %d times", probed)
+	}
+
+	if len(got) != 1 || got[0].Percent != 3 || got[0].IsLimited {
+		t.Errorf("expected the limit lifted and the window refreshed, got %+v", got)
+	}
+}
+
+func TestALimitStandsWhereARefreshCannotSpeakToIt(t *testing.T) {
+	path := cachePath(t)
+	clock := &testClock{now: testNow}
+
+	limitedWindow := agent.UsageWindow{
+		Duration:  5 * time.Hour,
+		Percent:   100,
+		ResetsAt:  testNow.Add(2 * time.Hour),
+		IsLimited: true,
+	}
+	seedLimit(t, path, clock, limitedWindow)
+
+	clock.set(testNow.Add(time.Hour))
+
+	refreshedWindow := limitedWindow
+	refreshedWindow.Percent = 98
+	refreshedWindow.IsLimited = false
+
+	reporter := &scriptedProber{
+		scriptedReporter: scriptedReporter{isAvailable: true},
+		probe: agent.UsageProbe{
+			Windows:      []agent.UsageWindow{refreshedWindow},
+			Availability: agent.UsageAvailabilityUnknown,
+		},
+	}
+
+	got, err := usage.Shared(reporter, path, rate, clock.read).UsageWindows(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(got) != 1 || got[0].Percent != 98 || !got[0].IsLimited {
+		t.Errorf("expected the limit carried over the refreshed window, got %+v", got)
+	}
+}
+
+func TestALimitDoesNotOutliveTheWindowItStoodIn(t *testing.T) {
+	path := cachePath(t)
+	clock := &testClock{now: testNow}
+
+	seedLimit(t, path, clock, agent.UsageWindow{
+		Duration:  5 * time.Hour,
+		Percent:   100,
+		ResetsAt:  testNow.Add(time.Hour),
+		IsLimited: true,
+	})
+
+	clock.set(testNow.Add(2 * time.Hour))
+
+	reporter := &scriptedReporter{windows: windows(4), isAvailable: true}
+
+	got, err := usage.Shared(reporter, path, rate, clock.read).UsageWindows(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if asked := reporter.asked.Load(); asked != 1 {
+		t.Errorf("the reporter was asked %d times", asked)
+	}
+
+	if len(got) != 1 || got[0].Percent != 4 || got[0].IsLimited {
+		t.Errorf("expected a window free of the lapsed limit, got %+v", got)
 	}
 }
 
