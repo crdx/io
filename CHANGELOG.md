@@ -2,39 +2,56 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
-- Fix usage window detection mismatches
-- Count every output token, and every provider, in `ohctl analyse`
-- Only analyse valid journals
-- Draw each analysis table under a Markdown heading
-- Shorten file refusal messages
-- Gather consecutive mid-round notices into one panel
-- Pick at least high effort level
+### Permissions
+
 - Add `[permissions]` for granular control
+- Ask before running risky tools
 - Ask for approval inside the input frame
-- Tell the agent more accurate information
-- Detect environment changes on resume, and tell the agent
-- Save truncated remains in session drops dir
-- Handle pending notices correctly
-- Repair region if the terminal is too short
-- Ensure max shell timeout is less than the typical prompt cache ttl
-- Tell agent that a finished job will notify
-- Add max job wait time
-- Show whole seconds for durations >= 1s
-- Show when a limited usage window resets
-- Detect valid Codex context windows the right way
 - Allow bash within host network, toggled with `n` cap
+- Remove the deprecated `s` cap
+- Use the workspace read and write state to colour the `x` cap
+
+### Security
+
+- Resolve every configured path into its real path
+- Report redundant and conflicting paths
+- Let a file tool follow a symlinked path
+- Ensure the max shell timeout is less than the typical prompt cache TTL
+
+### Tools
+
 - Rename `web_search` to `lookup`, toggled with `l` cap
 - Rename `web_fetch` to `fetch`, toggled with `n` cap
-- Remove the deprecated `s` cap
-- Add flag to enable network in bash tool call
-- Use the workspace read/write state to colour the `x` cap
-- Let a file tool follow a symlinked path to the grant that owns it
-- Add `[experimental]` config section
-- Hold every configured path by its real path
-- Report a configured path that another list also holds
-- Refresh a usage snapshot that a standing limit had frozen
+- Add max job wait time
+- Save truncated remains in the session drops directory
+- Shorten file refusal messages
+
+### Usage
+
+- Show when a limited usage window resets
+- Refresh frozen limits in case of an external reset (hello OpenAI)
+- Fix detection of usage window timespans
+- Fix detection of Codex context windows
+- Pick at least high effort level when not specified
+
+### Interface
+
+- Gather consecutive mid-round notices into one panel
+- Handle pending notices correctly
+- Repair the region if the terminal is too short
+- Show whole seconds for durations >= 1s, truncated rather than rounded
+- Remove some character-building options
+- Detect environment changes on resume
+
+### Analysis
+
+- Analyse every token and provider
+- Only look at valid journals
+- Draw a markdown heading above each table
 
 ## [0.5.0] - 2026-09-10
+
+### Changes
 
 - Detect valid Codex models the right way
 - Default to high effort level, and make it configurable
@@ -47,12 +64,16 @@
 
 ## [0.4.0] - 2026-09-10
 
+### Changes
+
 - Preview sessions in session picker
 - Name sandbox helper processes
 - Restore the cache properly on resume
 - Fix linkification of paths ending in dots
 
 ## [0.3.0] - 2026-09-10
+
+### Changes
 
 - Add LLM simulator backend with `--demo`, or use the _Simulation_ option during onboarding
 - Track input and output token API prices, stored when model list is updated
@@ -73,22 +94,20 @@
 
 ## [0.2.0] - 2026-09-09
 
-### Added
-
-#### Wire Protocols
+### Wire Protocols
 
 - Anthropic Messages
 - OpenAI Chat Completions
 - OpenAI Responses
 
-#### Providers
+### Providers
 
 - Anthropic (Claude subscription)
 - Codex (ChatGPT subscription)
 - OpenCode Go
 - Ollama (local, network)
 
-#### Models
+### Models
 
 - Listing with `-l`
 - Caching, refreshed when stale
@@ -98,7 +117,7 @@
 - Effort levels
 - Fast mode
 
-#### Tools
+### Tools
 
 - `job`: run background commands
 - `notify`: send desktop notifications
@@ -112,7 +131,7 @@
 - Batched concurrent calls
 - Stale-file edits refused
 
-#### Sandbox
+### Sandbox
 
 - Namespaces, Landlock, Seccomp
 - Virtual `/proc` and private `/tmp`
@@ -129,7 +148,7 @@
 - Offline Go module proxy
 - Obviously, `--yolo` for the daring
 
-#### Capabilities
+### Capabilities
 
 - Read always granted
 - Shell execution opt-in
@@ -139,7 +158,7 @@
 - Mid-session toggling with ctrl+x
 - Recorded in the session, restored on resume
 
-#### Interface
+### Interface
 
 - Configurable input block segments:
     - Model
@@ -176,13 +195,13 @@
 - Pictures drawn with kitty graphics
 - Terminal title management
 
-#### TUIs
+### TUIs
 
 - Model picker
 - Session picker
 - Onboarding wizard
 
-#### Input
+### Input
 
 - Multi-line editing
 - Scrollable input
@@ -190,7 +209,7 @@
 - Pasted text handled sanely
 - Pasted images handled
 
-#### Commands
+### Commands
 
 - `/conf`: edit the configuration
 - `/copy`: copy a target
@@ -210,7 +229,7 @@
 - Unknown commands rejected
 - Tab completion
 
-#### Agent Turns
+### Agent Turns
 
 - Message queueing
 - Mid-turn interjection
@@ -226,7 +245,7 @@
 - Notifications on turn finish
 - Notifications on session death
 
-#### Sessions
+### Sessions
 
 - Versioned journal
 - Migrations, locking
@@ -246,7 +265,7 @@
 - HTTP wire logs
 - Transcript regeneration
 
-#### Configuration
+### Configuration
 
 - Fully XDG compliant
 - Local `oh.toml` overrides (lists merged)
@@ -257,7 +276,7 @@
 - Live reloading
 - Skills, skill include and exclude patterns
 
-#### Command Line
+### Command Line
 
 - Session resumption with `-r`
 - Model selection with `-m`
@@ -268,7 +287,7 @@
 - OAuth login with `-L`
 - Sub usage reporting
 
-#### Maintenance
+### Maintenance
 
 - `ohctl sessions`
 - `ohctl analyse`
@@ -276,12 +295,12 @@
 - `ohctl migrate`
 - `ohctl gc`
 
-#### Development
+### Development
 
 - Replay-based test suite
 - Terminal goldens
 
-#### Linters
+### Linters
 
 - `abbreviation`
 - `adjective`
