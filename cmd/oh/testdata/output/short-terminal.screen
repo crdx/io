@@ -1,3 +1,24 @@
+=== a panel grown taller than the terminal ===
+
+ expose the five preview ports
+
+
+Exposing each port in turn.
+expose 8001 ✓
+expose 8002 ✓
+expose 8003 ✓
+expose 8004 ✓
+expose 8005 ✓
+
+
+ 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.
+ 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.
+ 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.
+ 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.
+ 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.
+
+
+All five previews are up.
 === streamed taller than the terminal ===
 Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
 

@@ -24,6 +24,50 @@ func (self *Screen) Open(block Block) {
 	self.open(block, ToolGroup, nil)
 }
 
+type Frame func(rows []string, columns int) []string
+
+type framedBlock struct {
+	blocks []Block
+	frame  Frame
+}
+
+func (self *framedBlock) Rows(columns int) []string {
+	var rows []string
+
+	for _, block := range self.blocks {
+		rows = append(rows, block.Rows(columns)...)
+	}
+
+	return self.frame(rows, columns)
+}
+
+func (self *Screen) Panel(block Block, frame Frame) {
+	if self.addToOpenPanel(block) {
+		return
+	}
+
+	self.open(&framedBlock{blocks: []Block{block}, frame: frame}, NoticeGroup, nil)
+}
+
+func (self *Screen) addToOpenPanel(block Block) bool {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	if len(self.blocks) == 0 {
+		return false
+	}
+
+	panel, isPanel := self.blocks[len(self.blocks)-1].Block.(*framedBlock)
+	if !isPanel {
+		return false
+	}
+
+	panel.blocks = append(panel.blocks, block)
+	self.refresh()
+
+	return true
+}
+
 func (self *Screen) OpenNotice(block Block) *BlockHandle {
 	handle := new(BlockHandle)
 	self.open(block, NoticeGroup, handle)

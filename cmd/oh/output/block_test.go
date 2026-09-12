@@ -4,6 +4,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"crdx.org/io/cmd/oh/style"
 )
 
 type mutableBlock struct {
@@ -113,6 +115,81 @@ func TestANoticeBlockStaysItsOwnBesideALaterLine(t *testing.T) {
 	}
 	if !strings.Contains(drawn, "the harness said something") {
 		t.Errorf("the line beside the notice was lost: %q", drawn)
+	}
+}
+
+func framed(rows []string, _ int) []string {
+	return slices.Concat([]string{"top"}, rows, []string{"bottom"})
+}
+
+func panelRows(screen *Screen) []string {
+	rows, _, _ := renderGroupedBlocks(screen.blocks, screen.columns, screen.grouping)
+
+	return rows
+}
+
+func TestConsecutivePanelRowsShareOneFrame(t *testing.T) {
+	screen, _ := region()
+
+	screen.Panel(textBlock{text: "first notice"}, framed)
+	screen.Panel(textBlock{text: "second notice"}, framed)
+	screen.Panel(textBlock{text: "third notice"}, framed)
+
+	if len(screen.blocks) != 1 {
+		t.Fatalf("the panel was drawn as %d blocks, want one", len(screen.blocks))
+	}
+
+	want := []string{"top", "first notice", "second notice", "third notice", "bottom"}
+	if got := panelRows(screen); !slices.Equal(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestAPanelOpenedBesideAToolBlockLeavesItAlone(t *testing.T) {
+	screen, _ := region()
+
+	screen.Open(textBlock{text: "read notes.txt"})
+	screen.Panel(textBlock{text: "first notice"}, framed)
+	screen.Panel(textBlock{text: "second notice"}, framed)
+
+	if len(screen.blocks) != 2 {
+		t.Fatalf("the panel was drawn as %d blocks beside the tool, want two", len(screen.blocks))
+	}
+
+	want := []string{"read notes.txt", "", "top", "first notice", "second notice", "bottom"}
+	if got := panelRows(screen); !slices.Equal(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestAPanelAfterALineStartsItsOwnFrame(t *testing.T) {
+	screen, _ := region()
+
+	screen.Panel(textBlock{text: "first notice"}, framed)
+	screen.Line("the harness said something")
+	screen.Panel(textBlock{text: "second notice"}, framed)
+
+	want := []string{
+		"top", "first notice", "bottom",
+		"the harness said something",
+		"top", "second notice", "bottom",
+	}
+	if got := panelRows(screen); !slices.Equal(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestAPanelSealedIntoScrollbackFramesTheNextOneApart(t *testing.T) {
+	screen, screenOutput := region()
+
+	screen.Panel(textBlock{text: "first notice"}, framed)
+	screen.Seal()
+	screen.Panel(textBlock{text: "second notice"}, framed)
+	screen.Seal()
+
+	drawn := style.Plain(screenOutput.String())
+	if count := strings.Count(drawn, "top"); count != 2 {
+		t.Errorf("the sealed panel was reopened: %d frames in %q, want two", count, drawn)
 	}
 }
 

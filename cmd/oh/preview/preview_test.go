@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/internal/util/strutil"
 )
@@ -40,12 +41,34 @@ func conversation() []agent.Event {
 	}
 }
 
+func exposedPorts(t *testing.T) []agent.Event {
+	t.Helper()
+
+	var events []agent.Event
+	var ports []uint16
+
+	for _, port := range []uint16{8001, 8002, 8003} {
+		ports = append(ports, port)
+		event, err := portgrant.HostToSandboxChangeEvent("127.9.9.9", port, ports)
+		if err != nil {
+			t.Fatal(err)
+		}
+		events = append(events, event)
+	}
+
+	return events
+}
+
 func TestWhatAConversationLooksLikeBeforeItIsOpenedMatchesTheGolden(t *testing.T) {
 	var drawn strings.Builder
 
 	for _, room := range []int{100, 46} {
 		fmt.Fprintf(&drawn, "=== %d columns ===\n", room)
 		for _, row := range Draw(conversation(), nil, room) {
+			fmt.Fprintln(&drawn, row)
+		}
+		fmt.Fprintf(&drawn, "=== %d columns, ports exposed in a row ===\n", room)
+		for _, row := range Draw(exposedPorts(t), nil, room) {
 			fmt.Fprintln(&drawn, row)
 		}
 	}

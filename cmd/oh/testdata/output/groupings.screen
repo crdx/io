@@ -9,6 +9,9 @@ The model ended the turn without answering.
 read target.txt ✓ 1L
 ls ✓ 2L
 
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
 A tool ran, and an answer followed it.
 
 read README.md ✓ 1L
@@ -37,6 +40,9 @@ The model ended the turn without answering.
 
 read target.txt ✓ 1L
 ls ✓ 2L
+
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
 
 A tool ran, and an answer followed it.
 
@@ -68,6 +74,9 @@ The model ended the turn without answering.
 
 read target.txt ✓ 1L
 ls ✓ 2L
+
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
 
 A tool ran, and an answer followed it.
 
@@ -101,6 +110,11 @@ The model ended the turn without answering.
 
 read target.txt ✓ 1L
 ls ✓ 2L
+
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
+
 A tool ran, and an answer followed it.
 read README.md ✓ 1L
 
@@ -133,6 +147,10 @@ The model ended the turn without answering.
 read target.txt ✓ 1L
 ls ✓ 2L
 
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
+
 A tool ran, and an answer followed it.
 
 read README.md ✓ 1L
@@ -164,6 +182,9 @@ The model ended the turn without answering.
 [#1] Request failed; retrying: The stream ended before the response did
 read target.txt ✓ 1L
 ls ✓ 2L
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
 A tool ran, and an answer followed it.
 read README.md ✓ 1L
 A thought after a tool call.
@@ -187,6 +208,9 @@ The model ended the turn without answering.
 [#1] Request failed; retrying: The stream ended before the response did
 read target.txt ✓ 1L
 ls ✓ 2L
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
 A tool ran, and an answer followed it.
 read README.md ✓ 1L
 
@@ -217,6 +241,9 @@ The model ended the turn without answering.
 read target.txt ✓ 1L
 ls ✓ 2L
 
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
+
 A tool ran, and an answer followed it.
 
 read README.md ✓ 1L
@@ -245,6 +272,9 @@ The model ended the turn without answering.
 [#1] Request failed; retrying: The stream ended before the response did
 read target.txt ✓ 1L
 ls ✓ 2L
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
 
 A tool ran, and an answer followed it.
 
@@ -276,6 +306,9 @@ The model ended the turn without answering.
 [#1] Request failed; retrying: The stream ended before the response did
 read target.txt ✓ 1L
 ls ✓ 2L
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
 
 A tool ran, and an answer followed it.
 
@@ -310,6 +343,11 @@ The model ended the turn without answering.
 
 read target.txt ✓ 1L
 ls ✓ 2L
+
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
+
 A tool ran, and an answer followed it.
 read README.md ✓ 1L
 A thought after a tool call.
@@ -339,6 +377,11 @@ The model ended the turn without answering.
 
 read target.txt ✓ 1L
 ls ✓ 2L
+
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
+
 A tool ran, and an answer followed it.
 read README.md ✓ 1L
 
@@ -373,6 +416,10 @@ The model ended the turn without answering.
 read target.txt ✓ 1L
 ls ✓ 2L
 
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
+
 A tool ran, and an answer followed it.
 
 read README.md ✓ 1L
@@ -406,6 +453,10 @@ The model ended the turn without answering.
 read target.txt ✓ 1L
 ls ✓ 2L
 
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
+
 A tool ran, and an answer followed it.
 
 read README.md ✓ 1L
@@ -438,6 +489,10 @@ The model ended the turn without answering.
 
 read target.txt ✓ 1L
 ls ✓ 2L
+
+
+ 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+
 
 A tool ran, and an answer followed it.
 

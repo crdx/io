@@ -1,0 +1,90 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## User · +0s
+
+expose the five preview ports
+
+## Tool calls · +2s
+
+```
+expose: 8001 [call_1]
+expose: 8002 [call_2]
+expose: 8003 [call_3]
+expose: 8004 [call_4]
+expose: 8005 [call_5]
+```
+
+## Host → sandbox · 1 sandbox port · changed port 8001 · +7s
+
+```
+Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.
+```
+
+## Tool calls · +8s
+
+```
+expose [ok, call_1]
+```
+
+## Host → sandbox · 2 sandbox ports · changed port 8002 · +9s
+
+```
+Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.
+```
+
+## Tool calls · +10s
+
+```
+expose [ok, call_2]
+```
+
+## Host → sandbox · 3 sandbox ports · changed port 8003 · +11s
+
+```
+Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.
+```
+
+## Tool calls · +12s
+
+```
+expose [ok, call_3]
+```
+
+## Host → sandbox · 4 sandbox ports · changed port 8004 · +13s
+
+```
+Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.
+```
+
+## Tool calls · +14s
+
+```
+expose [ok, call_4]
+```
+
+## Host → sandbox · 5 sandbox ports · changed port 8005 · +15s
+
+```
+Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.
+```
+
+## Tool calls · +16s
+
+```
+expose [ok, call_5]
+```
+
+## Assistant · +17s
+
+All five previews are up.
+
+

@@ -32,42 +32,48 @@ read: target.txt [ok, 1 line, 4B, call_1]
 ls: . [ok, 2 lines, 21B, call_2]
 ```
 
-## Assistant · +7s
+## Host → sandbox · 1 sandbox port · changed port 8080 · +7s
+
+```
+Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+```
+
+## Assistant · +8s
 
 A tool ran, and an answer followed it.
 
-## Tool calls · +8s
+## Tool calls · +9s
 
 ```
 read: README.md [ok, 1 line, 9B, call_3]
 ls: cmd [ok, 1 line, 3B, call_4]
 ```
 
-## Silent turn · +13s
+## Silent turn · +14s
 
 ```
 The model ended the turn without answering.
 ```
 
-## Assistant · +14s
+## Assistant · +15s
 
 An answer after a notice.
 
-## Assistant · +15s
+## Assistant · +16s
 
 A second answer after the first.
 
-## Assistant · +18s
+## Assistant · +19s
 
 An answer after a thought.
 
-## Failure · +19s
+## Failure · +20s
 
 ```
 the endpoint is having a moment
 ```
 
-## Silent turn · +21s
+## Silent turn · +22s
 
 ```
 The model ended the turn without answering.

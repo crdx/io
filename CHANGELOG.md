@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Gather consecutive mid-round notices into one panel
 - Pick at least high effort level
 - Add `[permissions]` for granular control
 - Ask for approval inside the input frame

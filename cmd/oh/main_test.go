@@ -6066,23 +6066,34 @@ func TestEveryScenarioDrawsWhatItDrewBefore(t *testing.T) {
 const shortLines = 3
 
 func TestATallRegionOnAShortTerminalIsRepairedRatherThanFrozen(t *testing.T) {
-	entries := readJournal(t, filepath.Join("testdata", "input", tallRegionScenario))
+	scenarios := map[string]string{
+		"streamed taller than the terminal":      tallRegionScenario,
+		"a panel grown taller than the terminal": noticePanelScenario,
+	}
 
-	drawn := streamThrough(t, newShortRig(t), entries)
+	passes := map[string]func() string{}
 
-	compareWithGolden(t, "short-terminal", ".screen", map[string]func() string{
-		"streamed taller than the terminal": func() string { return shown(t, drawn, replayColumns) },
-	})
+	for name, scenario := range scenarios {
+		entries := readJournal(t, filepath.Join("testdata", "input", scenario))
 
-	requireSameVisibleScreen(
-		t,
-		"a conversation taller than the terminal differs from the same one with room to draw",
-		replayAtWidth(t, entries, replayColumns),
-		drawn,
-	)
+		drawn := streamThrough(t, newShortRig(t), entries)
+
+		passes[name] = func() string { return shown(t, drawn, replayColumns) }
+
+		requireSameVisibleScreen(
+			t,
+			"a conversation taller than the terminal differs from the same one with room to draw",
+			replayAtWidth(t, entries, replayColumns),
+			drawn,
+		)
+	}
+
+	compareWithGolden(t, "short-terminal", ".screen", passes)
 }
 
 const tallRegionScenario = "parallel@rxw.jsonl"
+
+const noticePanelScenario = "notices-mid-round.jsonl"
 
 func TestAPrintedSessionShowsWhatTheInterfaceShowed(t *testing.T) {
 	for _, journal := range everyJournal(t) {
@@ -10371,9 +10382,40 @@ func TestPortDirectionNoticesMatchGolden(t *testing.T) {
 			self.screen.End()
 			return screenOutput.String()
 		},
+		"recorded ports in a row": func() string { return recordedPortsInARow(t, replayLines) },
 	}
 	compareWithGolden(t, "port-directions", ".ansi", passes)
 	compareWithGolden(t, "port-directions", ".screen", shownPasses(t, passes))
+}
+
+func recordedPortsInARow(t *testing.T, lines int) string {
+	t.Helper()
+
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, lines)
+
+	var ports []uint16
+	for _, port := range []uint16{8001, 8002, 8003} {
+		ports = append(ports, port)
+		event, err := portgrant.HostToSandboxChangeEvent("127.9.9.9", port, ports)
+		if err != nil {
+			t.Fatal(err)
+		}
+		self.notify(event)
+	}
+	self.screen.End()
+
+	return screenOutput.String()
+}
+
+func TestNoticesOnAShortTerminalAreRepairedRatherThanFrozen(t *testing.T) {
+	requireSameVisibleScreen(
+		t,
+		"notices drawn on a terminal too short to hold them differ from the same ones with room to draw",
+		recordedPortsInARow(t, replayLines),
+		recordedPortsInARow(t, shortLines),
+	)
 }
 
 func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) string {

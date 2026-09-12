@@ -247,6 +247,18 @@ func renderSubmittedMessage(
 	roots link.Roots,
 	marker string,
 ) string {
+	content := submittedContentRows(text, columns, shouldRenderHyperlinks, roots, marker)
+
+	return strings.Join(frameSubmitted(content, columns), "\n")
+}
+
+func submittedContentRows(
+	text string,
+	columns int,
+	shouldRenderHyperlinks bool,
+	roots link.Roots,
+	marker string,
+) []string {
 	contentColumns := columns
 	if contentColumns > 1 {
 		contentColumns--
@@ -279,6 +291,10 @@ func renderSubmittedMessage(
 		content[i] = prefix + row
 	}
 
+	return content
+}
+
+func frameSubmitted(content []string, columns int) []string {
 	rows := append([]string{""}, content...)
 	rows = append(rows, "")
 
@@ -290,7 +306,7 @@ func renderSubmittedMessage(
 		rows[i] = style.User(row)
 	}
 
-	return strings.Join(rows, "\n")
+	return rows
 }
 
 func NoticeStyle(severity agent.Status) style.Style {
@@ -380,8 +396,34 @@ func (self *Picasso) drawSubmitted(text string, marker string) {
 }
 
 func (self *Picasso) drawSubmittedBeforeResult(text string, marker string) {
-	self.drawSubmittedLine(text, marker)
-	self.screen.Blank()
+	self.screen.Panel(submittedRows{
+		render: func(columns int) []string { return self.submittedContent(text, marker, columns) },
+	}, frameSubmitted)
+}
+
+type submittedRows struct {
+	render func(columns int) []string
+}
+
+func (self submittedRows) Rows(columns int) []string {
+	if columns <= 0 {
+		return self.render(columns)
+	}
+
+	var rows []string
+	for _, row := range self.render(columns) {
+		rows = append(rows, width.Wrap(row, columns)...)
+	}
+
+	return rows
+}
+
+func (self *Picasso) submittedContent(text string, marker string, columns int) []string {
+	if !self.screen.IsTerminal() {
+		return submittedContentRows(text, columns, false, link.Roots{}, marker)
+	}
+
+	return submittedContentRows(text, columns, true, self.linkRoots().WithoutScratch(), marker)
 }
 
 func (self *Picasso) drawSubmittedLine(text string, marker string) {

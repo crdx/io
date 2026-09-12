@@ -156,34 +156,47 @@ func TestAnAnswerKeepsTheBlankRowsInsideIt(t *testing.T) {
 }
 
 type drawnKind struct {
-	name string
-	draw func(*output.Screen, string)
+	name  string
+	group string
+	draw  func(*output.Screen, string)
 }
 
 func drawnKinds() []drawnKind {
 	return []drawnKind{
 		{
-			name: "notice",
+			name:  "notice",
+			group: "notice",
 			draw: func(screen *output.Screen, text string) {
 				screen.Line(text)
 			},
 		},
 		{
-			name: "tool",
+			name:  "panel",
+			group: "notice",
+			draw: func(screen *output.Screen, text string) {
+				screen.Panel(fixedBlock(text), func(rows []string, _ int) []string { return rows })
+				screen.Seal()
+			},
+		},
+		{
+			name:  "tool",
+			group: "tool",
 			draw: func(screen *output.Screen, text string) {
 				screen.Open(fixedBlock(text))
 				screen.Seal()
 			},
 		},
 		{
-			name: "answer",
+			name:  "answer",
+			group: "answer",
 			draw: func(screen *output.Screen, text string) {
 				screen.DrawAnswer([]string{text})
 				screen.Seal()
 			},
 		},
 		{
-			name: "reasoning",
+			name:  "reasoning",
+			group: "reasoning",
 			draw: func(screen *output.Screen, text string) {
 				screen.DrawReasoning([]string{text})
 				screen.Seal()
@@ -211,7 +224,7 @@ func requireGroupsRunOnAsNamed(t *testing.T, groups []string, together map[strin
 				second.draw(screen, "two")
 
 				separator := "\n\n"
-				if first.name == second.name || slices.Contains(together[first.name], second.name) {
+				if first.group == second.group || slices.Contains(together[first.group], second.group) {
 					separator = "\n"
 				}
 				if got, want := screenOutput.String(), "one"+separator+"two"; got != want {

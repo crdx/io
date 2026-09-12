@@ -1,0 +1,858 @@
+=== narrow ===
+
+ expose the five preview ports
+
+
+Exposing each port in turn.
+expose 8001 ✓
+expose 8002 ✓
+expose 8003 ✓
+expose 8004 ✓
+expose 8005 ✓
+
+
+ 🤖 Exposed sandbox port 8001 to the
+    host at http://127.27.192.223:8001.
+ 🤖 Exposed sandbox port 8002 to the
+    host at http://127.27.192.223:8002.
+ 🤖 Exposed sandbox port 8003 to the
+    host at http://127.27.192.223:8003.
+ 🤖 Exposed sandbox port 8004 to the
+    host at http://127.27.192.223:8004.
+ 🤖 Exposed sandbox port 8005 to the
+    host at http://127.27.192.223:8005.
+
+
+All five previews are up.
+=== one column ===
+
+
+e
+
+x
+
+p
+
+o
+
+s
+
+e
+
+t
+
+h
+
+e
+
+f
+
+i
+
+v
+
+e
+
+p
+
+r
+
+e
+
+v
+
+i
+
+e
+
+w
+
+p
+
+o
+
+r
+
+t
+
+s
+
+
+E
+x
+p
+o
+s
+i
+n
+g
+e
+a
+c
+h
+p
+o
+r
+t
+i
+n
+t
+u
+r
+n
+.
+✓
+✓
+✓
+✓
+✓
+
+
+
+🤖
+
+E
+
+x
+
+p
+
+o
+
+s
+
+e
+
+d
+
+s
+
+a
+
+n
+
+d
+
+b
+
+o
+
+x
+
+p
+
+o
+
+r
+
+t
+
+8
+
+0
+
+0
+
+1
+
+t
+
+o
+
+t
+
+h
+
+e
+
+h
+
+o
+
+s
+
+t
+
+a
+
+t
+
+h
+
+t
+
+t
+
+p
+
+:
+
+/
+
+/
+
+1
+
+2
+
+7
+
+.
+
+2
+
+7
+
+.
+
+1
+
+9
+
+2
+
+.
+
+2
+
+2
+
+3
+
+:
+
+8
+
+0
+
+0
+
+1
+
+.
+
+🤖
+
+E
+
+x
+
+p
+
+o
+
+s
+
+e
+
+d
+
+s
+
+a
+
+n
+
+d
+
+b
+
+o
+
+x
+
+p
+
+o
+
+r
+
+t
+
+8
+
+0
+
+0
+
+2
+
+t
+
+o
+
+t
+
+h
+
+e
+
+h
+
+o
+
+s
+
+t
+
+a
+
+t
+
+h
+
+t
+
+t
+
+p
+
+:
+
+/
+
+/
+
+1
+
+2
+
+7
+
+.
+
+2
+
+7
+
+.
+
+1
+
+9
+
+2
+
+.
+
+2
+
+2
+
+3
+
+:
+
+8
+
+0
+
+0
+
+2
+
+.
+
+🤖
+
+E
+
+x
+
+p
+
+o
+
+s
+
+e
+
+d
+
+s
+
+a
+
+n
+
+d
+
+b
+
+o
+
+x
+
+p
+
+o
+
+r
+
+t
+
+8
+
+0
+
+0
+
+3
+
+t
+
+o
+
+t
+
+h
+
+e
+
+h
+
+o
+
+s
+
+t
+
+a
+
+t
+
+h
+
+t
+
+t
+
+p
+
+:
+
+/
+
+/
+
+1
+
+2
+
+7
+
+.
+
+2
+
+7
+
+.
+
+1
+
+9
+
+2
+
+.
+
+2
+
+2
+
+3
+
+:
+
+8
+
+0
+
+0
+
+3
+
+.
+
+🤖
+
+E
+
+x
+
+p
+
+o
+
+s
+
+e
+
+d
+
+s
+
+a
+
+n
+
+d
+
+b
+
+o
+
+x
+
+p
+
+o
+
+r
+
+t
+
+8
+
+0
+
+0
+
+4
+
+t
+
+o
+
+t
+
+h
+
+e
+
+h
+
+o
+
+s
+
+t
+
+a
+
+t
+
+h
+
+t
+
+t
+
+p
+
+:
+
+/
+
+/
+
+1
+
+2
+
+7
+
+.
+
+2
+
+7
+
+.
+
+1
+
+9
+
+2
+
+.
+
+2
+
+2
+
+3
+
+:
+
+8
+
+0
+
+0
+
+4
+
+.
+
+🤖
+
+E
+
+x
+
+p
+
+o
+
+s
+
+e
+
+d
+
+s
+
+a
+
+n
+
+d
+
+b
+
+o
+
+x
+
+p
+
+o
+
+r
+
+t
+
+8
+
+0
+
+0
+
+5
+
+t
+
+o
+
+t
+
+h
+
+e
+
+h
+
+o
+
+s
+
+t
+
+a
+
+t
+
+h
+
+t
+
+t
+
+p
+
+:
+
+/
+
+/
+
+1
+
+2
+
+7
+
+.
+
+2
+
+7
+
+.
+
+1
+
+9
+
+2
+
+.
+
+2
+
+2
+
+3
+
+:
+
+8
+
+0
+
+0
+
+5
+
+.
+
+
+A
+l
+l
+f
+i
+v
+e
+p
+r
+e
+v
+i
+e
+w
+s
+a
+r
+e
+u
+p
+.
+=== printed ===
+
+ expose the five preview ports
+
+
+Exposing each port in turn.
+expose 8001 ✓
+expose 8002 ✓
+expose 8003 ✓
+expose 8004 ✓
+expose 8005 ✓
+
+
+ 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.
+ 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.
+ 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.
+ 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.
+ 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.
+
+
+All five previews are up.
+=== tiny ===
+
+ expose the
+ five
+ preview
+ ports
+
+
+Exposing
+each port in
+turn.
+expose 80… ✓
+expose 80… ✓
+expose 80… ✓
+expose 80… ✓
+expose 80… ✓
+
+
+ 🤖 Exposed
+    sandbox
+    port
+    8001 to
+    the host
+    at
+    http://1
+    27.27.19
+    2.223:80
+    01.
+ 🤖 Exposed
+    sandbox
+    port
+    8002 to
+    the host
+    at
+    http://1
+    27.27.19
+    2.223:80
+    02.
+ 🤖 Exposed
+    sandbox
+    port
+    8003 to
+    the host
+    at
+    http://1
+    27.27.19
+    2.223:80
+    03.
+ 🤖 Exposed
+    sandbox
+    port
+    8004 to
+    the host
+    at
+    http://1
+    27.27.19
+    2.223:80
+    04.
+ 🤖 Exposed
+    sandbox
+    port
+    8005 to
+    the host
+    at
+    http://1
+    27.27.19
+    2.223:80
+    05.
+
+
+All five
+previews are
+up.
+=== wide ===
+
+ expose the five preview ports
+
+
+Exposing each port in turn.
+expose 8001 ✓
+expose 8002 ✓
+expose 8003 ✓
+expose 8004 ✓
+expose 8005 ✓
+
+
+ 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.
+ 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.
+ 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.
+ 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.
+ 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.
+
+
+All five previews are up.
