@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strconv"
 	"strings"
 	"text/template"
 
@@ -300,12 +299,13 @@ func scopeRules(data harnessContextTemplateData) string {
 			filesystem(data.WorkspaceWritable)+" and follows the workspace write state.")
 	}
 	if data.ShellOffered && !data.Yolo {
-		lines = append(lines, "- The shell may also read the system directories, "+
-			"but it can only write where the path tools can.")
-		lines = append(lines, "- The shell may execute files under the system directories, "+
-			"every directory in PATH, the workspace, HOME, and /tmp.")
+		lines = append(lines, "- The shell can read the system directories, but it can only write where the path tools can.")
+		lines = append(lines, "- The shell can execute files under the system directories, every directory in PATH, the workspace, HOME, and /tmp.")
 		for _, path := range extraPaths.Exec {
-			lines = append(lines, "- The shell may also execute files at or under "+path+".")
+			lines = append(lines, "- The shell can execute files at or under "+path+".")
+		}
+		for _, path := range extraPaths.Path {
+			lines = append(lines, "- The shell can execute files at or under "+path+", which is in PATH.")
 		}
 	}
 
@@ -465,29 +465,6 @@ func networkRules(data harnessContextTemplateData) string {
 		"the host's loopback interface and external networks are unreachable",
 		canRequestHostNetwork,
 	)
-	if len(data.ExtraPaths.HostLoopback) > 0 {
-		ports := make([]string, len(data.ExtraPaths.HostLoopback))
-		for i, port := range data.ExtraPaths.HostLoopback {
-			ports[i] = strconv.Itoa(int(port))
-		}
-		subject := "TCP ports " + strings.Join(ports, ", ")
-		verb := " are"
-		destination := "ports"
-		if len(ports) == 1 {
-			subject = "TCP port " + ports[0]
-			verb = " is"
-			destination = "port"
-		}
-		lines = append(
-			lines,
-			"- The host's loopback "+subject+verb+" reachable on the same sandbox loopback "+destination,
-		)
-		hostReachability = unreachableRule(
-			"all other host loopback traffic and external networks are unreachable",
-			canRequestHostNetwork,
-		)
-	}
-
 	lines = append(lines, unixSocketRule(data.Conditions.UnixSockets), hostReachability)
 	lines = append(lines, networkToolRules(data)...)
 

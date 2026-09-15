@@ -1,0 +1,28 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[first]
+prompt = "receive an HTML HTTP 520 from the edge proxy"
+
+[[first.response]]
+status = 520
+body = '''<html><body>Web server is returning an unknown error. Private diagnostics.</body></html>'''
+headers = { Content-Type = "text/html; charset=UTF-8" }
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Recovered after the edge failure."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Recovered after the edge failure."}]}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[resume]
+prompt = "continue after the recovered request"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Resumed."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}''',
+    '''{"type":"response.completed"}''',
+]

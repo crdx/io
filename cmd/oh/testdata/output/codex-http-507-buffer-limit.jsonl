@@ -2,7 +2,7 @@
 {"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
 {"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
 {"kind":"event","event":{"kind":"user_message","text":"receive HTTP 507 from the edge proxy"}}
-{"kind":"event","event":{"kind":"request_retry","text":"request failed with status 507: exceeded request buffer limit while retrying upstream","attempt":1}}
+{"kind":"event","event":{"kind":"request_retry","failure":{"kind":"http_status","http_status":507,"body":"exceeded request buffer limit while retrying upstream","media_type":"text/plain"},"attempt":1}}
 {"kind":"event","event":{"kind":"model_message","text":"Asked again, and answered."}}
 {"kind":"item","payload":{"role":"user","content":"receive HTTP 507 from the edge proxy"}}
 {"kind":"item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Asked again, and answered."}]}}

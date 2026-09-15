@@ -7,12 +7,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/internal/transient"
 )
 
@@ -249,36 +251,42 @@ func (self *observedBody) finish(err error, isIncomplete bool) {
 	self.observer.Finish(time.Now(), err, isIncomplete)
 }
 
-const statusOverloaded = 529
-
-var retriableStatuses = map[int]bool{
-	http.StatusTooManyRequests:     true,
-	http.StatusInternalServerError: true,
-	http.StatusBadGateway:          true,
-	http.StatusServiceUnavailable:  true,
-	http.StatusGatewayTimeout:      true,
-	http.StatusInsufficientStorage: true,
-	statusOverloaded:               true,
+var terminalServerStatuses = map[int]bool{
+	http.StatusNotImplemented:                true,
+	http.StatusHTTPVersionNotSupported:       true,
+	http.StatusVariantAlsoNegotiates:         true,
+	http.StatusLoopDetected:                  true,
+	http.StatusNotExtended:                   true,
+	http.StatusNetworkAuthenticationRequired: true,
 }
 
 type StatusError struct {
-	Status  int
-	Code    string
-	Message string
-	Body    string
-	Wait    time.Duration
+	Status    int
+	Code      string
+	Message   string
+	Body      string
+	MediaType string
+	Wait      time.Duration
 }
 
 func (self *StatusError) Error() string {
-	if self.Message != "" {
-		return self.Message
+	return self.DescribeFailure().Text()
+}
+
+func (self *StatusError) DescribeFailure() agent.Failure {
+	body := ""
+	if self.Message == "" && !isHTMLMediaType(self.MediaType) {
+		body = self.Body
 	}
 
-	if body := strings.TrimSpace(self.Body); body != "" {
-		return fmt.Sprintf("request failed with status %d: %s", self.Status, body)
+	return agent.Failure{
+		Kind:       agent.HTTPStatusFailure,
+		Message:    self.Message,
+		HTTPStatus: self.Status,
+		Code:       self.Code,
+		Body:       body,
+		MediaType:  self.MediaType,
 	}
-
-	return fmt.Sprintf("request failed with status %d", self.Status)
 }
 
 func IsRejected(err error) bool {
@@ -288,7 +296,11 @@ func IsRejected(err error) bool {
 }
 
 func (self *StatusError) Retriable() bool {
-	return retriableStatuses[self.Status]
+	if self.Status == http.StatusTooManyRequests {
+		return true
+	}
+
+	return self.Status/100 == 5 && !terminalServerStatuses[self.Status]
 }
 
 func (self *StatusError) RetryAfter() time.Duration {
@@ -299,9 +311,10 @@ func refusal(response *http.Response) error {
 	body, _ := io.ReadAll(io.LimitReader(response.Body, bodyLimit))
 
 	refusedRequest := &StatusError{
-		Status: response.StatusCode,
-		Body:   string(body),
-		Wait:   retryAfter(response.Header.Get("Retry-After")),
+		Status:    response.StatusCode,
+		Body:      string(body),
+		MediaType: mediaType(response.Header.Get("Content-Type"), body),
+		Wait:      retryAfter(response.Header.Get("Retry-After")),
 	}
 
 	var payload struct {
@@ -332,6 +345,24 @@ func refusal(response *http.Response) error {
 	}
 
 	return refusedRequest
+}
+
+func mediaType(header string, body []byte) string {
+	detectedMediaType, _, _ := mime.ParseMediaType(http.DetectContentType(body))
+	if isHTMLMediaType(detectedMediaType) {
+		return detectedMediaType
+	}
+
+	declaredMediaType, _, err := mime.ParseMediaType(header)
+	if err == nil {
+		return declaredMediaType
+	}
+
+	return detectedMediaType
+}
+
+func isHTMLMediaType(mediaType string) bool {
+	return mediaType == "text/html" || mediaType == "application/xhtml+xml"
 }
 
 func CacheLifetime(header http.Header) time.Duration {

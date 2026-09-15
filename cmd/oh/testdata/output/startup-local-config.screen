@@ -124,11 +124,10 @@ Agent brave-otter 🦦 ready in 2ms with 4
 oh.toml: bar.bottom.left, bar.top.center
 , caps.default, editor.command, input.co
 ntinue, model.round_robin, ports.hostnam
-e, provider.ollama.host, sandbox.host_lo
-opback, sandbox.read, sandbox.write, ski
-lls.exclude, skills.include, snippets.re
-view, tool.output, ui.grouping, ui.reaso
-ning, ui.streaming.
+e, provider.ollama.host, sandbox.read, s
+andbox.write, skills.exclude, skills.inc
+lude, snippets.review, tool.output, ui.g
+rouping, ui.reasoning, ui.streaming.
 === many local settings / ordinary / one column ===
 A
 g
@@ -362,29 +361,6 @@ b
 o
 x
 .
-h
-o
-s
-t
-_
-l
-o
-o
-p
-b
-a
-c
-k
-,
-
-s
-a
-n
-d
-b
-o
-x
-.
 r
 e
 a
@@ -528,24 +504,22 @@ robin, ports
 .hostname, p
 rovider.olla
 ma.host, san
-dbox.host_lo
-opback, sand
-box.read, sa
-ndbox.write,
- skills.excl
-ude, skills.
-include, sni
-ppets.review
-, tool.outpu
-t, ui.groupi
-ng, ui.reaso
-ning, ui.str
-eaming.
+dbox.read, s
+andbox.write
+, skills.exc
+lude, skills
+.include, sn
+ippets.revie
+w, tool.outp
+ut, ui.group
+ing, ui.reas
+oning, ui.st
+reaming.
 === many local settings / ordinary / wide ===
 Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: bar.bottom.
 left, bar.top.center, caps.default, editor.command, input.continue, model.round_robin, ports.hostnam
-e, provider.ollama.host, sandbox.host_loopback, sandbox.read, sandbox.write, skills.exclude, skills.
-include, snippets.review, tool.output, ui.grouping, ui.reasoning, ui.streaming.
+e, provider.ollama.host, sandbox.read, sandbox.write, skills.exclude, skills.include, snippets.revie
+w, tool.output, ui.grouping, ui.reasoning, ui.streaming.
 === many local settings / sized / narrow ===
  🦦    Agent brave-otter ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt
@@ -556,7 +530,6 @@ include, snippets.review, tool.output, ui.grouping, ui.reasoning, ui.streaming.
        model.round_robin,
        ports.hostname,
        provider.ollama.host,
-       sandbox.host_loopback,
        sandbox.read, sandbox.write,
        skills.exclude, skills.include,
        snippets.review, tool.output,
@@ -566,8 +539,8 @@ include, snippets.review, tool.output, ui.grouping, ui.reasoning, ui.streaming.
  🦦    Agent brave-otter ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: bar.bottom.left, bar.top.center,
        caps.default, editor.command, input.continue, model.round_robin, ports.hostname,
-       provider.ollama.host, sandbox.host_loopback, sandbox.read, sandbox.write, skills.exclude,
-       skills.include, snippets.review, tool.output, ui.grouping, ui.reasoning, ui.streaming
+       provider.ollama.host, sandbox.read, sandbox.write, skills.exclude, skills.include,
+       snippets.review, tool.output, ui.grouping, ui.reasoning, ui.streaming
 === mixed global and local settings / ordinary / narrow ===
 Agent brave-otter 🦦 ready in 2ms with 4
  skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸

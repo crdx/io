@@ -2,6 +2,12 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+### Theme
+
+- Theme skill names with `skill` and code keywords with `syntax_keyword`
+- Decorate any theme key with bold, faint, italic, underline, blink, reverse, hidden, strikethrough, and overline
+- Give an underline its own shape and colour with `underline:curly` and `underline:#rrggbb`
+
 ### Permissions
 
 - Add `[permissions]` for granular control
@@ -13,13 +19,24 @@
 
 ### Security
 
+- Refuse `[editor]`, `[experimental]`, `[provider]`, `[sandbox]`, and `[skills]` in a workspace `oh.toml`
+- Refuse a bar segment option holding text the terminal would obey
+- Refuse a `ports.hostname` that is not a hostname
+- Draw a provider's model list without the control characters it may carry
+- Paste without the control characters the clipboard may carry
+
 - Resolve every configured path into its real path
+- Preserve nested write grants inside read-only paths
+- Keep unreadable nested directories read-only
+- Omit redundant PATH execution grants for targets already covered by the workspace
+- Keep deleted temporary path grants from disabling the shell
 - Report redundant and conflicting paths
 - Let a file tool follow a symlinked path
 - Ensure the max shell timeout is less than the typical prompt cache TTL
 - Notify which keys changed on auto-reload
+- Remove `sandbox.host_loopback`
 
-### Tools
+### Tools & Skills
 
 - Rename `web_search` to `lookup`, toggled with `l` cap
 - Rename `web_fetch` to `fetch`, toggled with `n` cap
@@ -27,9 +44,11 @@
 - Limit background job cleanup to one second on close
 - Save truncated remains in the session drops directory
 - Shorten file refusal messages
+- Serve a built-in `oh` skill
 
 ### Usage
 
+- Use fresh usage reset times rather than cached ones
 - Show when a limited usage window resets
 - Refresh frozen limits in case of an external reset (hello OpenAI)
 - Fix detection of usage window timespans
@@ -38,6 +57,8 @@
 
 ### Interface
 
+- Store request failures as structured facts and retry HTTP 520 without displaying its HTML response
+- Show an input frame beneath session previews
 - Support theme colour customisation
 - Theme harness-submitted messages
 - Gather consecutive mid-round notices into one panel

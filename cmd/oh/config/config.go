@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"maps"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"strings"
+	"unicode"
 
 	"github.com/BurntSushi/toml"
 
@@ -31,6 +33,11 @@ import (
 var defaultsTOML string
 
 const minimumToolOutputBytes = 1024
+
+const (
+	sessionPlaceholder = "{session}"
+	hostnameLimit      = 253
+)
 
 const (
 	versionSetting  = "version"
@@ -121,7 +128,7 @@ func (self Ports) GetHostname(sessionName string, fallbackHostname string) strin
 	if self.Hostname == "" {
 		return fallbackHostname
 	}
-	return strings.ReplaceAll(self.Hostname, "{session}", sessionName)
+	return strings.ReplaceAll(self.Hostname, sessionPlaceholder, sessionName)
 }
 
 type Ui struct {
@@ -287,7 +294,62 @@ type segmentOptions struct {
 }
 
 func (self segmentOptions) Read(into any) error {
-	return self.meta.PrimitiveDecode(self.entry, into)
+	if err := self.meta.PrimitiveDecode(self.entry, into); err != nil {
+		return err
+	}
+
+	return refuseUndrawableText(into)
+}
+
+func refuseUndrawableText(options any) error {
+	value := reflect.ValueOf(options)
+	for value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil
+		}
+		value = value.Elem()
+	}
+
+	if value.Kind() != reflect.Struct {
+		return nil
+	}
+
+	for field, setting := range value.Fields() {
+		name := field.Tag.Get("toml")
+		if name == "" {
+			name = strings.ToLower(field.Name)
+		}
+
+		if err := refuseUndrawableValue(name, setting); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func refuseUndrawableValue(name string, setting reflect.Value) error {
+	//nolint:exhaustive // every other kind holds no text
+	switch setting.Kind() {
+	case reflect.String:
+		for _, character := range setting.String() {
+			if unicode.IsControl(character) {
+				return fmt.Errorf(
+					"%s holds %q, which the terminal would read as an instruction rather than text",
+					name, character,
+				)
+			}
+		}
+	case reflect.Slice, reflect.Array:
+		for i := range setting.Len() {
+			if err := refuseUndrawableValue(fmt.Sprintf("%s[%d]", name, i), setting.Index(i)); err != nil {
+				return err
+			}
+		}
+	default:
+	}
+
+	return nil
 }
 
 func (self Config) GetOverride() (Override, bool) {
@@ -428,59 +490,6 @@ type sourceSnapshot struct {
 	snapshot snapshot
 }
 
-type additiveSettings struct {
-	skills  SkillPaths
-	sandbox sandbox
-}
-
-func getAdditiveSettings(config Config) additiveSettings {
-	return additiveSettings{
-		skills: SkillPaths{
-			Include: slices.Clone(config.Skills.Include),
-			Exclude: slices.Clone(config.Skills.Exclude),
-		},
-		sandbox: sandbox{
-			HostLoopback: slices.Clone(config.Sandbox.HostLoopback),
-			Read:         slices.Clone(config.Sandbox.Read),
-			Write:        slices.Clone(config.Sandbox.Write),
-			Exec:         slices.Clone(config.Sandbox.Exec),
-			Home:         slices.Clone(config.Sandbox.Home),
-		},
-	}
-}
-
-func mergeAdditiveSettings(config *Config, previous additiveSettings, meta toml.MetaData, displayPath string) error {
-	if meta.IsDefined("skills", "include") {
-		config.Skills.Include = append(previous.skills.Include, config.Skills.Include...)
-	}
-	if meta.IsDefined("skills", "exclude") {
-		config.Skills.Exclude = append(previous.skills.Exclude, config.Skills.Exclude...)
-	}
-	if meta.IsDefined("sandbox", "read") {
-		config.Sandbox.Read = append(previous.sandbox.Read, config.Sandbox.Read...)
-	}
-	if meta.IsDefined("sandbox", "write") {
-		config.Sandbox.Write = append(previous.sandbox.Write, config.Sandbox.Write...)
-	}
-	if meta.IsDefined("sandbox", "exec") {
-		config.Sandbox.Exec = append(previous.sandbox.Exec, config.Sandbox.Exec...)
-	}
-	if meta.IsDefined("sandbox", "home") {
-		config.Sandbox.Home = append(previous.sandbox.Home, config.Sandbox.Home...)
-	}
-	if !meta.IsDefined("sandbox", "host_loopback") {
-		return nil
-	}
-	if err := validateHostLoopbackPorts(config.Sandbox.HostLoopback); err != nil {
-		return fmt.Errorf("%s: sandbox.host_loopback: %w", displayPath, err)
-	}
-	config.Sandbox.HostLoopback = deduplicate(append(
-		previous.sandbox.HostLoopback,
-		config.Sandbox.HostLoopback...,
-	))
-	return nil
-}
-
 func loadSnapshots(sources []sourceSnapshot) (Config, error) {
 	var config Config
 
@@ -523,17 +532,18 @@ func applySnapshot(config *Config, source sourceSnapshot) error {
 	}
 
 	previousSnippets := maps.Clone(config.Snippets)
-	previousAdditive := getAdditiveSettings(*config)
 	meta, err := toml.Decode(string(source.snapshot.data), config)
 	if err != nil {
 		return fmt.Errorf("%s: %w", displayPath, err)
 	}
 
-	config.sources = append(config.sources, sourceMetadata{source: source.source, path: displayPath, meta: &meta})
-
-	if err := mergeAdditiveSettings(config, previousAdditive, meta, displayPath); err != nil {
-		return err
+	if source.source.IsOverride {
+		if err := refuseWorkspaceSettings(meta); err != nil {
+			return fmt.Errorf("%s: %w", displayPath, err)
+		}
 	}
+
+	config.sources = append(config.sources, sourceMetadata{source: source.source, path: displayPath, meta: &meta})
 
 	if meta.IsDefined("model", "round_robin") {
 		if len(config.Model.RoundRobin) == 0 {
@@ -610,6 +620,7 @@ func applySnapshot(config *Config, source sourceSnapshot) error {
 		{"sandbox.read", &config.Sandbox.Read},
 		{"sandbox.write", &config.Sandbox.Write},
 		{"sandbox.exec", &config.Sandbox.Exec},
+		{"sandbox.path", &config.Sandbox.Path},
 		{"sandbox.home", &config.Sandbox.Home},
 	}
 	for _, list := range lists {
@@ -624,10 +635,6 @@ func applySnapshot(config *Config, source sourceSnapshot) error {
 			(*list.values)[i] = resolvedPath
 		}
 		*list.values = deduplicate(*list.values)
-	}
-
-	if err := validateHostLoopbackPorts(config.Sandbox.HostLoopback); err != nil {
-		return fmt.Errorf("%s: sandbox.host_loopback: %w", displayPath, err)
 	}
 
 	for _, mappedPath := range config.Sandbox.Home {
@@ -655,28 +662,75 @@ func deduplicate[Value comparable](values []Value) []Value {
 	return result
 }
 
+var settingsAWorkspaceMayNotSet = []string{
+	"editor",
+	"experimental",
+	"provider",
+	"sandbox",
+	"skills",
+}
+
+func refuseWorkspaceSettings(meta toml.MetaData) error {
+	for _, key := range meta.Keys() {
+		if !meta.IsDefined(key...) || meta.Type(key...) == "Hash" {
+			continue
+		}
+
+		if slices.Contains(settingsAWorkspaceMayNotSet, key[0]) {
+			return fmt.Errorf(
+				"%s cannot be overridden in oh.toml",
+				key.String(),
+			)
+		}
+	}
+
+	return nil
+}
+
 func validateHostSettings(ollamaHost string, hasOllamaHost bool, hostname string) error {
 	if hasOllamaHost && ollamaHost == "" {
 		return errors.New("provider.ollama.host is empty")
 	}
-	if hostname != "" && strings.Count(hostname, "{session}") != 1 {
+	if hostname == "" {
+		return nil
+	}
+	if strings.Count(hostname, sessionPlaceholder) != 1 {
 		return errors.New("ports.hostname must contain {session} exactly once")
 	}
+	return validateHostname(hostname)
+}
+
+func validateHostname(hostname string) error {
+	if len(hostname) > hostnameLimit {
+		return fmt.Errorf(
+			"ports.hostname is %d characters long, and a hostname is at most %d",
+			len(hostname), hostnameLimit,
+		)
+	}
+
+	for _, character := range strings.ReplaceAll(hostname, sessionPlaceholder, "") {
+		if !isHostnameCharacter(character) {
+			return fmt.Errorf(
+				"ports.hostname holds %q, and a hostname is letters, digits, dots, and dashes",
+				character,
+			)
+		}
+	}
+
 	return nil
 }
 
-func validateHostLoopbackPorts(ports []uint16) error {
-	seenPorts := make(map[uint16]struct{}, len(ports))
-	for _, port := range ports {
-		if port == 0 {
-			return errors.New("port 0 is invalid")
-		}
-		if _, exists := seenPorts[port]; exists {
-			return fmt.Errorf("port %d is repeated", port)
-		}
-		seenPorts[port] = struct{}{}
+func isHostnameCharacter(character rune) bool {
+	switch {
+	case character >= 'a' && character <= 'z':
+		return true
+	case character >= 'A' && character <= 'Z':
+		return true
+	case character >= '0' && character <= '9':
+		return true
+	default:
+		return character == '.' || character == '-'
 	}
-	return nil
 }
 
 func resolveConfigPath(configPath string, writtenPath string) (string, error) {

@@ -18,9 +18,9 @@
 - Pasting a clipboard image with ctrl+v saves it under /state/sessions/brave-otter/drops, where path tools can read it.
 - The configured path /reference is read-only.
 - The configured path /output is read-write and follows the workspace write state.
-- The shell may also read the system directories, but it can only write where the path tools can.
-- The shell may execute files under the system directories, every directory in PATH, the workspace, HOME, and /tmp.
-- The shell may also execute files at or under /commands.
+- The shell can read the system directories, but it can only write where the path tools can.
+- The shell can execute files under the system directories, every directory in PATH, the workspace, HOME, and /tmp.
+- The shell can execute files at or under /commands.
 
 # Personality
 

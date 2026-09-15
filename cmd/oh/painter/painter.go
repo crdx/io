@@ -221,8 +221,8 @@ func RenderRetry(event agent.Event) string {
 		notice += "; retrying"
 	}
 
-	if event.Text != "" {
-		notice += ": " + strutil.Capitalise(strutil.Flatten(strutil.FirstLine(event.Text)))
+	if failure := agent.FailureText(event); failure != "" {
+		notice += ": " + strutil.Capitalise(strutil.Flatten(strutil.FirstLine(failure)))
 	}
 
 	if event.Arguments != "" {
@@ -686,5 +686,5 @@ func (self *Picasso) render(event agent.Event) string {
 }
 
 func RenderFailure(event agent.Event) string {
-	return strutil.CapitaliseSentence(strutil.PrintableLines(event.Text))
+	return strutil.CapitaliseSentence(strutil.PrintableLines(agent.FailureText(event)))
 }

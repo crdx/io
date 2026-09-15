@@ -48,9 +48,12 @@ sandbox *args:
         TestAnExposedPortReachesAListenerInsideTheSandbox
         TestAReadPathInsideAWritePathIsNotWritable
         TestARepositoryCannotBeClobbered
+        TestAWriteGrantInsideAReadGrantInsideAWriteGrantIsWritable
         TestAnExactReadGrantInsideAWriteGrantRemainsReadOnly
         TestAnExecutableBuiltInTmpMayRunWhenGranted
         TestAnOrdinaryCommandReachesAListenerAJobLeftBehind
+        TestAPolicyMayNameAnOptionalMissingPath
+        TestCommandsCannotChangeAnUnreadableSubtree
         TestCommandsMayTalkOverAUnixSocketInTheScratch
         TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted
         TestCommandsSharingAScratchShareItsContents

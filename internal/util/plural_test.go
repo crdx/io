@@ -27,3 +27,15 @@ func TestPluralKeepsTheNounItWasGiven(t *testing.T) {
 		t.Errorf("Plural(3, %q) = %q", "running session", got)
 	}
 }
+
+func TestPluralNounCarriesNoCount(t *testing.T) {
+	for count, want := range map[int]string{
+		0: "caches",
+		1: "cache",
+		2: "caches",
+	} {
+		if got := util.PluralNoun(count, "cache"); got != want {
+			t.Errorf("PluralNoun(%d, %q) = %q, want %q", count, "cache", got, want)
+		}
+	}
+}

@@ -5,17 +5,22 @@ import (
 	"strings"
 
 	"crdx.org/io/cmd/oh/ansi"
+	"crdx.org/io/cmd/oh/edit"
+	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 )
 
 const (
-	openablePreviewHint = "enter to open · esc return · ↑↓ scroll"
-	runningPreviewHint  = "running · esc return · ↑↓ scroll"
-	closePreviewKey     = 'q'
-	previewRule         = "─"
-	previewHeaderRows   = 3
+	openablePreviewHint     = "enter to open · esc return · ↑↓ scroll"
+	runningPreviewHint      = "running · esc return · ↑↓ scroll"
+	closePreviewKey         = 'q'
+	previewRule             = "─"
+	previewHeaderRows       = 3
+	previewFooterRows       = 4
+	previewLoadInputHint    = "Press enter to load..."
+	previewRunningInputHint = "Session is running..."
 )
 
 type previewState struct {
@@ -122,7 +127,7 @@ func (self *state) readPreviewRows(room int) {
 }
 
 func (self *state) drawPreview(room int, height int) string {
-	rows := max(height-previewHeaderRows, 1)
+	rows := max(height-previewHeaderRows-previewFooterRows, 0)
 	self.window = rows
 	self.readPreviewRows(room)
 	self.preview.offset = min(self.preview.offset, self.lastPreviewOffset())
@@ -143,7 +148,22 @@ func (self *state) drawPreview(room int, height int) string {
 			output.WriteString(ansi.Reset)
 		}
 		output.WriteString(eraseLine)
-		if at+1 < self.preview.offset+rows {
+		output.WriteString("\r\n")
+	}
+
+	output.WriteString(eraseLine + "\r\n")
+
+	inputHint := style.PreviewRunningHint(Clip(previewRunningInputHint, room))
+	if self.preview.isOpenable {
+		inputHint = style.PreviewLoadHint(Clip(previewLoadInputHint, room))
+	}
+	inputRows, _, _ := input.Block{
+		Input: edit.Frame{Rows: []string{inputHint}},
+	}.Rows(room)
+	for index, row := range inputRows {
+		output.WriteString(row)
+		output.WriteString(eraseLine)
+		if index+1 < len(inputRows) {
 			output.WriteString("\r\n")
 		}
 	}

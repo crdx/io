@@ -2,7 +2,7 @@
 {"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
 {"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
 {"kind":"event","event":{"kind":"user_message","text":"receive a top-level Responses API error"}}
-{"kind":"event","event":{"kind":"turn_failure","text":"the prompt was refused"}}
+{"kind":"event","event":{"kind":"turn_failure","failure":{"kind":"generic_error","message":"the prompt was refused"}}}
 {"kind":"item","payload":{"role":"user","content":"receive a top-level Responses API error"}}
 {"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the endpoint error"}}

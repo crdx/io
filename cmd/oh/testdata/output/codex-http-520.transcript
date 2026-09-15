@@ -1,0 +1,34 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `medium`
+- **Provider:** `codex`
+- **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## Mode · rxwngl · +0s
+
+## User · +0s
+
+receive an HTML HTTP 520 from the edge proxy
+
+## Retrying · attempt 1 · waited 1s · +0s
+
+```
+request failed with status 520
+```
+
+## Assistant · +0s
+
+Recovered after the edge failure.
+
+## User · +0s
+
+continue after the recovered request
+
+## Assistant · +0s
+
+Resumed.
+

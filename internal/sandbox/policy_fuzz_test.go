@@ -36,14 +36,15 @@ func fuzzedPaths(t *testing.T, encoded string) []string {
 
 func FuzzAPolicyMeansTheSameThingOnBothSidesOfTheProcessBoundary(fuzzer *testing.F) {
 	for _, seed := range []struct {
-		read    string
-		write   string
-		exec    string
-		sockets string
-		scratch string
+		read     string
+		write    string
+		exec     string
+		sockets  string
+		optional string
+		scratch  string
 	}{
 		{},
-		{read: "/read", write: "/write", exec: "/exec"},
+		{read: "/read", write: "/write", exec: "/exec", optional: "/read"},
 		{read: "/tmp/held", write: "/tmp", sockets: "/tmp", scratch: "/scratch"},
 		{read: "/work/held", write: "/work"},
 		{read: "/a\xffb"},
@@ -53,7 +54,7 @@ func FuzzAPolicyMeansTheSameThingOnBothSidesOfTheProcessBoundary(fuzzer *testing
 		{read: "/a/../b"},
 		{scratch: "/tmp"},
 	} {
-		fuzzer.Add(seed.read, seed.write, seed.exec, seed.sockets, seed.scratch)
+		fuzzer.Add(seed.read, seed.write, seed.exec, seed.sockets, seed.optional, seed.scratch)
 	}
 
 	fuzzer.Fuzz(func(
@@ -62,6 +63,7 @@ func FuzzAPolicyMeansTheSameThingOnBothSidesOfTheProcessBoundary(fuzzer *testing
 		write string,
 		exec string,
 		sockets string,
+		optional string,
 		scratch string,
 	) {
 		if len(scratch) > fuzzedPathLength {
@@ -69,11 +71,12 @@ func FuzzAPolicyMeansTheSameThingOnBothSidesOfTheProcessBoundary(fuzzer *testing
 		}
 
 		validated := Policy{
-			Read:    fuzzedPaths(t, read),
-			Write:   fuzzedPaths(t, write),
-			Exec:    fuzzedPaths(t, exec),
-			Sockets: fuzzedPaths(t, sockets),
-			TmpDir:  scratch,
+			Read:          fuzzedPaths(t, read),
+			Write:         fuzzedPaths(t, write),
+			Exec:          fuzzedPaths(t, exec),
+			Sockets:       fuzzedPaths(t, sockets),
+			OptionalPaths: fuzzedPaths(t, optional),
+			TmpDir:        scratch,
 		}
 
 		if validated.sane() != nil {

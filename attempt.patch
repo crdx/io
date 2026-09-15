@@ -1,0 +1,297 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index f96f5c652edc61374a2f070b06725334a43c9e95..406545bc900a39776a4eedfdd5fd5cdc0dc2577a 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -14,6 +14,8 @@
+ ### Security
+ 
+ - Resolve every configured path into its real path
++- Keep unreadable nested directories read-only instead of refusing the shell during repository discovery
++- Omit redundant PATH execution grants for targets already covered by the workspace, including tool-manager symlinks
+ - Report redundant and conflicting paths
+ - Let a file tool follow a symlinked path
+ - Ensure the max shell timeout is less than the typical prompt cache TTL
+diff --git a/Justfile b/Justfile
+index fb906dbbda9dd20f8d9313262064e84ae039787c..817cf44cd5276ca90c47380ebf131c7a4e439ab7 100644
+--- a/Justfile
++++ b/Justfile
+@@ -51,6 +51,7 @@ sandbox *args:
+         TestAnExactReadGrantInsideAWriteGrantRemainsReadOnly
+         TestAnExecutableBuiltInTmpMayRunWhenGranted
+         TestAnOrdinaryCommandReachesAListenerAJobLeftBehind
++        TestCommandsCannotChangeAnUnreadableSubtree
+         TestCommandsMayTalkOverAUnixSocketInTheScratch
+         TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted
+         TestCommandsSharingAScratchShareItsContents
+diff --git a/cmd/oh/shell/policy.go b/cmd/oh/shell/policy.go
+index d9bf781b9bb35a50424c9a5ea6fbd20134211d38..598a34d17719bfbeaf1c0789c0ce27133dc22d9a 100644
+--- a/cmd/oh/shell/policy.go
++++ b/cmd/oh/shell/policy.go
+@@ -42,6 +42,7 @@ func shellCPUTime() time.Duration {
+ 
+ func execPaths(workspaceDir string) []string {
+ 	paths := []string{workspaceDir}
++	workspaceRoot := pathutil.Canonicalise(workspaceDir)
+ 
+ 	for entry := range strings.SplitSeq(os.Getenv("PATH"), string(os.PathListSeparator)) {
+ 		if entry == "" {
+@@ -53,9 +54,19 @@ func execPaths(workspaceDir string) []string {
+ 		entry = filepath.Clean(entry)
+ 
+ 		info, err := os.Stat(entry)
+-		if err == nil && info.IsDir() && !slices.Contains(paths, entry) {
+-			paths = append(paths, entry)
++		if err != nil || !info.IsDir() || slices.Contains(paths, entry) {
++			continue
+ 		}
++
++		// The workspace already grants execution beneath it. Do not turn a
++		// redundant PATH alias into a grant through a writable symlink.
++		if target, err := filepath.EvalSymlinks(entry); err == nil {
++			if _, isCovered := pathutil.RelativeTo(workspaceRoot, target); isCovered {
++				continue
++			}
++		}
++
++		paths = append(paths, entry)
+ 	}
+ 
+ 	return paths
+@@ -264,6 +275,14 @@ func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, err
+ 
+ 		err = filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+ 			if err != nil {
++				if path != root && entry != nil && entry.IsDir() && errors.Is(err, fs.ErrPermission) {
++					// An unlistable subtree may still contain writable metadata.
++					// Hold the whole subtree read-only rather than leave it unprotected.
++					if !slices.Contains(policy.Read, path) && !slices.Contains(readOnlyPaths, path) {
++						readOnlyPaths = append(readOnlyPaths, path)
++					}
++					return filepath.SkipDir
++				}
+ 				return err
+ 			}
+ 			if entry.Name() != ".git" {
+diff --git a/cmd/oh/shell/policy_test.go b/cmd/oh/shell/policy_test.go
+index 06832e1797d72cc2975c2073d86ddf7f39bd5f32..f10bd60db6c9db8763f3d874a89dc51aa64fa9de 100644
+--- a/cmd/oh/shell/policy_test.go
++++ b/cmd/oh/shell/policy_test.go
+@@ -592,6 +592,87 @@ func TestCommandsOnThePathMayBeExecuted(t *testing.T) {
+ 	}
+ }
+ 
++func TestPathEntriesAlreadyExecutableInTheWorkspaceNeedNoGrant(t *testing.T) {
++	workspace := t.TempDir()
++	installDir := filepath.Join(workspace, ".local", "share", "mise", "installs", "codex")
++	versionDir := filepath.Join(installDir, "1.0")
++	if err := os.MkdirAll(versionDir, 0o700); err != nil {
++		t.Fatal(err)
++	}
++	alias := filepath.Join(installDir, "latest")
++	if err := os.Symlink("1.0", alias); err != nil {
++		t.Fatal(err)
++	}
++
++	for _, entry := range []string{"", ".", workspace, versionDir, alias, filepath.Join(".local", "share", "mise", "installs", "codex", "latest")} {
++		t.Run(entry, func(t *testing.T) {
++			t.Setenv("PATH", entry)
++			if paths := execPaths(workspace); !slices.Equal(paths, []string{workspace}) {
++				t.Errorf("got %v, want only the workspace grant", paths)
++			}
++		})
++	}
++}
++
++func TestCommandsCanExecuteThroughAWorkspacePathAlias(t *testing.T) {
++	if err := sandbox.Supported(t.Context()); err != nil {
++		t.Skipf("the sandbox cannot be built here: %v", err)
++	}
++
++	workspace := reachableDir(t)
++	versionDir := filepath.Join(workspace, "tools", "1.0")
++	if err := os.MkdirAll(versionDir, 0o700); err != nil {
++		t.Fatal(err)
++	}
++	if err := os.WriteFile(filepath.Join(versionDir, "probe"), []byte("#!/bin/sh\nprintf ready"), 0o700); err != nil {
++		t.Fatal(err)
++	}
++	alias := filepath.Join(workspace, "tools", "latest")
++	if err := os.Symlink("1.0", alias); err != nil {
++		t.Fatal(err)
++	}
++	t.Setenv("PATH", alias+string(os.PathListSeparator)+os.Getenv("PATH"))
++
++	policy, err := createTestPolicy(t, workspace, reachableDir(t), t.TempDir(), Paths{}, caps.Write)
++	if err != nil {
++		t.Fatal(err)
++	}
++	result, err := sandbox.Run(t.Context(), workspace, "probe", policy)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if result.ExitCode != 0 || result.Output != "ready" {
++		t.Errorf("got status %d and output %q, want ready", result.ExitCode, result.Output)
++	}
++}
++
++func TestAPathSymlinkOutsideTheWorkspaceIsStillRefused(t *testing.T) {
++	workspace := filepath.Join(t.TempDir(), "workspace")
++	outside := workspace + "-outside"
++	for _, directory := range []string{workspace, outside} {
++		if err := os.Mkdir(directory, 0o700); err != nil {
++			t.Fatal(err)
++		}
++	}
++	alias := filepath.Join(workspace, "latest")
++	if err := os.Symlink(outside, alias); err != nil {
++		t.Fatal(err)
++	}
++	t.Setenv("PATH", alias)
++
++	paths := execPaths(workspace)
++	if !slices.Contains(paths, alias) {
++		t.Fatalf("the outside target needs its own grant, got %v", paths)
++	}
++	_, err := sandbox.Run(t.Context(), workspace, "true", sandbox.Policy{
++		Exec:  paths,
++		Write: []string{workspace},
++	})
++	if err == nil || !strings.Contains(err.Error(), "symbolic link") {
++		t.Errorf("got %v, want the unsafe grant to be refused", err)
++	}
++}
++
+ func TestGoUsesTheShellCacheAndTheHostModuleCacheAsAProxy(t *testing.T) {
+ 	workspace := t.TempDir()
+ 	home := t.TempDir()
+@@ -788,6 +869,130 @@ func TestEveryExistingRepositoryIsProtectedFromTheShell(t *testing.T) {
+ 	}
+ }
+ 
++func makeUnreadable(t *testing.T, directory string, mode os.FileMode) {
++	t.Helper()
++
++	if err := os.Chmod(directory, mode); err != nil {
++		t.Fatal(err)
++	}
++	t.Cleanup(func() {
++		if err := os.Chmod(directory, 0o700); err != nil {
++			t.Error(err)
++		}
++	})
++
++	if _, err := os.ReadDir(directory); err == nil {
++		t.Skip("this process can read directories regardless of their permissions")
++	} else if !errors.Is(err, os.ErrPermission) {
++		t.Fatal(err)
++	}
++}
++
++func TestUnreadableSubtreesAreHeldReadOnly(t *testing.T) {
++	for _, mode := range []os.FileMode{0, 0o300} {
++		for _, isAdditional := range []bool{false, true} {
++			t.Run(strconv.FormatUint(uint64(mode), 8)+"/additional="+strconv.FormatBool(isAdditional), func(t *testing.T) {
++				workspace := t.TempDir()
++				additional := t.TempDir()
++				root := workspace
++				if isAdditional {
++					root = additional
++				}
++				unreadable := filepath.Join(root, "forge", "data", "ssh")
++				metadataPaths := []string{
++					filepath.Join(root, ".git"),
++					filepath.Join(root, "a", ".git"),
++					filepath.Join(root, "z", ".git"),
++				}
++				for _, metadata := range append(slices.Clone(metadataPaths), filepath.Join(unreadable, "hidden", ".git")) {
++					if err := os.MkdirAll(metadata, 0o700); err != nil {
++						t.Fatal(err)
++					}
++				}
++				makeUnreadable(t, unreadable, mode)
++
++				policy, err := createTestPolicy(t, workspace, t.TempDir(), t.TempDir(), Paths{
++					Write: []string{additional},
++				}, caps.Write)
++				if err != nil {
++					t.Fatalf("an unreadable nested directory blocked the shell policy: %v", err)
++				}
++				for _, path := range append(metadataPaths, unreadable) {
++					if !slices.Contains(policy.Read, path) {
++						t.Errorf("expected %s to be held read-only, got %v", path, policy.Read)
++					}
++				}
++				if !slices.Contains(policy.Write, root) || slices.Contains(policy.Read, root) {
++					t.Errorf("the rest of the tree lost write access: %#v", policy)
++				}
++			})
++		}
++	}
++}
++
++func TestCommandsCannotChangeAnUnreadableSubtree(t *testing.T) {
++	if err := sandbox.Supported(t.Context()); err != nil {
++		t.Skipf("the sandbox cannot be built here: %v", err)
++	}
++
++	workspace := reachableDir(t)
++	unreadable := filepath.Join(workspace, "service")
++	metadata := filepath.Join(unreadable, "repo", ".git", "config")
++	if err := os.MkdirAll(filepath.Dir(metadata), 0o700); err != nil {
++		t.Fatal(err)
++	}
++	if err := os.WriteFile(metadata, []byte("intact"), 0o600); err != nil {
++		t.Fatal(err)
++	}
++	// Known paths can still be written without directory-listing permission.
++	makeUnreadable(t, unreadable, 0o300)
++
++	policy, err := createTestPolicy(t, workspace, reachableDir(t), t.TempDir(), Paths{}, caps.Write)
++	if err != nil {
++		t.Fatal(err)
++	}
++	result, err := sandbox.Run(t.Context(), workspace, "printf ready > work && cat work", policy)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if result.ExitCode != 0 || result.Output != "ready" {
++		t.Fatalf("the rest of the workspace is unusable: %#v", result)
++	}
++	for _, command := range []string{
++		"printf clobbered > service/repo/.git/config",
++		"chmod 700 service",
++		"mv service elsewhere",
++	} {
++		result, err := sandbox.Run(t.Context(), workspace, command, policy)
++		if err != nil {
++			t.Fatal(err)
++		}
++		if result.ExitCode == 0 {
++			t.Errorf("%q was allowed", command)
++		}
++	}
++	content, err := os.ReadFile(metadata) //nolint:gosec // the test's own metadata
++	if err != nil || string(content) != "intact" {
++		t.Errorf("the hidden metadata got %q and %v", content, err)
++	}
++}
++
++func TestAnUnreadableProtectionRootIsStillRefused(t *testing.T) {
++	root := t.TempDir()
++	makeUnreadable(t, root, 0)
++
++	if _, err := protectedPolicy(sandbox.Policy{}, []string{root}); !errors.Is(err, os.ErrPermission) {
++		t.Errorf("got %v, want the unreadable root to be refused", err)
++	}
++}
++
++func TestAMissingProtectionRootIsStillRefused(t *testing.T) {
++	root := filepath.Join(t.TempDir(), "missing")
++	if _, err := protectedPolicy(sandbox.Policy{}, []string{root}); !errors.Is(err, os.ErrNotExist) {
++		t.Errorf("got %v, want the missing root to be refused", err)
++	}
++}
++
+ func TestACommitOnlyShellWithNoRepositoryMayChangeOnlyItsCache(t *testing.T) {
+ 	workspace := t.TempDir()
+ 	homeDir := t.TempDir()

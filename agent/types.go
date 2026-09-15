@@ -297,6 +297,7 @@ type Event struct {
 
 	Kind      Kind                  `json:"kind"`
 	Text      string                `json:"text,omitempty"`
+	Failure   *Failure              `json:"failure,omitempty"`
 	ID        string                `json:"id,omitempty"`
 	Name      string                `json:"name,omitempty"`
 	Arguments string                `json:"arguments,omitempty"`

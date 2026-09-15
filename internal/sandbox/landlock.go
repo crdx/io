@@ -133,6 +133,9 @@ func applyLandlock(policy Policy) (bool, error) {
 		rights := rightsAtVersion(grant.rights, version)
 
 		if err := addRule(ruleset, grant.path, rights, policy.Write); err != nil {
+			if grant.isOptional && !pathutil.Exists(grant.path) {
+				continue
+			}
 			return false, err
 		}
 	}

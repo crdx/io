@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"syscall"
@@ -19,19 +20,56 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func (self Policy) nestedPaths() []string {
-	var inside []string
+type mountRefinement struct {
+	path       string
+	isReadOnly bool
+}
 
-	for _, read := range self.Read {
-		for _, write := range self.Write {
-			if _, ok := pathutil.RelativeTo(write, read); ok {
-				inside = append(inside, read)
-				break
+func (self Policy) mountRefinements() []mountRefinement {
+	isWritable := make(map[string]bool, len(self.Read)+len(self.Write))
+	for _, path := range self.Read {
+		isWritable[filepath.Clean(path)] = false
+	}
+	for _, path := range self.Write {
+		isWritable[filepath.Clean(path)] = true
+	}
+
+	paths := make([]string, 0, len(isWritable))
+	for path := range isWritable {
+		paths = append(paths, path)
+	}
+	slices.SortFunc(paths, func(left string, right string) int {
+		if difference := len(left) - len(right); difference != 0 {
+			return difference
+		}
+		return strings.Compare(left, right)
+	})
+
+	var refinements []mountRefinement
+	for _, path := range paths {
+		isCurrentlyReadOnly := false
+		for _, refinement := range refinements {
+			if _, isBelow := pathutil.RelativeTo(refinement.path, path); isBelow {
+				isCurrentlyReadOnly = refinement.isReadOnly
 			}
+		}
+
+		isReadOnlyWanted := !isWritable[path] && self.writeCovers(path)
+		if isReadOnlyWanted != isCurrentlyReadOnly {
+			refinements = append(refinements, mountRefinement{path: path, isReadOnly: isReadOnlyWanted})
 		}
 	}
 
-	return inside
+	return refinements
+}
+
+func (self Policy) writeCovers(path string) bool {
+	for _, write := range self.Write {
+		if _, isBelow := pathutil.RelativeTo(write, path); isBelow {
+			return true
+		}
+	}
+	return false
 }
 
 const privateNamespaces uintptr = syscall.CLONE_NEWUSER | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS
@@ -142,8 +180,15 @@ func applyMounts(policy Policy) error {
 		return err
 	}
 
-	for _, path := range policy.nestedPaths() {
-		if err := mountReadOnly(path); err != nil {
+	for _, refinement := range policy.mountRefinements() {
+		isOptional := slices.Contains(policy.OptionalPaths, refinement.path)
+		if isOptional && !pathutil.Exists(refinement.path) {
+			continue
+		}
+		if err := mountWithAccess(refinement); err != nil {
+			if isOptional && !pathutil.Exists(refinement.path) {
+				continue
+			}
 			return err
 		}
 	}
@@ -207,8 +252,14 @@ func writeTemporaryFile(contents string) (string, error) {
 	return file.Name(), nil
 }
 
-func mountReadOnly(path string) error {
-	return attach(path, path, &unix.MountAttr{Attr_set: unix.MOUNT_ATTR_RDONLY})
+func mountWithAccess(refinement mountRefinement) error {
+	attributes := &unix.MountAttr{}
+	if refinement.isReadOnly {
+		attributes.Attr_set = unix.MOUNT_ATTR_RDONLY
+	} else {
+		attributes.Attr_clr = unix.MOUNT_ATTR_RDONLY
+	}
+	return attach(refinement.path, refinement.path, attributes)
 }
 
 func mountProcessFilesystem() error {

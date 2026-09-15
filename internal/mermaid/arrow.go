@@ -194,7 +194,7 @@ func (self *graph) drawPath(path []gridCoord) (*drawing, [][]drawingCoord, []dir
 }
 
 func (self *graph) drawBoxStart(path []gridCoord, firstLine []drawingCoord) *drawing {
-	sketch := *(copyCanvas(self.drawing))
+	sketch := *copyCanvas(self.drawing)
 	from := firstLine[0]
 	dir := determineDirection(genericCoord(path[0]), genericCoord(path[1]))
 
@@ -216,7 +216,7 @@ func (self *graph) drawBoxStart(path []gridCoord, firstLine []drawingCoord) *dra
 }
 
 func (self *graph) drawArrowHead(line []drawingCoord, fallback direction) *drawing {
-	sketch := *(copyCanvas(self.drawing))
+	sketch := *copyCanvas(self.drawing)
 	if len(line) == 0 {
 		return &sketch
 	}

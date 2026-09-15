@@ -654,6 +654,40 @@ func TestAnExactReadGrantInsideAWriteGrantRemainsReadOnly(t *testing.T) {
 	}
 }
 
+func TestAWriteGrantInsideAReadGrantInsideAWriteGrantIsWritable(t *testing.T) {
+	directory := t.TempDir()
+	protectedPath := filepath.Join(directory, "held")
+	writablePath := filepath.Join(protectedPath, "open")
+	protectedAgainPath := filepath.Join(writablePath, "closed")
+	if err := os.MkdirAll(protectedAgainPath, 0o750); err != nil {
+		t.Fatal(err)
+	}
+
+	policy := sandbox.Policy{
+		Read:  []string{protectedPath, protectedAgainPath},
+		Write: []string{writablePath},
+	}
+
+	writtenPath := filepath.Join(writablePath, "written")
+	result := run(t, directory, "printf written > "+writtenPath, policy)
+	if result.ExitCode != 0 {
+		t.Fatalf("the nested write grant was refused with %q", result.Output)
+	}
+	if content, err := os.ReadFile(writtenPath); err != nil || string(content) != "written" { //nolint:gosec // the test's own path
+		t.Errorf("nested write produced %q and %v", content, err)
+	}
+
+	for _, path := range []string{
+		filepath.Join(protectedPath, "blocked"),
+		filepath.Join(protectedAgainPath, "blocked"),
+	} {
+		result := run(t, directory, "printf blocked > "+path, policy)
+		if result.ExitCode == 0 {
+			t.Errorf("the read-only path %s was writable", path)
+		}
+	}
+}
+
 func TestAGrantedPathIsStillNotWritable(t *testing.T) {
 	grantedDirectory := t.TempDir()
 
@@ -921,57 +955,6 @@ func TestDatagramsStayOnLoopback(t *testing.T) {
 	}
 	if result.ExitCode != 0 || !strings.Contains(result.Output, "ping") {
 		t.Errorf("loopback datagram failed: %q", result.Output)
-	}
-}
-
-func TestNamedHostLoopbackPortIsForwarded(t *testing.T) {
-	if err := sandbox.Supported(t.Context()); err != nil {
-		t.Skipf("the sandbox cannot enforce this policy: %v", err)
-	}
-
-	var listenConfig net.ListenConfig
-	host, err := listenConfig.Listen(t.Context(), "tcp4", "127.0.0.1:0")
-	if err != nil {
-		t.Skipf("host sockets are unavailable: %v", err)
-	}
-	defer func() { _ = host.Close() }()
-
-	_, portText, err := net.SplitHostPort(host.Addr().String())
-	if err != nil {
-		t.Fatal(err)
-	}
-	var port uint16
-	if _, err := fmt.Sscan(portText, &port); err != nil {
-		t.Fatal(err)
-	}
-	accepted := make(chan error, 1)
-	go func() {
-		connection, err := host.Accept()
-		if err == nil {
-			_, err = connection.Write([]byte("bridged\n"))
-			_ = connection.Close()
-		}
-		accepted <- err
-	}()
-
-	keeperProcess, err := keeper.Open(t.Context(), port)
-	if err != nil {
-		t.Fatalf("could not open keeper: %v", err)
-	}
-	defer func() { _ = keeperProcess.Close() }()
-
-	result, err := sandbox.Wrapped(keeperProcess).Run(
-		t.Context(), t.TempDir(),
-		"cat </dev/tcp/localhost/"+strconv.Itoa(int(port)), sandbox.Policy{},
-	)
-	if err != nil {
-		t.Fatalf("could not run command: %v", err)
-	}
-	if result.ExitCode != 0 || !strings.Contains(result.Output, "bridged") {
-		t.Errorf("host loopback was not forwarded: %q", result.Output)
-	}
-	if err := <-accepted; err != nil {
-		t.Errorf("host service did not accept the bridge: %v", err)
 	}
 }
 
@@ -1685,6 +1668,26 @@ func TestAPolicyNamingAMissingPathIsRefused(t *testing.T) {
 
 	if err == nil || !strings.Contains(err.Error(), "do not exist") {
 		t.Errorf("got %v, want a complaint about the missing path", err)
+	}
+}
+
+func TestAPolicyMayNameAnOptionalMissingPath(t *testing.T) {
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot be built here: %v", err)
+	}
+
+	directory := t.TempDir()
+	absent := filepath.Join(directory, "nowhere")
+	result, err := sandbox.Run(context.Background(), directory, "true", sandbox.Policy{
+		Read:          []string{absent},
+		Write:         []string{directory},
+		OptionalPaths: []string{absent},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.ExitCode != 0 {
+		t.Errorf("got status %d, want success", result.ExitCode)
 	}
 }
 

@@ -3,7 +3,7 @@
 {"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
 {"kind":"event","event":{"kind":"user_message","text":"complete a summary, then fail"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Completed summary."}}
-{"kind":"event","event":{"kind":"turn_failure","text":"model failed after reasoning"}}
+{"kind":"event","event":{"kind":"turn_failure","failure":{"kind":"generic_error","message":"model failed after reasoning"}}}
 {"kind":"item","payload":{"role":"user","content":"complete a summary, then fail"}}
 {"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the first response"}}

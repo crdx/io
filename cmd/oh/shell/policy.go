@@ -42,6 +42,7 @@ func shellCPUTime() time.Duration {
 
 func execPaths(workspaceDir string) []string {
 	paths := []string{workspaceDir}
+	workspaceRoot := pathutil.Canonicalise(workspaceDir)
 
 	for entry := range strings.SplitSeq(os.Getenv("PATH"), string(os.PathListSeparator)) {
 		if entry == "" {
@@ -53,9 +54,17 @@ func execPaths(workspaceDir string) []string {
 		entry = filepath.Clean(entry)
 
 		info, err := os.Stat(entry)
-		if err == nil && info.IsDir() && !slices.Contains(paths, entry) {
-			paths = append(paths, entry)
+		if err != nil || !info.IsDir() || slices.Contains(paths, entry) {
+			continue
 		}
+
+		if target, err := filepath.EvalSymlinks(entry); err == nil {
+			if _, isCovered := pathutil.RelativeTo(workspaceRoot, target); isCovered {
+				continue
+			}
+		}
+
+		paths = append(paths, entry)
 	}
 
 	return paths
@@ -95,6 +104,27 @@ func furnish(homeDir string, sources []string, writableRoots []string) ([]string
 
 type supportProbe func(context.Context) error
 
+func omitUnavailableOptionalPaths(paths Paths, optionalPaths []string) (Paths, []string) {
+	var unavailablePaths []string
+	optionalPaths = slices.DeleteFunc(slices.Clone(optionalPaths), func(path string) bool {
+		isUnavailable := !pathutil.Exists(path)
+		if isUnavailable {
+			unavailablePaths = append(unavailablePaths, path)
+		}
+		return isUnavailable
+	})
+	if len(unavailablePaths) == 0 {
+		return paths, optionalPaths
+	}
+
+	paths = clonePaths(paths)
+	removeUnavailable := func(path string) bool { return slices.Contains(unavailablePaths, path) }
+	paths.Read = slices.DeleteFunc(paths.Read, removeUnavailable)
+	paths.Write = slices.DeleteFunc(paths.Write, removeUnavailable)
+	paths.Exec = slices.DeleteFunc(paths.Exec, removeUnavailable)
+	return paths, optionalPaths
+}
+
 func createPolicy(
 	ctx context.Context,
 	workspaceDir string,
@@ -103,12 +133,33 @@ func createPolicy(
 	extraPaths Paths,
 	currentCaps caps.Set,
 ) (sandbox.Policy, error) {
+	return createPolicyWithOptionalPaths(
+		ctx,
+		workspaceDir,
+		homeDir,
+		tmpDir,
+		extraPaths,
+		nil,
+		currentCaps,
+	)
+}
+
+func createPolicyWithOptionalPaths(
+	ctx context.Context,
+	workspaceDir string,
+	homeDir string,
+	tmpDir string,
+	extraPaths Paths,
+	optionalPaths []string,
+	currentCaps caps.Set,
+) (sandbox.Policy, error) {
 	return createPolicyWithSupportProbe(
 		ctx,
 		workspaceDir,
 		homeDir,
 		tmpDir,
 		extraPaths,
+		optionalPaths,
 		currentCaps,
 		sandbox.Supported,
 	)
@@ -120,9 +171,11 @@ func createPolicyWithSupportProbe(
 	homeDir string,
 	tmpDir string,
 	extraPaths Paths,
+	optionalPaths []string,
 	currentCaps caps.Set,
 	supportedProbe supportProbe,
 ) (sandbox.Policy, error) {
+	extraPaths, optionalPaths = omitUnavailableOptionalPaths(extraPaths, optionalPaths)
 	cacheDir := filepath.Join(homeDir, ".cache")
 	writablePaths := allWritablePaths(workspaceDir, homeDir, extraPaths.Write, currentCaps)
 	writableRoots := slices.Concat(writablePaths, []string{cacheDir, tmpDir})
@@ -152,14 +205,20 @@ func createPolicyWithSupportProbe(
 
 	readablePaths := slices.Concat(extraPaths.Read, extraPaths.Write, mappedPaths)
 
-	executablePaths := append(append(execPaths(workspaceDir), extraPaths.Exec...), homeDir, sandbox.TmpDir)
+	executablePaths := slices.Concat(
+		execPaths(workspaceDir),
+		extraPaths.Exec,
+		extraPaths.Path,
+		[]string{homeDir, sandbox.TmpDir},
+	)
 
 	policy := sandbox.Policy{
-		Read:    readablePaths,
-		Write:   []string{cacheDir},
-		Sockets: []string{cacheDir, sandbox.TmpDir},
-		Exec:    executablePaths,
-		TmpDir:  tmpDir,
+		Read:          readablePaths,
+		Write:         []string{cacheDir},
+		Sockets:       []string{cacheDir, sandbox.TmpDir},
+		Exec:          executablePaths,
+		OptionalPaths: slices.Clone(optionalPaths),
+		TmpDir:        tmpDir,
 
 		Env: []string{
 			"PATH",
@@ -186,6 +245,10 @@ func createPolicyWithSupportProbe(
 		MaxProcesses: shellProcesses,
 	}
 
+	if len(extraPaths.Path) > 0 {
+		policy = policy.WithSetEnv("PATH", ShellPath(extraPaths.Path))
+	}
+
 	policy = policy.WithSetEnv("GOPROXY", "off").WithSetEnv("GOSUMDB", "off")
 	modules, err := goModuleCache()
 	if err != nil {
@@ -210,7 +273,11 @@ func createPolicyWithSupportProbe(
 	if !currentCaps.Has(caps.Git) {
 		protectRoots := append([]string{workspaceDir}, extraPaths.Write...)
 		var err error
-		writablePolicy, err = protectedPolicy(writablePolicy, protectRoots)
+		writablePolicy, err = protectedPolicyWithOptionalRoots(
+			writablePolicy,
+			protectRoots,
+			optionalPaths,
+		)
 		if err != nil {
 			return policy, fmt.Errorf("could not find repository metadata to protect: %w", err)
 		}
@@ -241,6 +308,14 @@ func readOnlySandboxPolicy(
 }
 
 func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, error) {
+	return protectedPolicyWithOptionalRoots(policy, roots, nil)
+}
+
+func protectedPolicyWithOptionalRoots(
+	policy sandbox.Policy,
+	roots []string,
+	optionalRoots []string,
+) (sandbox.Policy, error) {
 	var readOnlyPaths []string
 	visitedRoots := make(map[string]struct{}, len(roots))
 
@@ -253,6 +328,9 @@ func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, err
 
 		resolvedRoot, err := filepath.EvalSymlinks(root)
 		if err != nil {
+			if slices.Contains(optionalRoots, root) && !pathutil.Exists(root) {
+				continue
+			}
 			return policy, err
 		}
 		if file.InGitDir(resolvedRoot) {
@@ -264,6 +342,12 @@ func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, err
 
 		err = filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
 			if err != nil {
+				if path != root && entry != nil && entry.IsDir() && errors.Is(err, fs.ErrPermission) {
+					if !slices.Contains(policy.Read, path) && !slices.Contains(readOnlyPaths, path) {
+						readOnlyPaths = append(readOnlyPaths, path)
+					}
+					return filepath.SkipDir
+				}
 				return err
 			}
 			if entry.Name() != ".git" {
@@ -279,6 +363,9 @@ func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, err
 			return nil
 		})
 		if err != nil {
+			if slices.Contains(optionalRoots, root) && !pathutil.Exists(root) {
+				continue
+			}
 			return policy, err
 		}
 	}
@@ -430,7 +517,16 @@ func freshPolicy(
 		return YoloPolicy(homeDir, tmpDir), nil
 	}
 
-	policy, err := createPolicy(ctx, workspaceDir, homeDir, tmpDir, pathAccess.GetPaths(), currentCaps)
+	extraPaths, optionalPaths := pathAccess.getPaths()
+	policy, err := createPolicyWithOptionalPaths(
+		ctx,
+		workspaceDir,
+		homeDir,
+		tmpDir,
+		extraPaths,
+		optionalPaths,
+		currentCaps,
+	)
 	if err != nil {
 		if ctx.Err() != nil {
 			return policy, ctx.Err()

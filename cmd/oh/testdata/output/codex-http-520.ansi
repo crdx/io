@@ -1,0 +1,13 @@
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m receive an HTML HTTP 520 from the edge proxy                                                       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[38;2;207;173;0m[#1] Request failed; retrying in 1s: Request failed with status 520\e[0m\r
+\r
+\e[?7l\r\e[KRecovered after the edge failure.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m continue after the recovered request                                                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KResumed.\e[?25h\e[?2026l\r

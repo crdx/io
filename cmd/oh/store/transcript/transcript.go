@@ -118,7 +118,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			output.markdown(event.Text)
 		}
 	case agent.FailureEvent:
-		output.fence(event.Text)
+		output.fence(agent.FailureText(event))
 	case agent.SilentTurnEvent:
 		output.fence(agent.SilentTurnNotice)
 	case agent.CacheRebuildEvent:
@@ -156,7 +156,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 	case agent.InterruptionEvent:
 		output.paragraph(interrupt.Notice(event))
 	case agent.RetryingEvent:
-		output.fence(event.Text)
+		output.fence(agent.FailureText(event))
 		if event.Arguments != "" {
 			output.fence(event.Arguments)
 		}

@@ -160,7 +160,7 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 	for _, want := range []string{
 		"configured path /reference is read-only",
 		"configured path /output is read-write and follows the workspace write state",
-		"shell may also execute files at or under /commands",
+		"shell can execute files at or under /commands",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("system prompt does not contain %q: %q", want, got)
@@ -396,26 +396,6 @@ func TestTheHarnessDoesNotOfferTheHostNetworkWhenItIsNotGranted(t *testing.T) {
 		"The host network is withheld in this session, so a call asking for network=host is refused",
 		"The user can grant the host network with ctrl+x n",
 		"Ask the user to grant the host network rather than asking the user to run the command",
-	} {
-		if !strings.Contains(got, want) {
-			t.Errorf("harness context does not contain %q: %q", want, got)
-		}
-	}
-}
-
-func TestTheHarnessDisclosesForwardedHostLoopbackPorts(t *testing.T) {
-	got := harnessContext(Config{
-		Workspace:   work.At("/workspace"),
-		SessionName: "session-id",
-		TmpDir:      "/tmp/x",
-		HomeDir:     "/state/home",
-		CurrentCaps: caps.Read,
-		ExtraPaths:  shell.Paths{HostLoopback: []uint16{80, 3000}},
-	})
-
-	for _, want := range []string{
-		"host's loopback TCP ports 80, 3000 are reachable",
-		"All other host loopback traffic and external networks are unreachable",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("harness context does not contain %q: %q", want, got)
@@ -663,7 +643,7 @@ func TestAnOfferedToolIsStillMentioned(t *testing.T) {
 		"# Network",
 		"The bash tool is granted",
 		"A service started with the job tool",
-		"The shell may also execute files at or under /commands.",
+		"The shell can execute files at or under /commands.",
 		"git clone --shared",
 	} {
 		if !strings.Contains(got, want) {
@@ -750,7 +730,7 @@ func TestTheShellReportsWhereItMayExecuteFiles(t *testing.T) {
 		OfferedTools: []string{"bash"},
 	})
 
-	want := "The shell may execute files under the system directories, every directory in PATH, " +
+	want := "The shell can execute files under the system directories, every directory in PATH, " +
 		"the workspace, HOME, and /tmp."
 	if !strings.Contains(got, want) {
 		t.Errorf("harness context does not contain %q: %q", want, got)
@@ -767,7 +747,7 @@ func TestTheShellReportsThatItReadsWiderThanThePathTools(t *testing.T) {
 		OfferedTools: []string{"bash"},
 	})
 
-	want := "The shell may also read the system directories, but it can only write where the " +
+	want := "The shell can read the system directories, but it can only write where the " +
 		"path tools can."
 	if !strings.Contains(got, want) {
 		t.Errorf("harness context does not contain %q: %q", want, got)

@@ -1,0 +1,14 @@
+{"kind":"head","version":13,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
+{"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
+{"kind":"event","event":{"kind":"user_message","text":"receive an HTML HTTP 520 from the edge proxy"}}
+{"kind":"event","event":{"kind":"request_retry","failure":{"kind":"http_status","http_status":520,"media_type":"text/html"},"attempt":1}}
+{"kind":"event","event":{"kind":"model_message","text":"Recovered after the edge failure."}}
+{"kind":"item","payload":{"role":"user","content":"receive an HTML HTTP 520 from the edge proxy"}}
+{"kind":"item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Recovered after the edge failure."}]}}
+{"kind":"turn_completion","turn":{}}
+{"kind":"event","event":{"kind":"user_message","text":"continue after the recovered request"}}
+{"kind":"event","event":{"kind":"model_message","text":"Resumed."}}
+{"kind":"item","payload":{"role":"user","content":"continue after the recovered request"}}
+{"kind":"item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}
+{"kind":"turn_completion","turn":{}}

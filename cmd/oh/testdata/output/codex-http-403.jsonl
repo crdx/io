@@ -2,7 +2,7 @@
 {"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
 {"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
 {"kind":"event","event":{"kind":"user_message","text":"receive HTTP 403"}}
-{"kind":"event","event":{"kind":"turn_failure","text":"request failed with status 403"}}
+{"kind":"event","event":{"kind":"turn_failure","failure":{"kind":"http_status","http_status":403,"media_type":"text/event-stream"}}}
 {"kind":"item","payload":{"role":"user","content":"receive HTTP 403"}}
 {"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the transport failure"}}

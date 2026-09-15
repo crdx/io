@@ -1669,7 +1669,7 @@ func (self *App) finish() {
 	if self.currentTurn.Cancelled() {
 		self.recordEvent(interrupt.Event(self.interruptionCause()))
 	} else if turnError = self.currentTurn.Error(); turnError != nil {
-		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: turnError.Error()})
+		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Failure: agent.FailureFrom(turnError)})
 	}
 
 	if note, isNoted := self.currentTurn.TakeNotes(); isNoted {

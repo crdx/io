@@ -56,14 +56,15 @@ type Policy struct {
 	Yolo    bool `json:"yolo,omitempty"`
 	Network bool `json:"network,omitempty"`
 
-	Read    []string          `json:"read"`
-	Write   []string          `json:"write"`
-	Sockets []string          `json:"sockets"`
-	Exec    []string          `json:"exec"`
-	TmpDir  string            `json:"tmpdir"`
-	Env     []string          `json:"env"`
-	SetEnv  map[string]string `json:"set_env"`
-	Timeout time.Duration     `json:"timeout"`
+	Read          []string          `json:"read"`
+	Write         []string          `json:"write"`
+	Sockets       []string          `json:"sockets"`
+	Exec          []string          `json:"exec"`
+	OptionalPaths []string          `json:"optional_paths,omitempty"`
+	TmpDir        string            `json:"tmpdir"`
+	Env           []string          `json:"env"`
+	SetEnv        map[string]string `json:"set_env"`
+	Timeout       time.Duration     `json:"timeout"`
 
 	MaxCPUTime   time.Duration `json:"cpu_time"`
 	MaxFileSize  int64         `json:"file_size"`
@@ -129,11 +130,15 @@ func (self Policy) grants() []grant {
 	}
 
 	for _, path := range self.Read {
-		grants = append(grants, grant{path: path, rights: rightsRead})
+		grants = append(grants, grant{
+			path: path, rights: rightsRead, isOptional: slices.Contains(self.OptionalPaths, path),
+		})
 	}
 
 	for _, path := range self.Exec {
-		grants = append(grants, grant{path: path, rights: rightsExec})
+		grants = append(grants, grant{
+			path: path, rights: rightsExec, isOptional: slices.Contains(self.OptionalPaths, path),
+		})
 	}
 
 	for _, path := range self.Write {
@@ -142,7 +147,9 @@ func (self Policy) grants() []grant {
 			rights |= accessResolveUnix
 		}
 
-		grants = append(grants, grant{path: path, rights: rights})
+		grants = append(grants, grant{
+			path: path, rights: rights, isOptional: slices.Contains(self.OptionalPaths, path),
+		})
 	}
 
 	return grants

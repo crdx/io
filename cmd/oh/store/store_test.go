@@ -123,28 +123,6 @@ func TestASessionReadsBackAsItWasWritten(t *testing.T) {
 	}
 }
 
-func TestHostLoopbackPortsSurviveWithTheSession(t *testing.T) {
-	directory := t.TempDir()
-	log, err := store.Create(directory, store.Meta{HostLoopback: []uint16{80, 3000}})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "store it"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := log.Close(); err != nil {
-		t.Fatal(err)
-	}
-
-	storedSession, err := store.Read(directory, log.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(storedSession.Meta.HostLoopback, []uint16{80, 3000}) {
-		t.Errorf("got host loopback ports %v, want [80 3000]", storedSession.Meta.HostLoopback)
-	}
-}
-
 func TestTheConditionsAtCreationSurviveWithTheSession(t *testing.T) {
 	directory := t.TempDir()
 	createdConditions := conditions.Conditions{UnixSockets: true, Interactive: true}

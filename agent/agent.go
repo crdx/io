@@ -463,7 +463,7 @@ func (self *Agent) send(
 
 		notice := Event{
 			Kind:    RetryingEvent,
-			Text:    err.Error(),
+			Failure: FailureFrom(err),
 			Attempt: attempt,
 			Took:    wait,
 		}

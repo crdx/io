@@ -18,9 +18,9 @@
 - The configured path /state/farm is read-only, apart from your scratch space at /state/farm/brave-otter, which is writable.
 - The configured path /state/sessions is read-only.
 - The configured path /output is read-write and follows the workspace write state.
-- The shell may also read the system directories, but it can only write where the path tools can.
-- The shell may execute files under the system directories, every directory in PATH, the workspace, HOME, and /tmp.
-- The shell may also execute files at or under /commands.
+- The shell can read the system directories, but it can only write where the path tools can.
+- The shell can execute files under the system directories, every directory in PATH, the workspace, HOME, and /tmp.
+- The shell can execute files at or under /commands.
 
 # Personality
 

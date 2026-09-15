@@ -408,7 +408,7 @@ func TestAnAppliedReloadNamesTheFileThatChangedAndWhatItSupplies(t *testing.T) {
 	}
 	t.Cleanup(observer.Close)
 
-	if err := os.WriteFile(overridePath, []byte("[editor]\ncommand = [\"vi\"]\n\n[ui]\nstreaming = \"asap\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(overridePath, []byte("[input]\ncontinue = \"second\"\n\n[ui]\nstreaming = \"asap\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -423,11 +423,11 @@ func TestAnAppliedReloadNamesTheFileThatChangedAndWhatItSupplies(t *testing.T) {
 	if !strings.HasSuffix(change.Path, "oh.toml") || change.IsRemoved {
 		t.Errorf("got path %q removed=%t", change.Path, change.IsRemoved)
 	}
-	if want := []string{"editor.command", "ui.streaming"}; !slices.Equal(change.Settings, want) {
+	if want := []string{"input.continue", "ui.streaming"}; !slices.Equal(change.Settings, want) {
 		t.Errorf("got settings %v, want %v", change.Settings, want)
 	}
 
-	if err := os.WriteFile(overridePath, []byte("[editor]\ncommand = [\"vi\"]\n\n[ui]\nstreaming = \"line\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(overridePath, []byte("[input]\ncontinue = \"second\"\n\n[ui]\nstreaming = \"line\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 

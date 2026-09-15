@@ -3583,74 +3583,72 @@ func TestGoldenFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		".transcript",
 	})
 	for name, extensions := range map[string][]string{
-		"app-plain-resume":         {".jsonl", ".transcript"},
-		"app-plain-turn":           {".jsonl", ".transcript"},
-		"authorisation-url":        {".ansi", ".screen"},
-		"banner":                   {".ansi", ".screen"},
-		"clearing":                 {".ansi", ".screen"},
-		"completion":               {".txt"},
-		"config-reload":            {".ansi", ".screen"},
-		"corrupt-session":          {".txt"},
-		"default-bar":              {".ansi", ".screen"},
-		"feedback":                 {".ansi", ".screen", ".txt"},
-		"fork-message":             {".txt"},
-		"context":                  {".prompt"},
-		"context-drops":            {".prompt"},
-		"context-jobs":             {".prompt"},
-		"context-loopback":         {".prompt"},
-		"context-network":          {".prompt"},
-		"context-network-loopback": {".prompt"},
-		"context-network-print":    {".prompt"},
-		"context-print":            {".prompt"},
-		"context-file-tools":       {".prompt"},
-		"context-no-sockets":       {".prompt"},
-		"context-repository":       {".prompt"},
-		"context-scratch-root":     {".prompt"},
-		"context-yolo":             {".prompt"},
-		"inputblock":               {".ansi", ".screen"},
-		"legacy-alt-enter":         {".ansi", ".screen"},
-		"lifecycle":                {".ansi", ".screen"},
-		"line-resize":              {".screen"},
-		"short-terminal":           {".screen"},
-		"streaming-modes":          {".screen"},
-		"groupings":                {".screen"},
-		"reasonings":               {".ansi", ".screen"},
-		"mermaid-streaming":        {".screen"},
-		"mode-takeback":            {".ansi", ".screen"},
-		"model-arguments":          {".txt"},
-		"new-session":              {".txt"},
-		"ordinary-tab":             {".ansi", ".screen"},
-		"path-grant-lifecycle":     {".ansi", ".screen"},
-		"port-directions":          {".ansi", ".screen"},
-		"path-message":             {".ansi", ".screen"},
-		"user-path-links":          {".ansi", ".screen"},
-		"workspace-paths":          {".ansi", ".screen"},
-		"pending-mode-messages":    {".ansi", ".screen"},
-		"paste":                    {".ansi", ".screen"},
-		"pictures":                 {".ansi", ".screen"},
-		"picker-menu":              {".ansi", ".screen"},
-		"plain-input":              {".ansi", ".screen"},
-		"print-arguments":          {".txt"},
-		"queued-messages":          {".ansi", ".screen"},
-		"readline-bindings":        {".ansi", ".screen"},
-		"resume-arguments":         {".txt"},
-		"resume-model-arguments":   {".txt"},
-		"resume-mode":              {".ansi"},
-		"resume-confinement":       {".ansi"},
-		"running":                  {".ansi", ".screen"},
-		"schedule":                 {".ansi", ".screen"},
-		"segments":                 {".ansi", ".screen"},
-		"signal-restoration":       {".ansi"},
-		"special-links":            {".ansi", ".screen"},
-		"startup":                  {".ansi", ".screen"},
-		"startup-local-config":     {".ansi", ".screen"},
-		"startup-sized":            {".ansi", ".screen"},
-		"startup-sized-output":     {".ansi", ".screen"},
-		"terminal-escape":          {".ansi", ".screen"},
-		"theme-reload":             {".ansi", ".screen"},
-		"usage":                    {".json"},
-		"usage-arguments":          {".txt"},
-		"vertical-movement":        {".ansi", ".screen"},
+		"app-plain-resume":       {".jsonl", ".transcript"},
+		"app-plain-turn":         {".jsonl", ".transcript"},
+		"authorisation-url":      {".ansi", ".screen"},
+		"banner":                 {".ansi", ".screen"},
+		"clearing":               {".ansi", ".screen"},
+		"completion":             {".txt"},
+		"config-reload":          {".ansi", ".screen"},
+		"corrupt-session":        {".txt"},
+		"default-bar":            {".ansi", ".screen"},
+		"feedback":               {".ansi", ".screen", ".txt"},
+		"fork-message":           {".txt"},
+		"context":                {".prompt"},
+		"context-drops":          {".prompt"},
+		"context-jobs":           {".prompt"},
+		"context-network":        {".prompt"},
+		"context-network-print":  {".prompt"},
+		"context-print":          {".prompt"},
+		"context-file-tools":     {".prompt"},
+		"context-no-sockets":     {".prompt"},
+		"context-repository":     {".prompt"},
+		"context-scratch-root":   {".prompt"},
+		"context-yolo":           {".prompt"},
+		"inputblock":             {".ansi", ".screen"},
+		"legacy-alt-enter":       {".ansi", ".screen"},
+		"lifecycle":              {".ansi", ".screen"},
+		"line-resize":            {".screen"},
+		"short-terminal":         {".screen"},
+		"streaming-modes":        {".screen"},
+		"groupings":              {".screen"},
+		"reasonings":             {".ansi", ".screen"},
+		"mermaid-streaming":      {".screen"},
+		"mode-takeback":          {".ansi", ".screen"},
+		"model-arguments":        {".txt"},
+		"new-session":            {".txt"},
+		"ordinary-tab":           {".ansi", ".screen"},
+		"path-grant-lifecycle":   {".ansi", ".screen"},
+		"port-directions":        {".ansi", ".screen"},
+		"path-message":           {".ansi", ".screen"},
+		"user-path-links":        {".ansi", ".screen"},
+		"workspace-paths":        {".ansi", ".screen"},
+		"pending-mode-messages":  {".ansi", ".screen"},
+		"paste":                  {".ansi", ".screen"},
+		"pictures":               {".ansi", ".screen"},
+		"picker-menu":            {".ansi", ".screen"},
+		"plain-input":            {".ansi", ".screen"},
+		"print-arguments":        {".txt"},
+		"queued-messages":        {".ansi", ".screen"},
+		"readline-bindings":      {".ansi", ".screen"},
+		"resume-arguments":       {".txt"},
+		"resume-model-arguments": {".txt"},
+		"resume-mode":            {".ansi"},
+		"resume-confinement":     {".ansi"},
+		"running":                {".ansi", ".screen"},
+		"schedule":               {".ansi", ".screen"},
+		"segments":               {".ansi", ".screen"},
+		"signal-restoration":     {".ansi"},
+		"special-links":          {".ansi", ".screen"},
+		"startup":                {".ansi", ".screen"},
+		"startup-local-config":   {".ansi", ".screen"},
+		"startup-sized":          {".ansi", ".screen"},
+		"startup-sized-output":   {".ansi", ".screen"},
+		"terminal-escape":        {".ansi", ".screen"},
+		"theme-reload":           {".ansi", ".screen"},
+		"usage":                  {".json"},
+		"usage-arguments":        {".txt"},
+		"vertical-movement":      {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)
 	}
@@ -5648,7 +5646,6 @@ type promptGolden struct {
 	isYolo              bool
 	areJobsGiven        bool
 	hasClipboardDrops   bool
-	hasHostLoopbackPort bool
 	isNetworkGranted    bool
 	isPrinting          bool
 	offeredTools        []string
@@ -5663,7 +5660,6 @@ func TestGoldenTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 		"context-yolo":          {isYolo: true},
 		"context-jobs":          {areJobsGiven: true},
 		"context-drops":         {hasClipboardDrops: true},
-		"context-loopback":      {hasHostLoopbackPort: true},
 		"context-network":       {isNetworkGranted: true},
 		"context-network-print": {isNetworkGranted: true, isPrinting: true},
 		"context-print":         {isPrinting: true},
@@ -5671,10 +5667,6 @@ func TestGoldenTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 		"context-no-sockets":    {hasNoSockets: true},
 		"context-repository":    {isRepository: true},
 		"context-scratch-root":  {readsTheScratchRoot: true},
-		"context-network-loopback": {
-			hasHostLoopbackPort: true,
-			isNetworkGranted:    true,
-		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			compareSystemPromptWithGolden(t, name, shape)
@@ -5719,11 +5711,6 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 		readPaths = []string{"/state/farm", "/state/sessions"}
 	}
 
-	var hostLoopback []uint16
-	if shape.hasHostLoopbackPort {
-		hostLoopback = []uint16{3000}
-	}
-
 	currentCaps := caps.Read | caps.Write | caps.Git | caps.Shell
 	if shape.isNetworkGranted {
 		currentCaps |= caps.Network
@@ -5740,10 +5727,9 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 		HomeDir:     "/state/home",
 		CurrentCaps: currentCaps,
 		ExtraPaths: shell.Paths{
-			HostLoopback: hostLoopback,
-			Read:         readPaths,
-			Write:        []string{"/output"},
-			Exec:         []string{"/commands"},
+			Read:  readPaths,
+			Write: []string{"/output"},
+			Exec:  []string{"/commands"},
 		},
 		DropsDirectory: dropsDirectory,
 		Skills: []skill.Skill{{
@@ -7012,7 +6998,6 @@ func TestGoldenTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 		"input.continue",
 		"model.round_robin",
 		"ports.hostname",
-		"sandbox.host_loopback",
 		"skills.include",
 		"ui.streaming",
 	}}
@@ -7067,7 +7052,6 @@ func TestGoldenLocalConfigsDrawMegathoroughly(t *testing.T) {
 					"model.round_robin",
 					"ports.hostname",
 					"provider.ollama.host",
-					"sandbox.host_loopback",
 					"sandbox.read",
 					"sandbox.write",
 					"skills.exclude",
@@ -7541,6 +7525,7 @@ func TestGoldenReloadingAThemeReplaysTheWholeConversation(t *testing.T) {
 		"inherited theme restored":     func() string { return inheritedThemeReloadStream(t) },
 		"invalid theme left untouched": func() string { return invalidThemeReloadStream(t) },
 		"every palette role":           func() string { return themePaletteStream(t) },
+		"decorated palette roles":      func() string { return decoratedThemeStream(t) },
 	}
 	compareWithGolden(t, "theme-reload", ".ansi", passes)
 	compareWithGolden(t, "theme-reload", ".screen", shownPasses(t, passes))
@@ -7730,6 +7715,8 @@ func themePaletteStream(t *testing.T) string {
 	theme.SyntaxType = "#080808"
 	theme.SyntaxLiteral = "#090909"
 	theme.SyntaxOperator = "#0a0a0a"
+	theme.SyntaxKeyword = "#0b0b0b"
+	theme.Skill = "#0e0e0e"
 	theme.User = "#0c0c0c"
 	theme.Harness = "#0d0d0d"
 	restoreTheme := style.ApplyTheme(theme)
@@ -7746,8 +7733,32 @@ func themePaletteStream(t *testing.T) string {
 		style.Type("syntax type"),
 		style.Literal("syntax literal"),
 		style.Operator("syntax operator"),
+		style.Keyword("syntax keyword"),
+		style.Skill("skill"),
 		style.User("user background"),
 		style.Harness("harness background"),
+	}, "\r\n") + "\r\n"
+}
+
+func decoratedThemeStream(t *testing.T) string {
+	t.Helper()
+	theme := style.DefaultTheme()
+	theme.Accent = "#030303 italic"
+	theme.Dim = "underline"
+	theme.StatusInfo = "#060606 underline:curly underline:#0a0b0c"
+	theme.StatusDanger = "#070707 bold strikethrough"
+	theme.SyntaxType = "faint overline"
+	theme.User = "#0c0c0c italic underline"
+	restoreTheme := style.ApplyTheme(theme)
+	defer restoreTheme()
+
+	return strings.Join([]string{
+		style.Subject("italic accent"),
+		style.Dim("underlined terminal default"),
+		style.Info("curly coloured underline"),
+		style.Failure("bold strikethrough"),
+		style.Type("faint overline"),
+		style.User("decorated user background"),
 	}, "\r\n") + "\r\n"
 }
 
@@ -11953,7 +11964,7 @@ func newSessionGoldenPorts(sessionName string, hostnameTemplate string) *portgra
 	return portgrant.NewHostToSandbox(portgrant.HostToSandboxExposer{
 		Expose: func(uint16) error { return nil },
 		Hide:   func(uint16) error { return nil },
-	}, hostname, nil)
+	}, hostname)
 }
 
 func newSessionGoldenTools(

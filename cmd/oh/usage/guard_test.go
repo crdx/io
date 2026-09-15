@@ -494,25 +494,26 @@ func TestAModelScopedLimitLeavesOtherModelsAvailable(t *testing.T) {
 	}
 }
 
-func TestARecoveryProbeDoesNotPushAResetOutwards(t *testing.T) {
+func TestARecoveryProbeTakesTheFreshReset(t *testing.T) {
 	path := cachePath(t)
 	clock := &testClock{now: testNow}
-	resetsAt := testNow.Add(2 * time.Hour)
+	storedResetsAt := testNow.Add(2 * time.Hour)
 
 	seedLimit(t, path, clock, agent.UsageWindow{
 		Duration:  7 * 24 * time.Hour,
 		Percent:   100,
-		ResetsAt:  resetsAt,
+		ResetsAt:  storedResetsAt,
 		IsLimited: true,
 	})
 
 	clock.set(testNow.Add(17 * time.Minute))
 
+	freshResetsAt := testNow.Add(3 * time.Hour)
 	provider := &providerStub{probe: agent.UsageProbe{
 		Windows: []agent.UsageWindow{{
 			Duration: 7 * 24 * time.Hour,
 			Percent:  99,
-			ResetsAt: testNow.Add(3 * time.Hour),
+			ResetsAt: freshResetsAt,
 		}},
 		Availability: agent.UsageAvailabilityAllowed,
 	}}
@@ -534,7 +535,7 @@ func TestARecoveryProbeDoesNotPushAResetOutwards(t *testing.T) {
 		t.Fatalf("got %+v", got)
 	}
 
-	if !got[0].ResetsAt.Equal(resetsAt) {
-		t.Errorf("the reset moved to %s, want %s", got[0].ResetsAt, resetsAt)
+	if !got[0].ResetsAt.Equal(freshResetsAt) {
+		t.Errorf("the reset reads %s, want %s", got[0].ResetsAt, freshResetsAt)
 	}
 }

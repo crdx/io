@@ -3,16 +3,21 @@ package shell
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"crdx.org/io/internal/util/pathutil"
 )
 
 type Paths struct {
-	HostLoopback []uint16 `toml:"host_loopback"`
-	Read         []string `toml:"read"`
-	Write        []string `toml:"write"`
-	Exec         []string `toml:"exec"`
-	Home         []string `toml:"home"`
+	Read  []string `toml:"read"`
+	Write []string `toml:"write"`
+	Exec  []string `toml:"exec"`
+	Path  []string `toml:"path"`
+	Home  []string `toml:"home"`
+}
+
+func ShellPath(pathDirectories []string) string {
+	return strings.Join(append([]string{os.Getenv("PATH")}, pathDirectories...), string(os.PathListSeparator))
 }
 
 func HomeRelativePath(path string) (string, bool) {

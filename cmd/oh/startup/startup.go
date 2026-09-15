@@ -112,10 +112,11 @@ func renderDetails(info Info, introduction string, conclusion string) string {
 	if introduction != "" {
 		_, _ = line.WriteString(style.Subtle(introduction))
 	}
-	_, _ = line.WriteString(style.Normal(strconv.Itoa(info.ProjectSkills + info.GlobalSkills)))
-	_, _ = line.WriteString(style.Subtle(" skills ") + style.Accent(startupDetailsSeparator) + style.Subtle(" "))
+	skillCount := info.ProjectSkills + info.GlobalSkills
+	_, _ = line.WriteString(style.Normal(strconv.Itoa(skillCount)))
+	_, _ = line.WriteString(style.Subtle(" "+util.PluralNoun(skillCount, "skill")+" ") + style.Accent(startupDetailsSeparator) + style.Subtle(" "))
 	_, _ = line.WriteString(style.Normal(strconv.Itoa(info.Snippets)))
-	_, _ = line.WriteString(style.Subtle(" snippets ") + style.Accent(startupDetailsSeparator) + style.Subtle(" "))
+	_, _ = line.WriteString(style.Subtle(" "+util.PluralNoun(info.Snippets, "snippet")+" ") + style.Accent(startupDetailsSeparator) + style.Subtle(" "))
 	_, _ = line.WriteString(startupContextTokens(info))
 	if info.LocalConfig == nil || info.LocalConfig.Name == "" {
 		_, _ = line.WriteString(style.Subtle(" context" + conclusion))

@@ -105,6 +105,13 @@ func (self Policy) sane() error {
 		}
 	}
 
+	grantedPaths := slices.Concat(self.Read, self.Write, self.Exec)
+	for _, path := range self.OptionalPaths {
+		if !slices.Contains(grantedPaths, path) {
+			return fmt.Errorf("%s is optional but is not granted", path)
+		}
+	}
+
 	return self.reachable()
 }
 

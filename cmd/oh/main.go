@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 	"syscall"
 	"time"
@@ -509,14 +508,22 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		return "", err
 	}
-	hostLoopback := sessions.OpeningHostLoopback(settings.Sandbox.HostLoopback, resumedSession)
 	pathAccess, err := shell.NewPathAccess(files, mode, settings.Sandbox)
 	if err != nil {
 		return "", err
 	}
 	defer pathAccess.Close()
 
-	globalSkillDirs := append([]string{location.GetConfigDir("skills")}, settings.Skills.Include...)
+	builtinSkillDir := location.GetStateDir(skill.DirectoryName)
+	if err := skill.Materialise(builtinSkillDir); err != nil {
+		util.WriteWarningf(os.Stderr, "%v", err)
+		builtinSkillDir = ""
+	}
+
+	globalSkillDirs := append(
+		[]string{builtinSkillDir, location.GetConfigDir(skill.DirectoryName)},
+		settings.Skills.Include...,
+	)
 	availableSkills, err := skill.Discover(workspace.GetDir(), globalSkillDirs, os.Stderr)
 	if err != nil {
 		return "", err
@@ -573,7 +580,6 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		Provider:     selection.Provider,
 		Effort:       selection.Effort,
 		IsFast:       selection.IsFast,
-		HostLoopback: slices.Clone(hostLoopback),
 		Yolo:         args.Yolo,
 	}
 
@@ -629,7 +635,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		args.Message = startup.JoinPrompt(initialFilesMessage, args.Message)
 	}
 
-	sandboxRunner, jobManager, keeperProcess, closeKeeper, keeperRefusal := openRunner(ctx, args.Yolo, hostLoopback)
+	sandboxRunner, jobManager, keeperProcess, closeKeeper, keeperRefusal := openRunner(ctx, args.Yolo)
 	defer closeKeeper()
 
 	if jobManager != nil {
@@ -723,13 +729,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		}
 	}
 
-	hostToSandbox = portgrant.NewHostToSandbox(hostToSandboxExposer, hostToSandboxHostname, hostLoopback)
+	hostToSandbox = portgrant.NewHostToSandbox(hostToSandboxExposer, hostToSandboxHostname)
 	hostToSandbox.SetSandboxToHostPorts(sandboxToHost.GetCurrent)
 	var hostToSandboxRestoreResult portgrant.HostToSandboxRestoreResult
 	if resumedSession != nil {
 		if recordedPorts, found := portgrant.LastRecordedHostToSandbox(resumedSession.Events); found {
 			hostToSandbox, hostToSandboxRestoreResult = portgrant.NewRestoredHostToSandbox(
-				hostToSandboxExposer, hostToSandboxHostname, hostLoopback, recordedPorts,
+				hostToSandboxExposer, hostToSandboxHostname, recordedPorts,
 			)
 			hostToSandbox.SetSandboxToHostPorts(sandboxToHost.GetCurrent)
 		}
@@ -1093,13 +1099,13 @@ func isSessionLeftToResume(isPersisted bool, isSimulated bool, kind cycle.Transi
 }
 
 func openRunner(
-	ctx context.Context, isYolo bool, hostLoopback []uint16,
+	ctx context.Context, isYolo bool,
 ) (sandbox.Runner, *jobs.Manager, *keeper.Keeper, func(), error) {
 	if isYolo {
 		return sandbox.Direct(), nil, nil, func() {}, nil
 	}
 
-	keeperProcess, err := keeper.Open(ctx, hostLoopback...)
+	keeperProcess, err := keeper.Open(ctx)
 	if err != nil {
 		return sandbox.Direct(), nil, nil, func() {}, err
 	}

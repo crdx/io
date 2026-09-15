@@ -46,17 +46,13 @@ func TestMissingConfiguredPathsAreCreatedAndKept(t *testing.T) {
 
 	var warnings strings.Builder
 	filtered, err := PreparePaths(Paths{
-		HostLoopback: []uint16{80},
-		Read:         []string{existingRead, missingRead},
-		Write:        []string{existingWrite, missingWrite},
-		Exec:         []string{existingExec, missingExec},
-		Home:         []string{existingHome, missingHome},
+		Read:  []string{existingRead, missingRead},
+		Write: []string{existingWrite, missingWrite},
+		Exec:  []string{existingExec, missingExec},
+		Home:  []string{existingHome, missingHome},
 	}, &warnings)
 	if err != nil {
 		t.Fatal(err)
-	}
-	if !slices.Equal(filtered.HostLoopback, []uint16{80}) {
-		t.Errorf("got host loopback ports %v, want [80]", filtered.HostLoopback)
 	}
 	if !slices.Equal(filtered.Read, []string{existingRead, missingRead}) {
 		t.Errorf("got read paths %v, want %v", filtered.Read, []string{existingRead, missingRead})
@@ -294,6 +290,10 @@ func TestTemporaryAccessOverridesAndThenRestoresConfiguredAccess(t *testing.T) {
 	if hasChanged, err := access.Grant(configuredDirectory, ReadAccess|WriteAccess); err != nil || !hasChanged {
 		t.Fatalf("grant changed=%t: %v", hasChanged, err)
 	}
+	_, temporaryPaths := access.getPaths()
+	if slices.Contains(temporaryPaths, configuredDirectory) {
+		t.Errorf("configured path %s became optional", configuredDirectory)
+	}
 	mountedRoot, name, err = files.Resolve(filepath.Join(configuredDirectory, "proof"))
 	if err != nil {
 		t.Fatal(err)
@@ -332,6 +332,10 @@ func TestRevokingANewTemporaryPathRemovesItFromBothEnforcers(t *testing.T) {
 	}
 	if !slices.Contains(access.GetPaths().Read, temporaryDirectory) {
 		t.Errorf("shell paths do not include %s", temporaryDirectory)
+	}
+	_, temporaryPaths := access.getPaths()
+	if !slices.Contains(temporaryPaths, temporaryDirectory) {
+		t.Errorf("temporary shell paths do not include %s", temporaryDirectory)
 	}
 
 	if !access.Revoke(temporaryDirectory) {

@@ -27,7 +27,7 @@ func recordingExposer(exposed *[]uint16) HostToSandboxExposer {
 
 func TestExposingAPortOpensItAndRecordsTheWholeSet(t *testing.T) {
 	var exposed []uint16
-	ports := NewHostToSandbox(recordingExposer(&exposed), testHost, nil)
+	ports := NewHostToSandbox(recordingExposer(&exposed), testHost)
 
 	if _, err := ports.Expose(8080); err != nil {
 		t.Fatal(err)
@@ -55,7 +55,7 @@ func TestExposingAPortOpensItAndRecordsTheWholeSet(t *testing.T) {
 
 func TestHidingAPortClosesItAndLeavesTheRestBehind(t *testing.T) {
 	var exposed []uint16
-	ports := NewHostToSandbox(recordingExposer(&exposed), testHost, nil)
+	ports := NewHostToSandbox(recordingExposer(&exposed), testHost)
 
 	if _, err := ports.Expose(8080); err != nil {
 		t.Fatal(err)
@@ -82,7 +82,8 @@ func TestHidingAPortClosesItAndLeavesTheRestBehind(t *testing.T) {
 
 func TestAPortIsRefusedWhenItCannotBeExposed(t *testing.T) {
 	var exposed []uint16
-	ports := NewHostToSandbox(recordingExposer(&exposed), testHost, []uint16{80})
+	ports := NewHostToSandbox(recordingExposer(&exposed), testHost)
+	ports.SetSandboxToHostPorts(func() []uint16 { return []uint16{80} })
 
 	for name, port := range map[string]uint16{
 		"zero":      0,
@@ -108,7 +109,7 @@ func TestAPortIsRefusedWhenItCannotBeExposed(t *testing.T) {
 }
 
 func TestExposingIsRefusedWithoutASandboxToExposeFrom(t *testing.T) {
-	ports := NewHostToSandbox(HostToSandboxExposer{}, testHost, nil)
+	ports := NewHostToSandbox(HostToSandboxExposer{}, testHost)
 
 	_, err := ports.Expose(8080)
 	if err == nil || !strings.Contains(err.Error(), "sandbox") {
@@ -126,7 +127,7 @@ func TestARestoredSessionOpensThePortsItRecordedAndReportsTheRest(t *testing.T) 
 			return nil
 		},
 		Hide: func(uint16) error { return nil },
-	}, testHost, nil, []uint16{3000, 8080})
+	}, testHost, []uint16{3000, 8080})
 
 	if !slices.Equal(ports.GetCurrent(), []uint16{8080}) {
 		t.Errorf("got current ports %v, want [8080]", ports.GetCurrent())
@@ -141,7 +142,7 @@ func TestARestoredSessionOpensThePortsItRecordedAndReportsTheRest(t *testing.T) 
 
 func TestARestoredSessionSaysNothingAboutThePortsItWasAlreadyToldOf(t *testing.T) {
 	var exposed []uint16
-	ports, _ := NewRestoredHostToSandbox(recordingExposer(&exposed), testHost, nil, []uint16{8080})
+	ports, _ := NewRestoredHostToSandbox(recordingExposer(&exposed), testHost, []uint16{8080})
 
 	if told := ports.Peek(); told != "" {
 		t.Errorf("got %q, want nothing said about a restored port", told)
@@ -156,7 +157,7 @@ func TestARestoredSessionSaysNothingAboutThePortsItWasAlreadyToldOf(t *testing.T
 
 func TestTheModelIsToldWhenAPortOpensAndWhenItCloses(t *testing.T) {
 	var exposed []uint16
-	ports := NewHostToSandbox(recordingExposer(&exposed), testHost, nil)
+	ports := NewHostToSandbox(recordingExposer(&exposed), testHost)
 
 	if _, err := ports.Expose(8080); err != nil {
 		t.Fatal(err)
@@ -272,7 +273,7 @@ func TestAnAddressIsDerivedFromTheSessionNameAndIsAlwaysLoopback(t *testing.T) {
 
 func TestWhatTheModelExposesIsAnnouncedToTheHarness(t *testing.T) {
 	var exposed []uint16
-	ports := NewHostToSandbox(recordingExposer(&exposed), testHost, nil)
+	ports := NewHostToSandbox(recordingExposer(&exposed), testHost)
 	access := ports.ForModel()
 
 	address, err := access.Expose(8080)
@@ -304,7 +305,7 @@ func TestWhatTheModelExposesIsAnnouncedToTheHarness(t *testing.T) {
 
 func TestWhatTheModelCannotExposeIsNotAnnounced(t *testing.T) {
 	var exposed []uint16
-	ports := NewHostToSandbox(recordingExposer(&exposed), testHost, nil)
+	ports := NewHostToSandbox(recordingExposer(&exposed), testHost)
 	access := ports.ForModel()
 
 	if _, err := access.Expose(80); err == nil {

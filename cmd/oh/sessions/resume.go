@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	"crdx.org/io/session"
@@ -163,14 +162,6 @@ func OpeningCaps(requestedCaps caps.Set, wereCapsChosen bool, resumedSession *st
 	}
 
 	return lastCaps, nil
-}
-
-func OpeningHostLoopback(configuredPorts []uint16, resumedSession *store.Session) []uint16 {
-	if resumedSession == nil {
-		return slices.Clone(configuredPorts)
-	}
-
-	return slices.Clone(resumedSession.Meta.HostLoopback)
 }
 
 func OpeningConfinement(wasYoloChosen bool, resumedSession *store.Session) (bool, error) {

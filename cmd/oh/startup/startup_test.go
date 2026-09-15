@@ -107,6 +107,21 @@ func TestStartupQuantitiesPutOnlyTheirNumbersInTheNormalForeground(t *testing.T)
 	}
 }
 
+func TestOneSkillAndOneSnippetAreCountedInTheSingular(t *testing.T) {
+	line := style.Plain(RenderBanner(
+		time.Millisecond,
+		false,
+		Info{GlobalSkills: 1, Snippets: 1},
+		80,
+		false,
+	))
+	want := "Agent ready in 1ms with 1 skill ⧸ 1 snippet ⧸ 0t context."
+
+	if line != want {
+		t.Errorf("got %q, want %q", line, want)
+	}
+}
+
 func TestAnEmptyStartupSaysTheSentenceAlone(t *testing.T) {
 	line := style.Plain(RenderBanner(time.Millisecond, false, Info{}, 80, false))
 	want := "Agent ready in 1ms with 0 skills ⧸ 0 snippets ⧸ 0t context."

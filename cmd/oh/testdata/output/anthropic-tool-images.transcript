@@ -17,8 +17,8 @@ show me both pictures
 ## Tool calls · +0s
 
 ```
-snapshot: snapshot [ok, 10.9K, ~1.2Kt, toolu_1]
-thumbnail: thumbnail [ok, 2.73K, ~500t, toolu_2]
+snapshot: snapshot [ok, 55.9K, ~1.2Kt, toolu_1]
+thumbnail: thumbnail [ok, 8.76K, ~500t, toolu_2]
 ```
 
 ## Assistant · +0s

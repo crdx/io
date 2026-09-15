@@ -31,6 +31,42 @@ const (
 	pasteEnd   = "\x1b[201~"
 )
 
+func TestPastedTextArrivesWithoutWhatTheTerminalWouldObey(t *testing.T) {
+	for name, pasted := range map[string]struct {
+		text string
+		want string
+	}{
+		"clear screen": {text: "ls\x1b[2J -la", want: "ls -la"},
+		"clipboard":    {text: "hello \x1b]52;c;cHduZWQ=\x07world", want: "hello world"},
+		"bell":         {text: "ding\x07", want: "ding"},
+		"carriage":     {text: "one\r\ntwo\rthree", want: "one\ntwo\nthree"},
+		"kept":         {text: "one\n\ttwo", want: "one\n\ttwo"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			input := NewInput(NewHistory("", 0))
+			input.InsertPasted(pasted.text)
+
+			if got := input.Text(); got != pasted.want {
+				t.Errorf("got %q, want %q", got, pasted.want)
+			}
+		})
+	}
+}
+
+func TestABracketedPasteDropsTheControlRunesItCarries(t *testing.T) {
+	input := NewInput(NewHistory("", 0))
+
+	input.Apply(key.Key{Code: key.PasteStart}, false)
+	for _, character := range "ls\x1b[2J -la\x07" {
+		input.Apply(key.Key{Code: key.Rune, Value: character}, false)
+	}
+	input.Apply(key.Key{Code: key.PasteEnd}, false)
+
+	if got, want := input.Text(), "ls[2J -la"; got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestAPasteKeepsItsLineBreaks(t *testing.T) {
 	for name, payload := range map[string]string{
 		"lf":   "one\ntwo\nthree",

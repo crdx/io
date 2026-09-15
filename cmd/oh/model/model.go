@@ -130,7 +130,21 @@ func loadModelCache(path string) modelCache {
 		cache.Providers = map[string]cachedModels{}
 	}
 
+	for providerName, listing := range cache.Providers {
+		listing.Models = plainModels(listing.Models)
+		cache.Providers[providerName] = listing
+	}
+
 	return cache
+}
+
+func plainModels(models []agent.Model) []agent.Model {
+	for i := range models {
+		models[i].ID = plainly(models[i].ID)
+		models[i].Name = plainly(models[i].Name)
+	}
+
+	return models
 }
 
 func saveModelCache(path string, cache modelCache) error {
@@ -500,6 +514,7 @@ func updateModels(
 		registeredModels := registry.Provider(registryNames[providerName])
 
 		listedModels, source, why := describeProviderModels(ctx, providerName, registeredModels, listProviderModels)
+		listedModels = plainModels(listedModels)
 
 		models, ignoredModels := recordableModels(providerName, listedModels)
 		ignoredModels = append(ignoredModels, unselectableModels(models)...)

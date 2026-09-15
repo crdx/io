@@ -18,11 +18,9 @@ import (
 type Style func(format any, args ...any) string
 
 const (
-	reset      = "\x1b[0m"
-	italicCode = "3"
-	orchid     = "#e6a8ff"
-	aqua       = "#7ff0dd"
-	mauve      = "#c9a6d4"
+	reset  = "\x1b[0m"
+	orchid = "#e6a8ff"
+	aqua   = "#7ff0dd"
 )
 
 var (
@@ -34,11 +32,13 @@ var (
 	Call       Style = Normal
 	TypedInput Style = Normal
 
-	Reasoning      Style = decorate(col.Italic, Dim)
-	RunningSession Style = decorate(col.Italic, Dim)
-	Column         Style = decorate(col.Underline, Dim)
-	Greeting       Style = col.Italic
-	PendingPrefix  Style = col.Underline
+	PreviewLoadHint    Style = decorate(col.Italic, decorate(col.Dim, Success))
+	PreviewRunningHint Style = decorate(col.Italic, decorate(col.Dim, Change))
+	Reasoning          Style = decorate(col.Italic, Dim)
+	RunningSession     Style = decorate(col.Italic, Dim)
+	Column             Style = decorate(col.Underline, Dim)
+	Greeting           Style = col.Italic
+	PendingPrefix      Style = col.Underline
 
 	Success Style = success()
 	Read    Style = success()
@@ -71,7 +71,7 @@ var (
 	Harness Style = harnessBackground()
 	User    Style = userBackground()
 
-	Skill Style = hex(mauve)
+	Skill Style = skill()
 
 	Subject Style = accent()
 	Spinner Style = accent()
@@ -94,7 +94,7 @@ var (
 	Border  Style = Dim
 
 	Comment     Style = Dim
-	Keyword     Style = hex(mauve)
+	Keyword     Style = syntaxKeyword()
 	Function    Style = information()
 	Literal     Style = syntaxLiteral()
 	Number      Style = accent()
@@ -269,24 +269,6 @@ func channelAlong(from uint8, to uint8, along float64) uint8 {
 	return uint8(float64(from) + (float64(to)-float64(from))*along)
 }
 
-func hex(value string) Style {
-	code := sgr(value)
-
-	return func(format any, args ...any) string {
-		text := fmt.Sprint(format)
-
-		if len(args) > 0 {
-			text = fmt.Sprintf(text, args...)
-		}
-
-		if code == "" || !isColorEnabled {
-			return text
-		}
-
-		return "\x1b[" + code + "m" + text + reset
-	}
-}
-
 func normal() Style {
 	return themedForeground(func(theme *compiledTheme) string { return theme.normal })
 }
@@ -325,6 +307,14 @@ func syntaxLiteral() Style {
 
 func syntaxOperator() Style {
 	return themedForeground(func(theme *compiledTheme) string { return theme.syntaxOperator })
+}
+
+func syntaxKeyword() Style {
+	return themedForeground(func(theme *compiledTheme) string { return theme.syntaxKeyword })
+}
+
+func skill() Style {
+	return themedForeground(func(theme *compiledTheme) string { return theme.skill })
 }
 
 func userBackground() Style {
@@ -372,21 +362,12 @@ func themedBackground(selectCode func(*compiledTheme) string) Style {
 	}
 }
 
-func backgroundSequence(value string) string {
-	return strings.Replace(sgr(value), "38;", "48;", 1)
-}
-
-func sgr(value string) string {
-	colourValue, isColour := colour(value)
-	if !isColour {
-		return ""
-	}
-
-	return sequenceFor(colourValue)
-}
-
 func sequenceFor(value color.RGBA) string {
-	return fmt.Sprintf("38;2;%d;%d;%d", value.R, value.G, value.B)
+	return foregroundLayer + ";2;" + channels(value)
+}
+
+func channels(value color.RGBA) string {
+	return fmt.Sprintf("%d;%d;%d", value.R, value.G, value.B)
 }
 
 func colour(value string) (color.RGBA, bool) {

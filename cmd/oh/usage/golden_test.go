@@ -240,7 +240,7 @@ func refreshedReporter() *scriptedProbeReporter {
 	}
 }
 
-func recedingReporter() *scriptedProbeReporter {
+func laterResetReporter() *scriptedProbeReporter {
 	laterWeek := weeklyWindow(88)
 	laterWeek.ResetsAt = laterWeek.ResetsAt.Add(time.Hour)
 
@@ -291,9 +291,9 @@ func drawEachStandingLimit(t *testing.T, isPlain bool) string {
 			reporter:    refreshedReporter(),
 		},
 		{
-			name:        "a refreshed window whose reset arrived an hour later",
+			name:        "a refreshed window uses its later reset",
 			nextProbeAt: collectedAt.Add(-10 * time.Minute),
-			reporter:    recedingReporter(),
+			reporter:    laterResetReporter(),
 		},
 		{
 			name:        "a refreshed window that arrived with no reset",

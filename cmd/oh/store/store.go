@@ -28,7 +28,6 @@ type Meta struct {
 	SystemPrompt string                 `json:"system_prompt,omitempty"`
 	Tools        []string               `json:"tools,omitempty"`
 	Conditions   *conditions.Conditions `json:"conditions,omitempty"`
-	HostLoopback []uint16               `json:"host_loopback,omitempty"`
 	Yolo         bool                   `json:"yolo,omitempty"`
 }
 
