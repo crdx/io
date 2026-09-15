@@ -20,7 +20,7 @@ const (
 	searchInstructions = "Search the web for current, reliable information. Answer directly and cite sources with Markdown links."
 )
 
-const SearchEffort = "medium"
+const SearchEffort = "high"
 
 type SearchClient struct {
 	URL   string
