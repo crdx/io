@@ -123,12 +123,14 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 		{
 			name: "fetch markdown",
 			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/article", Type: "markdown"}, agent.SuccessStatus,
-				"# Article\n\n- first\n- second\n"),
+				"[raw HTML saved to /state/sessions/brave-otter/drops/fetch-0123456789abcdef.html]\n\n"+
+					"# Article\n\n- first\n- second\n"),
 		},
 		{
 			name: "fetch html",
 			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/raw", Type: "raw"}, agent.SuccessStatus,
-				"<!DOCTYPE html>\n<title>Hello</title>\n"),
+				"[raw HTML saved to /state/sessions/brave-otter/drops/fetch-fedcba9876543210.html]\n\n"+
+					"<!DOCTYPE html>\n<title>Hello</title>\n"),
 		},
 		{
 			name: "fetch failure",

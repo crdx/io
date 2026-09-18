@@ -23,7 +23,7 @@ Let me search, then read the announcement.
 
 ```
 lookup: latest Go release [ok, 1 line, 86B, call_2]
-fetch: https://go.dev/blog/go1.26 [ok, 8 lines, 253B, call_3]
+fetch: https://go.dev/blog/go1.26 [ok, 11 lines, 331B, call_3]
 ```
 
 ## Assistant · +8s

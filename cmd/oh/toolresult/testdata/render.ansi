@@ -138,6 +138,10 @@ Go has a new release. \e[38;2;129;162;190mSource\e[0m\e[38;2;150;152;150m (https
 === fetch markdown ===
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/article\e[0m · \e[38;2;150;152;150mmarkdown\e[0m
 
+[raw HTML saved to
+/state/sessions/brave-otter/drops/fetch-0123456789abcdef.htm
+l]
+
 \e[1m\e[38;2;207;173;0mArticle\e[0m\e[0m
 
 \e[38;2;192;128;80m• \e[0mfirst
@@ -145,6 +149,8 @@ Go has a new release. \e[38;2;129;162;190mSource\e[0m\e[38;2;150;152;150m (https
 
 === fetch html ===
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/raw\e[0m · \e[38;2;150;152;150mraw\e[0m
+
+\e[38;2;150;152;150m[raw HTML saved to /state/sessions/brave-otter/drops/fetch-fedcba9876543210.html]\e[0m
 
 \e[38;2;150;152;150m<!DOCTYPE html>\e[0m
 <title>\e[38;2;150;152;150mHello\e[0m</title>

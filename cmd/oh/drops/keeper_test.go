@@ -3,6 +3,7 @@ package drops
 import (
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"crdx.org/io/internal/file"
@@ -60,6 +61,9 @@ func TestAKeeperOpensWithoutADropsDirectory(t *testing.T) {
 
 func TestWhatAKeeperSavesCanBeReadBack(t *testing.T) {
 	for name, save := range map[string]func(*Keeper) (string, error){
+		"HTML": func(keeper *Keeper) (string, error) {
+			return keeper.SaveHTML([]byte("<!DOCTYPE html><title>page</title>"))
+		},
 		"image": func(keeper *Keeper) (string, error) {
 			return keeper.SaveImage("image/png", []byte("\x89PNG\r\n"))
 		},
@@ -96,6 +100,28 @@ func TestAKeeperMountsTheDropsItMadeOnlyOnce(t *testing.T) {
 
 	if !isReadable(t, keeper, first) || !isReadable(t, keeper, second) {
 		t.Error("a later drop lost the mount the first one made")
+	}
+}
+
+func TestAKeeperCanSaveConcurrentHTML(t *testing.T) {
+	keeper, _ := openKeeper(t)
+
+	const calls = 8
+	errors := make(chan error, calls)
+	var group sync.WaitGroup
+	for range calls {
+		group.Go(func() {
+			_, err := keeper.SaveHTML([]byte("<!DOCTYPE html><title>page</title>"))
+			errors <- err
+		})
+	}
+	group.Wait()
+	close(errors)
+
+	for err := range errors {
+		if err != nil {
+			t.Error(err)
+		}
 	}
 }
 

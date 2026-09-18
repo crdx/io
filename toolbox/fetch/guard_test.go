@@ -74,15 +74,15 @@ func TestFetchWillNotReachALoopbackService(t *testing.T) {
 	}))
 	defer service.Close()
 
-	output, err := fetchPage(t.Context(), defaultClient(), Args{URL: service.URL, Type: "text"})
+	output, err := fetchPage(t.Context(), defaultClient(), service.URL)
 	if err == nil {
-		t.Fatalf("expected the fetch to be refused, got %q", output)
+		t.Fatalf("expected the fetch to be refused, got %q", output.rawHTML)
 	}
 	if !strings.Contains(err.Error(), "reaches only the public internet") {
 		t.Errorf("expected the refusal to say why, got %v", err)
 	}
-	if strings.Contains(output, "an internal secret") {
-		t.Errorf("the loopback service was read: %q", output)
+	if strings.Contains(string(output.rawHTML), "an internal secret") {
+		t.Errorf("the loopback service was read: %q", output.rawHTML)
 	}
 }
 

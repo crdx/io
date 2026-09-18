@@ -827,6 +827,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			func(ctx context.Context, address string) error {
 				return fetchApproval.ask(ctx, askBroker, permissions.Fetch(), address)
 			},
+			dropKeeper.SaveHTML,
 		),
 	)
 	toolboxTools = truncate.Tools(toolboxTools, toolOutputLimit)

@@ -23,6 +23,10 @@ const testHTML = `<!DOCTYPE html>
 
 func allowFetch(context.Context, string) error { return nil }
 
+func saveTestHTML([]byte) (string, error) {
+	return "/session/drops/fetch-test.html", nil
+}
+
 func TestFetchReturnsEverySupportedFormat(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if request.Header.Get("Accept") != "text/html, application/xhtml+xml" {
@@ -32,13 +36,18 @@ func TestFetchReturnsEverySupportedFormat(t *testing.T) {
 	}))
 	defer server.Close()
 
+	page, err := fetchPage(t.Context(), server.Client(), server.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	for format, want := range map[string][]string{
 		"raw":        {"<!DOCTYPE html>", "doBadThings()"},
 		"clean_html": {"<h1>Example &amp; test</h1>", "<nav>Menu</nav>"},
 		"text":       {"Example & test", "Read this page.", "First", "Second"},
 		"markdown":   {"# Example & test", "**this**", "[page](https://example.com/more)", "- First"},
 	} {
-		got, err := fetchPage(t.Context(), server.Client(), Args{URL: server.URL, Type: format})
+		got, err := renderPage(page.rawHTML, format)
 		if err != nil {
 			t.Fatalf("%s: %v", format, err)
 		}
@@ -49,6 +58,40 @@ func TestFetchReturnsEverySupportedFormat(t *testing.T) {
 		}
 		if format != "raw" && strings.Contains(got, "doBadThings") {
 			t.Errorf("%s retained stripped script: %q", format, got)
+		}
+	}
+}
+
+func TestFetchSavesRawHTMLAndReturnsItsPathForEverySupportedFormat(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		_, _ = writer.Write([]byte(testHTML))
+	}))
+	defer server.Close()
+
+	for _, format := range []string{"raw", "clean_html", "text", "markdown"} {
+		var savedHTML []byte
+		call, err := newTool(
+			func() bool { return true },
+			allowFetch,
+			func(contents []byte) (string, error) {
+				savedHTML = append(savedHTML[:0], contents...)
+				return "/session/drops/fetch-test.html", nil
+			},
+			server.Client(),
+		).Parse(`{"url":"` + server.URL + `","type":"` + format + `"}`)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		result, err := call.Exec(t.Context())
+		if err != nil {
+			t.Fatalf("%s: %v", format, err)
+		}
+		if string(savedHTML) != testHTML {
+			t.Errorf("%s saved %q, want the unaltered HTML", format, savedHTML)
+		}
+		if !strings.HasPrefix(result.Output, "[raw HTML saved to /session/drops/fetch-test.html]\n\n") {
+			t.Errorf("%s returned %q", format, result.Output)
 		}
 	}
 }
@@ -72,15 +115,19 @@ func TestFetchParsesMalformedHTMLAsADocumentTree(t *testing.T) {
 	}
 }
 
-func fetchTestPage(t *testing.T, page string, format string) string {
+func fetchTestPage(t *testing.T, contents string, format string) string {
 	t.Helper()
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
-		_, _ = writer.Write([]byte(page))
+		_, _ = writer.Write([]byte(contents))
 	}))
 	defer server.Close()
 
-	output, err := fetchPage(t.Context(), server.Client(), Args{URL: server.URL, Type: format})
+	page, err := fetchPage(t.Context(), server.Client(), server.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	output, err := renderPage(page.rawHTML, format)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,14 +152,54 @@ func TestFetchReportsHTTPFailures(t *testing.T) {
 	}))
 	defer server.Close()
 
-	_, err := fetchPage(t.Context(), server.Client(), Args{URL: server.URL, Type: "text"})
-	if err == nil || !strings.Contains(err.Error(), "HTTP 418: not today") {
+	var savedHTML []byte
+	call, err := newTool(
+		func() bool { return true },
+		allowFetch,
+		func(contents []byte) (string, error) {
+			savedHTML = append(savedHTML, contents...)
+			return "/session/drops/fetch-error.html", nil
+		},
+		server.Client(),
+	).Parse(`{"url":"` + server.URL + `","type":"text"}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = call.Exec(t.Context())
+	if err == nil || !strings.Contains(err.Error(), "HTTP 418: not today") ||
+		!strings.Contains(err.Error(), "/session/drops/fetch-error.html") {
 		t.Errorf("got %v", err)
+	}
+	if string(savedHTML) != "not today" {
+		t.Errorf("saved %q, want the HTTP failure body", savedHTML)
+	}
+}
+
+func TestFetchReportsWhenRawHTMLCannotBeSaved(t *testing.T) {
+	saveFailure := errors.New("drops are unavailable")
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		_, _ = writer.Write([]byte(testHTML))
+	}))
+	defer server.Close()
+
+	call, err := newTool(
+		func() bool { return true },
+		allowFetch,
+		func([]byte) (string, error) { return "", saveFailure },
+		server.Client(),
+	).Parse(`{"url":"` + server.URL + `","type":"markdown"}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := call.Exec(t.Context()); !errors.Is(err, saveFailure) {
+		t.Errorf("got %v, want the save failure", err)
 	}
 }
 
 func TestFetchIsAReadOnlyConcurrentTool(t *testing.T) {
-	offeredTool := New(func() bool { return true }, allowFetch)
+	offeredTool := New(func() bool { return true }, allowFetch, saveTestHTML)
 
 	if offeredTool.Name() != "fetch" {
 		t.Errorf("got name %q", offeredTool.Name())
@@ -134,7 +221,7 @@ func TestFetchIsRefusedWithoutNetworkAccess(t *testing.T) {
 	}))
 	defer server.Close()
 
-	call, err := newTool(func() bool { return false }, allowFetch, server.Client()).
+	call, err := newTool(func() bool { return false }, allowFetch, saveTestHTML, server.Client()).
 		Parse(`{"url":"` + server.URL + `","type":"text"}`)
 	if err != nil {
 		t.Fatal(err)
@@ -152,13 +239,14 @@ func TestFetchReportsAPageWithNoContent(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 	defer server.Close()
 
-	call, err := newTool(func() bool { return true }, allowFetch, server.Client()).
+	call, err := newTool(func() bool { return true }, allowFetch, saveTestHTML, server.Client()).
 		Parse(`{"url":"` + server.URL + `","type":"text"}`)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := call.Exec(t.Context()); err == nil || !strings.Contains(err.Error(), "no content") {
+	if _, err := call.Exec(t.Context()); err == nil || !strings.Contains(err.Error(), "no content") ||
+		!strings.Contains(err.Error(), "/session/drops/fetch-test.html") {
 		t.Errorf("got %v", err)
 	}
 }
@@ -180,6 +268,7 @@ func TestARefusedFetchReachesNothing(t *testing.T) {
 			asked = address
 			return refusal
 		},
+		saveTestHTML,
 		server.Client(),
 	).Parse(`{"url":"` + server.URL + `","type":"text"}`)
 	if err != nil {

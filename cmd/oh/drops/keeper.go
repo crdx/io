@@ -14,9 +14,10 @@ type Keeper struct {
 	sessionDirectory string
 	ensureSession    func() error
 
-	mutex     sync.Mutex
-	isMounted bool
-	close     func() error
+	saveMutex  sync.Mutex
+	mountMutex sync.Mutex
+	isMounted  bool
+	close      func() error
 }
 
 func Open(files *file.Root, sessionDirectory string, ensureSession func() error) (*Keeper, error) {
@@ -39,6 +40,9 @@ func (self *Keeper) GetDirectory() string {
 }
 
 func (self *Keeper) SaveImage(mediaType string, data []byte) (string, error) {
+	self.saveMutex.Lock()
+	defer self.saveMutex.Unlock()
+
 	path, err := SaveImage(self.sessionDirectory, self.ensureSession, mediaType, data)
 	if err != nil {
 		return "", err
@@ -52,6 +56,9 @@ func (self *Keeper) SaveImage(mediaType string, data []byte) (string, error) {
 }
 
 func (self *Keeper) SaveOutput(output string) (string, error) {
+	self.saveMutex.Lock()
+	defer self.saveMutex.Unlock()
+
 	path, err := SaveOutput(self.sessionDirectory, self.ensureSession, output)
 	if err != nil {
 		return "", err
@@ -63,7 +70,26 @@ func (self *Keeper) SaveOutput(output string) (string, error) {
 	return path, nil
 }
 
+func (self *Keeper) SaveHTML(contents []byte) (string, error) {
+	self.saveMutex.Lock()
+	defer self.saveMutex.Unlock()
+
+	path, err := SaveHTML(self.sessionDirectory, self.ensureSession, contents)
+	if err != nil {
+		return "", err
+	}
+	if err := self.mount(true); err != nil {
+		_ = os.Remove(path)
+		return "", fmt.Errorf("make the saved HTML readable: %w", err)
+	}
+
+	return path, nil
+}
+
 func (self *Keeper) CopyFile(sourcePath string, fileName string) (string, error) {
+	self.saveMutex.Lock()
+	defer self.saveMutex.Unlock()
+
 	path, err := CopyFile(self.sessionDirectory, self.ensureSession, sourcePath, fileName)
 	if err != nil {
 		return "", err
@@ -77,15 +103,15 @@ func (self *Keeper) CopyFile(sourcePath string, fileName string) (string, error)
 }
 
 func (self *Keeper) Close() error {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
+	self.mountMutex.Lock()
+	defer self.mountMutex.Unlock()
 
 	return self.close()
 }
 
 func (self *Keeper) mount(shouldExist bool) error {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
+	self.mountMutex.Lock()
+	defer self.mountMutex.Unlock()
 
 	if self.isMounted {
 		return nil

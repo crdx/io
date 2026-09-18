@@ -6848,7 +6848,7 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 	)
 	tools = append(tools,
 		lookup.New(func() bool { return true }, allowApproval, sessionGoldenSearcher{}),
-		fetch.New(func() bool { return true }, allowApproval),
+		fetch.New(func() bool { return true }, allowApproval, saveTestHTML),
 	)
 	log := testLog(t)
 
@@ -12742,7 +12742,7 @@ func newSessionGoldenTools(
 			searcher := sessionGoldenSearcher{answer: specification.LookupAnswer}
 			tools = append(tools,
 				lookup.New(func() bool { return !specification.LookupWithheld }, allowApproval, searcher),
-				fetch.New(func() bool { return !specification.FetchWithheld }, allowApproval),
+				fetch.New(func() bool { return !specification.FetchWithheld }, allowApproval, saveTestHTML),
 			)
 			continue
 		}
@@ -12887,6 +12887,10 @@ func newSessionGoldenShell(t *testing.T, grantedCaps caps.Set, isYolo bool) tool
 }
 
 func allowApproval(context.Context, string) error { return nil }
+
+func saveTestHTML([]byte) (string, error) {
+	return "/state/sessions/brave-otter/drops/fetch-test.html", nil
+}
 
 func newRefusingAskBroker(t *testing.T) *ask.Broker {
 	t.Helper()
