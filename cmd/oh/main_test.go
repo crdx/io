@@ -3898,6 +3898,7 @@ func TestGoldenFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"corrupt-session":        {".txt"},
 		"default-bar":            {".ansi", ".screen"},
 		"feedback":               {".ansi", ".screen", ".txt"},
+		"feedback-frame":         {".ansi", ".screen"},
 		"fork-message":           {".txt"},
 		"context":                {".prompt"},
 		"context-drops":          {".prompt"},
@@ -6984,6 +6985,7 @@ func TestGoldenATurnStillRunningDrawsWhatItDrewBefore(t *testing.T) {
 
 	screenPasses := shownPasses(t, passes)
 	screenPasses["help during reasoning"] = func() string { return shownHelpDuringReasoningFrames(t) }
+	screenPasses["help on a short running terminal"] = func() string { return shownShortRunningHelpFrames(t) }
 	compareWithGolden(t, "running", ".screen", screenPasses)
 }
 
@@ -8470,7 +8472,7 @@ func invalidThemeReloadStream(t *testing.T) string {
 	restoreTheme := style.ApplyTheme(style.DefaultTheme())
 	defer restoreTheme()
 
-	path := filepath.Join(t.TempDir(), "config.toml")
+	path := stableGoldenPath(t, "config.toml", false)
 	writeLiveConfig(t, path, "[ui.theme]\nuser = \"#010203\"\n")
 
 	var screenOutput bytes.Buffer
@@ -8952,6 +8954,66 @@ func TestGoldenFeedbackDrawsEveryVisibleState(t *testing.T) {
 	compareWithGolden(t, "feedback", ".txt", map[string]func() string{
 		"plain help": func() string { return plainFeedback(t) },
 	})
+}
+
+type feedbackFrameScenario struct {
+	columns int
+	lines   int
+	text    string
+}
+
+func TestGoldenFeedbackFrameDrawsAtEverySize(t *testing.T) {
+	scenarios := map[string]feedbackFrameScenario{
+		"narrow wrapping": {
+			columns: narrowColumns,
+			lines:   replayLines,
+			text:    "A feedback message long enough to wrap inside its frame.",
+		},
+		"minimum frame": {
+			columns: 5,
+			lines:   replayLines,
+			text:    "ab",
+		},
+		"below frame threshold": {
+			columns: 4,
+			lines:   replayLines,
+			text:    "ab",
+		},
+		"one column": {
+			columns: oneColumn,
+			lines:   replayLines,
+			text:    "x",
+		},
+		"taller than terminal": {
+			columns: narrowColumns,
+			lines:   8,
+			text:    "one\ntwo\nthree\nfour\nfive\nsix\nseven\neight",
+		},
+	}
+
+	ansiPasses := make(map[string]func() string, len(scenarios))
+	screenPasses := make(map[string]func() string, len(scenarios))
+	for name, scenario := range scenarios {
+		ansiPasses[name] = func() string { return feedbackFrameStream(t, scenario) }
+		screenPasses[name] = func() string {
+			return shown(t, feedbackFrameStream(t, scenario), scenario.columns)
+		}
+	}
+
+	compareWithGolden(t, "feedback-frame", ".ansi", ansiPasses)
+	compareWithGolden(t, "feedback-frame", ".screen", screenPasses)
+}
+
+func feedbackFrameStream(t *testing.T, scenario feedbackFrameScenario) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.NewTerminalOfSize(&screenOutput, scenario.columns, scenario.lines)
+	self.showFeedback(feedback.Command, feedback.Message{Text: scenario.text, Status: agent.InfoStatus})
+	self.show(edit.NewInput(nil))
+
+	return screenOutput.String()
 }
 
 func feedbackStream(t *testing.T, scenario feedbackScenario) string {
@@ -12096,9 +12158,9 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 		t.Fatal(err)
 	}
 	self.display.bar = bar.NewConfiguration(registry, live.SegmentLayout)
-	referencePath := stableGrantGoldenPath(t, "reference", true)
-	missingPath := stableGrantGoldenPath(t, "missing", false)
-	homePath := stableGrantGoldenPath(t, "user", true)
+	referencePath := stableGoldenPath(t, "reference", true)
+	missingPath := stableGoldenPath(t, "missing", false)
+	homePath := stableGoldenPath(t, "user", true)
 	t.Setenv("HOME", homePath)
 
 	inputLine := edit.NewInput(nil)
@@ -12190,10 +12252,10 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 	return stream
 }
 
-func stableGrantGoldenPath(t *testing.T, label string, shouldExist bool) string {
+func stableGoldenPath(t *testing.T, label string, shouldExist bool) string {
 	t.Helper()
 
-	parent := fmt.Sprintf("/tmp/oh-grant-%s-%010d", label, os.Getpid())
+	parent := fmt.Sprintf("/tmp/oh-golden-%s-%010d", label, os.Getpid())
 	path := filepath.Join(parent, label)
 	if err := os.RemoveAll(parent); err != nil {
 		t.Fatal(err)
@@ -15757,8 +15819,10 @@ func TestHelpDuringReasoningIsDrawnInOneFrame(t *testing.T) {
 	}
 
 	visible := strings.Join(visibleScreen(t, frames[0], replayColumns), "\n")
-	if !strings.Contains(visible, "Commands:\n  /conf\n  /copy") {
-		t.Errorf("help did not settle in its frame:\n%s", visible)
+	for _, want := range []string{"╭", "│ Commands:", "│   /conf", "│   /copy", "╰"} {
+		if !strings.Contains(visible, want) {
+			t.Errorf("help did not settle in its frame:\n%s", visible)
+		}
 	}
 	if strings.Contains(visible, "/help") {
 		t.Errorf("accepted input remained in the settled frame:\n%s", visible)
@@ -15800,6 +15864,66 @@ func shownHelpDuringReasoningFrames(t *testing.T) string {
 
 	var shown strings.Builder
 	for index, frame := range helpDuringReasoningFrames(t) {
+		fmt.Fprintf(&shown, "--- frame %d ---\n%s\n", index+1, strings.Join(visibleScreen(t, frame, replayColumns), "\n"))
+	}
+	return strings.TrimSuffix(shown.String(), "\n")
+}
+
+func TestHelpStaysPutOnAShortTerminalDuringARunningTurn(t *testing.T) {
+	frames := shortRunningHelpFrames(t)
+	if len(frames) < 2 {
+		t.Fatalf("help drew only %d frame, want repeated running-turn repaints", len(frames))
+	}
+
+	first := visibleScreen(t, frames[0], replayColumns)
+	for i, frame := range frames[1:] {
+		if got := visibleScreen(t, frame, replayColumns); !slices.Equal(got, first) {
+			t.Errorf("frame %d moved the help feedback:\n%s", i+2, strings.Join(got, "\n"))
+		}
+	}
+}
+
+func shortRunningHelpFrames(t *testing.T) []string {
+	t.Helper()
+
+	writer := &frameRecordingWriter{}
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.NewTerminalOfSize(writer, replayColumns, shortLines)
+	self.slash.commands = fixtureCommandRegistry(t, slash.Command{
+		Name: "help",
+		Run: func(context slash.Context, _ slash.Arguments) error {
+			context.Notice("Commands:\n  /conf\n  /copy")
+			return nil
+		},
+	})
+	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+	self.inputLine = inputLine
+	inputLine.SetText("/help")
+	self.show(inputLine)
+	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: "thinking about it"})
+	framesBeforeHelp := len(writer.frames)
+
+	self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Enter})
+	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "answer"})
+	self.show(inputLine)
+	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: " grows"})
+	self.show(inputLine)
+	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "\nand another line"})
+	self.show(inputLine)
+
+	frames := slices.Clone(writer.frames[framesBeforeHelp:])
+	self.currentTurn.painter.Close(dynamic.Cancelled)
+	return frames
+}
+
+func shownShortRunningHelpFrames(t *testing.T) string {
+	t.Helper()
+
+	var shown strings.Builder
+	for index, frame := range shortRunningHelpFrames(t) {
 		fmt.Fprintf(&shown, "--- frame %d ---\n%s\n", index+1, strings.Join(visibleScreen(t, frame, replayColumns), "\n"))
 	}
 	return strings.TrimSuffix(shown.String(), "\n")

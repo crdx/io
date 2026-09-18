@@ -1,6 +1,7 @@
 package input
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -159,6 +160,65 @@ func TestStatusRowsSitAboveTheTopRuleWithoutMovingTheInput(t *testing.T) {
 	}
 	if rowsFromBottom := len(rows) - cursorRow; rowsFromBottom != 2 {
 		t.Errorf("status moved the input to %d rows from the bottom, want 2", rowsFromBottom)
+	}
+}
+
+func TestFeedbackRowsFormABoxAttachedToTheTopRule(t *testing.T) {
+	const columns = 20
+	block := Block{
+		Input:         edit.Frame{Rows: []string{"input"}, Row: 0, Column: 3},
+		Status:        []string{"first", "second"},
+		FrameFeedback: true,
+	}
+
+	rows, cursorRow, cursorColumn := block.Rows(columns)
+	plainRows := make([]string, len(rows))
+	for i, row := range rows {
+		plainRows[i] = style.Plain(row)
+		if i != 4 {
+			if got := style.Width(row); got != columns {
+				t.Errorf("row %d is %d columns wide, want %d: %q", i, got, columns, plainRows[i])
+			}
+		}
+	}
+
+	want := []string{
+		"╭──────────────────╮",
+		"│ first            │",
+		"│ second           │",
+		"╰──────────────────╯",
+		"input",
+		"────────────────────",
+	}
+	if !slices.Equal(plainRows, want) {
+		t.Errorf("got rows %q, want %q", plainRows, want)
+	}
+	if cursorRow != 4 || cursorColumn != 3 {
+		t.Errorf("feedback moved the cursor to %d,%d within the footer", cursorRow, cursorColumn)
+	}
+	if rowsFromBottom := len(rows) - cursorRow; rowsFromBottom != 2 {
+		t.Errorf("feedback moved the input to %d rows from the bottom, want 2", rowsFromBottom)
+	}
+}
+
+func TestFeedbackFrameIsDroppedWhenItCannotHoldContent(t *testing.T) {
+	for columns := range minimumFramedFeedbackWidth {
+		block := Block{
+			Input:         edit.Frame{Rows: []string{""}},
+			Status:        []string{"x"},
+			FrameFeedback: true,
+		}
+
+		rows, _, _ := block.Rows(columns)
+		if strings.ContainsAny(style.Plain(strings.Join(rows, "")), "╭╮│╰╯") {
+			t.Errorf("feedback was framed in %d columns: %q", columns, rows)
+		}
+		if got := FeedbackContentWidth(columns); got != columns {
+			t.Errorf("content width in %d columns is %d", columns, got)
+		}
+		if got := FeedbackRuleWidth(columns); got != columns {
+			t.Errorf("rule width in %d columns is %d", columns, got)
+		}
 	}
 }
 

@@ -126,6 +126,22 @@ func TestAFooterShorterThanTheTerminalKeepsTheBlanksAboveIt(t *testing.T) {
 	}
 }
 
+func TestATallFooterKeepsItsHeightWhenContentAppearsAboveIt(t *testing.T) {
+	screen := NewTerminalOfSize(&strings.Builder{}, 40, 6)
+	rows := footerRows(10)
+
+	screen.Footer(rows, 8, 0)
+	if got := len(screen.input.rows); got != 6 {
+		t.Fatalf("initial footer kept %d rows, want 6", got)
+	}
+
+	screen.hasPrinted = true
+	screen.Footer(rows, 8, 0)
+	if got := len(screen.input.rows); got != 6 {
+		t.Errorf("footer shrank to %d rows when content appeared above it", got)
+	}
+}
+
 func TestAFooterAndItsBlanksNeverOutgrowTheTerminal(t *testing.T) {
 	for _, lines := range []int{1, 2, 3, 10, 24} {
 		screenOutput := &strings.Builder{}

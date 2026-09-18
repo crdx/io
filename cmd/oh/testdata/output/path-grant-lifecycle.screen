@@ -15,9 +15,10 @@ Model returned no reply.
  ⏳ Granted temporary read-only access to /reference.
 
 
-/grant: /reference already has temporary read-only access
-(alt+enter to send)
-── ·✦· ─ r:reference ──────────────────────────────────────────────────────────────── brave-otter ──
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ /grant: /reference already has temporary read-only access     │
+│ (alt+enter to send)                                                                              │
+╰── ·✦· ─ r:reference ────────────────────────────────────────────────────────────── brave-otter ──╯
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === executable grant ===
@@ -31,8 +32,8 @@ Model returned no reply.
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === grant replaced before sending ===
                                                                            double-enter to send now
- ⏳ Granted temporary read and write access to /reference. Changes
-    there follow the workspace write capability.
+ ⏳ Granted temporary read and write access to /reference.
+    Changes there follow the workspace write capability.
 
 
 ── ·✦· ─ rw:reference ─────────────────────────────────────────────────────────────── brave-otter ──
@@ -55,15 +56,17 @@ Model returned no reply.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === missing home path rejected ===
-/grant: Could not resolve ~/missing: lstat /user/missing: no such file
-or directory (alt+enter to send)
-── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ /grant: Could not resolve ~/missing: lstat /user/missing: no such  │
+│ file or directory (alt+enter to send)                                                            │
+╰── ·✦· ──────────────────────────────────────────────────────────────────────────── brave-otter ──╯
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === missing path rejected ===
-/grant: Could not resolve /missing: lstat
-/missing: no such file or directory (alt+enter to send)
-── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ /grant: Could not resolve /missing: lstat                       │
+│ /missing: no such file or directory (alt+enter to send)         │
+╰── ·✦· ──────────────────────────────────────────────────────────────────────────── brave-otter ──╯
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === pending grant ===
@@ -79,8 +82,9 @@ or directory (alt+enter to send)
  ⏳ Revoked temporary access to /missing.
 
 
-Temporary access could not be restored: path does not exist
-── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Temporary access could not be restored: path does not exist                                      │
+╰── ·✦· ──────────────────────────────────────────────────────────────────────────── brave-otter ──╯
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === restoration correction settled ===
@@ -94,13 +98,16 @@ Temporary access could not be restored: path does not exist
 
 Model returned no reply.
 
-Temporary access could not be restored: path does not exist
-── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Temporary access could not be restored: path does not exist                                      │
+╰── ·✦· ──────────────────────────────────────────────────────────────────────────── brave-otter ──╯
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === revoke without grant rejected ===
-/revoke: /reference has no temporary grant (alt+enter to send)
-── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ /revoke: /reference has no temporary grant (alt+enter to      │
+│ send)                                                                                            │
+╰── ·✦· ──────────────────────────────────────────────────────────────────────────── brave-otter ──╯
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === settled into next turn ===
@@ -118,7 +125,8 @@ Model returned no reply.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === unknown access rejected ===
-Usage: /grant {r|rx|rw|rxw} <path> (alt+enter to send)
-── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Usage: /grant {r|rx|rw|rxw} <path> (alt+enter to send)                                           │
+╰── ·✦· ──────────────────────────────────────────────────────────────────────────── brave-otter ──╯
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────

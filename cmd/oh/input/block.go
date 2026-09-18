@@ -7,7 +7,28 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
-const edgePad = 2
+const (
+	edgePad                    = 2
+	feedbackFrameWidth         = 4
+	feedbackBorderWidth        = 2
+	minimumFramedFeedbackWidth = feedbackFrameWidth + 1
+)
+
+func FeedbackContentWidth(width int) int {
+	if width < minimumFramedFeedbackWidth {
+		return width
+	}
+
+	return width - feedbackFrameWidth
+}
+
+func FeedbackRuleWidth(width int) int {
+	if width < minimumFramedFeedbackWidth {
+		return width
+	}
+
+	return width - feedbackBorderWidth
+}
 
 type Ruler struct {
 	Left   string
@@ -24,16 +45,17 @@ func LeftContentWidth(width int, right string) int {
 }
 
 type Block struct {
-	Top      Ruler
-	Input    edit.Frame
-	Bottom   Ruler
-	Status   []string
-	Question []string
-	Rule     style.Style
+	Top           Ruler
+	Input         edit.Frame
+	Bottom        Ruler
+	Status        []string
+	FrameFeedback bool
+	Question      []string
+	Rule          style.Style
 }
 
 func (self Block) Rows(width int) ([]string, int, int) {
-	rows := make([]string, 0, len(self.Input.Rows)+3)
+	rows := make([]string, 0, len(self.Status)+len(self.Input.Rows)+4)
 
 	top := self.Top
 	if self.Input.IsSearching && !self.isAsking() {
@@ -46,13 +68,35 @@ func (self Block) Rows(width int) ([]string, int, int) {
 	}
 
 	body, bodyRow, bodyColumn := self.body()
+	rule := self.rule()
+	statusRows, topWidth := self.renderStatus(width, rule)
 
-	rows = append(rows, self.Status...)
-	rows = append(rows, top.render(width, self.rule()))
+	rows = append(rows, statusRows...)
+	topRule := top.render(topWidth, rule)
+	if topWidth != width {
+		topRule = rule("╰") + topRule + rule("╯")
+	}
+	rows = append(rows, topRule)
 	rows = append(rows, body...)
-	rows = append(rows, bottom.render(width, self.rule()))
+	rows = append(rows, bottom.render(width, rule))
 
-	return rows, len(self.Status) + bodyRow + 1, bodyColumn
+	return rows, len(statusRows) + bodyRow + 1, bodyColumn
+}
+
+func (self Block) renderStatus(width int, rule style.Style) ([]string, int) {
+	if !self.FrameFeedback || width < minimumFramedFeedbackWidth {
+		return self.Status, width
+	}
+
+	contentWidth := FeedbackContentWidth(width)
+	rows := make([]string, 0, len(self.Status)+1)
+	rows = append(rows, rule("╭"+strings.Repeat("─", width-feedbackBorderWidth)+"╮"))
+	for _, status := range self.Status {
+		padding := strings.Repeat(" ", max(contentWidth-style.Width(status), 0))
+		rows = append(rows, rule("│")+" "+status+padding+" "+rule("│"))
+	}
+
+	return rows, FeedbackRuleWidth(width)
 }
 
 func (self Block) isAsking() bool {

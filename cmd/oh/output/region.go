@@ -131,6 +131,9 @@ func (self *Screen) fitFooter(rows []string, cursorRow int) ([]string, int) {
 	}
 
 	room := max(1, self.lines-self.leastSeparators())
+	if len(rows) > room && len(self.input.rows) > room {
+		room = min(len(self.input.rows), self.lines)
+	}
 	if len(rows) <= room {
 		return rows, cursorRow
 	}

@@ -35,6 +35,7 @@
 - List changed models on update
 - Remove trailing new line at the end of `chat.md`
 - Fence piped input when there is also a prompt
+- Draw feedback in an input frame box
 
 ## [0.6.0] - 2026-09-18
 

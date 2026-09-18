@@ -851,12 +851,19 @@ func (self *App) show(inputLine *edit.Input) {
 
 	columns := self.screen.Columns()
 	frame := inputLine.Frame(columns)
+	isFeedbackFramed := !self.feedback.IsEmpty()
+	statusWidth := columns
+	topWidth := columns
+	if isFeedbackFramed {
+		statusWidth = input.FeedbackContentWidth(columns)
+		topWidth = input.FeedbackRuleWidth(columns)
+	}
 
 	topRight := self.renderBar(segment.TopRight, frame)
 	bottomRight := self.renderBar(segment.BottomRight, frame)
 	block := input.Block{
 		Top: input.Ruler{
-			Left:   self.renderBarWithin(segment.TopLeft, frame, input.LeftContentWidth(columns, topRight)),
+			Left:   self.renderBarWithin(segment.TopLeft, frame, input.LeftContentWidth(topWidth, topRight)),
 			Center: self.renderBar(segment.TopCenter, frame),
 			Right:  topRight,
 		},
@@ -866,9 +873,10 @@ func (self *App) show(inputLine *edit.Input) {
 			Center: self.renderBar(segment.BottomCenter, frame),
 			Right:  bottomRight,
 		},
-		Status:   self.statusRows(columns),
-		Question: self.questionRows(columns),
-		Rule:     self.ruleStyle(),
+		Status:        self.statusRows(statusWidth),
+		FrameFeedback: isFeedbackFramed,
+		Question:      self.questionRows(columns),
+		Rule:          self.ruleStyle(),
 	}
 
 	if self.isAwaitingAnswer() {
