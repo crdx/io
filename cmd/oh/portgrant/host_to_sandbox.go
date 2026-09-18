@@ -45,30 +45,27 @@ type HostToSandboxRestoreResult struct {
 type HostToSandbox struct {
 	exposer               HostToSandboxExposer
 	host                  string
-	sandboxToHostPorts    []uint16
 	getSandboxToHostPorts func() []uint16
 	state                 *access.State[[]uint16]
 	changes               chan agent.Event
 	mutex                 sync.Mutex
 }
 
-func NewHostToSandbox(exposer HostToSandboxExposer, host string, sandboxToHostPorts []uint16) *HostToSandbox {
+func NewHostToSandbox(exposer HostToSandboxExposer, host string) *HostToSandbox {
 	return &HostToSandbox{
-		exposer:            exposer,
-		host:               host,
-		sandboxToHostPorts: slices.Clone(sandboxToHostPorts),
-		state:              access.New([]uint16(nil), hostToSandboxDefinition(host)),
-		changes:            make(chan agent.Event, maxExposedPorts),
+		exposer: exposer,
+		host:    host,
+		state:   access.New([]uint16(nil), hostToSandboxDefinition(host)),
+		changes: make(chan agent.Event, maxExposedPorts),
 	}
 }
 
 func NewRestoredHostToSandbox(
 	exposer HostToSandboxExposer,
 	host string,
-	sandboxToHostPorts []uint16,
 	recordedPorts []uint16,
 ) (*HostToSandbox, HostToSandboxRestoreResult) {
-	ports := NewHostToSandbox(exposer, host, sandboxToHostPorts)
+	ports := NewHostToSandbox(exposer, host)
 	result := HostToSandboxRestoreResult{}
 	current := make([]uint16, 0, len(recordedPorts))
 
@@ -349,11 +346,7 @@ func (self *HostToSandbox) judge(port uint16) error {
 	if port < lowestPort {
 		return fmt.Errorf("port %d is below %d, which an unprivileged harness cannot bind", port, lowestPort)
 	}
-	sandboxToHostPorts := self.sandboxToHostPorts
-	if self.getSandboxToHostPorts != nil {
-		sandboxToHostPorts = append(slices.Clone(sandboxToHostPorts), self.getSandboxToHostPorts()...)
-	}
-	if slices.Contains(sandboxToHostPorts, port) {
+	if self.getSandboxToHostPorts != nil && slices.Contains(self.getSandboxToHostPorts(), port) {
 		return fmt.Errorf("port %d already forwards to the host, so nothing inside is listening on it", port)
 	}
 	if len(self.state.GetCurrent()) >= maxExposedPorts {

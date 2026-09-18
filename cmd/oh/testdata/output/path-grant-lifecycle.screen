@@ -11,7 +11,7 @@ The model ended the turn without answering.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === duplicate grant rejected ===
-
+                                                                           double-enter to send now
  ⏳ Granted temporary read-only access to /reference.
 
 
@@ -21,7 +21,7 @@ The model ended the turn without answering.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === executable grant ===
-
+                                                                           double-enter to send now
  ⏳ Granted temporary read and execute access to /reference.
     Execution there follows the shell capability.
 
@@ -30,7 +30,7 @@ The model ended the turn without answering.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === grant replaced before sending ===
-
+                                                                           double-enter to send now
  ⏳ Granted temporary read and write access to /reference. Changes
     there follow the workspace write capability.
 
@@ -43,7 +43,7 @@ The model ended the turn without answering.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === home path granted ===
-
+                                                                           double-enter to send now
  ⏳ Granted temporary read-only access to /user/reference.
 
 
@@ -67,7 +67,7 @@ or directory (alt+enter to send)
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === pending grant ===
-
+                                                                           double-enter to send now
  ⏳ Granted temporary read-only access to /reference.
 
 
@@ -75,8 +75,8 @@ or directory (alt+enter to send)
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === restoration correction pending ===
-
- ⏳ Revoked temporary path access to /missing.
+                                                                           double-enter to send now
+ ⏳ Revoked temporary access to /missing.
 
 
 Temporary access could not be restored: path does not exist
@@ -85,7 +85,7 @@ Temporary access could not be restored: path does not exist
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === restoration correction settled ===
 
- 🤖 Revoked temporary path access to /missing.
+ 🤖 Revoked temporary access to /missing.
 
 
 

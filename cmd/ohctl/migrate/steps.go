@@ -129,7 +129,7 @@ func announces(mode string, text string) bool {
 		if !isNamed {
 			continue
 		}
-		if notice, isSaid := caps.Notice(swappedCaps, grantedCaps); isSaid && notice == text {
+		if notice, isSaid := recordedNotice(swappedCaps, grantedCaps); isSaid && notice == text {
 			return true
 		}
 	}
@@ -703,7 +703,43 @@ func recordedModeNotice(event agent.Event) (string, bool) {
 		return "", false
 	}
 
-	return caps.Notice(swappedCaps, grantedCaps)
+	return recordedNotice(swappedCaps, grantedCaps)
+}
+
+func recordedNotice(swappedCaps caps.Set, grantedCaps caps.Set) (string, bool) {
+	isGranted := grantedCaps.Has(swappedCaps)
+
+	switch swappedCaps {
+	case caps.Write:
+		if isGranted {
+			return "The workspace is now read-write.", true
+		}
+		return "The workspace is now read-only.", true
+	case caps.Shell:
+		if isGranted {
+			return "The bash tool can now run shell commands.", true
+		}
+		return "The bash tool is now refused, and will turn away every command until it is granted again.", true
+	case caps.Network:
+		if isGranted {
+			return "The bash tool can now request the host network, and the fetch tool can now access the internet.", true
+		}
+		return "The bash tool can no longer request the host network, and the fetch tool is now refused.", true
+	case caps.Git:
+		if isGranted {
+			return "The .git directory is now read-write.", true
+		}
+		return "The .git directory is now read-only.", true
+	case caps.Lookup:
+		if isGranted {
+			return "The lookup tool can now access the internet.", true
+		}
+		return "The lookup tool is now refused.", true
+	case caps.Read:
+		return "", false
+	}
+
+	return "", false
 }
 
 func grantedPaths(event agent.Event) []string {

@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/conditions"
+	"crdx.org/io/cmd/oh/hostcommand"
 	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/pathgrant"
@@ -118,45 +119,23 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			output.markdown(event.Text)
 		}
 	case agent.FailureEvent:
-		output.fence(event.Text)
+		output.fence(agent.FailureText(event))
 	case agent.SilentTurnEvent:
 		output.fence(agent.SilentTurnNotice)
 	case agent.CacheRebuildEvent:
 		output.fence(agent.CacheRebuildNotice(event))
 	case agent.PrefixRewriteEvent:
 		output.fence(agent.PrefixRewriteNotice + event.Text)
-	case turn.HarnessPoke:
-		if notice, isSaid := turn.PokeNotice(event); isSaid {
-			output.fence(notice)
-		}
-	case jobrecord.Ended:
-		if notice, isSaid := jobrecord.EndedNotice(event); isSaid {
-			output.fence(notice)
-		}
-	case caps.ModeChange:
-		if notice, isSaid := caps.ModeNotice(event); isSaid {
-			output.fence(notice)
-		}
-	case conditions.Change:
-		if notice, isSaid := conditions.Notice(event); isSaid {
-			output.fence(notice)
-		}
-	case pathgrant.Change:
-		if notice, isSaid := pathgrant.Notice(event); isSaid {
-			output.fence(notice)
-		}
-	case portgrant.SandboxToHostChange:
-		if notice, isSaid := portgrant.SandboxToHostNotice(event); isSaid {
-			output.fence(notice)
-		}
-	case portgrant.HostToSandboxChange:
-		if notice, isSaid := portgrant.HostToSandboxNotice(event); isSaid {
+	case turn.HarnessPoke, jobrecord.Ended, jobrecord.EndedWithSession, caps.JobStop, caps.ModeChange,
+		conditions.Change, pathgrant.Change, portgrant.SandboxToHostChange, portgrant.HostToSandboxChange,
+		hostcommand.Ran:
+		if notice, isSaid := harnessNotice(event); isSaid {
 			output.fence(notice)
 		}
 	case agent.InterruptionEvent:
 		output.paragraph(interrupt.Notice(event))
 	case agent.RetryingEvent:
-		output.fence(event.Text)
+		output.fence(agent.FailureText(event))
 		if event.Arguments != "" {
 			output.fence(event.Arguments)
 		}
@@ -166,6 +145,46 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 
 	_, err := self.file.WriteString(output.String())
 	return err
+}
+
+func harnessNotice(event agent.Event) (string, bool) {
+	switch event.Kind {
+	case turn.HarnessPoke:
+		return turn.PokeNotice(event)
+	case jobrecord.Ended:
+		return jobrecord.EndedNotice(event)
+	case jobrecord.EndedWithSession:
+		return jobrecord.EndedWithSessionNotice(event)
+	case caps.JobStop:
+		return caps.JobStopNotice(event)
+	case hostcommand.Ran:
+		return hostcommand.Notice(event)
+	case caps.ModeChange:
+		return joined(caps.ModeNotice(event))
+	case conditions.Change:
+		return joined(conditions.Notice(event))
+	case pathgrant.Change:
+		return pathgrant.Notice(event)
+	case portgrant.SandboxToHostChange:
+		return portgrant.SandboxToHostNotice(event)
+	case portgrant.HostToSandboxChange:
+		return portgrant.HostToSandboxNotice(event)
+	case agent.StartupEvent, agent.UserMessageEvent, agent.SilentTurnEvent, agent.PrefixRewriteEvent,
+		agent.CacheRebuildEvent, agent.ModelReasoningEvent, agent.ModelMessageEvent,
+		agent.ToolCallRequestEvent, agent.ToolCallResultEvent, agent.StateChangeEvent,
+		agent.InterruptionEvent, agent.RetryingEvent, agent.FailureEvent:
+		return "", false
+	}
+
+	return "", false
+}
+
+func joined(notices []string, areSaid bool) (string, bool) {
+	if !areSaid {
+		return "", false
+	}
+
+	return strings.Join(notices, "\n"), true
 }
 
 func (self *toolCallEntry) line() string {
@@ -406,6 +425,8 @@ func title(kind agent.Kind) string {
 		return "Host → sandbox"
 	case turn.HarnessPoke:
 		return "Poke"
+	case hostcommand.Ran:
+		return "Host command"
 	case agent.SilentTurnEvent:
 		return "Silent turn"
 	case agent.CacheRebuildEvent:

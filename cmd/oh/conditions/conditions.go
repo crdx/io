@@ -80,35 +80,49 @@ func definition() access.Definition[Conditions] {
 }
 
 func describeChanges(knownConditions Conditions, current Conditions) string {
-	var clauses []string
+	return strings.Join(changeNotices(knownConditions, current), " ")
+}
+
+func changeNotices(knownConditions Conditions, current Conditions) []string {
+	var notices []string
 
 	if knownConditions.UnixSockets != current.UnixSockets {
-		if current.UnixSockets {
-			clauses = append(clauses,
-				"A Unix socket now works beneath /tmp, and is refused beneath the workspace.")
-		} else {
-			clauses = append(clauses,
-				"A Unix socket no longer works at any path, so no service can listen on a Unix socket.")
-		}
+		notices = append(notices, unixSocketNotice(current.UnixSockets))
 	}
 
 	if knownConditions.IPv6 != current.IPv6 {
-		if current.IPv6 {
-			clauses = append(clauses, "This machine has IPv6 again, so ::1 reaches the sandbox loopback.")
-		} else {
-			clauses = append(clauses, "This machine has lost IPv6, so only 127.0.0.1 works.")
-		}
+		notices = append(notices, addressNotice(current.IPv6))
 	}
 
 	if knownConditions.Interactive != current.Interactive {
-		if current.Interactive {
-			clauses = append(clauses, "The user has returned, so you can ask them a question.")
-		} else {
-			clauses = append(clauses, "The user has gone, so you cannot ask them anything.")
-		}
+		notices = append(notices, interactionNotice(current.Interactive))
 	}
 
-	return strings.Join(clauses, " ")
+	return notices
+}
+
+func unixSocketNotice(areTheyReachable bool) string {
+	if areTheyReachable {
+		return "Unix sockets now work beneath /tmp, but not beneath the workspace."
+	}
+
+	return "Unix sockets no longer work."
+}
+
+func addressNotice(isIPv6Reachable bool) string {
+	if isIPv6Reachable {
+		return "This machine now has IPv6, so ::1 reaches the sandbox loopback."
+	}
+
+	return "This machine no longer has IPv6, so only 127.0.0.1 works."
+}
+
+func interactionNotice(isInteractive bool) string {
+	if isInteractive {
+		return "This session is now interactive, so a question can be asked and a gated call approved."
+	}
+
+	return "This session is now non-interactive, so nothing can be asked or approved."
 }
 
 const Change agent.Kind = "conditions_change"
@@ -168,17 +182,17 @@ func Summary(event agent.Event) (string, bool) {
 	return strings.Join(facilities, ", "), true
 }
 
-func Notice(event agent.Event) (string, bool) {
+func Notice(event agent.Event) ([]string, bool) {
 	if event.Kind != Change {
-		return "", false
+		return nil, false
 	}
 
 	var state eventState
 	if err := json.Unmarshal(event.State, &state); err != nil {
-		return "", false
+		return nil, false
 	}
 
-	notice := describeChanges(state.KnownConditions, state.Current)
+	notices := changeNotices(state.KnownConditions, state.Current)
 
-	return notice, notice != ""
+	return notices, len(notices) > 0
 }

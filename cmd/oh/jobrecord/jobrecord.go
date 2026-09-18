@@ -6,6 +6,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/access"
+	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/internal/jobs"
 )
 
@@ -51,7 +52,7 @@ func EndedNotice(event agent.Event) (string, bool) {
 	}
 
 	return jobs.Report(
-		"The job "+conclusion.Snapshot.Name+" exited: "+conclusion.Snapshot.Outcome()+".",
+		"The job "+markdown.CodeSpan(conclusion.Snapshot.Name)+" exited: "+conclusion.Snapshot.Outcome()+".",
 		conclusion.Output,
 		conclusion.DroppedBytes,
 	), true
@@ -74,12 +75,17 @@ func EndedWithSessionNotice(event agent.Event) (string, bool) {
 		return "", false
 	}
 
-	subject := "The job " + names[0] + " is"
-	if len(names) > 1 {
-		subject = "The jobs " + strings.Join(names[:len(names)-1], ", ") +
-			" and " + names[len(names)-1] + " are"
+	formattedNames := make([]string, 0, len(names))
+	for _, name := range names {
+		formattedNames = append(formattedNames, markdown.CodeSpan(name))
 	}
 
-	return subject + " no longer running, having been stopped when the session last closed. " +
-		"Start one again by name to run its command afresh.", true
+	subject := "The job " + formattedNames[0] + " was"
+	if len(formattedNames) > 1 {
+		subject = "The jobs " + strings.Join(formattedNames[:len(formattedNames)-1], ", ") +
+			" and " + formattedNames[len(formattedNames)-1] + " were"
+	}
+
+	return subject + " stopped when the session last closed. " +
+		"Call `job(action=\"start\", name=\"" + names[0] + "\")` with no command to run its command again.", true
 }

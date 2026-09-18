@@ -77,6 +77,10 @@
 - Theme harness-submitted messages
 - Gather consecutive mid-round notices into one panel
 - Handle pending notices correctly
+- Tell the model exactly what the harness drew
+- Display each capability change as its own notice
+- Display each machine condition change as its own notice
+- Shorten harness notices in general
 - Repair the region if the terminal is too short
 - Show whole seconds for durations >= 1s
 - Remove some character-building options

@@ -126,7 +126,7 @@ func modeDefinition() access.Definition[Set] {
 	return access.Definition[Set]{
 		Clone: func(grantedCaps Set) Set { return grantedCaps },
 		Describe: func(knownCaps Set, currentCaps Set) string {
-			return lexicalDiff(currentCaps^knownCaps, currentCaps)
+			return strings.Join(changeNotices(currentCaps^knownCaps, currentCaps), " ")
 		},
 	}
 }
@@ -151,26 +151,26 @@ func (self *Mode) Inject() string {
 	return self.state.Inject()
 }
 
-func lexicalDiff(changedCaps Set, currentCaps Set) string {
-	var clauses []string
+func changeNotices(changedCaps Set, currentCaps Set) []string {
+	var notices []string
 
 	if changedCaps.Has(Write) {
-		clauses = append(clauses, workspaceIs(currentCaps.Has(Write)))
+		notices = append(notices, workspaceNotice(currentCaps.Has(Write)))
 	}
 	if changedCaps.Has(Shell) {
-		clauses = append(clauses, shellIs(currentCaps.Has(Shell)))
+		notices = append(notices, shellNotice(currentCaps.Has(Shell)))
 	}
 	if changedCaps.Has(Network) {
-		clauses = append(clauses, networkIs(currentCaps.Has(Network)))
+		notices = append(notices, hostNetworkNotice(currentCaps.Has(Network)), fetchNotice(currentCaps.Has(Network)))
 	}
 	if changedCaps.Has(Git) {
-		clauses = append(clauses, historyIs(currentCaps.Has(Git)))
+		notices = append(notices, repositoryNotice(currentCaps.Has(Git)))
 	}
 	if changedCaps.Has(Lookup) {
-		clauses = append(clauses, lookupIs(currentCaps.Has(Lookup)))
+		notices = append(notices, lookupNotice(currentCaps.Has(Lookup)))
 	}
 
-	return strings.Join(clauses, " ")
+	return notices
 }
 
 func withdrawal(withdrawnCaps Set) string {
@@ -186,42 +186,50 @@ func withdrawal(withdrawnCaps Set) string {
 	}
 }
 
-func workspaceIs(writable bool) string {
-	if writable {
+func workspaceNotice(isWritable bool) string {
+	if isWritable {
 		return "The workspace is now read-write."
 	}
 
 	return "The workspace is now read-only."
 }
 
-func shellIs(granted bool) string {
-	if granted {
+func shellNotice(isGranted bool) string {
+	if isGranted {
 		return "The bash tool can now run shell commands."
 	}
 
-	return "The bash tool is now refused, and will turn away every command until it is granted again."
+	return "The bash tool is now refused."
 }
 
-func historyIs(writable bool) string {
-	if writable {
+func repositoryNotice(isWritable bool) string {
+	if isWritable {
 		return "The .git directory is now read-write."
 	}
 
 	return "The .git directory is now read-only."
 }
 
-func lookupIs(granted bool) string {
-	if granted {
+func lookupNotice(isGranted bool) string {
+	if isGranted {
 		return "The lookup tool can now access the internet."
 	}
 
 	return "The lookup tool is now refused."
 }
 
-func networkIs(granted bool) string {
-	if granted {
-		return "The bash tool can now request the host network, and the fetch tool can now access the internet."
+func hostNetworkNotice(isGranted bool) string {
+	if isGranted {
+		return "The bash tool can now request the host network."
 	}
 
-	return "The bash tool can no longer request the host network, and the fetch tool is now refused."
+	return "The bash tool can no longer request the host network."
+}
+
+func fetchNotice(isGranted bool) string {
+	if isGranted {
+		return "The fetch tool can now access the internet."
+	}
+
+	return "The fetch tool is now refused."
 }

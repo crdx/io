@@ -6,6 +6,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/access"
+	"crdx.org/io/cmd/oh/markdown"
 )
 
 const ModeChange agent.Kind = "mode_change"
@@ -31,21 +32,21 @@ func GrantedBy(event agent.Event) (Set, error) {
 	return Parse(flags)
 }
 
-func Notice(swappedCaps Set, grantedCaps Set) (string, bool) {
-	notice := lexicalDiff(swappedCaps, grantedCaps)
+func Notice(swappedCaps Set, grantedCaps Set) ([]string, bool) {
+	notices := changeNotices(swappedCaps, grantedCaps)
 
-	return notice, notice != ""
+	return notices, len(notices) > 0
 }
 
-func ModeNotice(event agent.Event) (string, bool) {
+func ModeNotice(event agent.Event) ([]string, bool) {
 	swappedCaps, isKnown := Named(event.Name)
 	if !isKnown {
-		return "", false
+		return nil, false
 	}
 
 	grantedCaps, err := GrantedBy(event)
 	if err != nil {
-		return "", false
+		return nil, false
 	}
 
 	return Notice(swappedCaps, grantedCaps)
@@ -104,13 +105,13 @@ func JobStopNotice(event agent.Event) (string, bool) {
 	}
 
 	if len(event.State) == 0 {
-		return fmt.Sprintf("The job %s was stopped from the keyboard.", event.Name), true
+		return fmt.Sprintf("The job %s was stopped from the keyboard.", markdown.CodeSpan(event.Name)), true
 	}
 
 	var stopReason jobStopReason
 	if err := json.Unmarshal(event.State, &stopReason); err == nil && stopReason.Path != "" {
 		return fmt.Sprintf(
-			"The job %s was stopped because access to %s was revoked.", event.Name, stopReason.Path,
+			"The job %s was stopped because access to %s was revoked.", markdown.CodeSpan(event.Name), stopReason.Path,
 		), true
 	}
 
@@ -124,5 +125,5 @@ func JobStopNotice(event agent.Event) (string, bool) {
 		return "", false
 	}
 
-	return fmt.Sprintf("The job %s was stopped because %s.", event.Name, reason), true
+	return fmt.Sprintf("The job %s was stopped because %s.", markdown.CodeSpan(event.Name), reason), true
 }

@@ -56,13 +56,13 @@ I can build in place and run what comes out of it.
 ## Path grant · 2 paths · changed /build · +9s
 
 ```
-Revoked temporary path access to /build.
+Revoked temporary access to /build.
 ```
 
 ## Path grant · 1 path · changed /tools · +10s
 
 ```
-Revoked temporary path access to /tools.
+Revoked temporary access to /tools.
 ```
 
 ## Assistant · +11s
@@ -72,7 +72,7 @@ I will use the reference alone from here.
 ## Path grant · none · changed /reference · +12s
 
 ```
-Revoked temporary path access to /reference.
+Revoked temporary access to /reference.
 ```
 
 ## Assistant · +13s

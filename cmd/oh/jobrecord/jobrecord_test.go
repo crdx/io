@@ -59,7 +59,7 @@ func TestOneEndedJobIsNamedInTheSingular(t *testing.T) {
 	if !isSaid {
 		t.Fatal("one ended job said nothing")
 	}
-	if want := "The job docs is no longer running"; notice[:len(want)] != want {
+	if want := "The job `docs` was stopped"; notice[:len(want)] != want {
 		t.Errorf("got %q, want it to open with %q", notice, want)
 	}
 }
@@ -71,22 +71,22 @@ func TestSeveralEndedJobsAreNamedInThePlural(t *testing.T) {
 	if !isSaid {
 		t.Fatal("several ended jobs said nothing")
 	}
-	if want := "The jobs docs, build and watch are no longer running"; notice[:len(want)] != want {
+	if want := "The jobs `docs`, `build` and `watch` were stopped"; notice[:len(want)] != want {
 		t.Errorf("got %q, want it to name all three", notice)
 	}
 }
 
 func TestAnEndedJobNoticeAgreesWithItsOwnNumber(t *testing.T) {
-	const tail = " no longer running, having been stopped when the session last closed. " +
-		"Start one again by name to run its command afresh."
+	const tail = " stopped when the session last closed. " +
+		"Call `job(action=\"start\", name=\"docs\")` with no command to run its command again."
 
 	for _, test := range []struct {
 		names   []string
 		expects string
 	}{
-		{[]string{"docs"}, "The job docs is" + tail},
-		{[]string{"docs", "watch"}, "The jobs docs and watch are" + tail},
-		{[]string{"docs", "build", "watch"}, "The jobs docs, build and watch are" + tail},
+		{[]string{"docs"}, "The job `docs` was" + tail},
+		{[]string{"docs", "watch"}, "The jobs `docs` and `watch` were" + tail},
+		{[]string{"docs", "build", "watch"}, "The jobs `docs`, `build` and `watch` were" + tail},
 	} {
 		notice, isSaid := jobrecord.EndedWithSessionNotice(jobrecord.EndedWithSessionEvent(test.names))
 		if !isSaid {
@@ -123,7 +123,7 @@ func TestAJobThatFinishedOnItsOwnSaysHowItWent(t *testing.T) {
 		t.Fatal("a finished job said nothing")
 	}
 
-	expects := "The job build exited: failed after 12s, exit(2).\n" +
+	expects := "The job `build` exited: failed after 12s, exit(2).\n" +
 		"undefined: getWidth\nexit status 1"
 	if notice != expects {
 		t.Errorf("got %q, want %q", notice, expects)
@@ -136,5 +136,32 @@ func TestAJobThatFinishedOnItsOwnSaysHowItWent(t *testing.T) {
 func TestANamelessJobSaysNothingWhenItEnds(t *testing.T) {
 	if _, isSaid := jobrecord.EndedNotice(jobrecord.EndedEvent(jobs.Conclusion{})); isSaid {
 		t.Error("a job with no name still said something")
+	}
+}
+
+func TestAnEmptyFinishedJobMarksItsCodedStatusLine(t *testing.T) {
+	event := jobrecord.EndedEvent(jobs.Conclusion{
+		Snapshot: jobs.Snapshot{Name: "build", State: jobs.StateComplete},
+	})
+	notice, isSaid := jobrecord.EndedNotice(event)
+	if !isSaid {
+		t.Fatal("a finished job said nothing")
+	}
+	if want := "The job `build` exited: complete (no output)."; notice != want {
+		t.Errorf("got %q, want %q", notice, want)
+	}
+}
+
+func TestAJobNameContainingABacktickRemainsOneCodeSpan(t *testing.T) {
+	event := jobrecord.EndedEvent(jobs.Conclusion{
+		Snapshot: jobs.Snapshot{Name: "build`fast", State: jobs.StateComplete},
+		Output:   "done",
+	})
+	notice, isSaid := jobrecord.EndedNotice(event)
+	if !isSaid {
+		t.Fatal("a finished job said nothing")
+	}
+	if want := "The job `` build`fast `` exited: complete.\ndone"; notice != want {
+		t.Errorf("got %q, want %q", notice, want)
 	}
 }

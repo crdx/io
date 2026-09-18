@@ -95,7 +95,7 @@ func TestRevokingAGrantRemovesItFromTheFileTools(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if notice, found := Notice(event); !found || notice != "Revoked temporary path access to "+directory+"." {
+	if notice, found := Notice(event); !found || notice != "Revoked temporary access to "+directory+"." {
 		t.Errorf("got notice %q and %t", notice, found)
 	}
 	if _, _, err := files.Resolve(directory); !errors.Is(err, file.ErrOutsideRoot) {
@@ -208,8 +208,8 @@ func TestGrantChangesAreInjectedOnce(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want := "The path " + directory +
-		" now has temporary read and write access. Changes there follow the workspace write capability."
+	want := "Granted temporary read and write access to " + directory +
+		". Changes there follow the workspace write capability."
 	if got := grants.Inject(); got != want {
 		t.Errorf("got injection %q", got)
 	}
@@ -310,7 +310,7 @@ func TestRestoreReopensPresentPathsAndCorrectsMissingOnes(t *testing.T) {
 	if _, _, err := files.Resolve(present); err != nil {
 		t.Fatal(err)
 	}
-	if message := grants.Inject(); !strings.Contains(message, missing) || !strings.Contains(message, "revoked") {
+	if message := grants.Inject(); !strings.Contains(message, missing) || !strings.Contains(message, "Revoked") {
 		t.Errorf("got correction %q", message)
 	}
 }

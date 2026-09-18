@@ -4,13 +4,10 @@
 \r
 \e[?7l\r\e[KPartial answer.\r
 \r
-\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\e[48;2;48;58;67m 🤖 The workspace is now read-only.                                                                 \e[0m\r
-\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r
-\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\e[48;2;48;58;67m 🤖 The .git directory is now read-only.                                                            \e[0m\r
-\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 The workspace is now read-only.                                                                 \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 The .git directory is now read-only.                                                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \r\e[KThe workspace and history are read-only now.\e[?25h\e[?2026l\r
 \r

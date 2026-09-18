@@ -2,6 +2,7 @@ package caps
 
 import (
 	"errors"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -10,16 +11,16 @@ import (
 )
 
 var (
-	nowReadOnly     = workspaceIs(false)
-	nowReadWrite    = workspaceIs(true)
-	gitReadOnly     = historyIs(false)
-	gitWritable     = historyIs(true)
-	shellGranted    = shellIs(true)
-	shellWithheld   = shellIs(false)
-	lookupGranted   = lookupIs(true)
-	lookupWithheld  = lookupIs(false)
-	networkGranted  = networkIs(true)
-	networkWithheld = networkIs(false)
+	nowReadOnly     = workspaceNotice(false)
+	nowReadWrite    = workspaceNotice(true)
+	gitReadOnly     = repositoryNotice(false)
+	gitWritable     = repositoryNotice(true)
+	shellGranted    = shellNotice(true)
+	shellWithheld   = shellNotice(false)
+	lookupGranted   = lookupNotice(true)
+	lookupWithheld  = lookupNotice(false)
+	networkGranted  = hostNetworkNotice(true) + " " + fetchNotice(true)
+	networkWithheld = hostNetworkNotice(false) + " " + fetchNotice(false)
 )
 
 func TestEveryClauseSaysSomethingAndSaysItBothWays(t *testing.T) {
@@ -202,6 +203,36 @@ func TestSwitchingHostNetworkAccessIsAnnounced(t *testing.T) {
 
 	if got := self.Inject(); got != networkWithheld {
 		t.Errorf("expected %q, got %q", networkWithheld, got)
+	}
+}
+
+func TestEachToolAffectedByAChangeSaysSoOnItsOwn(t *testing.T) {
+	notices, areSaid := Notice(Network, Read|Network)
+	if !areSaid {
+		t.Fatal("expected the network capability to say something")
+	}
+
+	want := []string{hostNetworkNotice(true), fetchNotice(true)}
+	if !slices.Equal(notices, want) {
+		t.Errorf("expected %q, got %q", want, notices)
+	}
+
+	for _, notice := range notices {
+		if strings.Contains(notice, ", and") {
+			t.Errorf("expected one fact to a notice, got %q", notice)
+		}
+	}
+}
+
+func TestSeveralCapabilitiesChangedAtOnceSayOneNoticeEach(t *testing.T) {
+	notices, areSaid := Notice(Write|Git, Read)
+	if !areSaid {
+		t.Fatal("expected the changed capabilities to say something")
+	}
+
+	want := []string{workspaceNotice(false), repositoryNotice(false)}
+	if !slices.Equal(notices, want) {
+		t.Errorf("expected %q, got %q", want, notices)
 	}
 }
 

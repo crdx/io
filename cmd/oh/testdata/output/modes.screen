@@ -17,9 +17,7 @@ writing.
 Writing it down.
 
 
- 🤖 The bash tool is now refused, and
-    will turn away every command until
-    it is granted again.
+ 🤖 The bash tool is now refused.
 
 
 Done.
@@ -271,104 +269,6 @@ e
 
 d
 
-,
-
-a
-
-n
-
-d
-
-w
-
-i
-
-l
-
-l
-
-t
-
-u
-
-r
-
-n
-
-a
-
-w
-
-a
-
-y
-
-e
-
-v
-
-e
-
-r
-
-y
-
-c
-
-o
-
-m
-
-m
-
-a
-
-n
-
-d
-
-u
-
-n
-
-t
-
-i
-
-l
-
-i
-
-t
-
-i
-
-s
-
-g
-
-r
-
-a
-
-n
-
-t
-
-e
-
-d
-
-a
-
-g
-
-a
-
-i
-
-n
-
 .
 
 
@@ -395,7 +295,7 @@ Reading and running commands, but not writing.
 Writing it down.
 
 
- 🤖 The bash tool is now refused, and will turn away every command until it is granted again.
+ 🤖 The bash tool is now refused.
 
 
 Done.
@@ -432,16 +332,7 @@ down.
  🤖 The bash
     tool is
     now
-    refused,
-    and will
-    turn
-    away
-    every
-    command
-    until it
-    is
-    granted
-    again.
+    refused.
 
 
 Done.
@@ -463,7 +354,7 @@ Reading and running commands, but not writing.
 Writing it down.
 
 
- 🤖 The bash tool is now refused, and will turn away every command until it is granted again.
+ 🤖 The bash tool is now refused.
 
 
 Done.

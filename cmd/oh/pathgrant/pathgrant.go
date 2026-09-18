@@ -239,19 +239,14 @@ func describeChanges(knownGrants []Grant, currentGrants []Grant) string {
 		if found && previous.Access == grant.Access {
 			continue
 		}
-		clauses = append(clauses, modelGrantNotice(grant))
+		clauses = append(clauses, grantNotice(grant))
 	}
 	for _, grant := range knownGrants {
 		if _, found := findGrant(currentGrants, grant.Path); !found {
-			clauses = append(clauses, "The temporary path grant for "+grant.Path+" has been revoked.")
+			clauses = append(clauses, revocationNotice(grant.Path))
 		}
 	}
 	return strings.Join(clauses, " ")
-}
-
-func modelGrantNotice(grant Grant) string {
-	return "The path " + grant.Path + " now has temporary " +
-		grant.Access.Describe() + " access." + capabilityClauses(grant.Access)
 }
 
 const Change agent.Kind = "path_grant_change"
@@ -351,7 +346,11 @@ func Notice(event agent.Event) (string, bool) {
 	if grant, found := findGrant(grants, event.Name); found {
 		return grantNotice(grant), true
 	}
-	return "Revoked temporary path access to " + event.Name + ".", true
+	return revocationNotice(event.Name), true
+}
+
+func revocationNotice(path string) string {
+	return "Revoked temporary access to " + path + "."
 }
 
 func grantNotice(grant Grant) string {

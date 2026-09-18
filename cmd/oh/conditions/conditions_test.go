@@ -1,6 +1,7 @@
 package conditions
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -23,9 +24,9 @@ func TestEachLostFacilityIsToldOnce(t *testing.T) {
 
 	notice := state.Inject()
 	for _, want := range []string{
-		"A Unix socket no longer works at any path",
-		"This machine has lost IPv6",
-		"The user has gone",
+		"Unix sockets no longer work",
+		"This machine no longer has IPv6",
+		"This session is now non-interactive",
 	} {
 		if !strings.Contains(notice, want) {
 			t.Errorf("notice %q does not contain %q", notice, want)
@@ -42,9 +43,9 @@ func TestEachRegainedFacilityIsTold(t *testing.T) {
 
 	notice := state.Peek()
 	for _, want := range []string{
-		"A Unix socket now works beneath /tmp",
-		"This machine has IPv6 again",
-		"The user has returned",
+		"Unix sockets now work beneath /tmp",
+		"This machine now has IPv6",
+		"This session is now interactive",
 	} {
 		if !strings.Contains(notice, want) {
 			t.Errorf("notice %q does not contain %q", notice, want)
@@ -61,12 +62,12 @@ func TestAChangeIsRecordedAndReadBack(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	notice, isSaid := Notice(event)
-	if !isSaid {
+	notices, areSaid := Notice(event)
+	if !areSaid {
 		t.Fatal("a changed condition says nothing")
 	}
-	if want := "A Unix socket no longer works at any path"; !strings.Contains(notice, want) {
-		t.Errorf("notice %q does not contain %q", notice, want)
+	if want := []string{unixSocketNotice(false), addressNotice(false)}; !slices.Equal(notices, want) {
+		t.Errorf("got notices %q, want %q", notices, want)
 	}
 
 	recorded, found := LastRecorded([]agent.Event{event})
@@ -86,8 +87,8 @@ func TestABaselineIsRecordedWithoutSayingAnything(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if notice, isSaid := Notice(event); isSaid {
-		t.Errorf("a baseline says %q", notice)
+	if notices, areSaid := Notice(event); areSaid {
+		t.Errorf("a baseline says %q", notices)
 	}
 
 	recorded, found := LastRecorded([]agent.Event{event})
@@ -138,7 +139,7 @@ func TestTheConditionsAtCreationAreCompared(t *testing.T) {
 	if !restored.IsChanged {
 		t.Fatal("a machine that lost a facility reports no change")
 	}
-	if want := "A Unix socket no longer works"; !strings.Contains(restored.State.Peek(), want) {
+	if want := "Unix sockets no longer work"; !strings.Contains(restored.State.Peek(), want) {
 		t.Errorf("notice %q does not contain %q", restored.State.Peek(), want)
 	}
 }
@@ -182,7 +183,7 @@ func TestAMachineThatRecoversIsToldAgain(t *testing.T) {
 	}
 
 	notice := restored.State.Peek()
-	for _, want := range []string{"A Unix socket now works beneath /tmp", "This machine has IPv6 again"} {
+	for _, want := range []string{"Unix sockets now work beneath /tmp", "This machine now has IPv6"} {
 		if !strings.Contains(notice, want) {
 			t.Errorf("notice %q does not contain %q", notice, want)
 		}
@@ -215,7 +216,7 @@ func TestOnlyTheFacilitiesThatMovedAreTold(t *testing.T) {
 	}
 
 	notice := restored.State.Peek()
-	if want := "This machine has lost IPv6"; !strings.Contains(notice, want) {
+	if want := "This machine no longer has IPv6"; !strings.Contains(notice, want) {
 		t.Errorf("notice %q does not contain %q", notice, want)
 	}
 	for _, unwanted := range []string{"Unix socket", "The user"} {

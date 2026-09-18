@@ -41,20 +41,15 @@ I can build in place and run what comes
 out of it.
 
 
- 🤖 Revoked temporary path access to
-    /build.
-
-
-
- 🤖 Revoked temporary path access to
-    /tools.
+ 🤖 Revoked temporary access to /build.
+ 🤖 Revoked temporary access to /tools.
 
 
 I will use the reference alone from
 here.
 
 
- 🤖 Revoked temporary path access to
+ 🤖 Revoked temporary access to
     /reference.
 
 
@@ -1043,14 +1038,6 @@ r
 
 y
 
-p
-
-a
-
-t
-
-h
-
 a
 
 c
@@ -1080,9 +1067,6 @@ l
 d
 
 .
-
-
-
 
 🤖
 
@@ -1117,14 +1101,6 @@ a
 r
 
 y
-
-p
-
-a
-
-t
-
-h
 
 a
 
@@ -1227,14 +1203,6 @@ a
 r
 
 y
-
-p
-
-a
-
-t
-
-h
 
 a
 
@@ -1327,17 +1295,14 @@ I can run what is in the tools directory now.
 I can build in place and run what comes out of it.
 
 
- 🤖 Revoked temporary path access to /build.
-
-
-
- 🤖 Revoked temporary path access to /tools.
+ 🤖 Revoked temporary access to /build.
+ 🤖 Revoked temporary access to /tools.
 
 
 I will use the reference alone from here.
 
 
- 🤖 Revoked temporary path access to /reference.
+ 🤖 Revoked temporary access to /reference.
 
 
 I will no longer use it.
@@ -1451,17 +1416,12 @@ it.
 
  🤖 Revoked
     temporar
-    y path
-    access
+    y access
     to
     /build.
-
-
-
  🤖 Revoked
     temporar
-    y path
-    access
+    y access
     to
     /tools.
 
@@ -1475,8 +1435,7 @@ here.
 
  🤖 Revoked
     temporar
-    y path
-    access
+    y access
     to
     /referen
     ce.
@@ -1518,17 +1477,14 @@ I can run what is in the tools directory now.
 I can build in place and run what comes out of it.
 
 
- 🤖 Revoked temporary path access to /build.
-
-
-
- 🤖 Revoked temporary path access to /tools.
+ 🤖 Revoked temporary access to /build.
+ 🤖 Revoked temporary access to /tools.
 
 
 I will use the reference alone from here.
 
 
- 🤖 Revoked temporary path access to /reference.
+ 🤖 Revoked temporary access to /reference.
 
 
 I will no longer use it.

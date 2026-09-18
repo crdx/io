@@ -1,6 +1,7 @@
 package caps
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -48,13 +49,13 @@ func TestAConversationThatNeverSaidItsModeSaysSo(t *testing.T) {
 
 func TestAModeChangeSaysWhatItSwapped(t *testing.T) {
 	notice, said := ModeNotice(ModeToggleEvent(Git, Read|Write|Git))
-	if !said || notice != historyIs(true) {
-		t.Errorf("expected %q, got %q and %t", historyIs(true), notice, said)
+	if !said || !slices.Equal(notice, []string{repositoryNotice(true)}) {
+		t.Errorf("expected %q, got %q and %t", repositoryNotice(true), notice, said)
 	}
 
 	notice, said = ModeNotice(ModeToggleEvent(Write, Read))
-	if !said || notice != workspaceIs(false) {
-		t.Errorf("expected %q, got %q and %t", workspaceIs(false), notice, said)
+	if !said || !slices.Equal(notice, []string{workspaceNotice(false)}) {
+		t.Errorf("expected %q, got %q and %t", workspaceNotice(false), notice, said)
 	}
 
 	if notice, said := ModeNotice(ModeEvent(Read | Write)); said {
@@ -68,7 +69,7 @@ func TestAChangeTakenBackLeavesTheOnesAfterItSayingWhatTheySaid(t *testing.T) {
 
 	event = ModeWithout(event, Git)
 
-	if again, _ := ModeNotice(event); again != said {
+	if again, _ := ModeNotice(event); !slices.Equal(again, said) {
 		t.Errorf("expected %q, got %q", said, again)
 	}
 
@@ -82,14 +83,14 @@ func TestAJobStoppedForARevokedPathNamesThePath(t *testing.T) {
 	if !isShown {
 		t.Fatal("a job stopped for a revoked path said nothing")
 	}
-	if !strings.Contains(notice, "docs") || !strings.Contains(notice, "/reference") {
-		t.Errorf("got %q, want it to name the job and the path", notice)
+	if !strings.Contains(notice, "job `docs`") || !strings.Contains(notice, "/reference") {
+		t.Errorf("got %q, want it to code the job name and name the path", notice)
 	}
 }
 
 func TestAJobStoppedForACapabilityStillNamesTheCapability(t *testing.T) {
 	notice, isShown := JobStopNotice(JobStopEvent("docs", Write))
-	if !isShown || !strings.Contains(notice, "read-only") {
-		t.Errorf("got %q (shown %v), want the capability reason preserved", notice, isShown)
+	if !isShown || !strings.Contains(notice, "job `docs`") || !strings.Contains(notice, "read-only") {
+		t.Errorf("got %q (shown %v), want the coded job name and capability reason preserved", notice, isShown)
 	}
 }

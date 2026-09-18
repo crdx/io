@@ -734,7 +734,8 @@ func TestFormatElevenMigrationKeepsTheFactAndDropsTheProse(t *testing.T) {
 			t.Errorf("the interruption lost its cause: %+v", event)
 		}
 		if event.Kind == caps.ModeChange && event.Name == "w" {
-			if notice, isSaid := caps.ModeNotice(event); !isSaid || notice != "The workspace is now read-only." {
+			notice, isSaid := caps.ModeNotice(event)
+			if !isSaid || !slices.Equal(notice, []string{"The workspace is now read-only."}) {
 				t.Errorf("the mode change cannot say itself: %q %t", notice, isSaid)
 			}
 		}
