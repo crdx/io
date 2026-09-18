@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m run each shape of command and load the \e[0m\r
 \e[48;2;52;53;65m skill                                  \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -28,7 +28,7 @@
 \r\e[K}\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mr\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -344,7 +344,7 @@ I left a note in ~/README.md and the skill is at ~/skills/tidy/SKILL.md.
 }
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m run each shape of command and load the skill                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -369,7 +369,7 @@ I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and 
 }\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m run each shape of command and load the skill                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -394,7 +394,7 @@ I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and 
 \r\e[K}\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m run each shape of command and load the skill                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -419,7 +419,7 @@ I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and 
 \r\e[K}\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m run each shape of command and load the skill                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -444,7 +444,7 @@ I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and 
 \r\e[K}\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m run each   \e[0m\r
 \e[48;2;52;53;65m shape of   \e[0m\r
 \e[48;2;52;53;65m command and\e[0m\r
@@ -495,7 +495,7 @@ I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and 
 \r\e[K}\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m run each shape of command and load the skill\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;201;166;212mif\e[0m\e[38;2;150;152;150m [[ -d src ]]\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;201;166;212mthen\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mthere\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;201;166;212melif\e[0m\e[38;2;150;152;150m [[ -f src ]]\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;201;166;212mthen\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mfile\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;201;166;212melse\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mnone\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;201;166;212mfi\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
@@ -519,7 +519,7 @@ I left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and 
 \r\e[K}
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m run each shape of command and load the skill                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

@@ -1,4 +1,4 @@
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m call two tools and interrupt while the second is working                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -7,7 +7,7 @@
 \r
 \e[38;2;207;173;0mTurn stopped because the user pressed escape.\e[0m\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what happened to the second one                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

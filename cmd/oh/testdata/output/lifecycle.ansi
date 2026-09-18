@@ -3,7 +3,7 @@
 === progress refreshed mid-turn ===
 \e]9;4;3\e\\\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -45,7 +45,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 === released and kept ===
 \e]9;4;3\e\\\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -87,7 +87,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 === released and unused ===
 \e]9;4;3\e\\\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -129,7 +129,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 === resized ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -149,7 +149,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r\e[Klayer instead.\r
 \e[?25h\e[?2026l\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -171,7 +171,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 === resized mid-turn ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -181,7 +181,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r
 \r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -259,7 +259,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 > ask something else\r
 > and a second row\r\r\e[1A\e[J\e[1A\r
 \r> ask something else\r
-> and a second row\r\r\e[1A\e[J\e[48;2;52;53;65m                                                                                                    \e[0m\r
+> and a second row\r\r\e[1A\e[J\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m search everything for the spinner      \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -12,7 +12,7 @@
 \r\e[Kgave up after a minute.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65ms\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -161,7 +161,7 @@ find \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;12
 The grep took nine seconds and the find gave up after a minute.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m search everything for the spinner                                                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -173,7 +173,7 @@ That will take a moment.\r
 The grep took nine seconds and the find gave up after a minute.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m search everything for the spinner                                                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -186,7 +186,7 @@ The grep took nine seconds and the find gave up after a minute.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep too\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took ni\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine secon\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up afte\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a minu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a minute.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m search everything for the spinner                                                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -199,7 +199,7 @@ The grep took nine seconds and the find gave up after a minute.\r
 \e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a minute.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m search everything for the spinner                                                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -212,7 +212,7 @@ The grep took nine seconds and the find gave up after a minute.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep too\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took ni\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine secon\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up afte\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a minu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a minute.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m search     \e[0m\r
 \e[48;2;52;53;65m everything \e[0m\r
 \e[48;2;52;53;65m for the    \e[0m\r
@@ -235,7 +235,7 @@ The grep took nine seconds and the find gave up after a minute.\r
 \r\e[Kminute.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m search everything for the spinner\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KThat will take a moment.
@@ -246,7 +246,7 @@ The grep took nine seconds and the find gave up after a minute.\r
 \r\e[KThe grep took nine seconds and the find gave up after a minute.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m search everything for the spinner                                                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

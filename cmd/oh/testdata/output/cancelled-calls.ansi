@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m read both of those files, then wait for\e[0m\r
 \e[48;2;52;53;65m check                                  \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -10,12 +10,12 @@
 \r
 \e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
-\e[48;2;52;53;65m                                        \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m one was all I needed                   \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mr\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -109,7 +109,7 @@
 \e[38;2;207;173;0md\e[0m\r
 \e[38;2;207;173;0m.\e[0m\r
 \r
-\e[48;2;52;53;65m \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mo\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -159,7 +159,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \e[48;2;52;53;65m\e[0m
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m read both of those files, then wait for check                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -169,12 +169,12 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \r
 \e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m one was all I needed                                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m read both of those files, then wait for check                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -187,12 +187,12 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \r
 \e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m one was all I needed                                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m read both of those files, then wait for check                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -205,12 +205,12 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \r
 \e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m one was all I needed                                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m read both of those files, then wait for check                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -223,12 +223,12 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \r
 \e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m one was all I needed                                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m read both  \e[0m\r
 \e[48;2;52;53;65m of those   \e[0m\r
 \e[48;2;52;53;65m files, then\e[0m\r
@@ -243,13 +243,13 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \e[38;2;207;173;0mTurn\e[0m\r
 \e[38;2;207;173;0mstopped.\e[0m\r
 \r
-\e[48;2;52;53;65m            \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m one was all\e[0m\r
 \e[48;2;52;53;65m I needed   \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m read both of those files, then wait for check\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
@@ -258,12 +258,12 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 
 \e[38;2;207;173;0mTurn stopped.\e[0m
 
-\e[48;2;52;53;65m\e[0m
+\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m one was all I needed\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m read both of those files, then wait for check                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -273,7 +273,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \r
 \e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m one was all I needed                                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[?25h\e[?2026l

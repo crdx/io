@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m see what the working tree looks like   \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -85,7 +85,7 @@
 \r
 \r\e[KThe push was refused, so pull first.\r
 \r
-\e[48;2;52;53;65m                                        \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m check the notes while that runs        \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -152,7 +152,7 @@
 \r
 \r\e[KTwo lines, as the count said.\r
 \r
-\e[48;2;52;53;65m                                        \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m explain the fix while i poke at the    \e[0m\r
 \e[48;2;52;53;65m tree                                   \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -179,7 +179,7 @@
 \r\e[Kagrees.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65ms\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -1828,7 +1828,7 @@
 \r\e[Kt\r
 \r\e[K.\r
 \r
-\e[48;2;52;53;65m \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mc\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -3183,7 +3183,7 @@
 \r\e[Kd\r
 \r\e[K.\r
 \r
-\e[48;2;52;53;65m \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65me\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -3793,7 +3793,7 @@ The call was being unsettled because the notice closed the live block.
 That is the whole change, and your diff agrees.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m see what the working tree looks like                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -3869,7 +3869,7 @@ One tracked file has changed and \e[38;2;192;128;80mnotes.txt\e[0m is not tracke
 \r
 The push was refused, so pull first.\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m check the notes while that runs                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -3927,7 +3927,7 @@ The push was refused, so pull first.\r
 \r
 Two lines, as the count said.\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m explain the fix while i poke at the tree                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -3949,7 +3949,7 @@ The call was being unsettled because the notice closed the live block.\r
 That is the whole change, and your diff agrees.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m see what the working tree looks like                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -4025,7 +4025,7 @@ That is the whole change, and your diff agrees.\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was ref\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was refused\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was refused, so\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was refused, so pul\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was refused, so pull fi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was refused, so pull first.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m check the notes while that runs                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -4095,7 +4095,7 @@ That is the whole change, and your diff agrees.\r
 \r
 \e[?2026h\e[?25l\r\e[KTwo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo line\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo lines, a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo lines, as th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo lines, as the co\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo lines, as the count\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo lines, as the count said\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo lines, as the count said.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m explain the fix while i poke at the tree                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -4117,7 +4117,7 @@ That is the whole change, and your diff agrees.\r
 \e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whol\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole ch\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change, and yo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change, and your d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change, and your diff\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change, and your diff agre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change, and your diff agrees.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m see what the working tree looks like                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -4193,7 +4193,7 @@ That is the whole change, and your diff agrees.\r
 \r
 \e[?2026h\e[?25l\r\e[KThe push was refused, so pull first.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m check the notes while that runs                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -4263,7 +4263,7 @@ That is the whole change, and your diff agrees.\r
 \r
 \e[?2026h\e[?25l\r\e[KTwo lines, as the count said.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m explain the fix while i poke at the tree                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -4285,7 +4285,7 @@ That is the whole change, and your diff agrees.\r
 \e[?2026h\e[?25l\r\e[KThat is the whole change, and your diff agrees.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m see what the working tree looks like                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -4361,7 +4361,7 @@ That is the whole change, and your diff agrees.\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was ref\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was refused\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was refused, so\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was refused, so pul\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was refused, so pull fi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe push was refused, so pull first.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m check the notes while that runs                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -4431,7 +4431,7 @@ That is the whole change, and your diff agrees.\r
 \r
 \e[?2026h\e[?25l\r\e[KTwo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo line\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo lines, a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo lines, as th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo lines, as the co\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo lines, as the count\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo lines, as the count said\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTwo lines, as the count said.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m explain the fix while i poke at the tree                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -4453,7 +4453,7 @@ That is the whole change, and your diff agrees.\r
 \e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whol\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole ch\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change, and yo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change, and your d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change, and your diff\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change, and your diff agre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the whole change, and your diff agrees.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m see what   \e[0m\r
 \e[48;2;52;53;65m the working\e[0m\r
 \e[48;2;52;53;65m tree looks \e[0m\r
@@ -4636,7 +4636,7 @@ That is the whole change, and your diff agrees.\r
 \r\e[Krefused, so\r
 \r\e[Kpull first.\r
 \r
-\e[48;2;52;53;65m            \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m check the  \e[0m\r
 \e[48;2;52;53;65m notes while\e[0m\r
 \e[48;2;52;53;65m that runs  \e[0m\r
@@ -4784,7 +4784,7 @@ That is the whole change, and your diff agrees.\r
 \r\e[Kas the count\r
 \r\e[Ksaid.\r
 \r
-\e[48;2;52;53;65m            \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m explain the\e[0m\r
 \e[48;2;52;53;65m fix while i\e[0m\r
 \e[48;2;52;53;65m poke at the\e[0m\r
@@ -4839,7 +4839,7 @@ That is the whole change, and your diff agrees.\r
 \r\e[Kagrees.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m see what the working tree looks like\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[48;2;48;58;67m\e[0m\r
@@ -4914,7 +4914,7 @@ That is the whole change, and your diff agrees.\r
 
 \r\e[KThe push was refused, so pull first.
 
-\e[48;2;52;53;65m\e[0m
+\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m check the notes while that runs\e[0m
 \e[48;2;52;53;65m\e[0m
 \r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
@@ -4969,7 +4969,7 @@ That is the whole change, and your diff agrees.\r
 
 \r\e[KTwo lines, as the count said.
 
-\e[48;2;52;53;65m\e[0m
+\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m explain the fix while i poke at the tree\e[0m
 \e[48;2;52;53;65m\e[0m
 \r\e[KThe call was being unsettled because the notice closed the live block.
@@ -4990,7 +4990,7 @@ That is the whole change, and your diff agrees.\r
 \r\e[KThat is the whole change, and your diff agrees.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m see what the working tree looks like                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -5066,7 +5066,7 @@ That is the whole change, and your diff agrees.\r
 \r
 \r\e[KThe push was refused, so pull first.\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m check the notes while that runs                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -5124,7 +5124,7 @@ That is the whole change, and your diff agrees.\r
 \r
 \r\e[KTwo lines, as the count said.\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m explain the fix while i poke at the tree                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

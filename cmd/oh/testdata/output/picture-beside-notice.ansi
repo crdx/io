@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m read the screenshot and expose the     \e[0m\r
 \e[48;2;52;53;65m preview                                \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -19,7 +19,7 @@
 \r\e[Kpreview is up.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mr\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -258,7 +258,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44
 The gradient is in place, and the preview is up.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m read the screenshot and expose the preview                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -275,7 +275,7 @@ The gradient is in place, and the preview is up.
 The gradient is in place, and the preview is up.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m read the screenshot and expose the preview                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -301,7 +301,7 @@ The gradient is in place, and the preview is up.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grad\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the pr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the previe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the preview is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the preview is up.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m read the screenshot and expose the preview                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -327,7 +327,7 @@ The gradient is in place, and the preview is up.\r
 \e[?2026h\e[?25l\r\e[KThe gradient is in place, and the preview is up.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m read the screenshot and expose the preview                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -353,7 +353,7 @@ The gradient is in place, and the preview is up.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grad\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the pr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the previe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the preview is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the preview is up.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m read the   \e[0m\r
 \e[48;2;52;53;65m screenshot \e[0m\r
 \e[48;2;52;53;65m and expose \e[0m\r
@@ -385,7 +385,7 @@ The gradient is in place, and the preview is up.\r
 \r\e[Kup.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m read the screenshot and expose the preview\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m\r
@@ -398,7 +398,7 @@ The gradient is in place, and the preview is up.\r
 \r\e[KThe gradient is in place, and the preview is up.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m read the screenshot and expose the preview                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

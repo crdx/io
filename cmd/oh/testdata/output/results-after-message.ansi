@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m look at both of those and tell me what \e[0m\r
 \e[48;2;52;53;65m changed                                \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -12,7 +12,7 @@
 \r\e[KBoth still mention the spinner.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65ml\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -152,7 +152,7 @@ grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;1
 Both still mention the spinner.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m look at both of those and tell me what changed                                                     \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -164,7 +164,7 @@ Taking them together.\r
 Both still mention the spinner.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m look at both of those and tell me what changed                                                     \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -177,7 +177,7 @@ Both still mention the spinner.\r
 \e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth sti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still menti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the spinn\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the spinner.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m look at both of those and tell me what changed                                                     \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -190,7 +190,7 @@ Both still mention the spinner.\r
 \e[?2026h\e[?25l\r\e[KBoth still mention the spinner.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m look at both of those and tell me what changed                                                     \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -203,7 +203,7 @@ Both still mention the spinner.\r
 \e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth sti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still menti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the spinn\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the spinner.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m look at    \e[0m\r
 \e[48;2;52;53;65m both of    \e[0m\r
 \e[48;2;52;53;65m those and  \e[0m\r
@@ -223,7 +223,7 @@ Both still mention the spinner.\r
 \r\e[Kspinner.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m look at both of those and tell me what changed\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KTaking them together.
@@ -234,7 +234,7 @@ Both still mention the spinner.\r
 \r\e[KBoth still mention the spinner.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m look at both of those and tell me what changed                                                     \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

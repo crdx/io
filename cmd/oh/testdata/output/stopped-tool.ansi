@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m build it and tell me what broke        \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -9,14 +9,14 @@
 \r
 \e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
-\e[48;2;52;53;65m                                        \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m leave it, the build is broken anyway   \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
 \r\e[KLeft alone.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mb\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -97,7 +97,7 @@
 \e[38;2;207;173;0md\e[0m\r
 \e[38;2;207;173;0m.\e[0m\r
 \r
-\e[48;2;52;53;65m \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65ml\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -187,7 +187,7 @@ Building now.
 Left alone.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m build it and tell me what broke                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -197,14 +197,14 @@ Building now.\r
 \r
 \e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m leave it, the build is broken anyway                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 Left alone.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m build it and tell me what broke                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -214,14 +214,14 @@ Left alone.\r
 \r
 \e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m leave it, the build is broken anyway                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KLeft\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLeft alo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLeft alone.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m build it and tell me what broke                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -231,14 +231,14 @@ Left alone.\r
 \r
 \e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m leave it, the build is broken anyway                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KLeft alone.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m build it and tell me what broke                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -248,14 +248,14 @@ Left alone.\r
 \r
 \e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m leave it, the build is broken anyway                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KLeft\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLeft alo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLeft alone.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m build it   \e[0m\r
 \e[48;2;52;53;65m and tell me\e[0m\r
 \e[48;2;52;53;65m what broke \e[0m\r
@@ -269,7 +269,7 @@ Left alone.\r
 \e[38;2;207;173;0mTurn\e[0m\r
 \e[38;2;207;173;0mstopped.\e[0m\r
 \r
-\e[48;2;52;53;65m            \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m leave it,  \e[0m\r
 \e[48;2;52;53;65m the build  \e[0m\r
 \e[48;2;52;53;65m is broken  \e[0m\r
@@ -279,7 +279,7 @@ Left alone.\r
 \r\e[KLeft alone.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m build it and tell me what broke\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KBuilding now.
@@ -288,13 +288,13 @@ Left alone.\r
 
 \e[38;2;207;173;0mTurn stopped.\e[0m
 
-\e[48;2;52;53;65m\e[0m
+\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m leave it, the build is broken anyway\e[0m
 \e[48;2;52;53;65m\e[0m
 \r\e[KLeft alone.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m build it and tell me what broke                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -304,7 +304,7 @@ Left alone.\r
 \r
 \e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m leave it, the build is broken anyway                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

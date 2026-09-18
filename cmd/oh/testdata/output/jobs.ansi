@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m start the docs server, check on it,    \e[0m\r
 \e[48;2;52;53;65m then stop it                           \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -21,7 +21,7 @@
 \r\e[Kprocessor limit.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65ms\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -243,7 +243,7 @@
 The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m after exceeding its 2s processor limit.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m start the docs server, check on it, then stop it                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -262,7 +262,7 @@ The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now
 exceeding its 2s processor limit.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m start the docs server, check on it, then stop it                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -281,7 +281,7 @@ exceeding its 2s processor limit.\r
 \r\e[Kex\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s proce\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s processor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s processor lim\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s processor limit.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m start the docs server, check on it, then stop it                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -300,7 +300,7 @@ exceeding its 2s processor limit.\r
 \r\e[Kexceeding its 2s processor limit.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m start the docs server, check on it, then stop it                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -319,7 +319,7 @@ exceeding its 2s processor limit.\r
 \r\e[Kex\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s proce\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s processor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s processor lim\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s processor limit.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m start the  \e[0m\r
 \e[48;2;52;53;65m docs       \e[0m\r
 \e[48;2;52;53;65m server,    \e[0m\r
@@ -356,7 +356,7 @@ exceeding its 2s processor limit.\r
 \r\e[Klimit.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m start the docs server, check on it, then stop it\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m--bind\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mlocalhost\e[0m \e[38;2;150;152;150m2L\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
@@ -373,7 +373,7 @@ exceeding its 2s processor limit.\r
 \r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m after exceeding its 2s processor limit.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m start the docs server, check on it, then stop it                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

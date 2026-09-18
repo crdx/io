@@ -3,7 +3,7 @@
 \e[38;2;150;152;150m\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m\e[0m\r
 \e[38;2;150;152;150mcontext.\e[0m\r
 \r
-\e[48;2;52;53;65m                                        \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m what is the current go release, and    \e[0m\r
 \e[48;2;52;53;65m what does the blog say about it?       \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -22,7 +22,7 @@
 \r\e[Kflaky-run reporting in \e[38;2;192;128;80mgo test\e[0m, and a\r
 \r\e[Ksmaller allocation header.\r
 \r
-\e[48;2;52;53;65m                                        \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m now read the release notes as plain    \e[0m\r
 \e[48;2;52;53;65m text                                   \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -113,7 +113,7 @@
 \e[38;2;150;152;150mt\e[0m\r
 \e[38;2;150;152;150m.\e[0m\r
 \r
-\e[48;2;52;53;65m \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mw\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -444,7 +444,7 @@
 \r\e[Kr\r
 \r\e[K.\r
 \r
-\e[48;2;52;53;65m \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mn\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -726,7 +726,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.
 === printed ===
 \e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is the current go release, and what does the blog say about it?                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -740,7 +740,7 @@ Let me search, then read the announcement.\r
 Go \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in\r
 \e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -756,7 +756,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 === streamed asap ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is the current go release, and what does the blog say about it?                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -770,7 +770,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 \e[?2026h\e[?25l\r\e[KGo *\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo **1.2\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is curre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The anno\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announce\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement cal\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out itera\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in `con\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in `contain\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in `container/h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, fl\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run repo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reportin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K`go\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K`go tes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a sm\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smalle\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller alloca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation hea\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -786,7 +786,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 === streamed line ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is the current go release, and what does the blog say about it?                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -800,7 +800,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 \e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -816,7 +816,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 === streamed paced ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is the current go release, and what does the blog say about it?                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -830,7 +830,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 \e[?2026h\e[?25l\r\e[KGo *\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo **1.2\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is curre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The anno\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announce\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement cal\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out itera\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in `con\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in `contain\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in `container/h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, fl\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run repo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reportin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K`go\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K`go tes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a sm\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smalle\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller alloca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation hea\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -854,7 +854,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 \e[38;2;150;152;150m\e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m\e[0m\r
 \e[38;2;150;152;150mcontext.\e[0m\r
 \r
-\e[48;2;52;53;65m            \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m what is the\e[0m\r
 \e[48;2;52;53;65m current go \e[0m\r
 \e[48;2;52;53;65m release,   \e[0m\r
@@ -894,7 +894,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 \r\e[Kallocation\r
 \r\e[Kheader.\r
 \r
-\e[48;2;52;53;65m            \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m now read   \e[0m\r
 \e[48;2;52;53;65m the release\e[0m\r
 \e[48;2;52;53;65m notes as   \e[0m\r
@@ -927,7 +927,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 === unsized ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
-\e[48;2;52;53;65m\e[0m
+\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m what is the current go release, and what does the blog say about it?\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading the announcement the search cites.\e[0m\e[0m
@@ -939,7 +939,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 
 \r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in \e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.
 
-\e[48;2;52;53;65m\e[0m
+\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m now read the release notes as plain text\e[0m
 \e[48;2;52;53;65m\e[0m
 \r\e[K\e[48;2;48;58;67m\e[0m\r
@@ -954,7 +954,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 === wide ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is the current go release, and what does the blog say about it?                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -968,7 +968,7 @@ Fetching is refused, so I cannot read the notes until you grant access again.\r
 \r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in\r
 \r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

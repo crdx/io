@@ -1,4 +1,4 @@
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m send malformed tool input three times over                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -11,7 +11,7 @@
 \r
 \e[?7l\r\e[KI got there in the end.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m carry on                                                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

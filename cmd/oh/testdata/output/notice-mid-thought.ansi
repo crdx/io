@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m think it through while the build       \e[0m\r
 \e[48;2;52;53;65m finishes                               \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -25,7 +25,7 @@
 \r\e[Kfirst.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mt\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -550,7 +550,7 @@ exit status 1\e[0m
 The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think it through while the build finishes                                                          \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -568,7 +568,7 @@ The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read 
 The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think it through while the build finishes                                                          \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -586,7 +586,7 @@ The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read 
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe buil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build fa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined `ge\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined `getWid\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the rea\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to com\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come fi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think it through while the build finishes                                                          \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -604,7 +604,7 @@ The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read 
 \e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think it through while the build finishes                                                          \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -622,7 +622,7 @@ The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read 
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe buil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build fa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined `ge\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined `getWid\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the rea\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to com\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come fi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m think it   \e[0m\r
 \e[48;2;52;53;65m through    \e[0m\r
 \e[48;2;52;53;65m while the  \e[0m\r
@@ -680,7 +680,7 @@ The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read 
 \r\e[Kfirst.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m think it through while the build finishes\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[48;2;48;58;67m\e[0m\r
@@ -695,7 +695,7 @@ exit status 1\e[0m\r
 \r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think it through while the build finishes                                                          \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

@@ -1,7 +1,7 @@
 === a notice naming a path under /tmp ===
 \e[38;2;204;102;102mCould not read /tmp/zoom-on.png\e[0m
 === a path the user typed under their own /tmp ===
-\e[48;2;52;53;65m                                        \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m look at /tmp/zoom-on.png               \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 

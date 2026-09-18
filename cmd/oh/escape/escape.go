@@ -6,11 +6,11 @@ import (
 )
 
 const (
-	textSizingPrefix   = "\x1b]66;"
 	maximumCursorCells = 65_535
+	textSizingPrefix   = "\x1b]66;"
+	HyperlinkClose     = "\x1b]8;;\x1b\\"
+	MessageMark        = "\x1b]133;A\x1b\\"
 )
-
-const HyperlinkClose = "\x1b]8;;\x1b\\"
 
 type Sequence struct {
 	End         int

@@ -1,0 +1,1483 @@
+=== host-commands, narrow ===
+▸
+   see what the working tree looks like
+
+
+
+   🤖 The user ran the following command
+      on the host:
+
+      $ git status --short
+
+      Output:
+
+       M README.md
+      ?? notes.txt
+
+      Exit code: 0
+
+
+  One tracked file has changed and
+  notes.txt is not tracked yet.
+
+
+   🤖 The user ran the following command
+      on the host:
+
+      $ git push
+
+      Output:
+
+      error: failed to push some refs
+
+      Exit code: 1
+   🤖 The user ran the following command
+      on the host, producing no output:
+
+      $ touch notes.txt
+
+      Exit code: 0
+   🤖 The user ran the following command
+      on the host, producing no output:
+
+      $ sleep 600
+
+      Stopped after its limit of 30s.
+   🤖 The user ran the following command
+      on the host, producing no output:
+
+      $ cat <<'EOF' > notes.txt
+      > first
+      > second
+      > EOF
+
+      Exit code: 0
+   🤖 The user ran the following command
+      on the host:
+
+      $ sed -n '1,4p' README.md
+
+      Output:
+
+      # Title
+
+      ```go
+      fmt.Println("hello")
+      ```
+
+      Exit code: 0
+   🤖 The user ran the following command
+      on the host:
+
+      $ find / -name '*.go'
+
+      Output:
+
+      /one.go
+      /two.go
+
+      [truncated at 18B of 3.1K; full
+      output in
+      /workspace/drops/output-9f2a.txt]
+
+      Exit code: 0
+
+
+  The push was refused, so pull first.
+
+▸
+   check the notes while that runs
+
+
+  read notes.txt ✓ 2L
+
+
+   🤖 The user ran the following command
+      on the host:
+
+      $ wc -l notes.txt
+
+      Output:
+
+      2 notes.txt
+
+      Exit code: 0
+
+
+   🤖 The user ran the following command
+      on the host:
+
+      $ ls --color=always
+
+      Output:
+
+      cmd
+      build.sh
+      README.md
+
+      Exit code: 0
+   🤖 The user ran the following command
+      on the host:
+
+      $ git log -1 --format=%s
+
+      Output:
+
+      rewrite the drawing layer so a live
+      region never repaints above its own
+      top row, which used to silently lose
+      every row beneath it
+
+      Exit code: 0
+   🤖 The user ran the following command
+      on the host:
+
+      $ find . -type f -name '*.go' -newer
+      go.mod -not -path './vendor/*' -exec
+      grep -l 'drawSubmittedBeforeResult'
+      {} + | sort -u
+
+      Output:
+
+      cmd/oh/painter/painter.go
+
+      Exit code: 0
+   🤖 The user ran the following command
+      on the host, producing no output:
+
+      $ printf '   \\n\\n'
+
+      Exit code: 0
+
+
+  Two lines, as the count said.
+
+▸
+   explain the fix while i poke at the
+   tree
+
+
+  The call was being unsettled because the
+  notice closed the live block.
+
+
+   🤖 The user ran the following command
+      on the host:
+
+      $ git diff --stat
+
+      Output:
+
+       cmd/oh/painter/painter.go | 4 +--
+       1 file changed, 2 insertions(+), 2
+      deletions(-)
+
+      Exit code: 0
+
+
+  That is the whole change, and your diff
+  agrees.
+=== host-commands, plain ===
+
+   see what the working tree looks like
+
+
+   🤖 The user ran the following command on the host:
+
+      $ git status --short
+
+      Output:
+
+       M README.md
+      ?? notes.txt
+
+      Exit code: 0
+
+  One tracked file has changed and notes.txt is not tracked yet.
+
+
+   🤖 The user ran the following command on the host:
+
+      $ git push
+
+      Output:
+
+      error: failed to push some refs
+
+      Exit code: 1
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ touch notes.txt
+
+      Exit code: 0
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ sleep 600
+
+      Stopped after its limit of 30s.
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ cat <<'EOF' > notes.txt
+      > first
+      > second
+      > EOF
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ sed -n '1,4p' README.md
+
+      Output:
+
+      # Title
+
+      ```go
+      fmt.Println("hello")
+      ```
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ find / -name '*.go'
+
+      Output:
+
+      /one.go
+      /two.go
+
+      [truncated at 18B of 3.1K; full output in /workspace/drops/output-9f2a.txt]
+
+      Exit code: 0
+
+  The push was refused, so pull first.
+
+
+   check the notes while that runs
+
+  read notes.txt ✓ 2L
+
+
+   🤖 The user ran the following command on the host:
+
+      $ wc -l notes.txt
+
+      Output:
+
+      2 notes.txt
+
+      Exit code: 0
+
+
+   🤖 The user ran the following command on the host:
+
+      $ ls --color=always
+
+      Output:
+
+      cmd
+      build.sh
+      README.md
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ git log -1 --format=%s
+
+      Output:
+
+      rewrite the drawing layer so a live region never repaints above its own top row, which used to s
+  ilently lose every row beneath it
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ find . -type f -name '*.go' -newer go.mod -not -path './vendor/*' -exec grep -l 'drawSubmitted
+  BeforeResult' {} + | sort -u
+
+      Output:
+
+      cmd/oh/painter/painter.go
+
+      Exit code: 0
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ printf '   \\n\\n'
+
+      Exit code: 0
+
+  Two lines, as the count said.
+
+
+   explain the fix while i poke at the tree
+
+  The call was being unsettled because the notice closed the live block.
+
+
+   🤖 The user ran the following command on the host:
+
+      $ git diff --stat
+
+      Output:
+
+       cmd/oh/painter/painter.go | 4 +--
+       1 file changed, 2 insertions(+), 2 deletions(-)
+
+      Exit code: 0
+
+  That is the whole change, and your diff agrees.
+=== host-commands, printed ===
+▸
+   see what the working tree looks like
+
+
+
+   🤖 The user ran the following command on the host:
+
+      $ git status --short
+
+      Output:
+
+       M README.md
+      ?? notes.txt
+
+      Exit code: 0
+
+
+  One tracked file has changed and notes.txt is not tracked yet.
+
+
+   🤖 The user ran the following command on the host:
+
+      $ git push
+
+      Output:
+
+      error: failed to push some refs
+
+      Exit code: 1
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ touch notes.txt
+
+      Exit code: 0
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ sleep 600
+
+      Stopped after its limit of 30s.
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ cat <<'EOF' > notes.txt
+      > first
+      > second
+      > EOF
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ sed -n '1,4p' README.md
+
+      Output:
+
+      # Title
+
+      ```go
+      fmt.Println("hello")
+      ```
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ find / -name '*.go'
+
+      Output:
+
+      /one.go
+      /two.go
+
+      [truncated at 18B of 3.1K; full output in /workspace/drops/output-9f2a.txt]
+
+      Exit code: 0
+
+
+  The push was refused, so pull first.
+
+▸
+   check the notes while that runs
+
+
+  read notes.txt ✓ 2L
+
+
+   🤖 The user ran the following command on the host:
+
+      $ wc -l notes.txt
+
+      Output:
+
+      2 notes.txt
+
+      Exit code: 0
+
+
+   🤖 The user ran the following command on the host:
+
+      $ ls --color=always
+
+      Output:
+
+      cmd
+      build.sh
+      README.md
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ git log -1 --format=%s
+
+      Output:
+
+      rewrite the drawing layer so a live region never repaints above its own top row, which used to
+      silently lose every row beneath it
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ find . -type f -name '*.go' -newer go.mod -not -path './vendor/*' -exec grep -l
+      'drawSubmittedBeforeResult' {} + | sort -u
+
+      Output:
+
+      cmd/oh/painter/painter.go
+
+      Exit code: 0
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ printf '   \\n\\n'
+
+      Exit code: 0
+
+
+  Two lines, as the count said.
+
+▸
+   explain the fix while i poke at the tree
+
+
+  The call was being unsettled because the notice closed the live block.
+
+
+   🤖 The user ran the following command on the host:
+
+      $ git diff --stat
+
+      Output:
+
+       cmd/oh/painter/painter.go | 4 +--
+       1 file changed, 2 insertions(+), 2 deletions(-)
+
+      Exit code: 0
+
+
+  That is the whole change, and your diff agrees.
+=== host-commands, streamed ===
+▸
+   see what the working tree looks like
+
+
+
+   🤖 The user ran the following command on the host:
+
+      $ git status --short
+
+      Output:
+
+       M README.md
+      ?? notes.txt
+
+      Exit code: 0
+
+
+  One tracked file has changed and notes.txt is not tracked yet.
+
+
+   🤖 The user ran the following command on the host:
+
+      $ git push
+
+      Output:
+
+      error: failed to push some refs
+
+      Exit code: 1
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ touch notes.txt
+
+      Exit code: 0
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ sleep 600
+
+      Stopped after its limit of 30s.
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ cat <<'EOF' > notes.txt
+      > first
+      > second
+      > EOF
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ sed -n '1,4p' README.md
+
+      Output:
+
+      # Title
+
+      ```go
+      fmt.Println("hello")
+      ```
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ find / -name '*.go'
+
+      Output:
+
+      /one.go
+      /two.go
+
+      [truncated at 18B of 3.1K; full output in /workspace/drops/output-9f2a.txt]
+
+      Exit code: 0
+
+
+  The push was refused, so pull first.
+
+▸
+   check the notes while that runs
+
+
+  read notes.txt ✓ 2L
+
+
+   🤖 The user ran the following command on the host:
+
+      $ wc -l notes.txt
+
+      Output:
+
+      2 notes.txt
+
+      Exit code: 0
+
+
+   🤖 The user ran the following command on the host:
+
+      $ ls --color=always
+
+      Output:
+
+      cmd
+      build.sh
+      README.md
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ git log -1 --format=%s
+
+      Output:
+
+      rewrite the drawing layer so a live region never repaints above its own top row, which used to
+      silently lose every row beneath it
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ find . -type f -name '*.go' -newer go.mod -not -path './vendor/*' -exec grep -l
+      'drawSubmittedBeforeResult' {} + | sort -u
+
+      Output:
+
+      cmd/oh/painter/painter.go
+
+      Exit code: 0
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ printf '   \\n\\n'
+
+      Exit code: 0
+
+
+  Two lines, as the count said.
+
+▸
+   explain the fix while i poke at the tree
+
+
+  The call was being unsettled because the notice closed the live block.
+
+
+   🤖 The user ran the following command on the host:
+
+      $ git diff --stat
+
+      Output:
+
+       cmd/oh/painter/painter.go | 4 +--
+       1 file changed, 2 insertions(+), 2 deletions(-)
+
+      Exit code: 0
+
+
+  That is the whole change, and your diff agrees.
+=== host-commands, tiny ===
+▸
+   see what
+   the working
+   tree looks
+   like
+
+
+
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host:
+
+      $ git
+      status
+      --short
+
+      Output:
+
+       M
+      README.m
+      d
+      ??
+      notes.tx
+      t
+
+      Exit
+      code: 0
+
+
+  One tracked
+  file has
+  changed and
+  notes.txt is
+  not tracked
+  yet.
+
+
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host:
+
+      $ git
+      push
+
+      Output:
+
+      error:
+      failed
+      to push
+      some
+      refs
+
+      Exit
+      code: 1
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host,
+      producin
+      g no
+      output:
+
+      $ touch
+      notes.tx
+      t
+
+      Exit
+      code: 0
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host,
+      producin
+      g no
+      output:
+
+      $ sleep
+      600
+
+      Stopped
+      after
+      its
+      limit of
+      30s.
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host,
+      producin
+      g no
+      output:
+
+      $ cat
+      <<'EOF'
+      >
+      notes.tx
+      t
+      > first
+      > second
+      > EOF
+
+      Exit
+      code: 0
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host:
+
+      $ sed -n
+      '1,4p'
+      README.m
+      d
+
+      Output:
+
+      # Title
+
+      ```go
+      fmt.Prin
+      tln("hel
+      lo")
+      ```
+
+      Exit
+      code: 0
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host:
+
+      $ find /
+      -name
+      '*.go'
+
+      Output:
+
+      /one.go
+      /two.go
+
+      [truncat
+      ed at
+      18B of
+      3.1K;
+      full
+      output
+      in
+      /workspa
+      ce/drops
+      /output-
+      9f2a.txt
+      ]
+
+      Exit
+      code: 0
+
+
+  The push was
+  refused, so
+  pull first.
+
+▸
+   check the
+   notes while
+   that runs
+
+
+  read n… ✓ 2L
+
+
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host:
+
+      $ wc -l
+      notes.tx
+      t
+
+      Output:
+
+      2
+      notes.tx
+      t
+
+      Exit
+      code: 0
+
+
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host:
+
+      $ ls
+      --color=
+      always
+
+      Output:
+
+      cmd
+      build.sh
+      README.m
+      d
+
+      Exit
+      code: 0
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host:
+
+      $ git
+      log -1
+      --format
+      =%s
+
+      Output:
+
+      rewrite
+      the
+      drawing
+      layer so
+      a live
+      region
+      never
+      repaints
+      above
+      its own
+      top row,
+      which
+      used to
+      silently
+      lose
+      every
+      row
+      beneath
+      it
+
+      Exit
+      code: 0
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host:
+
+      $ find .
+      -type f
+      -name
+      '*.go'
+      -newer
+      go.mod
+      -not
+      -path
+      './vendo
+      r/*'
+      -exec
+      grep -l
+      'drawSub
+      mittedBe
+      foreResu
+      lt' {} +
+      | sort
+      -u
+
+      Output:
+
+      cmd/oh/p
+      ainter/p
+      ainter.g
+      o
+
+      Exit
+      code: 0
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host,
+      producin
+      g no
+      output:
+
+      $ printf
+      '
+      \\n\\n'
+
+      Exit
+      code: 0
+
+
+  Two lines,
+  as the count
+  said.
+
+▸
+   explain the
+   fix while i
+   poke at the
+   tree
+
+
+  The call was
+  being
+  unsettled
+  because the
+  notice
+  closed the
+  live block.
+
+
+   🤖 The user
+      ran the
+      followin
+      g
+      command
+      on the
+      host:
+
+      $ git
+      diff
+      --stat
+
+      Output:
+
+
+      cmd/oh/p
+      ainter/p
+      ainter.g
+      o | 4
+      +--
+       1 file
+      changed,
+      2
+      insertio
+      ns(+), 2
+      deletion
+      s(-)
+
+      Exit
+      code: 0
+
+
+  That is the
+  whole
+  change, and
+  your diff
+  agrees.
+=== host-commands, wide ===
+▸
+   see what the working tree looks like
+
+
+
+   🤖 The user ran the following command on the host:
+
+      $ git status --short
+
+      Output:
+
+       M README.md
+      ?? notes.txt
+
+      Exit code: 0
+
+
+  One tracked file has changed and notes.txt is not tracked yet.
+
+
+   🤖 The user ran the following command on the host:
+
+      $ git push
+
+      Output:
+
+      error: failed to push some refs
+
+      Exit code: 1
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ touch notes.txt
+
+      Exit code: 0
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ sleep 600
+
+      Stopped after its limit of 30s.
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ cat <<'EOF' > notes.txt
+      > first
+      > second
+      > EOF
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ sed -n '1,4p' README.md
+
+      Output:
+
+      # Title
+
+      ```go
+      fmt.Println("hello")
+      ```
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ find / -name '*.go'
+
+      Output:
+
+      /one.go
+      /two.go
+
+      [truncated at 18B of 3.1K; full output in /workspace/drops/output-9f2a.txt]
+
+      Exit code: 0
+
+
+  The push was refused, so pull first.
+
+▸
+   check the notes while that runs
+
+
+  read notes.txt ✓ 2L
+
+
+   🤖 The user ran the following command on the host:
+
+      $ wc -l notes.txt
+
+      Output:
+
+      2 notes.txt
+
+      Exit code: 0
+
+
+   🤖 The user ran the following command on the host:
+
+      $ ls --color=always
+
+      Output:
+
+      cmd
+      build.sh
+      README.md
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ git log -1 --format=%s
+
+      Output:
+
+      rewrite the drawing layer so a live region never repaints above its own top row, which used to
+      silently lose every row beneath it
+
+      Exit code: 0
+   🤖 The user ran the following command on the host:
+
+      $ find . -type f -name '*.go' -newer go.mod -not -path './vendor/*' -exec grep -l
+      'drawSubmittedBeforeResult' {} + | sort -u
+
+      Output:
+
+      cmd/oh/painter/painter.go
+
+      Exit code: 0
+   🤖 The user ran the following command on the host, producing no output:
+
+      $ printf '   \\n\\n'
+
+      Exit code: 0
+
+
+  Two lines, as the count said.
+
+▸
+   explain the fix while i poke at the tree
+
+
+  The call was being unsettled because the notice closed the live block.
+
+
+   🤖 The user ran the following command on the host:
+
+      $ git diff --stat
+
+      Output:
+
+       cmd/oh/painter/painter.go | 4 +--
+       1 file changed, 2 insertions(+), 2 deletions(-)
+
+      Exit code: 0
+
+
+  That is the whole change, and your diff agrees.
+=== mid-call-message, narrow ===
+▸
+   read the renderer and tell me what it
+   does
+
+
+  Reading the renderer before saying
+  anything about it.
+
+  Reading it now.
+
+  read cmd/oh/line/render.go –
+
+  Turn stopped.
+
+▸
+   never mind, what is in target.txt?
+
+
+  read target.txt ✓ 1L
+
+  It holds the word one, and nothing else.
+=== mid-call-message, plain ===
+
+   read the renderer and tell me what it does
+
+  Reading the renderer before saying anything about it.
+
+  Reading it now.
+
+  read cmd/oh/line/render.go –
+
+  Turn stopped.
+
+
+   never mind, what is in target.txt?
+
+  read target.txt ✓ 1L
+
+  It holds the word one, and nothing else.
+=== mid-call-message, printed ===
+▸
+   read the renderer and tell me what it does
+
+
+  Reading the renderer before saying anything about it.
+
+  Reading it now.
+
+  read cmd/oh/line/render.go –
+
+  Turn stopped.
+
+▸
+   never mind, what is in target.txt?
+
+
+  read target.txt ✓ 1L
+
+  It holds the word one, and nothing else.
+=== mid-call-message, streamed ===
+▸
+   read the renderer and tell me what it does
+
+
+  Reading the renderer before saying anything about it.
+
+  Reading it now.
+
+  read cmd/oh/line/render.go –
+
+  Turn stopped.
+
+▸
+   never mind, what is in target.txt?
+
+
+  read target.txt ✓ 1L
+
+  It holds the word one, and nothing else.
+=== mid-call-message, tiny ===
+▸
+   read the
+   renderer
+   and tell me
+   what it
+   does
+
+
+  Reading the
+  renderer
+  before
+  saying
+  anything
+  about it.
+
+  Reading it
+  now.
+
+  read cmd/… –
+
+  Turn
+  stopped.
+
+▸
+   never mind,
+   what is in
+   target.txt?
+
+
+  read t… ✓ 1L
+
+  It holds the
+  word one,
+  and nothing
+  else.
+=== mid-call-message, wide ===
+▸
+   read the renderer and tell me what it does
+
+
+  Reading the renderer before saying anything about it.
+
+  Reading it now.
+
+  read cmd/oh/line/render.go –
+
+  Turn stopped.
+
+▸
+   never mind, what is in target.txt?
+
+
+  read target.txt ✓ 1L
+
+  It holds the word one, and nothing else.
+=== modes, narrow ===
+▸
+   what am i allowed to do here?
+
+
+  Reading and running commands, but not
+  writing.
+
+
+   🤖 Workspace is now read-write.
+
+
+▸
+   now write it down
+
+
+  Writing it down.
+
+
+   🤖 Bash is now refused.
+
+
+  Done.
+=== modes, plain ===
+
+   what am i allowed to do here?
+
+  Reading and running commands, but not writing.
+
+
+   🤖 Workspace is now read-write.
+
+
+   now write it down
+
+  Writing it down.
+
+
+   🤖 Bash is now refused.
+
+  Done.
+=== modes, printed ===
+▸
+   what am i allowed to do here?
+
+
+  Reading and running commands, but not writing.
+
+
+   🤖 Workspace is now read-write.
+
+
+▸
+   now write it down
+
+
+  Writing it down.
+
+
+   🤖 Bash is now refused.
+
+
+  Done.
+=== modes, streamed ===
+▸
+   what am i allowed to do here?
+
+
+  Reading and running commands, but not writing.
+
+
+   🤖 Workspace is now read-write.
+
+
+▸
+   now write it down
+
+
+  Writing it down.
+
+
+   🤖 Bash is now refused.
+
+
+  Done.
+=== modes, tiny ===
+▸
+   what am i
+   allowed to
+   do here?
+
+
+  Reading and
+  running
+  commands,
+  but not
+  writing.
+
+
+   🤖 Workspac
+      e is now
+      read-wri
+      te.
+
+
+▸
+   now write
+   it down
+
+
+  Writing it
+  down.
+
+
+   🤖 Bash is
+      now
+      refused.
+
+
+  Done.
+=== modes, wide ===
+▸
+   what am i allowed to do here?
+
+
+  Reading and running commands, but not writing.
+
+
+   🤖 Workspace is now read-write.
+
+
+▸
+   now write it down
+
+
+  Writing it down.
+
+
+   🤖 Bash is now refused.
+
+
+  Done.
+=== queued, delivered at the boundary ===
+▸
+   look at the first path
+
+
+  work the first path –
+
+▸
+   check the other path too
+
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────
+=== queued, standing unsent ===
+▸
+   look at the first path
+
+
+  work the first path
+
+                                                                             double-enter to send now
+   ⏳ check the other path too
+   ⏳ and mention what you find
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────

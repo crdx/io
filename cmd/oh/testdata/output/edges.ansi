@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m the awkward shapes                     \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -17,7 +17,7 @@
 \r\e[KThat is all of the awkward ones.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mt\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -149,7 +149,7 @@ summon \e[38;2;192;128;80mtoo much\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;1
 That is all of the awkward ones.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m the awkward shapes                                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -166,7 +166,7 @@ That is all of the awkward ones.
 That is all of the awkward ones.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m the awkward shapes                                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -183,7 +183,7 @@ That is all of the awkward ones.\r
 \e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the awkwa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the awkward o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the awkward ones.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m the awkward shapes                                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -200,7 +200,7 @@ That is all of the awkward ones.\r
 \e[?2026h\e[?25l\r\e[KThat is all of the awkward ones.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m the awkward shapes                                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -217,7 +217,7 @@ That is all of the awkward ones.\r
 \e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the awkwa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the awkward o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the awkward ones.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m the awkward\e[0m\r
 \e[48;2;52;53;65m shapes     \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
@@ -242,7 +242,7 @@ That is all of the awkward ones.\r
 \r\e[Kones.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m the awkward shapes\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\divine\e]8;;\e\\ \e[38;2;192;128;80m\e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\\e[0m \e[38;2;150;152;150mlines \e[0m\e[38;2;192;128;80m1-400\e[0m \e[38;2;76;154;44m✓\e[0m
@@ -258,7 +258,7 @@ That is all of the awkward ones.\r
 \r\e[KThat is all of the awkward ones.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m the awkward shapes                                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

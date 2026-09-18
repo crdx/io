@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m start the docs server and keep it up   \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -36,7 +36,7 @@
 \r\e[K\e[48;2;48;58;67m    /reference was revoked.             \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r
-\e[48;2;52;53;65m                                        \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m what happened to it                    \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -53,7 +53,7 @@
 \r\e[Kwithdrawn.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65ms\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -1209,7 +1209,7 @@
 \r\e[K\e[48;2;48;58;67m.\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r
-\e[48;2;52;53;65m \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mw\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -1394,7 +1394,7 @@ note: the oldest 1K of output was dropped to keep the spool bounded.\e[0m
 It was stopped when write access was withdrawn.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1421,7 +1421,7 @@ The docs server is up.\r
 \e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.                                     \e[0m\r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what happened to it                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1437,7 +1437,7 @@ The docs server is up.\r
 It was stopped when write access was withdrawn.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1464,7 +1464,7 @@ It was stopped when write access was withdrawn.\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.                                     \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what happened to it                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1480,7 +1480,7 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[KIt w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when writ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write ac\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was wit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was withdra\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was withdrawn.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1507,7 +1507,7 @@ It was stopped when write access was withdrawn.\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.                                     \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what happened to it                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1523,7 +1523,7 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[KIt was stopped when write access was withdrawn.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1550,7 +1550,7 @@ It was stopped when write access was withdrawn.\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.                                     \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what happened to it                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1566,7 +1566,7 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[KIt w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when writ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write ac\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was wit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was withdra\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was withdrawn.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m start the  \e[0m\r
 \e[48;2;52;53;65m docs server\e[0m\r
 \e[48;2;52;53;65m and keep it\e[0m\r
@@ -1674,7 +1674,7 @@ It was stopped when write access was withdrawn.\r
 \r\e[K\e[48;2;48;58;67m    revoked.\e[0m\r
 \r\e[K\e[48;2;48;58;67m            \e[0m\r
 \r
-\e[48;2;52;53;65m            \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m what       \e[0m\r
 \e[48;2;52;53;65m happened to\e[0m\r
 \e[48;2;52;53;65m it         \e[0m\r
@@ -1700,7 +1700,7 @@ It was stopped when write access was withdrawn.\r
 \r\e[Kwithdrawn.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m start the docs server and keep it up\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
@@ -1725,7 +1725,7 @@ note: the oldest 1K of output was dropped to keep the spool bounded.\e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.\e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[0m
 
-\e[48;2;52;53;65m\e[0m
+\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m what happened to it\e[0m
 \e[48;2;52;53;65m\e[0m
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
@@ -1740,7 +1740,7 @@ note: the oldest 1K of output was dropped to keep the spool bounded.\e[0m\r
 \r\e[KIt was stopped when write access was withdrawn.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1767,7 +1767,7 @@ note: the oldest 1K of output was dropped to keep the spool bounded.\e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.                                     \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what happened to it                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m use the external reference             \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -56,7 +56,7 @@
 \r\e[KI will no longer use it.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mu\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -1300,7 +1300,7 @@ I will use the reference alone from here.
 I will no longer use it.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m use the external reference                                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1345,7 +1345,7 @@ I will use the reference alone from here.\r
 I will no longer use it.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m use the external reference                                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1390,7 +1390,7 @@ I will no longer use it.\r
 \e[?2026h\e[?25l\r\e[KI wi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no lo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no longer\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no longer use\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no longer use it.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m use the external reference                                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1435,7 +1435,7 @@ I will no longer use it.\r
 \e[?2026h\e[?25l\r\e[KI will no longer use it.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m use the external reference                                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -1480,7 +1480,7 @@ I will no longer use it.\r
 \e[?2026h\e[?25l\r\e[KI wi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no lo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no longer\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no longer use\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no longer use it.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m use the    \e[0m\r
 \e[48;2;52;53;65m external   \e[0m\r
 \e[48;2;52;53;65m reference  \e[0m\r
@@ -1619,7 +1619,7 @@ I will no longer use it.\r
 \r\e[Kit.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m use the external reference\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[48;2;48;58;67m\e[0m\r
@@ -1660,7 +1660,7 @@ I will no longer use it.\r
 \r\e[KI will no longer use it.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m use the external reference                                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

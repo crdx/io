@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m expose the five preview ports          \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -26,7 +26,7 @@
 \r\e[KAll five previews are up.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65me\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -674,7 +674,7 @@
 All five previews are up.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m expose the five preview ports                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -696,7 +696,7 @@ All five previews are up.
 All five previews are up.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m expose the five preview ports                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -758,7 +758,7 @@ All five previews are up.\r
 \e[?2026h\e[?25l\r\e[KAll\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five pre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five preview\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five previews ar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five previews are up\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five previews are up.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m expose the five preview ports                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -820,7 +820,7 @@ All five previews are up.\r
 \e[?2026h\e[?25l\r\e[KAll five previews are up.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m expose the five preview ports                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -882,7 +882,7 @@ All five previews are up.\r
 \e[?2026h\e[?25l\r\e[KAll\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five pre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five preview\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five previews ar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five previews are up\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five previews are up.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m expose the \e[0m\r
 \e[48;2;52;53;65m five       \e[0m\r
 \e[48;2;52;53;65m preview    \e[0m\r
@@ -951,7 +951,7 @@ All five previews are up.\r
 \r\e[Kup.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m expose the five preview ports\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mExposing each port in turn.\e[0m\e[0m
@@ -972,7 +972,7 @@ All five previews are up.\r
 \r\e[KAll five previews are up.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m expose the five preview ports                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

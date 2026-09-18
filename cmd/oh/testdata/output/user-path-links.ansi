@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m read \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ and \e]8;;file:///workspace/spaced%20target.txt\e\\spaced target.txt\e]8;;\e\\  \e[0m\r
 \e[48;2;52;53;65m and \e]8;;file:///workspace/cmd/oh/line/render.go#12:3\e\\cmd/oh/line/render.go:12:3\e]8;;\e\\; also   \e[0m\r
 \e[48;2;52;53;65m \e]8;;file:///etc/hosts\e\\/etc/hosts\e]8;;\e\\ and \e]8;;https://example.test\e\\\e[38;2;129;162;190mthe target\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[38;2;150;152;150m\e[0m\e[48;2;52;53;65m              \e[0m\r
@@ -7,7 +7,7 @@
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mr\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -235,7 +235,7 @@
 \e[48;2;52;53;65m \e[0m\r
 \e[?25h\e[?2026l
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m read       \e[0m\r
 \e[48;2;52;53;65m \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ \e[0m\r
 \e[48;2;52;53;65m and \e]8;;file:///workspace/spaced%20target.txt\e\\spaced\e]8;;\e\\ \e[0m\r
@@ -253,7 +253,7 @@
 \e[48;2;52;53;65m            \e[0m\r
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m read \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ and \e]8;;file:///workspace/spaced%20target.txt\e\\spaced target.txt\e]8;;\e\\ and \e]8;;file:///workspace/cmd/oh/line/render.go#12:3\e\\cmd/oh/line/render.go:12:3\e]8;;\e\\; also \e]8;;file:///etc/hosts\e\\/etc/hosts\e]8;;\e\\ and \e]8;;https://example.test\e\\\e[38;2;129;162;190mthe\e[0m\e[48;2;52;53;65m\e]8;;\e\\      \e[0m\r
 \e[48;2;52;53;65m \e]8;;https://example.test\e\\\e[38;2;129;162;190mtarget\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[38;2;150;152;150m (https://example.test)\e[0m\e[48;2;52;53;65m.                                                                     \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

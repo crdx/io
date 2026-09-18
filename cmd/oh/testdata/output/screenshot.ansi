@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m what is in this screenshot?            \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -13,7 +13,7 @@
 \r\e[Kit are short.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mw\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -119,7 +119,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44
 It is a gradient, and the notes beside it are short.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is in this screenshot?                                                                        \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -132,7 +132,7 @@ It is a gradient, and the notes beside it are short.
 It is a gradient, and the notes beside it are short.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is in this screenshot?                                                                        \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -145,7 +145,7 @@ It is a gradient, and the notes beside it are short.\r
 \e[?2026h\e[?25l\r\e[KIt i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a grad\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes besi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it ar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it are sh\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it are short.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is in this screenshot?                                                                        \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -158,7 +158,7 @@ It is a gradient, and the notes beside it are short.\r
 \e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it are short.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is in this screenshot?                                                                        \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -171,7 +171,7 @@ It is a gradient, and the notes beside it are short.\r
 \e[?2026h\e[?25l\r\e[KIt i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a grad\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes besi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it ar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it are sh\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it are short.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m what is in \e[0m\r
 \e[48;2;52;53;65m this       \e[0m\r
 \e[48;2;52;53;65m screenshot?\e[0m\r
@@ -191,7 +191,7 @@ It is a gradient, and the notes beside it are short.\r
 \r\e[Kshort.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m what is in this screenshot?\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m
@@ -200,7 +200,7 @@ It is a gradient, and the notes beside it are short.\r
 \r\e[KIt is a gradient, and the notes beside it are short.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is in this screenshot?                                                                        \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m do one of everything so I can see what \e[0m\r
 \e[48;2;52;53;65m each call says about itself            \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -27,7 +27,7 @@
 \r\e[Kharness knows how to measure.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65md\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -377,7 +377,7 @@ Here is a script, and a pattern beside it:
 That is one call of every kind the harness knows how to measure.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m do one of everything so I can see what each call says about itself                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -402,7 +402,7 @@ Here is a script, and a pattern beside it:\r
 That is one call of every kind the harness knows how to measure.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m do one of everything so I can see what each call says about itself                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -427,7 +427,7 @@ That is one call of every kind the harness knows how to measure.\r
 \e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of ever\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every ki\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harne\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness k\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness knows\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness knows how\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness knows how to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness knows how to meas\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness knows how to measure.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m do one of everything so I can see what each call says about itself                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -452,7 +452,7 @@ That is one call of every kind the harness knows how to measure.\r
 \e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness knows how to measure.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m do one of everything so I can see what each call says about itself                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -477,7 +477,7 @@ That is one call of every kind the harness knows how to measure.\r
 \e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of ever\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every ki\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harne\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness k\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness knows\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness knows how\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness knows how to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness knows how to meas\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is one call of every kind the harness knows how to measure.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m do one of  \e[0m\r
 \e[48;2;52;53;65m everything \e[0m\r
 \e[48;2;52;53;65m so I can   \e[0m\r
@@ -526,7 +526,7 @@ That is one call of every kind the harness knows how to measure.\r
 \r\e[Kmeasure.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m do one of everything so I can see what each call says about itself\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KOne of each, then.
@@ -550,7 +550,7 @@ That is one call of every kind the harness knows how to measure.\r
 \r\e[KThat is one call of every kind the harness knows how to measure.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m do one of everything so I can see what each call says about itself                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

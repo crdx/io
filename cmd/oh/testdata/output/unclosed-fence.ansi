@@ -1,18 +1,18 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m show me the loop                       \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
 \e[?7l\r\e[KTry this.\r
 \r
-\e[48;2;52;53;65m                                        \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m did you mean bash?                     \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
 \r\e[Kyes — bash.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65ms\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -50,7 +50,7 @@
 \r\e[Ks\r
 \r\e[K.\r
 \r
-\e[48;2;52;53;65m \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65md\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -105,20 +105,20 @@ Try this.
 yes — bash.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m show me the loop                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 Try this.\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m did you mean bash?                                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 yes — bash.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m show me the loop                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -126,28 +126,28 @@ yes — bash.\r
 \r\e[K\r
 \r\e[K`\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[J\r\e[KTry this.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m did you mean bash?                                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[Kyes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kyes — ba\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kyes — bash.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m show me the loop                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KTry this.\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[J\r\e[KTry this.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m did you mean bash?                                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[Kyes — bash.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m show me the loop                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -155,21 +155,21 @@ yes — bash.\r
 \r\e[K\r
 \r\e[K`\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[J\r\e[KTry this.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m did you mean bash?                                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[Kyes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kyes — ba\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kyes — bash.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m show me the\e[0m\r
 \e[48;2;52;53;65m loop       \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
 \e[?7l\r\e[KTry this.\r
 \r
-\e[48;2;52;53;65m            \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m did you    \e[0m\r
 \e[48;2;52;53;65m mean bash? \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
@@ -177,24 +177,24 @@ yes — bash.\r
 \r\e[Kyes — bash.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m show me the loop\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KTry this.
 
-\e[48;2;52;53;65m\e[0m
+\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m did you mean bash?\e[0m
 \e[48;2;52;53;65m\e[0m
 \r\e[Kyes — bash.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m show me the loop                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?7l\r\e[KTry this.\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m did you mean bash?                                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

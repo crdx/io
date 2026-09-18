@@ -1,5 +1,5 @@
 === a piped prompt asks once ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m diff --git a/agent/agent.go b/agent/agent.go                                                       \e[0m\r
 \e[48;2;52;53;65m index d483cf5..a478bfa 100644                                                                      \e[0m\r
 \e[48;2;52;53;65m @@ -1,3 +1,3 @@                                                                                    \e[0m\r
@@ -10,7 +10,7 @@
 \e[?2026h\e[?25l\e[?7l\r\e[KSaid it.\e[?25h\e[?2026l\e]9;4;0\e\\\r
 
 === a piped prompt follows a given one ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m review this                                                                                        \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m diff --git a/agent/agent.go b/agent/agent.go                                                       \e[0m\r
@@ -23,7 +23,7 @@
 \e[?2026h\e[?25l\e[?7l\r\e[KSaid it.\e[?25h\e[?2026l\e]9;4;0\e\\\r
 
 === a piped prompt printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m diff --git a/agent/agent.go b/agent/agent.go                                                       \e[0m\r
 \e[48;2;52;53;65m index d483cf5..a478bfa 100644                                                                      \e[0m\r
 \e[48;2;52;53;65m @@ -1,3 +1,3 @@                                                                                    \e[0m\r
@@ -46,13 +46,13 @@ Said it.
 === an empty pipe asks nothing ===
 
 === typed lines ask one each ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m first question                                                                                     \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KSaid it.\e[?25h\e[?2026l\e]9;4;0\e\\\r
 \e]9;4;3\e\\\r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m second question                                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

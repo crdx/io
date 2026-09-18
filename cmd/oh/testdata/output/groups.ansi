@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m walk every pair of groups so the       \e[0m\r
 \e[48;2;52;53;65m spacing between them is written down   \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -40,7 +40,7 @@
 \e[38;2;207;173;0mModel returned no reply.\e[0m\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mw\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -662,7 +662,7 @@ An answer after a thought.
 \e[38;2;207;173;0mModel returned no reply.\e[0m
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m walk every pair of groups so the spacing between them is written down                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -700,7 +700,7 @@ An answer after a thought.\r
 \e[38;2;207;173;0mModel returned no reply.\e[0m\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m walk every pair of groups so the spacing between them is written down                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -738,7 +738,7 @@ An answer after a thought.\r
 \e[38;2;207;173;0mModel returned no reply.\e[0m\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m walk every pair of groups so the spacing between them is written down                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -776,7 +776,7 @@ An answer after a thought.\r
 \e[38;2;207;173;0mModel returned no reply.\e[0m\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m walk every pair of groups so the spacing between them is written down                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -814,7 +814,7 @@ An answer after a thought.\r
 \e[38;2;207;173;0mModel returned no reply.\e[0m\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m walk every \e[0m\r
 \e[48;2;52;53;65m pair of    \e[0m\r
 \e[48;2;52;53;65m groups so  \e[0m\r
@@ -899,7 +899,7 @@ An answer after a thought.\r
 \e[38;2;207;173;0mreply.\e[0m\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m walk every pair of groups so the spacing between them is written down\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[38;2;207;173;0mModel returned no reply.\e[0m
@@ -936,7 +936,7 @@ An answer after a thought.\r
 \e[38;2;207;173;0mModel returned no reply.\e[0m
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m walk every pair of groups so the spacing between them is written down                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

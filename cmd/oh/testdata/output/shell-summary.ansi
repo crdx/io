@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m check the tree, then build it          \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -16,7 +16,7 @@
 \r\e[Kbroken.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mc\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -127,7 +127,7 @@ read \e[38;2;150;152;150mcmd/oh/dynamic/\e[0m\e[38;2;192;128;80mdynamic.go\e[0m 
 The tree is dirty and the build is broken.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m check the tree, then build it                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -143,7 +143,7 @@ The tree is dirty and the build is broken.
 The tree is dirty and the build is broken.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m check the tree, then build it                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -159,7 +159,7 @@ The tree is dirty and the build is broken.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty and th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty and the bu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty and the build\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty and the build is b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty and the build is broke\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty and the build is broken.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m check the tree, then build it                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -175,7 +175,7 @@ The tree is dirty and the build is broken.\r
 \e[?2026h\e[?25l\r\e[KThe tree is dirty and the build is broken.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m check the tree, then build it                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -191,7 +191,7 @@ The tree is dirty and the build is broken.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty and th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty and the bu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty and the build\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty and the build is b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty and the build is broke\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe tree is dirty and the build is broken.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m check the  \e[0m\r
 \e[48;2;52;53;65m tree, then \e[0m\r
 \e[48;2;52;53;65m build it   \e[0m\r
@@ -212,7 +212,7 @@ The tree is dirty and the build is broken.\r
 \r\e[Kbroken.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m check the tree, then build it\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mgit\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mstatus\e[0m\e[38;2;150;152;150m --short\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L 4M\e[0m \e[38;2;150;152;150mM cmd/oh/main.go M cmd/oh/dynamic/dynamic.go\e[0m
@@ -227,7 +227,7 @@ The tree is dirty and the build is broken.\r
 \r\e[KThe tree is dirty and the build is broken.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m check the tree, then build it                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

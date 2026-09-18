@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m compare \e]8;;https://example.test/question\e\\\e[38;2;129;162;190mthe references\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[38;2;150;152;150m\e[0m\e[48;2;52;53;65m                 \e[0m\r
 \e[48;2;52;53;65m \e[38;2;150;152;150m(https://example.test/question)\e[0m\e[48;2;52;53;65m with   \e[0m\r
 \e[48;2;52;53;65m \e]8;;https://example.test/request\e\\\e[38;2;129;162;190mhttps://example.test/request\e[0m\e[48;2;52;53;65m\e]8;;\e\\           \e[0m\r
@@ -32,7 +32,7 @@
 \r\e[K\e[38;2;150;152;150m(diagram.png)\e[0m.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mc\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -796,7 +796,7 @@ Unsupported \e[38;2;129;162;190mscript links\e[0m\e[38;2;150;152;150m (javascrip
 An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m compare \e]8;;https://example.test/question\e\\\e[38;2;129;162;190mthe references\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[38;2;150;152;150m (https://example.test/question)\e[0m\e[48;2;52;53;65m with \e]8;;https://example.test/request\e\\\e[38;2;129;162;190mhttps://example.test/request\e[0m\e[48;2;52;53;65m\e]8;;\e\\           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -816,7 +816,7 @@ Unsupported \e[38;2;129;162;190mscript links\e[0m\e[38;2;150;152;150m (javascrip
 An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m compare \e]8;;https://example.test/question\e\\\e[38;2;129;162;190mthe references\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[38;2;150;152;150m (https://example.test/question)\e[0m\e[48;2;52;53;65m with \e]8;;https://example.test/request\e\\\e[38;2;129;162;190mhttps://example.test/request\e[0m\e[48;2;52;53;65m\e]8;;\e\\           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -839,7 +839,7 @@ An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;15
 \r\e[KA\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn im\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image rema\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallba\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![di\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagra\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagram](d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagram](diagr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagram](diagram.p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m compare \e]8;;https://example.test/question\e\\\e[38;2;129;162;190mthe references\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[38;2;150;152;150m (https://example.test/question)\e[0m\e[48;2;52;53;65m with \e]8;;https://example.test/request\e\\\e[38;2;129;162;190mhttps://example.test/request\e[0m\e[48;2;52;53;65m\e]8;;\e\\           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -859,7 +859,7 @@ An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;15
 \r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m compare \e]8;;https://example.test/question\e\\\e[38;2;129;162;190mthe references\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[38;2;150;152;150m (https://example.test/question)\e[0m\e[48;2;52;53;65m with \e]8;;https://example.test/request\e\\\e[38;2;129;162;190mhttps://example.test/request\e[0m\e[48;2;52;53;65m\e]8;;\e\\           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -882,7 +882,7 @@ An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;15
 \r\e[KAn image\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![di\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: ![diagram](diagr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m compare \e]8;;https://example.test/question\e\\\e[38;2;129;162;190mthe\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[0m\r
 \e[48;2;52;53;65m \e]8;;https://example.test/question\e\\\e[38;2;129;162;190mreferences\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[38;2;150;152;150m\e[0m\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m \e[38;2;150;152;150m(https://ex\e[0m\e[48;2;52;53;65m\e[0m\r
@@ -963,7 +963,7 @@ An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;15
 \r\e[K\e[38;2;150;152;150m)\e[0m.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m compare \e]8;;https://example.test/question\e\\\e[38;2;129;162;190mthe references\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[38;2;150;152;150m (https://example.test/question)\e[0m\e[48;2;52;53;65m with \e]8;;https://example.test/request\e\\\e[38;2;129;162;190mhttps://example.test/request\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[1m\e[38;2;207;173;0mTerminal links\e[0m\e[0m\r
@@ -977,7 +977,7 @@ An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;15
 \r\e[KAn image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m \e[38;2;150;152;150m(diagram.png)\e[0m.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m compare \e]8;;https://example.test/question\e\\\e[38;2;129;162;190mthe references\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[38;2;150;152;150m (https://example.test/question)\e[0m\e[48;2;52;53;65m with \e]8;;https://example.test/request\e\\\e[38;2;129;162;190mhttps://example.test/request\e[0m\e[48;2;52;53;65m\e]8;;\e\\           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m expose the preview and read the notes  \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -18,7 +18,7 @@
 \r\e[Kone line.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65me\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -294,7 +294,7 @@ ls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m
 The preview is up, and the notes hold one line.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m expose the preview and read the notes                                                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -310,7 +310,7 @@ The preview is up, and the notes hold one line.
 The preview is up, and the notes hold one line.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m expose the preview and read the notes                                                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -331,7 +331,7 @@ The preview is up, and the notes hold one line.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prev\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hol\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold on\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold one li\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold one line.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m expose the preview and read the notes                                                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -352,7 +352,7 @@ The preview is up, and the notes hold one line.\r
 \e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold one line.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m expose the preview and read the notes                                                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -373,7 +373,7 @@ The preview is up, and the notes hold one line.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prev\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hol\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold on\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold one li\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold one line.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m expose the \e[0m\r
 \e[48;2;52;53;65m preview and\e[0m\r
 \e[48;2;52;53;65m read the   \e[0m\r
@@ -408,7 +408,7 @@ The preview is up, and the notes hold one line.\r
 \r\e[Kline.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m expose the preview and read the notes\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mLooking at the notes first, then exposing the preview.\e[0m\e[0m
@@ -423,7 +423,7 @@ The preview is up, and the notes hold one line.\r
 \r\e[KThe preview is up, and the notes hold one line.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m expose the preview and read the notes                                                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

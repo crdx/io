@@ -1,5 +1,5 @@
 === markdown ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think about it in markdown before you answer                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -28,7 +28,7 @@
 \r\e[KThe read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\r
 \e[?25h\e[?2026l
 === markdown printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think about it in markdown before you answer                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -57,7 +57,7 @@
 The read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\r
 
 === markdown streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think about it in markdown before you answer                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -109,7 +109,7 @@ The read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read cam\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came fi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the fil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the file ho\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the file holds\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the file holds `one\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === markdown streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think about it in markdown before you answer                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -143,7 +143,7 @@ The read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\r
 \e[?2026h\e[?25l\r\e[KThe read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === markdown streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think about it in markdown before you answer                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -195,7 +195,7 @@ The read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read cam\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came fi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the fil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the file ho\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the file holds\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the file holds `one\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === plain ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think about it in markdown before you answer                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -210,7 +210,7 @@ The read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\r
 \r\e[KThe read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\r
 \e[?25h\e[?2026l
 === plain printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think about it in markdown before you answer                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -225,7 +225,7 @@ The read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\r
 The read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\r
 
 === plain streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think about it in markdown before you answer                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -244,7 +244,7 @@ The read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read cam\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came fi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the fil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the file ho\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the file holds\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the file holds `one\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === plain streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think about it in markdown before you answer                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -259,7 +259,7 @@ The read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\r
 \e[?2026h\e[?25l\r\e[KThe read came first, and the file holds \e[38;2;192;128;80mone\e[0m.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === plain streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think about it in markdown before you answer                                                       \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

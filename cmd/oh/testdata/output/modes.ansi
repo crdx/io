@@ -1,5 +1,5 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m what am i allowed to do here?          \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -10,7 +10,7 @@
 \r\e[K\e[48;2;48;58;67m 🤖 Workspace is now read-write.        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r
-\e[48;2;52;53;65m                                        \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m now write it down                      \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -23,7 +23,7 @@
 \r\e[KDone.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mw\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -168,7 +168,7 @@
 \r\e[K\e[48;2;48;58;67m.\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r
-\e[48;2;52;53;65m \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mn\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -279,7 +279,7 @@ Writing it down.
 Done.
 
 === printed ===
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what am i allowed to do here?                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -289,7 +289,7 @@ Reading and running commands, but not writing.\r
 \e[48;2;48;58;67m 🤖 Workspace is now read-write.                                                                    \e[0m\r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m now write it down                                                                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -302,7 +302,7 @@ Writing it down.\r
 Done.\r
 
 === streamed asap ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what am i allowed to do here?                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -312,7 +312,7 @@ Done.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Workspace is now read-write.                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m now write it down                                                                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -325,7 +325,7 @@ Done.\r
 \e[?2026h\e[?25l\r\e[KDone\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KDone.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what am i allowed to do here?                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -335,7 +335,7 @@ Done.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Workspace is now read-write.                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m now write it down                                                                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -348,7 +348,7 @@ Done.\r
 \e[?2026h\e[?25l\r\e[KDone.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what am i allowed to do here?                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -358,7 +358,7 @@ Done.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Workspace is now read-write.                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m now write it down                                                                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -371,7 +371,7 @@ Done.\r
 \e[?2026h\e[?25l\r\e[KDone\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KDone.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m what am i  \e[0m\r
 \e[48;2;52;53;65m allowed to \e[0m\r
 \e[48;2;52;53;65m do here?   \e[0m\r
@@ -390,7 +390,7 @@ Done.\r
 \r\e[K\e[48;2;48;58;67m    te.     \e[0m\r
 \r\e[K\e[48;2;48;58;67m            \e[0m\r
 \r
-\e[48;2;52;53;65m            \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m now write  \e[0m\r
 \e[48;2;52;53;65m it down    \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
@@ -407,7 +407,7 @@ Done.\r
 \r\e[KDone.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m what am i allowed to do here?\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KReading and running commands, but not writing.
@@ -416,7 +416,7 @@ Done.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Workspace is now read-write.\e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[0m
 
-\e[48;2;52;53;65m\e[0m
+\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m now write it down\e[0m
 \e[48;2;52;53;65m\e[0m
 \r\e[KWriting it down.
@@ -428,7 +428,7 @@ Done.\r
 \r\e[KDone.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what am i allowed to do here?                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -438,7 +438,7 @@ Done.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Workspace is now read-write.                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m now write it down                                                                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

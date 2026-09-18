@@ -1,4 +1,4 @@
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m audit the golden coverage                                                                          \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -14,7 +14,7 @@
 \r
 \r\e[KBoth cases are covered now.\e[?25h\e[?2026l\r
 \r
-\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m anything else missing?                                                                             \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
