@@ -1,0 +1,334 @@
+=== narrow ===
+Agent 000000000000000000000000 ready in
+0s with 0 skills ⧸ 0 snippets ⧸ ~800t
+context.
+
+
+ exercise every recent refusal
+
+
+Checking each refusal and failure shape.
+
+write config.yaml ✗ read the file first
+write config.yaml ✗ file changed; re-r…
+grep hello ✗ shim: Permission denied
+job start way-too… ✗ job name must matc…
+$ curl example.com ✗ approval timed out…
+$ curl example.com ✗ approval unavailab…
+lookup modern Go … ✗ approval timed out…
+lookup modern Go … ✗ approval unavailab…
+fetch https://exa… ✗ fetch refused; fet…
+fetch https://exa… ✗ approval timed out…
+fetch https://exa… ✗ approval unavailab…
+fetch https://exa… ✗ fetch returned HTT…
+fetch https://exa… ✗ fetch returned no …
+fetch https://exa… ✗ save raw HTML: dro…
+
+Every recent refusal remained visible.
+=== one column ===
+A
+g
+e
+n
+t
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+r
+e
+a
+d
+y
+i
+n
+0
+s
+w
+i
+t
+h
+0
+s
+k
+i
+l
+l
+s
+⧸
+0
+s
+n
+i
+p
+p
+e
+t
+s
+⧸
+~
+8
+0
+0
+t
+c
+o
+n
+t
+e
+x
+t
+.
+
+
+
+e
+
+x
+
+e
+
+r
+
+c
+
+i
+
+s
+
+e
+
+e
+
+v
+
+e
+
+r
+
+y
+
+r
+
+e
+
+c
+
+e
+
+n
+
+t
+
+r
+
+e
+
+f
+
+u
+
+s
+
+a
+
+l
+
+
+C
+h
+e
+c
+k
+i
+n
+g
+e
+a
+c
+h
+r
+e
+f
+u
+s
+a
+l
+a
+n
+d
+f
+a
+i
+l
+u
+r
+e
+s
+h
+a
+p
+e
+.
+
+✗
+✗
+✗
+✗
+✗
+✗
+✗
+✗
+✗
+✗
+✗
+✗
+✗
+✗
+
+E
+v
+e
+r
+y
+r
+e
+c
+e
+n
+t
+r
+e
+f
+u
+s
+a
+l
+r
+e
+m
+a
+i
+n
+e
+d
+v
+i
+s
+i
+b
+l
+e
+.
+=== printed ===
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
+
+
+ exercise every recent refusal
+
+
+Checking each refusal and failure shape.
+
+write config.yaml 15B ✗ read the file first
+write config.yaml 15B ✗ file changed; re-read it
+grep hello ✗ shim: Permission denied
+job start way-too-long true start ✗ job name must match [a-z0-9-]{1,10}
+$ curl example.com ✗ approval timed out after 1m; command did not run
+$ curl example.com ✗ approval unavailable; command did not run
+lookup modern Go release ✗ approval timed out after 1m; lookup did not run
+lookup modern Go release ✗ approval unavailable; lookup did not run
+fetch https://example.test/article markdown ✗ fetch refused; fetch did not run; choose another appr…
+fetch https://example.test/article markdown ✗ approval timed out after 1m; fetch did not run
+fetch https://example.test/article markdown ✗ approval unavailable; fetch did not run
+fetch https://example.test/teapot text ✗ fetch returned HTTP 418: not today (raw HTML saved to /sta…
+fetch https://example.test/empty text ✗ fetch returned no content (raw HTML saved to /state/session…
+fetch https://example.test/article markdown ✗ save raw HTML: drops are unavailable
+
+Every recent refusal remained visible.
+=== tiny ===
+Agent
+000000000000
+000000000000
+ready in 0s
+with 0
+skills ⧸ 0
+snippets ⧸
+~800t
+context.
+
+
+ exercise
+ every
+ recent
+ refusal
+
+
+Checking
+each refusal
+and failure
+shape.
+
+wri… ✗ read…
+wri… ✗ file…
+grep ✗ shim…
+job ✗ job …
+$ c… ✗ appr…
+$ c… ✗ appr…
+loo… ✗ appr…
+loo… ✗ appr…
+fet… ✗ fetc…
+fet… ✗ appr…
+fet… ✗ appr…
+fet… ✗ fetc…
+fet… ✗ fetc…
+fet… ✗ save…
+
+Every recent
+refusal
+remained
+visible.
+=== wide ===
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
+
+
+ exercise every recent refusal
+
+
+Checking each refusal and failure shape.
+
+write config.yaml 15B ✗ read the file first
+write config.yaml 15B ✗ file changed; re-read it
+grep hello ✗ shim: Permission denied
+job start way-too-long true start ✗ job name must match [a-z0-9-]{1,10}
+$ curl example.com ✗ approval timed out after 1m; command did not run
+$ curl example.com ✗ approval unavailable; command did not run
+lookup modern Go release ✗ approval timed out after 1m; lookup did not run
+lookup modern Go release ✗ approval unavailable; lookup did not run
+fetch https://example.test/article markdown ✗ fetch refused; fetch did not run; choose another appr…
+fetch https://example.test/article markdown ✗ approval timed out after 1m; fetch did not run
+fetch https://example.test/article markdown ✗ approval unavailable; fetch did not run
+fetch https://example.test/teapot text ✗ fetch returned HTTP 418: not today (raw HTML saved to /sta…
+fetch https://example.test/empty text ✗ fetch returned no content (raw HTML saved to /state/session…
+fetch https://example.test/article markdown ✗ save raw HTML: drops are unavailable
+
+Every recent refusal remained visible.

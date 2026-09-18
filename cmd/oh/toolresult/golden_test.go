@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/jobs"
 	internaltoolresult "crdx.org/io/internal/toolresult"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/toolbox/bash"
@@ -56,6 +58,16 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 				"the filesystem is read-only"),
 		},
 		{
+			name: "write unread file",
+			exchange: resultExchange("write", write.Args{Path: "config.yaml", Content: "enabled: false\n"}, agent.ErrorStatus,
+				file.ErrNotRead.Error()),
+		},
+		{
+			name: "write file changed since read",
+			exchange: resultExchange("write", write.Args{Path: "config.yaml", Content: "enabled: false\n"}, agent.ErrorStatus,
+				file.ErrChangedSinceRead.Error()),
+		},
+		{
 			name: "edit with context",
 			exchange: resultExchange("edit", edit.Args{
 				Path:    "main.go",
@@ -77,6 +89,16 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 			name: "shell failure",
 			exchange: resultExchange("bash", bash.Args{Command: "just check"}, agent.ErrorStatus,
 				"lint1  ✗\nmain.go:12: undefined: run\n"),
+		},
+		{
+			name: "shell approval timed out",
+			exchange: resultExchange("bash", bash.Args{Command: "curl example.com", Network: "host"}, agent.ErrorStatus,
+				"approval timed out after 1m; command did not run"),
+		},
+		{
+			name: "shell approval unavailable",
+			exchange: resultExchange("bash", bash.Args{Command: "curl example.com", Network: "host"}, agent.ErrorStatus,
+				"approval unavailable; command did not run"),
 		},
 		{
 			name:     "shell without output",
@@ -111,14 +133,33 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 				"cmd/oh/main.go:12:func Run() error {\ncmd/oh/ctl/open.go:8:func Open() {\n"),
 		},
 		{
+			name:     "grep without matches",
+			exchange: resultExchange("grep", grep.Args{Pattern: "COBOL"}, agent.SuccessStatus, "(no matches)"),
+		},
+		{
 			name: "grep failure",
 			exchange: resultExchange("grep", grep.Args{Pattern: "[", Path: "cmd"}, agent.ErrorStatus,
 				"regex parse error: unclosed character class"),
 		},
 		{
+			name: "grep could not run",
+			exchange: resultExchange("grep", grep.Args{Pattern: "hello"}, agent.ErrorStatus,
+				"shim: Permission denied"),
+		},
+		{
 			name: "lookup",
 			exchange: resultExchange("lookup", lookup.Args{Query: "modern Go release"}, agent.SuccessStatus,
 				"## Result\n\nGo has a new release. [Source](https://example.test/release)."),
+		},
+		{
+			name: "lookup approval timed out",
+			exchange: resultExchange("lookup", lookup.Args{Query: "modern Go release"}, agent.ErrorStatus,
+				"approval timed out after 1m; lookup did not run"),
+		},
+		{
+			name: "lookup approval unavailable",
+			exchange: resultExchange("lookup", lookup.Args{Query: "modern Go release"}, agent.ErrorStatus,
+				"approval unavailable; lookup did not run"),
 		},
 		{
 			name: "fetch markdown",
@@ -133,9 +174,56 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 					"<!DOCTYPE html>\n<title>Hello</title>\n"),
 		},
 		{
+			name: "fetch clean HTML",
+			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/clean", Type: "clean_html"}, agent.SuccessStatus,
+				"[raw HTML saved to /state/sessions/brave-otter/drops/fetch-clean.html]\n\n"+
+					"<h1>Hello</h1>\n<p>Clean page.</p>\n"),
+		},
+		{
+			name: "fetch text",
+			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/plain", Type: "text"}, agent.SuccessStatus,
+				"[raw HTML saved to /state/sessions/brave-otter/drops/fetch-text.html]\n\n"+
+					"Hello\n\nPlain page.\n"),
+		},
+		{
 			name: "fetch failure",
 			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/missing", Type: "text"}, agent.ErrorStatus,
 				"web fetch failed with status 404: page not found"),
+		},
+		{
+			name: "fetch HTTP failure",
+			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/teapot", Type: "text"}, agent.ErrorStatus,
+				"fetch returned HTTP 418: not today (raw HTML saved to /state/sessions/brave-otter/drops/fetch-error.html)"),
+		},
+		{
+			name: "fetch empty page",
+			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/empty", Type: "text"}, agent.ErrorStatus,
+				"fetch returned no content (raw HTML saved to /state/sessions/brave-otter/drops/fetch-empty.html)"),
+		},
+		{
+			name: "fetch save failure",
+			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/article", Type: "markdown"}, agent.ErrorStatus,
+				"save raw HTML: drops are unavailable"),
+		},
+		{
+			name: "fetch refused",
+			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/article", Type: "markdown"}, agent.ErrorStatus,
+				"fetch refused; fetch did not run; choose another approach"),
+		},
+		{
+			name: "fetch approval timed out",
+			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/article", Type: "markdown"}, agent.ErrorStatus,
+				"approval timed out after 1m; fetch did not run"),
+		},
+		{
+			name: "fetch approval unavailable",
+			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/article", Type: "markdown"}, agent.ErrorStatus,
+				"approval unavailable; fetch did not run"),
+		},
+		{
+			name: "job with invalid name",
+			exchange: resultExchange("job", job.Args{Action: "start", Name: "way-too-long", Command: "true"}, agent.ErrorStatus,
+				invalidJobNameError(t, "way-too-long")),
 		},
 		{
 			name: "job wait on a job that finished",
@@ -204,6 +292,16 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 		fmt.Fprintf(&drawn, "=== %s ===\n%s\n\n", test.name, strutil.VisibleEscapes(render(test.exchange, 60)))
 	}
 	assertGolden(t, "render.ansi", drawn.String())
+}
+
+func invalidJobNameError(t *testing.T, name string) string {
+	t.Helper()
+
+	err := jobs.ValidateName(name)
+	if err == nil {
+		t.Fatalf("expected %q to be an invalid job name", name)
+	}
+	return err.Error()
 }
 
 func resultExchange(name string, arguments any, status agent.Status, text string) internaltoolresult.Exchange {

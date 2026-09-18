@@ -1,0 +1,45 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## Startup · +0s
+
+## User · +1s
+
+exercise every recent refusal
+
+## Assistant · +2s
+
+Checking each refusal and failure shape.
+
+## Tool calls · +3s
+
+```
+write: config.yaml [error, call_1]
+write: config.yaml [error, call_2]
+grep: hello [error, call_3]
+job: way-too-long [error, call_4]
+bash: curl example.com [error, call_5]
+bash: curl example.com [error, call_6]
+lookup: modern Go release [error, call_7]
+lookup: modern Go release [error, call_8]
+fetch: https://example.test/article [error, call_9]
+fetch: https://example.test/article [error, call_10]
+fetch: https://example.test/article [error, call_11]
+fetch: https://example.test/teapot [error, call_12]
+fetch: https://example.test/empty [error, call_13]
+fetch: https://example.test/article [error, call_14]
+```
+
+## Assistant · +31s
+
+Every recent refusal remained visible.
+
+

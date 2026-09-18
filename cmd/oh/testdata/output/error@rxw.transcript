@@ -15,7 +15,13 @@
 
 have a look at that
 
-## Failure · +2s
+## Prefix rewrite · +2s
+
+```
+Request prefix changed: the tool list changed
+```
+
+## Failure · +3s
 
 ```
 {

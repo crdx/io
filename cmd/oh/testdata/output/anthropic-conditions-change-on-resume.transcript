@@ -18,11 +18,12 @@ listen on a Unix socket
 
 A socket beneath /tmp it is.
 
-## Conditions · unix sockets, ipv6 · +0s
+## Conditions · unix sockets, ipv6, asking the user · +0s
 
 ```
 Unix sockets no longer work.
 IPv6 unavailable; use 127.0.0.1.
+Session is non-interactive; questions and approvals are unavailable.
 ```
 
 ## User · +0s

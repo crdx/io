@@ -13,6 +13,9 @@ $ ls -la | grep -v "^d" | wc -l ✓ 1L
 grep ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ *.go ✓ 1L
 load skills/tidy/SKILL.md ✓ 8L
 read wide.md ✓ 3L
+read screen.go 10-14 ✓ 5L
+read screen.go 10+ ✓ 5L
+read screen.go 1-5 ✓ 5L
 
 The listing is 日本語のテキストと絵文字
 🎉 が混ざった行, which is wider on
@@ -102,6 +105,9 @@ l
 l
 
 
+✓
+✓
+✓
 ✓
 ✓
 ✓
@@ -331,6 +337,9 @@ $ ls -la | grep -v "^d" | wc -l ✓ 1L
 grep ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ *.go ✓ 1L
 load skills/tidy/SKILL.md ✓ 8L
 read wide.md ✓ 3L
+read screen.go 10-14 ✓ 5L
+read screen.go 10+ ✓ 5L
+read screen.go 1-5 ✓ 5L
 
 The listing is 日本語のテキストと絵文字 🎉 が混ざった行, which is wider on screen than it is long.
 
@@ -359,6 +368,9 @@ $ ls -… ✓ 1L
 grep ^… ✓ 1L
 load s… ✓ 8L
 read w… ✓ 3L
+read s… ✓ 5L
+read s… ✓ 5L
+read s… ✓ 5L
 
 The listing
 is
@@ -405,6 +417,9 @@ $ ls -la | grep -v "^d" | wc -l ✓ 1L
 grep ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ *.go ✓ 1L
 load skills/tidy/SKILL.md ✓ 8L
 read wide.md ✓ 3L
+read screen.go 10-14 ✓ 5L
+read screen.go 10+ ✓ 5L
+read screen.go 1-5 ✓ 5L
 
 The listing is 日本語のテキストと絵文字 🎉 が混ざった行, which is wider on screen than it is long.
 

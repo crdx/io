@@ -7,6 +7,8 @@
 \e[48;2;52;53;65m have a look at that                    \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
+\e[38;2;204;102;102mRequest prefix changed: the tool list\e[0m\r
+\e[38;2;204;102;102mchanged\e[0m\r
 \e[38;2;204;102;102m{\e[0m\r
   "type": "error",\r
   "error": {\r
@@ -123,6 +125,45 @@
 \e[48;2;52;53;65mt\e[0m\r
 \e[48;2;52;53;65m \e[0m\r
 \r
+\e[38;2;204;102;102mR\e[0m\r
+\e[38;2;204;102;102me\e[0m\r
+\e[38;2;204;102;102mq\e[0m\r
+\e[38;2;204;102;102mu\e[0m\r
+\e[38;2;204;102;102me\e[0m\r
+\e[38;2;204;102;102ms\e[0m\r
+\e[38;2;204;102;102mt\e[0m\r
+\e[38;2;204;102;102mp\e[0m\r
+\e[38;2;204;102;102mr\e[0m\r
+\e[38;2;204;102;102me\e[0m\r
+\e[38;2;204;102;102mf\e[0m\r
+\e[38;2;204;102;102mi\e[0m\r
+\e[38;2;204;102;102mx\e[0m\r
+\e[38;2;204;102;102mc\e[0m\r
+\e[38;2;204;102;102mh\e[0m\r
+\e[38;2;204;102;102ma\e[0m\r
+\e[38;2;204;102;102mn\e[0m\r
+\e[38;2;204;102;102mg\e[0m\r
+\e[38;2;204;102;102me\e[0m\r
+\e[38;2;204;102;102md\e[0m\r
+\e[38;2;204;102;102m:\e[0m\r
+\e[38;2;204;102;102mt\e[0m\r
+\e[38;2;204;102;102mh\e[0m\r
+\e[38;2;204;102;102me\e[0m\r
+\e[38;2;204;102;102mt\e[0m\r
+\e[38;2;204;102;102mo\e[0m\r
+\e[38;2;204;102;102mo\e[0m\r
+\e[38;2;204;102;102ml\e[0m\r
+\e[38;2;204;102;102ml\e[0m\r
+\e[38;2;204;102;102mi\e[0m\r
+\e[38;2;204;102;102ms\e[0m\r
+\e[38;2;204;102;102mt\e[0m\r
+\e[38;2;204;102;102mc\e[0m\r
+\e[38;2;204;102;102mh\e[0m\r
+\e[38;2;204;102;102ma\e[0m\r
+\e[38;2;204;102;102mn\e[0m\r
+\e[38;2;204;102;102mg\e[0m\r
+\e[38;2;204;102;102me\e[0m\r
+\e[38;2;204;102;102md\e[0m\r
 \e[38;2;204;102;102m{\e[0m\r
  \r
 "\r
@@ -194,6 +235,7 @@ e\r
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
+\e[38;2;204;102;102mRequest prefix changed: the tool list changed\e[0m
 \e[38;2;204;102;102m{
   "type": "error",
   "error": {
@@ -209,6 +251,7 @@ e\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
+\e[38;2;204;102;102mRequest prefix changed: the tool list changed\e[0m\r
 \e[38;2;204;102;102m{\e[0m\r
   "type": "error",\r
   "error": {\r
@@ -224,6 +267,7 @@ e\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
+\e[38;2;204;102;102mRequest prefix changed: the tool list changed\e[0m\r
 \e[38;2;204;102;102m{\e[0m\r
   "type": "error",\r
   "error": {\r
@@ -239,6 +283,7 @@ e\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
+\e[38;2;204;102;102mRequest prefix changed: the tool list changed\e[0m\r
 \e[38;2;204;102;102m{\e[0m\r
   "type": "error",\r
   "error": {\r
@@ -254,6 +299,7 @@ e\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
+\e[38;2;204;102;102mRequest prefix changed: the tool list changed\e[0m\r
 \e[38;2;204;102;102m{\e[0m\r
   "type": "error",\r
   "error": {\r
@@ -278,6 +324,11 @@ e\r
 \e[48;2;52;53;65m at that    \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
+\e[38;2;204;102;102mRequest\e[0m\r
+\e[38;2;204;102;102mprefix\e[0m\r
+\e[38;2;204;102;102mchanged: the\e[0m\r
+\e[38;2;204;102;102mtool list\e[0m\r
+\e[38;2;204;102;102mchanged\e[0m\r
 \e[38;2;204;102;102m{\e[0m\r
   "type":\r
 "error",\r
@@ -296,6 +347,7 @@ true\r
 \e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
+\e[38;2;204;102;102mRequest prefix changed: the tool list changed\e[0m
 \e[38;2;204;102;102m{
   "type": "error",
   "error": {
@@ -311,6 +363,7 @@ true\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
+\e[38;2;204;102;102mRequest prefix changed: the tool list changed\e[0m\r
 \e[38;2;204;102;102m{\e[0m\r
   "type": "error",\r
   "error": {\r

@@ -1,0 +1,32 @@
+{"event":{"kind":"session_startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
+{"event":{"kind":"user_message","text":"exercise every recent refusal"}}
+{"event":{"kind":"model_message","text":"Checking each refusal and failure shape."}}
+{"event":{"kind":"tool_call_request","id":"call_1","name":"write","arguments":"{\"path\":\"config.yaml\",\"content\":\"enabled: false\\n\"}","render":"config.yaml","detail":"15B","emphasis":{"kind":"focus","value":"config.yaml"}}}
+{"event":{"kind":"tool_call_result","status":"error","text":"read the file first","id":"call_1","name":"write","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_2","name":"write","arguments":"{\"path\":\"config.yaml\",\"content\":\"enabled: false\\n\"}","render":"config.yaml","detail":"15B","emphasis":{"kind":"focus","value":"config.yaml"}}}
+{"event":{"kind":"tool_call_result","status":"error","text":"file changed; re-read it","id":"call_2","name":"write","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_3","name":"grep","arguments":"{\"pattern\":\"hello\"}","render":"hello","emphasis":{"kind":"syntax","value":"regexp"},"read_only":true}}
+{"event":{"kind":"tool_call_result","status":"error","text":"shim: Permission denied","id":"call_3","name":"grep","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_4","name":"job","arguments":"{\"action\":\"start\",\"name\":\"way-too-long\",\"command\":\"true\"}","render":"way-too-long","detail":"start"}}
+{"event":{"kind":"tool_call_result","status":"error","text":"job name must match [a-z0-9-]{1,10}","id":"call_4","name":"job","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_5","name":"bash","arguments":"{\"command\":\"curl example.com\",\"network\":\"host\"}","render":"curl example.com","emphasis":{"kind":"syntax","value":"bash"}}}
+{"event":{"kind":"tool_call_result","status":"error","text":"approval timed out after 1m; command did not run","id":"call_5","name":"bash","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_6","name":"bash","arguments":"{\"command\":\"curl example.com\",\"network\":\"host\"}","render":"curl example.com","emphasis":{"kind":"syntax","value":"bash"}}}
+{"event":{"kind":"tool_call_result","status":"error","text":"approval unavailable; command did not run","id":"call_6","name":"bash","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_7","name":"lookup","arguments":"{\"query\":\"modern Go release\"}","render":"modern Go release","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"error","text":"approval timed out after 1m; lookup did not run","id":"call_7","name":"lookup","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_8","name":"lookup","arguments":"{\"query\":\"modern Go release\"}","render":"modern Go release","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"error","text":"approval unavailable; lookup did not run","id":"call_8","name":"lookup","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_9","name":"fetch","arguments":"{\"url\":\"https://example.test/article\",\"type\":\"markdown\"}","render":"https://example.test/article","detail":"markdown","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"error","text":"fetch refused; fetch did not run; choose another approach","id":"call_9","name":"fetch","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_10","name":"fetch","arguments":"{\"url\":\"https://example.test/article\",\"type\":\"markdown\"}","render":"https://example.test/article","detail":"markdown","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"error","text":"approval timed out after 1m; fetch did not run","id":"call_10","name":"fetch","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_11","name":"fetch","arguments":"{\"url\":\"https://example.test/article\",\"type\":\"markdown\"}","render":"https://example.test/article","detail":"markdown","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"error","text":"approval unavailable; fetch did not run","id":"call_11","name":"fetch","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_12","name":"fetch","arguments":"{\"url\":\"https://example.test/teapot\",\"type\":\"text\"}","render":"https://example.test/teapot","detail":"text","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"error","text":"fetch returned HTTP 418: not today (raw HTML saved to /state/sessions/brave-otter/drops/fetch-error.html)","id":"call_12","name":"fetch","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_13","name":"fetch","arguments":"{\"url\":\"https://example.test/empty\",\"type\":\"text\"}","render":"https://example.test/empty","detail":"text","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"error","text":"fetch returned no content (raw HTML saved to /state/sessions/brave-otter/drops/fetch-empty.html)","id":"call_13","name":"fetch","took":0}}
+{"event":{"kind":"tool_call_request","id":"call_14","name":"fetch","arguments":"{\"url\":\"https://example.test/article\",\"type\":\"markdown\"}","render":"https://example.test/article","detail":"markdown","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"error","text":"save raw HTML: drops are unavailable","id":"call_14","name":"fetch","took":0}}
+{"event":{"kind":"model_message","text":"Every recent refusal remained visible."}}

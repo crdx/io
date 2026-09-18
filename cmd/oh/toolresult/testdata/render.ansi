@@ -37,6 +37,24 @@ enabled: \e[38;2;201;166;212mfalse\e[0m
 \e[38;2;204;102;102mError\e[0m
 \e[38;2;204;102;102mthe filesystem is read-only\e[0m
 
+=== write unread file ===
+\e[38;2;207;173;0mwrite\e[0m · \e[38;2;192;128;80mconfig.yaml\e[0m · \e[38;2;150;152;150m15B\e[0m
+
+enabled: \e[38;2;201;166;212mfalse\e[0m
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mread the file first\e[0m
+
+=== write file changed since read ===
+\e[38;2;207;173;0mwrite\e[0m · \e[38;2;192;128;80mconfig.yaml\e[0m · \e[38;2;150;152;150m15B\e[0m
+
+enabled: \e[38;2;201;166;212mfalse\e[0m
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mfile changed; re-read it\e[0m
+
 === edit with context ===
 \e[38;2;207;173;0medit\e[0m · \e[38;2;192;128;80mmain.go\e[0m
 
@@ -79,6 +97,16 @@ done
 main.go:12: undefined: run
 \e[0m
 
+=== shell approval timed out ===
+\e[38;2;192;128;80m$ \e[0m\e[38;2;129;162;190mcurl\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mexample.com\e[0m
+
+\e[38;2;204;102;102mapproval timed out after 1m; command did not run\e[0m
+
+=== shell approval unavailable ===
+\e[38;2;192;128;80m$ \e[0m\e[38;2;129;162;190mcurl\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mexample.com\e[0m
+
+\e[38;2;204;102;102mapproval unavailable; command did not run\e[0m
+
 === shell without output ===
 \e[38;2;192;128;80m$ \e[0m\e[38;2;129;162;190mtrue\e[0m
 
@@ -120,6 +148,11 @@ main.go:12: undefined: run
 \e[38;2;150;152;150mcmd/oh/ctl/open.go:8:\e[0m\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mOpen\e[0m() {
 
 
+=== grep without matches ===
+\e[38;2;207;173;0mgrep\e[0m · \e[38;2;150;152;150mCOBOL\e[0m
+
+(no matches)
+
 === grep failure ===
 \e[38;2;207;173;0mgrep\e[0m · \e[38;2;150;152;150m[\e[0m · \e[38;2;150;152;150mcmd\e[0m
 
@@ -128,12 +161,36 @@ main.go:12: undefined: run
 \e[38;2;204;102;102mError\e[0m
 \e[38;2;204;102;102mregex parse error: unclosed character class\e[0m
 
+=== grep could not run ===
+\e[38;2;207;173;0mgrep\e[0m · \e[38;2;150;152;150mhello\e[0m
+
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mshim: Permission denied\e[0m
+
 === lookup ===
 \e[38;2;207;173;0mlookup\e[0m · \e[38;2;192;128;80mmodern Go release\e[0m
 
 \e[1m\e[38;2;207;173;0mResult\e[0m\e[0m
 
 Go has a new release. \e[38;2;129;162;190mSource\e[0m\e[38;2;150;152;150m (https://example.test/release)\e[0m.
+
+=== lookup approval timed out ===
+\e[38;2;207;173;0mlookup\e[0m · \e[38;2;192;128;80mmodern Go release\e[0m
+
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mapproval timed out after 1m; lookup did not run\e[0m
+
+=== lookup approval unavailable ===
+\e[38;2;207;173;0mlookup\e[0m · \e[38;2;192;128;80mmodern Go release\e[0m
+
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mapproval unavailable; lookup did not run\e[0m
 
 === fetch markdown ===
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/article\e[0m · \e[38;2;150;152;150mmarkdown\e[0m
@@ -156,6 +213,25 @@ l]
 <title>\e[38;2;150;152;150mHello\e[0m</title>
 
 
+=== fetch clean HTML ===
+\e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/clean\e[0m · \e[38;2;150;152;150mclean_html\e[0m
+
+\e[38;2;150;152;150m[raw HTML saved to /state/sessions/brave-otter/drops/fetch-clean.html]\e[0m
+
+<h1>\e[38;2;150;152;150mHello\e[0m</h1>
+<p>\e[38;2;150;152;150mClean page.\e[0m</p>
+
+
+=== fetch text ===
+\e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/plain\e[0m · \e[38;2;150;152;150mtext\e[0m
+
+[raw HTML saved to /state/sessions/brave-otter/drops/fetch-text.html]
+
+Hello
+
+Plain page.
+
+
 === fetch failure ===
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/missing\e[0m · \e[38;2;150;152;150mtext\e[0m
 
@@ -163,6 +239,65 @@ l]
 
 \e[38;2;204;102;102mError\e[0m
 \e[38;2;204;102;102mweb fetch failed with status 404: page not found\e[0m
+
+=== fetch HTTP failure ===
+\e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/teapot\e[0m · \e[38;2;150;152;150mtext\e[0m
+
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mfetch returned HTTP 418: not today (raw HTML saved to /state/sessions/brave-otter/drops/fetch-error.html)\e[0m
+
+=== fetch empty page ===
+\e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/empty\e[0m · \e[38;2;150;152;150mtext\e[0m
+
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mfetch returned no content (raw HTML saved to /state/sessions/brave-otter/drops/fetch-empty.html)\e[0m
+
+=== fetch save failure ===
+\e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/article\e[0m · \e[38;2;150;152;150mmarkdown\e[0m
+
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102msave raw HTML: drops are unavailable\e[0m
+
+=== fetch refused ===
+\e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/article\e[0m · \e[38;2;150;152;150mmarkdown\e[0m
+
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mfetch refused; fetch did not run; choose another approach\e[0m
+
+=== fetch approval timed out ===
+\e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/article\e[0m · \e[38;2;150;152;150mmarkdown\e[0m
+
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mapproval timed out after 1m; fetch did not run\e[0m
+
+=== fetch approval unavailable ===
+\e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/article\e[0m · \e[38;2;150;152;150mmarkdown\e[0m
+
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mapproval unavailable; fetch did not run\e[0m
+
+=== job with invalid name ===
+\e[38;2;207;173;0mjob\e[0m
+
+{
+    "action": \e[38;2;181;189;104m"start"\e[0m,
+    "name": \e[38;2;181;189;104m"way-too-long"\e[0m,
+    "command": \e[38;2;181;189;104m"true"\e[0m
+}
+
+job name must match [a-z0-9-]{1,10}
 
 === job wait on a job that finished ===
 \e[38;2;207;173;0mjob\e[0m

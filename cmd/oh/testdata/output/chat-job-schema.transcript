@@ -1,0 +1,28 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `medium`
+- **Provider:** `chat`
+- **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## Mode · rxwngl · +0s
+
+## User · +0s
+
+state the job name rules
+
+## Assistant · +0s
+
+Job names use one to ten lowercase letters, digits, or hyphens.
+
+## User · +0s
+
+carry on
+
+## Assistant · +0s
+
+Carrying on.
+

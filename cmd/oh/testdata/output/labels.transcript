@@ -25,9 +25,12 @@ bash: ls -la | grep -v "^d" | wc -l [ok, 1 line, 2B, call_6]
 grep: ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ [ok, 1 line, 24B, call_7]
 read: skills/tidy/SKILL.md [ok, 8 lines, 72B, call_8]
 read: wide.md [ok, 3 lines, 96B, call_9]
+read: screen.go [ok, 5 lines, 25B, call_10]
+read: screen.go [ok, 5 lines, 25B, call_11]
+read: screen.go [ok, 5 lines, 15B, call_12]
 ```
 
-## Assistant · +19s
+## Assistant · +25s
 
 The listing is `日本語のテキストと絵文字 🎉 が混ざった行`, which is wider on screen than it is long.
 

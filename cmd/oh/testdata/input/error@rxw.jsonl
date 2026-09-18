@@ -1,3 +1,4 @@
 {"event":{"kind":"session_startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
 {"event":{"kind":"user_message","text":"have a look at that"}}
+{"event":{"kind":"prefix_rewrite","text":"the tool list changed"}}
 {"event":{"kind":"turn_failure","text":"{\n  \"type\": \"error\",\n  \"error\": {\n    \"code\": \"overloaded\",\n    \"retry\": true\n  }\n}"}}

@@ -18,9 +18,10 @@ bind a listener on ::1
 
 There is no IPv6 here, so 127.0.0.1 instead.
 
-## Conditions · ipv6, asking the user · +0s
+## Conditions · unix sockets, ipv6, asking the user · +0s
 
 ```
+Unix sockets now work under /tmp, not the workspace.
 IPv6 available; ::1 reaches the sandbox loopback.
 Session is interactive; questions and approvals are available.
 ```

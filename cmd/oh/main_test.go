@@ -3911,6 +3911,7 @@ func TestGoldenFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"context-path-kinds":     {".prompt"},
 		"context-repository":     {".prompt"},
 		"context-scratch-root":   {".prompt"},
+		"context-simulation":     {".prompt"},
 		"context-yolo":           {".prompt"},
 		"host-command":           {".ansi", ".screen"},
 		"inputblock":             {".ansi", ".screen"},
@@ -6072,6 +6073,10 @@ func TestGoldenTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 		"context-path-kinds":    {hasEveryPathKind: true},
 		"context-repository":    {isRepository: true},
 		"context-scratch-root":  {readsTheScratchRoot: true},
+		"context-simulation": {
+			isYolo:       true,
+			offeredTools: []string{"read", "ls", "grep"},
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			compareSystemPromptWithGolden(t, name, shape)
@@ -12998,6 +13003,8 @@ type sessionGoldenTurn struct {
 
 const exposeToolName = "expose"
 
+const jobToolName = "job"
+
 const notifyToolName = "notify"
 
 const printedSessionIsImpossible = "this scenario drives the interface, which a printed session has none of\n"
@@ -13315,6 +13322,11 @@ func newSessionGoldenTools(
 
 	tools := make([]tool.Tool, 0, len(specifications))
 	for _, specification := range specifications {
+		if specification.Name == jobToolName {
+			tools = append(tools, job.New(nil, nil, nil, true))
+			continue
+		}
+
 		if specification.Name == exposeToolName {
 			tools = append(tools, expose.New(ports.ForModel()))
 			continue

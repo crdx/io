@@ -1,0 +1,26 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[[tool]]
+name = "job"
+
+[first]
+prompt = "state the job name rules"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"role":"assistant","content":"Job names use one to ten lowercase letters, digits, or hyphens."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "carry on"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Carrying on."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
