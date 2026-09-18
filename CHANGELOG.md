@@ -8,7 +8,9 @@
 
 ### Theme
 
-- Theme skill names with `skill` and code keywords with `syntax_keyword`
+- Customise the look and feel with theme support
+- Themes apply instantly, so just ask the model to theme oh right in front of your eyes
+- Use project-level `oh.toml` to define a theme per project
 - Decorate any theme key with bold, faint, italic, underline, blink, reverse, hidden, strikethrough, and overline
 - Give an underline its own shape and colour with `underline:curly` and `underline:#rrggbb`
 - Reference theme change as `ui.theme` rather than every single colour in the universe
