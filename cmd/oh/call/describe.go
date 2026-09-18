@@ -106,6 +106,16 @@ func LabelFor(event agent.Event, getTool ToolLookup, workspace *work.Space) Labe
 	return label
 }
 
+func LabelForRendering(rendering tool.CallRendering) Label {
+	return getLabel(
+		rendering.Name,
+		rendering.Subject,
+		rendering.Qualifier,
+		rendering.Emphasis,
+		false,
+	)
+}
+
 func getLabel(name string, subject string, qualifier string, emphasis tool.Emphasis, isReadOnly bool) Label {
 	label := Label{
 		Name:      name,

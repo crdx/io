@@ -9,6 +9,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/slash"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/jobs"
 )
 
@@ -108,8 +109,8 @@ func TestTheJobsCommandListsEveryJob(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	notice := context.notice
-	for _, wanted := range []string{"docs: running", "python3 -m http.server 8080", "build: failed", "exit(1)"} {
+	notice := style.Plain(context.notice)
+	for _, wanted := range []string{"docs: running", "$ python3 -m http.server 8080", "build: failed", "exit(1)"} {
 		if !strings.Contains(notice, wanted) {
 			t.Errorf("got %q, want it to carry %q", notice, wanted)
 		}

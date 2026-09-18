@@ -1,0 +1,12 @@
+=== no jobs ===
+No background jobs.
+=== ordinary and multiline commands ===
+Background jobs:
+  build: complete after 3s  [38;2;129;162;190m$[0m [38;2;150;152;150mGOCACHE[0m[38;2;138;190;183m=[0m[38;2;150;152;150m/tmp/cache[0m[38;2;150;152;150m [0m[38;2;129;162;190mjust[0m[38;2;150;152;150m [0m[38;2;129;162;190mbuild[0m[38;2;150;152;150m [0m[38;2;138;190;183m&&[0m[38;2;150;152;150m [0m[38;2;129;162;190mecho[0m[38;2;150;152;150m [0m[38;2;129;162;190mdone[0m
+  docs: complete after 3s  [38;2;129;162;190m$[0m [38;2;129;162;190mpython3[0m[38;2;150;152;150m [0m[38;2;129;162;190m-m[0m[38;2;150;152;150m http.server 8080[0m[38;2;138;190;183m;[0m[38;2;150;152;150m [0m[38;2;129;162;190m--bind[0m[38;2;150;152;150m [0m[38;2;129;162;190mlocalhost[0m [38;2;150;152;150m2L[0m
+=== heredoc command ===
+Background jobs:
+  write: complete after 3s  [38;2;129;162;190m$[0m [38;2;129;162;190mcat[0m[38;2;150;152;150m [0m[38;2;138;190;183m<<[0m[38;2;150;152;150m'EOF' [0m[38;2;138;190;183m>[0m[38;2;150;152;150m notes.txt[0m [38;2;150;152;150m3L[0m
+=== malformed stored command ===
+Background jobs:
+  broken: complete after 3s  [38;2;129;162;190m$[0m [38;2;150;152;150mecho 'unterminated; echo later[0m [38;2;150;152;150m2L[0m

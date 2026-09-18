@@ -4,8 +4,10 @@ import (
 	"strings"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/call"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/internal/jobs"
+	"crdx.org/io/toolbox/bash"
 )
 
 type Jobs struct {
@@ -128,7 +130,8 @@ func formatJobs(listing []jobs.Snapshot) string {
 
 	lines := make([]string, 0, len(listing))
 	for _, snapshot := range listing {
-		lines = append(lines, "  "+snapshot.Describe()+"  "+snapshot.Command)
+		command := call.LabelForRendering(bash.DescribeCommand(snapshot.Command)).Render()
+		lines = append(lines, "  "+snapshot.Describe()+"  "+command)
 	}
 
 	return "Background jobs:\n" + strings.Join(lines, "\n")

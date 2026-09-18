@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/pathgrant"
@@ -219,6 +220,48 @@ func TestGoldenSnippetExpansionMatchesGolden(t *testing.T) {
 	}
 
 	assertGolden(t, "snippet-expansion.txt", output.String())
+}
+
+func TestGoldenJobListingMatchesGolden(t *testing.T) {
+	startedAt := time.Date(2026, time.January, 2, 3, 4, 5, 0, time.UTC)
+	finishedJob := func(name string, command string) jobs.Snapshot {
+		return jobs.Snapshot{
+			Name:      name,
+			Command:   command,
+			State:     jobs.StateComplete,
+			StartedAt: startedAt,
+			EndedAt:   startedAt.Add(3 * time.Second),
+		}
+	}
+
+	var output strings.Builder
+	for _, test := range []struct {
+		label   string
+		listing []jobs.Snapshot
+	}{
+		{label: "no jobs"},
+		{label: "ordinary and multiline commands", listing: []jobs.Snapshot{
+			finishedJob("build", "GOCACHE=/tmp/cache just build && echo done"),
+			finishedJob("docs", "python3 -m http.server 8080\n  --bind localhost"),
+		}},
+		{label: "heredoc command", listing: []jobs.Snapshot{
+			finishedJob("write", "cat <<'EOF' > notes.txt\nhello\nEOF"),
+		}},
+		{label: "malformed stored command", listing: []jobs.Snapshot{
+			finishedJob("broken", "echo 'unterminated\necho later"),
+		}},
+	} {
+		managedJobs, _ := fixtureJobs()
+		managedJobs.List = func() []jobs.Snapshot { return test.listing }
+
+		context, err := invokeJobCommand(t, managedJobs, "/jobs")
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Fprintf(&output, "=== %s ===\n%s\n", test.label, context.notice)
+	}
+
+	assertGolden(t, "job-listing.txt", output.String())
 }
 
 func TestGoldenJobOutputMatchesGolden(t *testing.T) {
