@@ -271,18 +271,25 @@ type inputContent struct {
 	Detail   string `json:"detail,omitempty"`
 }
 
-const imageDetail = "high"
+const (
+	imageDetail       = "high"
+	attachmentNotice  = "Image attached."
+	emptyOutputNotice = "No output."
+)
 
 func encodeToolOutput(result agent.ToolCallResult) any {
+	text := result.Output
+	if text == "" {
+		text = emptyOutputNotice
+	}
 	if result.Image.MediaType == "" || len(result.Image.Data) == 0 {
-		return result.Output
+		return text
 	}
 
-	content := make([]inputContent, 0, 2)
-	if result.Output != "" {
-		content = append(content, inputContent{Type: "input_text", Text: result.Output})
+	content := []inputContent{
+		{Type: "input_text", Text: text},
+		{Type: "input_text", Text: attachmentNotice},
 	}
-
 	content = append(content, inputContent{
 		Type: "input_image",
 		ImageURL: fmt.Sprintf(

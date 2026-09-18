@@ -107,7 +107,7 @@ func TestAnEmptyListingSaysSo(t *testing.T) {
 
 func TestStartingAnUnknownNameWithNoCommandIsRefused(t *testing.T) {
 	_, err := run(t, jobs.New(nil), map[string]string{"action": "start", "name": "ghost"})
-	if err == nil || !strings.Contains(err.Error(), "command is required") {
+	if err == nil || !strings.Contains(err.Error(), "command required") {
 		t.Errorf("got %v, want it to ask for a command", err)
 	}
 }
@@ -156,7 +156,7 @@ func TestWaitingForAllFinishedJobsReportsEveryOne(t *testing.T) {
 
 func TestAnUnknownActionIsRefused(t *testing.T) {
 	_, err := run(t, jobs.New(nil), map[string]string{"action": "frobnicate", "name": "docs"})
-	if err == nil || !strings.Contains(err.Error(), "wants to be one of") {
+	if err == nil || !strings.Contains(err.Error(), "must be") {
 		t.Errorf("got %v, want the actions listed", err)
 	}
 }
@@ -207,7 +207,7 @@ func TestStartingValidatesTheJobName(t *testing.T) {
 
 func TestAWaitNeedsEitherNameOrNames(t *testing.T) {
 	if _, err := run(t, jobs.New(nil), map[string]string{"action": "wait"}); err == nil ||
-		!strings.Contains(err.Error(), "name or names is required") {
+		!strings.Contains(err.Error(), "wait requires name or names") {
 		t.Errorf("got %v, want the wait to ask what to watch", err)
 	}
 }
@@ -218,7 +218,7 @@ func TestAWaitRefusesNameTogetherWithNames(t *testing.T) {
 		"name":   "build",
 		"names":  []string{"docs"},
 	})
-	if err == nil || !strings.Contains(err.Error(), "cannot both be used") {
+	if err == nil || !strings.Contains(err.Error(), "cannot both be set") {
 		t.Errorf("got %v, want the two forms to be refused together", err)
 	}
 }
@@ -228,7 +228,7 @@ func TestAWaitRefusesARepeatedName(t *testing.T) {
 		"action": "wait",
 		"names":  []string{"build", "build"},
 	})
-	if err == nil || !strings.Contains(err.Error(), "repeated") {
+	if err == nil || !strings.Contains(err.Error(), "duplicate name") {
 		t.Errorf("got %v, want the repeated name to be refused", err)
 	}
 }
@@ -239,7 +239,7 @@ func TestAWaitRefusesAnUnknownWaitForValue(t *testing.T) {
 		"name":     "build",
 		"wait_for": "most",
 	})
-	if err == nil || !strings.Contains(err.Error(), "either any or all") {
+	if err == nil || !strings.Contains(err.Error(), "must be any or all") {
 		t.Errorf("got %v, want the wait_for values to be named", err)
 	}
 }
@@ -250,7 +250,7 @@ func TestAWaitRefusesANegativeNumberOfSeconds(t *testing.T) {
 		"name":         "build",
 		"wait_seconds": -1,
 	})
-	if err == nil || !strings.Contains(err.Error(), "positive number of seconds") {
+	if err == nil || !strings.Contains(err.Error(), "must be positive") {
 		t.Errorf("got %v, want the negative wait to be refused", err)
 	}
 }
@@ -261,7 +261,7 @@ func TestOnlyAWaitTakesANumberOfSeconds(t *testing.T) {
 		"name":         "build",
 		"wait_seconds": 5,
 	})
-	if err == nil || !strings.Contains(err.Error(), "wait_seconds can only be used for wait") {
+	if err == nil || !strings.Contains(err.Error(), "wait_seconds requires action=\"wait\"") {
 		t.Errorf("got %v, want wait_seconds to belong to wait alone", err)
 	}
 }

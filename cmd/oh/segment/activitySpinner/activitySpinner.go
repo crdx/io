@@ -32,11 +32,11 @@ func New(isRunning func() bool, now func() time.Time) segment.Factory {
 		}
 
 		if len(args.Frames) == 0 {
-			return nil, errors.New("frames are empty, so there is nothing to turn through")
+			return nil, errors.New("frames must not be empty")
 		}
 
 		if args.Rate <= 0 {
-			return nil, fmt.Errorf("rate is %s, and wants to be longer than nothing", args.Rate)
+			return nil, fmt.Errorf("rate must be positive (got %s)", args.Rate)
 		}
 
 		width := style.Width(args.Idle)

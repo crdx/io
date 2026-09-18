@@ -17,7 +17,7 @@ have a look at the picker
 ## Tool calls · +0s
 
 ```
-title: fix the picker clipping [ok, 1 line, 51B, call-1]
+title: fix the picker clipping [ok, 1 line, 40B, call-1]
 ```
 
 ## Assistant · +0s
@@ -31,8 +31,8 @@ carry on
 ## Tool calls · +0s
 
 ```
-title: fix the picker clipping [ok, 1 line, 55B, call-2]
-title: give sessions a title [ok, 1 line, 49B, call-3]
+title: fix the picker clipping [ok, 1 line, 42B, call-2]
+title: give sessions a title [ok, 1 line, 38B, call-3]
 ```
 
 ## Assistant · +0s

@@ -32,7 +32,7 @@ func New(options segment.Options) (segment.Segment, error) {
 	case down:
 		return state{arrow: "↓"}, nil
 	default:
-		return nil, fmt.Errorf("direction is %q, and wants to be %s or %s", args.Direction, up, down)
+		return nil, fmt.Errorf("direction must be %s or %s (got %q)", up, down, args.Direction)
 	}
 }
 

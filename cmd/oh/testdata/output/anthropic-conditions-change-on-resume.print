@@ -6,7 +6,7 @@ A socket beneath /tmp it is.
 
 
  🤖 Unix sockets no longer work.
- 🤖 This machine no longer has IPv6, so only 127.0.0.1 works.
+ 🤖 IPv6 unavailable; use 127.0.0.1.
 
 
 

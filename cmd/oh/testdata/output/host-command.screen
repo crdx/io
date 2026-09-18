@@ -61,4 +61,4 @@
     Exit code: 0
 
 
-The turn was interrupted because the user pressed ctrl+d.
+Turn stopped because the user pressed ctrl+d.

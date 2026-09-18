@@ -619,7 +619,7 @@ func TestARefusedHostNetworkSaysSoInWordsTheModelCanAct(t *testing.T) {
 
 				return ctx
 			},
-			want: "nobody answered the request to let this command reach the host network within 1m",
+			want: "approval timed out after 1m",
 		},
 		"nobody to ask": {
 			prepare: func(t *testing.T, _ *ask.Broker) context.Context {
@@ -627,7 +627,7 @@ func TestARefusedHostNetworkSaysSoInWordsTheModelCanAct(t *testing.T) {
 
 				return t.Context()
 			},
-			want: "nobody here",
+			want: "approval unavailable",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -1869,8 +1869,8 @@ func TestModeChangesAcrossFailedTurnsDoNotAccumulate(t *testing.T) {
 }
 
 const (
-	nowReadOnlyNote         = "The workspace is now read-only."
-	historyNowReadWriteNote = "The .git directory is now read-write."
+	nowReadOnlyNote         = "Workspace is now read-only."
+	historyNowReadWriteNote = ".git is now read-write."
 )
 
 func containsNote(note string) func(message string) bool {
@@ -4219,7 +4219,7 @@ func TestAModeChangeSaysItselfInTheScrollback(t *testing.T) {
 	self.toggleCap(caps.Git)
 	self.settleAccess()
 
-	if !strings.Contains(screenOutput.String(), "The .git directory is now read-write.") {
+	if !strings.Contains(screenOutput.String(), ".git is now read-write.") {
 		t.Errorf("expected the change to be said, got %q", screenOutput.String())
 	}
 }
@@ -4250,7 +4250,7 @@ func TestGoldenPendingModeMessagesAreSeparatedFromStartupAndJoinedToEachOther(t 
 	}))
 }
 
-const laterHarnessLine = "The job `build` exited: complete after 30s."
+const laterHarnessLine = "Job `build` exited: complete after 30s."
 
 func pendingModeMessagesStream(t *testing.T, toggleCount int) string {
 	t.Helper()
@@ -15065,7 +15065,7 @@ func TestEveryWayOfStoppingATurnSaysWhy(t *testing.T) {
 		},
 		"a capability change": {
 			stopTurn: func(self *App) { self.toggleCap(caps.Git) },
-			want:     "the user changed what the harness is allowed to do",
+			want:     "access changed",
 		},
 		"leaving the session": {
 			stopTurn: func(self *App) {
@@ -15073,7 +15073,7 @@ func TestEveryWayOfStoppingATurnSaysWhy(t *testing.T) {
 					t.Fatal(err)
 				}
 			},
-			want: "the session is being closed",
+			want: "the session closed",
 		},
 	}
 
@@ -15139,7 +15139,7 @@ func TestTheHarnessAsksForATitleOnlyOnceTheModelHasAnsweredWithoutGivingOne(t *t
 
 	completeTurn(self)
 	if !slices.ContainsFunc(backend.told(), func(note string) bool {
-		return strings.Contains(note, "has no title")
+		return strings.Contains(note, "Untitled session")
 	}) {
 		t.Errorf("the model was told %q", backend.told())
 	}
@@ -16311,10 +16311,10 @@ func TestAWithdrawalIsAnnouncedBeforeTheJobsItStopped(t *testing.T) {
 	if len(notices) != 2 {
 		t.Fatalf("got %d notices, want the change and the job it stopped: %v", len(notices), notices)
 	}
-	if !strings.Contains(notices[0], "workspace is now read-only") {
+	if !strings.Contains(notices[0], "Workspace is now read-only") {
 		t.Errorf("got %q first, want the change that caused the stop", notices[0])
 	}
-	if !strings.Contains(notices[1], "job `web` was stopped") {
+	if !strings.Contains(notices[1], "Job `web` stopped") {
 		t.Errorf("got %q second, want the job it stopped", notices[1])
 	}
 }
@@ -16326,8 +16326,8 @@ func TestTheModelIsToldAboutTheJobsAWithdrawalStopped(t *testing.T) {
 	self.settleAccess()
 
 	note := self.prelude()
-	change := strings.Index(note, "workspace is now read-only")
-	stop := strings.Index(note, "job `web` was stopped")
+	change := strings.Index(note, "Workspace is now read-only")
+	stop := strings.Index(note, "Job `web` stopped")
 	if change < 0 || stop < 0 {
 		t.Fatalf("got note %q, want the change and the job it stopped", note)
 	}
@@ -16343,7 +16343,7 @@ func TestTheModelIsToldAboutAStoppedJobEvenWhenTheCapabilityComesBack(t *testing
 	self.toggleCap(caps.Write)
 	self.settleAccess()
 
-	if note := self.prelude(); !strings.Contains(note, "job `web` was stopped") {
+	if note := self.prelude(); !strings.Contains(note, "Job `web` stopped") {
 		t.Errorf("got note %q, want the job the withdrawal stopped", note)
 	}
 	if note := self.prelude(); note != "" {
@@ -16411,7 +16411,7 @@ func TestAStoppedJobIsToldWhenThePathItHeldIsRevoked(t *testing.T) {
 	self.stopJobsHoldingPath("/workspace")
 	self.settleAccess()
 
-	if note := self.prelude(); !strings.Contains(note, "job `web` was stopped") {
+	if note := self.prelude(); !strings.Contains(note, "Job `web` stopped") {
 		t.Errorf("got note %q, want the job the revoked path stopped", note)
 	}
 }
@@ -16439,7 +16439,7 @@ func TestAModeChangeThatStoppedAJobIsNotTakenBack(t *testing.T) {
 	if len(notices) != 3 {
 		t.Fatalf("got %d notices, want both changes and the stop: %v", len(notices), notices)
 	}
-	if !strings.Contains(notices[2], "workspace is now read-write") {
+	if !strings.Contains(notices[2], "Workspace is now read-write") {
 		t.Errorf("got %q last, want the capability being granted again", notices[2])
 	}
 }
@@ -16461,7 +16461,7 @@ func TestAJobStoppedByAnotherCapabilityHoldsNothingBack(t *testing.T) {
 			len(notices), notices,
 		)
 	}
-	if !strings.Contains(notices[0], "job `web` was stopped") {
+	if !strings.Contains(notices[0], "Job `web` stopped") {
 		t.Errorf("got %q, want the stopped job left standing on its own", notices[0])
 	}
 }
@@ -16484,10 +16484,10 @@ func TestTogglingOnPastAStoppedJobStillSubtracts(t *testing.T) {
 	}
 
 	notices := self.pendingNotices.notices()
-	if !strings.Contains(notices[0], "workspace is now read-only") {
+	if !strings.Contains(notices[0], "Workspace is now read-only") {
 		t.Errorf("got %q first, want the change that stopped the job", notices[0])
 	}
-	if !strings.Contains(notices[1], "job `web` was stopped") {
+	if !strings.Contains(notices[1], "Job `web` stopped") {
 		t.Errorf("got %q second, want the job it stopped", notices[1])
 	}
 }
@@ -17199,19 +17199,19 @@ func TestEveryPermissionRefusesInWordsOfItsOwn(t *testing.T) {
 			ask: func(broker *ask.Broker) error {
 				return approveHostNetwork(t.Context(), broker, permission.Ask, "curl example.com")
 			},
-			want: "so it did not run",
+			want: "command did not run",
 		},
 		"lookup": {
 			ask: func(broker *ask.Broker) error {
 				return lookupApproval.ask(t.Context(), broker, permission.Ask, "weather")
 			},
-			want: "so nothing was searched for",
+			want: "lookup did not run",
 		},
 		"fetch": {
 			ask: func(broker *ask.Broker) error {
 				return fetchApproval.ask(t.Context(), broker, permission.Ask, "https://example.com")
 			},
-			want: "so nothing was downloaded",
+			want: "fetch did not run",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

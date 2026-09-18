@@ -105,7 +105,7 @@ func Send(ctx context.Context, writeEscape EscapeWriter, args Args) error {
 	var escape strings.Builder
 	if printsEscapeCode {
 		if writeEscape == nil {
-			return errors.New("could not notify the user: nothing to write the notification to")
+			return errors.New("notification failed: nothing to write it to")
 		}
 
 		command.Stdout = &escape
@@ -116,11 +116,11 @@ func Send(ctx context.Context, writeEscape EscapeWriter, args Args) error {
 			return stop.Error(ctx, "the notification")
 		}
 
-		return fmt.Errorf("could not notify the user: %w", err)
+		return fmt.Errorf("notification failed: %w", err)
 	}
 
 	if printsEscapeCode && !writeEscape(escape.String()) {
-		return errors.New("could not notify the user: the terminal that raises it is not there")
+		return errors.New("notification failed: its terminal is gone")
 	}
 
 	return nil
@@ -131,5 +131,5 @@ func run(ctx context.Context, writeEscape EscapeWriter, args Args) (string, erro
 		return "", err
 	}
 
-	return "notified the user", nil
+	return "notification sent", nil
 }

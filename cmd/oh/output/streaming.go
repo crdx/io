@@ -31,8 +31,8 @@ func (self *StreamingMode) UnmarshalTOML(value any) error {
 	setting, isKnown := streamingModes[strings.TrimSpace(name)]
 	if !isKnown {
 		return fmt.Errorf(
-			"stream is %q, and wants to be one of %s",
-			name, strings.Join(streamingModeNames(), ", "),
+			"stream must be one of %s (got %q)",
+			strings.Join(streamingModeNames(), ", "), name,
 		)
 	}
 

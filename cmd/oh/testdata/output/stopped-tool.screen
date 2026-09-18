@@ -7,7 +7,7 @@ Building now.
 
 $ just build – 11s 3L 40M compiling age…
 
-The turn was interrupted.
+Turn stopped.
 
 
  leave it, the build is broken anyway
@@ -84,24 +84,14 @@ w
 –
 
 T
-h
-e
-t
 u
 r
 n
-w
-a
 s
-i
-n
 t
-e
-r
-r
-u
+o
 p
-t
+p
 e
 d
 .
@@ -188,7 +178,7 @@ Building now.
 
 $ just build – 11s 3L 40M compiling agent compiling toolbox note: the command was stopped after 12s…
 
-The turn was interrupted.
+Turn stopped.
 
 
  leave it, the build is broken anyway
@@ -207,8 +197,8 @@ now.
 
 $ j… – comp…
 
-The turn was
-interrupted.
+Turn
+stopped.
 
 
  leave it,
@@ -227,7 +217,7 @@ Building now.
 
 $ just build – 11s 3L 40M compiling agent compiling toolbox note: the command was stopped after 12s…
 
-The turn was interrupted.
+Turn stopped.
 
 
  leave it, the build is broken anyway

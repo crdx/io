@@ -10,17 +10,16 @@
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after  \e[0m\r
-\r\e[K\e[48;2;48;58;67m    12s, exit(2).                       \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exit(2).                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined:     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    getWidth                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                       \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after \e[0m\r
-\r\e[K\e[48;2;48;58;67m    14s.                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.\e[0m\r
 \r\e[K\e[48;2;48;58;67m    docs written                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    host at http://127.27.192.223:8080. \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at        \e[0m\r
+\r\e[K\e[48;2;48;58;67m    http://127.27.192.223:8080.         \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r
 \r\e[KBoth files are read. The build failed on\r
@@ -169,13 +168,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mT\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67mJ\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -375,13 +368,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mT\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67mJ\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -467,21 +454,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mE\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mx\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mp\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67md\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67mS\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -511,23 +484,19 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m0\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67me\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
+\r\e[K\e[48;2;48;58;67mx\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mp\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -672,13 +641,13 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m \e[38;2;76;154;4
 read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 \e[48;2;48;58;67m\e[0m
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
 go build ./...
 cmd/oh/draw.go:41:9: undefined: getWidth
 exit status 1\e[0m
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.
 docs written\e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.\e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.\e[0m
 \e[48;2;48;58;67m\e[0m
 Both files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs are written.
 
@@ -692,13 +661,13 @@ Both files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidt
 \e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \e[48;2;48;58;67m    docs written                                                                                    \e[0m\r
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 Both files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs are written.\r
@@ -713,34 +682,34 @@ Both files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidt
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    docs written                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[11A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    docs written                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[10A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    docs written                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth fil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The bui\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build faile\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an unde\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefine\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined `g\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined `getWi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the do\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs are w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs are writt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs are written.\e[?25h\e[?2026l\r
@@ -755,34 +724,34 @@ Both files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidt
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    docs written                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[11A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    docs written                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[10A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    docs written                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs are written.\e[?25h\e[?2026l\r
@@ -797,34 +766,34 @@ Both files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidt
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    docs written                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[11A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    docs written                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[10A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    docs written                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth fil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The bui\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build faile\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an unde\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefine\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined `g\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined `getWi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the do\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs are w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs are writt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs are written.\e[?25h\e[?2026l\r
@@ -847,7 +816,7 @@ Both files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidt
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mt…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m   \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exited: \e[0m\r
 \r\e[K\e[48;2;48;58;67m    failed  \e[0m\r
@@ -864,19 +833,17 @@ Both files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidt
 \r\e[K\e[48;2;48;58;67m    getWidth\e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    status 1\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m    \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m    exited: \e[0m\r
 \r\e[K\e[48;2;48;58;67m    complete\e[0m\r
 \r\e[K\e[48;2;48;58;67m    after   \e[0m\r
 \r\e[K\e[48;2;48;58;67m    14s.    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    docs    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    written \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed \e[0m\r
-\r\e[K\e[48;2;48;58;67m    sandbox \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox \e[0m\r
 \r\e[K\e[48;2;48;58;67m    port    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    8080 to \e[0m\r
-\r\e[K\e[48;2;48;58;67m    the host\e[0m\r
+\r\e[K\e[48;2;48;58;67m    8080    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exposed \e[0m\r
 \r\e[K\e[48;2;48;58;67m    at      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    http://1\e[0m\r
 \r\e[K\e[48;2;48;58;67m    27.27.19\e[0m\r
@@ -902,13 +869,13 @@ Both files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidt
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
 go build ./...
 cmd/oh/draw.go:41:9: undefined: getWidth
 exit status 1\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.
 docs written\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.\e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[0m
 
 \r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs are written.
@@ -923,13 +890,13 @@ docs written\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80m\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    docs written                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \r\e[KBoth files are read. The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the docs are written.\r

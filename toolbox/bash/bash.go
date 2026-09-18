@@ -155,7 +155,7 @@ func validate(args Args, hasNetworkChoice bool) error {
 	case "", LoopbackNetwork, HostNetwork:
 	default:
 		return fmt.Errorf(
-			"network must be %q or %q, got %q",
+			"network must be %q or %q (got %q)",
 			LoopbackNetwork, HostNetwork, args.Network,
 		)
 	}

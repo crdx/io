@@ -10,7 +10,7 @@
 {"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"mode_change","name":"w","state":"rxngl"}}
 {"kind":"event","event":{"kind":"model_message","text":"Noted, the workspace is read-only now."}}
-{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"The previous turn was stopped before it finished because the user changed what the harness is allowed to do. The workspace is now read-only."}]}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"Turn stopped because access changed. Workspace is now read-only."}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Noted, the workspace is read-only now."}]}}
 {"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"carry on"}}

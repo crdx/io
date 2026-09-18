@@ -307,7 +307,7 @@ func TestAnImageReturnedByAToolFollowsItInAMessageOfItsOwn(t *testing.T) {
 	if !strings.Contains(bodies[0], `"image_url":{"url":"data:image/png;base64,AQID"}`) {
 		t.Errorf("expected the image to be carried as an image part, got %s", bodies[0])
 	}
-	if !strings.Contains(bodies[0], `"text":"Attached image(s) from tool result:"`) {
+	if !strings.Contains(bodies[0], `"text":"Image attached."`) {
 		t.Errorf("expected the attachment to explain the image, got %s", bodies[0])
 	}
 }

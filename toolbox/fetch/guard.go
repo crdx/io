@@ -82,12 +82,12 @@ func networkNameFor(address netip.Addr) string {
 func refuseReservedAddress(_ string, address string, _ syscall.RawConn) error {
 	host, _, err := net.SplitHostPort(address)
 	if err != nil {
-		return fmt.Errorf("could not read the address %s: %w", address, err)
+		return fmt.Errorf("failed to read address %s: %w", address, err)
 	}
 
 	parsedAddress, err := netip.ParseAddr(host)
 	if err != nil {
-		return fmt.Errorf("could not read the address %s: %w", host, err)
+		return fmt.Errorf("failed to read address %s: %w", host, err)
 	}
 
 	if networkName := networkNameFor(parsedAddress); networkName != "" {

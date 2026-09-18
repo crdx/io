@@ -7,7 +7,7 @@
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbuild\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150m11s 3L 40M\e[0m \e[38;2;150;152;150mcompiling age…\e[0m\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m leave it, the build is broken anyway   \e[0m\r
@@ -85,24 +85,14 @@
 \r\e[K\e[38;2;150;152;150m–\e[0m\r
 \r
 \e[38;2;207;173;0mT\e[0m\r
-\e[38;2;207;173;0mh\e[0m\r
-\e[38;2;207;173;0me\e[0m\r
-\e[38;2;207;173;0mt\e[0m\r
 \e[38;2;207;173;0mu\e[0m\r
 \e[38;2;207;173;0mr\e[0m\r
 \e[38;2;207;173;0mn\e[0m\r
-\e[38;2;207;173;0mw\e[0m\r
-\e[38;2;207;173;0ma\e[0m\r
 \e[38;2;207;173;0ms\e[0m\r
-\e[38;2;207;173;0mi\e[0m\r
-\e[38;2;207;173;0mn\e[0m\r
 \e[38;2;207;173;0mt\e[0m\r
-\e[38;2;207;173;0me\e[0m\r
-\e[38;2;207;173;0mr\e[0m\r
-\e[38;2;207;173;0mr\e[0m\r
-\e[38;2;207;173;0mu\e[0m\r
+\e[38;2;207;173;0mo\e[0m\r
 \e[38;2;207;173;0mp\e[0m\r
-\e[38;2;207;173;0mt\e[0m\r
+\e[38;2;207;173;0mp\e[0m\r
 \e[38;2;207;173;0me\e[0m\r
 \e[38;2;207;173;0md\e[0m\r
 \e[38;2;207;173;0m.\e[0m\r
@@ -189,7 +179,7 @@ Building now.
 
 \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbuild\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150m11s 3L 40M\e[0m \e[38;2;150;152;150mcompiling agent compiling toolbox note: the command was stopped after 12s because the user sent a new message.\e[0m
 
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m
+\e[38;2;207;173;0mTurn stopped.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m leave it, the build is broken anyway\e[0m
@@ -205,7 +195,7 @@ Building now.\r
 \r
 \e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbuild\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150m11s 3L 40M\e[0m \e[38;2;150;152;150mcompiling agent compiling toolbox note: the command was stopped after 12s…\e[0m\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m leave it, the build is broken anyway                                                               \e[0m\r
@@ -222,7 +212,7 @@ Left alone.\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbuild\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbuild\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150m11s 3L 40M\e[0m \e[38;2;150;152;150mcompiling agent compiling toolbox note: the command was stopped after 12s…\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m leave it, the build is broken anyway                                                               \e[0m\r
@@ -239,7 +229,7 @@ Left alone.\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbuild\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbuild\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150m11s 3L 40M\e[0m \e[38;2;150;152;150mcompiling agent compiling toolbox note: the command was stopped after 12s…\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m leave it, the build is broken anyway                                                               \e[0m\r
@@ -256,7 +246,7 @@ Left alone.\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbuild\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbuild\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150m11s 3L 40M\e[0m \e[38;2;150;152;150mcompiling agent compiling toolbox note: the command was stopped after 12s…\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m leave it, the build is broken anyway                                                               \e[0m\r
@@ -276,8 +266,8 @@ Left alone.\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mj\e[0m\e[38;2;129;162;190m…\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mcomp…\e[0m\r
 \r
-\e[38;2;207;173;0mThe turn was\e[0m\r
-\e[38;2;207;173;0minterrupted.\e[0m\r
+\e[38;2;207;173;0mTurn\e[0m\r
+\e[38;2;207;173;0mstopped.\e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m leave it,  \e[0m\r
@@ -296,7 +286,7 @@ Left alone.\r
 
 \r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbuild\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150m11s 3L 40M\e[0m \e[38;2;150;152;150mcompiling agent compiling toolbox note: the command was stopped after 12s because the user sent a new message.\e[0m
 
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m
+\e[38;2;207;173;0mTurn stopped.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m leave it, the build is broken anyway\e[0m
@@ -312,7 +302,7 @@ Left alone.\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbuild\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150m11s 3L 40M\e[0m \e[38;2;150;152;150mcompiling agent compiling toolbox note: the command was stopped after 12s…\e[0m\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m leave it, the build is broken anyway                                                               \e[0m\r

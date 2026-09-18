@@ -28,7 +28,7 @@ The docs server is up.
 ## job_ended · +5s
 
 ```
-The job `build` exited: failed after 12s, exit(2).
+Job `build` exited: failed after 12s, exit(2).
 go build ./...
 cmd/oh/draw.go:41:9: undefined: getWidth
 exit status 1
@@ -37,7 +37,7 @@ exit status 1
 ## job_ended · +6s
 
 ```
-The job `seed` exited: complete after 14s.
+Job `seed` exited: complete after 14s.
 seeding the database
 
 [truncated at 2K of 58.6K; full output in /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]
@@ -46,33 +46,33 @@ seeding the database
 ## job_ended · +7s
 
 ```
-The job `empty` exited: complete after 15s (no output).
+Job `empty` exited: complete after 15s (no output).
 ```
 
 ## job_ended · +8s
 
 ```
-The job `` build`fast `` exited: complete after 16s.
+Job `` build`fast `` exited: complete after 16s.
 done
 ```
 
 ## job_ended · +9s
 
 ```
-The job `archive` exited: complete after 17s (no output).
+Job `archive` exited: complete after 17s (no output).
 note: the oldest 1K of output was dropped to keep the spool bounded.
 ```
 
 ## job_stop · +10s
 
 ```
-The job `docs` was stopped because the workspace was made read-only.
+Job `docs` stopped because the workspace was made read-only.
 ```
 
 ## job_stop · +11s
 
 ```
-The job `index` was stopped because access to /reference was revoked.
+Job `index` stopped because access to /reference was revoked.
 ```
 
 ## User · +12s
@@ -88,7 +88,7 @@ job: stale status rendering [ok, 1 line, 26B, call_2]
 ## job_stop · +15s
 
 ```
-The job `docs` was stopped from the keyboard.
+Job `docs` stopped from the keyboard.
 ```
 
 ## Tool calls · +16s

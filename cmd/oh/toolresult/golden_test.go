@@ -66,7 +66,7 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 		{
 			name: "edit failure",
 			exchange: resultExchange("edit", edit.Args{Path: "main.go", OldText: "old", NewText: "new"}, agent.ErrorStatus,
-				"old_text does not appear in the file"),
+				"old_text not found"),
 		},
 		{
 			name: "shell success",
@@ -85,7 +85,7 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 		{
 			name: "shell cancelled",
 			exchange: resultExchange("bash", bash.Args{Command: "sleep 30"}, agent.CancelledStatus,
-				"the command was stopped because the user pressed escape"),
+				"the command stopped because the user pressed escape"),
 		},
 		{
 			name: "list directory",
@@ -183,12 +183,12 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 		{
 			name: "title",
 			exchange: resultExchange("title", title.Args{Title: "render-useful-results"}, agent.SuccessStatus,
-				"the session is now titled \"render-useful-results\""),
+				"session titled \"render-useful-results\""),
 		},
 		{
 			name: "notification",
 			exchange: resultExchange("notify", notify.Args{Title: "Checks passed", Message: "Everything is green", Icon: "success"}, agent.SuccessStatus,
-				"notified the user"),
+				"notification sent"),
 		},
 		{
 			name: "unknown tool",

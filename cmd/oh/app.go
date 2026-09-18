@@ -1552,7 +1552,7 @@ func (self *App) titleNote() string {
 		return ""
 	}
 
-	return "This session has no title yet. Name the task with the " + title.Name + " tool."
+	return "Untitled session: use the " + title.Name + " tool."
 }
 
 const noticeSeparator = "\n\n"
@@ -1617,7 +1617,7 @@ func (self *App) interruptionNote() string {
 		return ""
 	}
 
-	note := "The previous turn was stopped before it finished"
+	note := "Turn stopped"
 	if reason := self.interruptionReason(); reason != "" {
 		note += " because " + reason
 	}

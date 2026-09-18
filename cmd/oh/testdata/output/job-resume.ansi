@@ -8,11 +8,9 @@
 \r\e[KBoth are up.\r
 \r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m were stopped\e[0m\r
-\r\e[K\e[48;2;48;58;67m    when the session last closed. Call  \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mjob(action="start", name="docs")\e[0m\e[48;2;48;58;67m    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    with no command to run its command  \e[0m\r
-\r\e[K\e[48;2;48;58;67m    again.                              \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the\e[0m\r
+\r\e[K\e[48;2;48;58;67m    session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with   \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mjob(action="start", name="docs")\e[0m\e[48;2;48;58;67m.   \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -104,13 +102,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mT\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67mJ\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -141,14 +133,6 @@
 \r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80mc\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80mh\e[0m\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mw\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mr\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -192,14 +176,6 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mn\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ml\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ma\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mc\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ml\e[0m\r
@@ -214,13 +190,35 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m.\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mC\e[0m\r
+\r\e[K\e[48;2;48;58;67mR\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ml\e[0m\r
+\r\e[K\e[48;2;48;58;67mr\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ml\e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80md\e[0m\e[48;2;48;58;67m\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80mo\e[0m\e[48;2;48;58;67m\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80mc\e[0m\e[48;2;48;58;67m\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80ms\e[0m\e[48;2;48;58;67m\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mw\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mi\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mh\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80mj\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -283,72 +281,6 @@
 \r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80m"\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80m)\e[0m\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mw\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mi\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mn\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mc\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mm\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mm\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ma\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mn\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67md\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mr\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mu\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mn\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mi\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mc\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mm\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mm\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ma\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mn\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67md\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ma\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mg\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ma\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mi\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mn\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m.\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -430,7 +362,7 @@
 Both are up.
 
 \e[48;2;48;58;67m\e[0m
-\e[48;2;48;58;67m 🤖 The jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m were stopped when the session last closed. Call \e[38;2;192;128;80mjob(action="start", name="docs")\e[0m\e[48;2;48;58;67m with no command to run its command again.\e[0m
+\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start", name="docs")\e[0m\e[48;2;48;58;67m.\e[0m
 \e[48;2;48;58;67m\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m carry on\e[0m
@@ -450,8 +382,8 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.
 Both are up.\r
 \r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
-\e[48;2;48;58;67m 🤖 The jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m were stopped when the session last closed. Call \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m     \e[0m\r
-\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m with no command to run its command again.                                          \e[0m\r
+\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m      \e[0m\r
+\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m.                                                                                   \e[0m\r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -473,8 +405,8 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth are up.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m were stopped when the session last closed. Call \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m     \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m with no command to run its command again.                                          \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m      \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m.                                                                                   \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -496,8 +428,8 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \e[?2026h\e[?25l\r\e[KBoth are up.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m were stopped when the session last closed. Call \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m     \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m with no command to run its command again.                                          \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m      \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m.                                                                                   \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -519,8 +451,8 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth are up.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m were stopped when the session last closed. Call \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m     \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m with no command to run its command again.                                          \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m      \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m.                                                                                   \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -545,27 +477,21 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r\e[KBoth are up.\r
 \r
 \r\e[K\e[48;2;48;58;67m            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The jobs\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Jobs    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and\e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m   \e[0m\r
-\r\e[K\e[48;2;48;58;67m    were    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    stopped \e[0m\r
 \r\e[K\e[48;2;48;58;67m    when the\e[0m\r
 \r\e[K\e[48;2;48;58;67m    session \e[0m\r
-\r\e[K\e[48;2;48;58;67m    last    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    closed. \e[0m\r
-\r\e[K\e[48;2;48;58;67m    Call    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    Restart \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    with    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mjob(acti\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mon="star\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mt",\e[0m\e[48;2;48;58;67m     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="do\e[0m\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mcs")\e[0m\e[48;2;48;58;67m    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    with no \e[0m\r
-\r\e[K\e[48;2;48;58;67m    command \e[0m\r
-\r\e[K\e[48;2;48;58;67m    to run  \e[0m\r
-\r\e[K\e[48;2;48;58;67m    its     \e[0m\r
-\r\e[K\e[48;2;48;58;67m    command \e[0m\r
-\r\e[K\e[48;2;48;58;67m    again.  \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mcs")\e[0m\e[48;2;48;58;67m.   \e[0m\r
 \r\e[K\e[48;2;48;58;67m            \e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
@@ -591,7 +517,7 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r\e[KBoth are up.
 
 \r\e[K\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m were stopped when the session last closed. Call \e[38;2;192;128;80mjob(action="start", name="docs")\e[0m\e[48;2;48;58;67m with no command to run its command again.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start", name="docs")\e[0m\e[48;2;48;58;67m.\e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[0m
 
 \e[48;2;52;53;65m\e[0m
@@ -612,8 +538,8 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r\e[KBoth are up.\r
 \r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m were stopped when the session last closed. Call \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m     \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m with no command to run its command again.                                          \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m      \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m.                                                                                   \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

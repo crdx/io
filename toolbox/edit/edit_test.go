@@ -81,7 +81,7 @@ func TestTextAppearingTwiceIsRefused(t *testing.T) {
 		t.Fatal("expected ambiguous text to be refused")
 	}
 
-	if !strings.Contains(err.Error(), "more than once") {
+	if !strings.Contains(err.Error(), "not unique") {
 		t.Errorf("expected the refusal to say why, got %q", err)
 	}
 

@@ -5,7 +5,7 @@
 expose 8080 ✓ 1L
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 The preview is exposed at the address in the tool result above.
@@ -17,7 +17,7 @@ The preview is exposed at the address in the tool result above.
 expose 8080 remove ✓ 1L
 
 
- 🤖 Stopped exposing sandbox port 8080 to the host.
+ 🤖 Sandbox port 8080 no longer exposed to host.
 
 
 Taken down.

@@ -363,20 +363,23 @@ type imageSource struct {
 	Data      string `json:"data"`
 }
 
-const attachmentNotice = "(see attached image)"
+const (
+	attachmentNotice  = "Image attached."
+	emptyOutputNotice = "No output."
+)
 
 func encodeToolOutput(result agent.ToolCallResult) any {
-	if result.Image.MediaType == "" || len(result.Image.Data) == 0 {
-		return result.Output
-	}
-
 	text := result.Output
 	if text == "" {
-		text = attachmentNotice
+		text = emptyOutputNotice
+	}
+	if result.Image.MediaType == "" || len(result.Image.Data) == 0 {
+		return text
 	}
 
 	return []any{
 		textBlock{Type: "text", Text: text},
+		textBlock{Type: "text", Text: attachmentNotice},
 		imageBlock{
 			Type: "image",
 			Source: imageSource{

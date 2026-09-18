@@ -113,7 +113,7 @@ func exec(ctx context.Context, root *file.Root, args Args) (tool.ToolCallResult,
 	mediaType := loadedFile.mediaType
 	if imageutil.IsSupported(mediaType) {
 		if args.Offset > 0 || args.Limit > 0 {
-			return tool.ToolCallResult{Metrics: metrics}, errors.New("line ranges are not supported for images")
+			return tool.ToolCallResult{Metrics: metrics}, errors.New("images do not support line ranges")
 		}
 
 		metrics.Kind = tool.MetricImage
@@ -146,7 +146,7 @@ func exec(ctx context.Context, root *file.Root, args Args) (tool.ToolCallResult,
 	}
 	if start >= len(lines) {
 		return tool.ToolCallResult{Metrics: metrics}, fmt.Errorf(
-			"offset %d is past the end of the file (%d lines)", args.Offset, len(lines),
+			"offset %d exceeds the file's %d lines", args.Offset, len(lines),
 		)
 	}
 
@@ -176,10 +176,10 @@ func oversizedResult(
 		if isImage {
 			noun = "image"
 		}
-		return tool.ToolCallResult{Metrics: metrics}, fmt.Errorf("%s is larger than the %d-byte limit", noun, maxFileBytes)
+		return tool.ToolCallResult{Metrics: metrics}, fmt.Errorf("%s exceeds the %s limit", noun, util.FormatBytes(maxFileBytes, bytePrecision))
 	}
 	if isImage {
-		return tool.ToolCallResult{Metrics: metrics}, errors.New("line ranges are not supported for images")
+		return tool.ToolCallResult{Metrics: metrics}, errors.New("images do not support line ranges")
 	}
 
 	loadedRange, err := loadRange(ctx, root, name, args)
@@ -238,7 +238,7 @@ func loadRange(ctx context.Context, root *file.Root, name string, args Args) (lo
 				separatorBytes = 1
 			}
 			if output.Len()+separatorBytes+len(content) > maxFileBytes {
-				return loadedRange{}, fmt.Errorf("range is larger than the %d-byte limit", maxFileBytes)
+				return loadedRange{}, fmt.Errorf("range exceeds the %s limit", util.FormatBytes(maxFileBytes, bytePrecision))
 			}
 			if separatorBytes > 0 {
 				output.WriteByte('\n')
@@ -266,7 +266,7 @@ func loadRange(ctx context.Context, root *file.Root, name string, args Args) (lo
 	result.totalLines = lineIndex
 	if result.totalLines > 0 && start >= result.totalLines {
 		return result, fmt.Errorf(
-			"offset %d is past the end of the file (%d lines)", args.Offset, result.totalLines,
+			"offset %d exceeds the file's %d lines", args.Offset, result.totalLines,
 		)
 	}
 

@@ -22,7 +22,7 @@ work: work [cancelled, 1 line, 67B, call-1]
 
 ## Interrupted · +0s
 
-The turn was interrupted because the user sent another message.
+Turn stopped because the user sent another message.
 
 ## User · +0s
 

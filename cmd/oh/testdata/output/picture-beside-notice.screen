@@ -11,8 +11,8 @@ read screenshot.png ✓
 read notes.md ✓
 
 
- 🤖 Exposed sandbox port 8080 to the
-    host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at
+    http://127.27.192.223:8080.
 
 
 The gradient is in place, and the
@@ -101,21 +101,7 @@ w
 
 🤖
 
-E
-
-x
-
-p
-
-o
-
-s
-
-e
-
-d
-
-s
+S
 
 a
 
@@ -145,23 +131,19 @@ t
 
 0
 
-t
-
-o
-
-t
-
-h
-
 e
 
-h
+x
+
+p
 
 o
 
 s
 
-t
+e
+
+d
 
 a
 
@@ -273,7 +255,7 @@ read screenshot.png ✓
 read notes.md ✓
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 The gradient is in place, and the preview is up.
@@ -292,11 +274,10 @@ read scre… ✓
 read note… ✓
 
 
- 🤖 Exposed
-    sandbox
+ 🤖 Sandbox
     port
-    8080 to
-    the host
+    8080
+    exposed
     at
     http://1
     27.27.19
@@ -321,7 +302,7 @@ read screenshot.png ✓
 read notes.md ✓
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 The gradient is in place, and the preview is up.

@@ -86,8 +86,8 @@ func TestEveryToolResultShapeHasAStableWireRepresentation(t *testing.T) {
 		toolCallID string
 		content    string
 	}{
-		{role: "tool", toolCallID: "empty", content: "(no tool output)"},
-		{role: "tool", toolCallID: "image", content: "(see attached image)"},
+		{role: "tool", toolCallID: "empty", content: "No output."},
+		{role: "tool", toolCallID: "image", content: "No output."},
 		{role: "tool", toolCallID: "error", content: "failed"},
 	} {
 		got := messages[index]
@@ -100,7 +100,7 @@ func TestEveryToolResultShapeHasAStableWireRepresentation(t *testing.T) {
 	if attachment.Role != "user" || attachment.ToolCallID != "" {
 		t.Errorf("got attachment message %+v", attachment)
 	}
-	wantAttachment := `[{"type":"text","text":"Attached image(s) from tool result:"},{"type":"image_url","image_url":{"url":"data:image/png;base64,AQID"}}]`
+	wantAttachment := `[{"type":"text","text":"Image attached."},{"type":"image_url","image_url":{"url":"data:image/png;base64,AQID"}}]`
 	if string(attachment.Content) != wantAttachment {
 		t.Errorf("got attachment %s, want %s", attachment.Content, wantAttachment)
 	}

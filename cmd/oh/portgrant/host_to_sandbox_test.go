@@ -182,7 +182,7 @@ func TestANoticeSaysWhichWayThePortWent(t *testing.T) {
 		t.Fatal(err)
 	}
 	notice, isSaid := HostToSandboxNotice(opened)
-	if !isSaid || notice != "Exposed sandbox port 8080 to the host at "+URL(testHost, 8080)+"." {
+	if !isSaid || notice != "Sandbox port 8080 exposed at "+URL(testHost, 8080)+"." {
 		t.Errorf("got %q and %t", notice, isSaid)
 	}
 
@@ -191,7 +191,7 @@ func TestANoticeSaysWhichWayThePortWent(t *testing.T) {
 		t.Fatal(err)
 	}
 	notice, isSaid = HostToSandboxNotice(closed)
-	if !isSaid || notice != "Stopped exposing sandbox port 8080 to the host." {
+	if !isSaid || notice != "Sandbox port 8080 no longer exposed to host." {
 		t.Errorf("got %q and %t", notice, isSaid)
 	}
 

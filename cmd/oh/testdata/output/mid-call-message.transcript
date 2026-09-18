@@ -25,7 +25,7 @@ read: cmd/oh/line/render.go [call_1]
 
 ## Interrupted · +4s
 
-The turn was interrupted.
+Turn stopped.
 
 ## User · +5s
 

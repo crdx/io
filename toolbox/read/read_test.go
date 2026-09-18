@@ -118,7 +118,7 @@ func TestAnImageCannotBeReadAsLines(t *testing.T) {
 	root := testRoot(t, "picture.png", content)
 
 	_, err := exec(t, root, `{"path":"picture.png","limit":1}`)
-	if err == nil || err.Error() != "line ranges are not supported for images" {
+	if err == nil || err.Error() != "images do not support line ranges" {
 		t.Errorf("expected a line range to be refused, got %v", err)
 	}
 }
@@ -238,12 +238,12 @@ func TestRangesOfFilesAboveTheReadLimit(t *testing.T) {
 	}
 
 	_, err = execute(fmt.Sprintf(`{"path":%q,"limit":1}`, name))
-	if err == nil || err.Error() != "range is larger than the 20971520-byte limit" {
+	if err == nil || err.Error() != "range exceeds the 20M limit" {
 		t.Errorf("unexpected oversized range failure: %v", err)
 	}
 
 	_, err = execute(fmt.Sprintf(`{"path":%q,"offset":3,"limit":1}`, name))
-	if err == nil || err.Error() != "offset 3 is past the end of the file (2 lines)" {
+	if err == nil || err.Error() != "offset 3 exceeds the file's 2 lines" {
 		t.Errorf("unexpected past-end failure: %v", err)
 	}
 
@@ -326,19 +326,19 @@ func TestFilesAboveTheReadLimitAreRefusedBeforeTheirContentsAreLoaded(t *testing
 			name:      "image",
 			header:    "\x89PNG\r\n\x1a\n",
 			arguments: `{"path":"large"}`,
-			failure:   "image is larger than the 20971520-byte limit",
+			failure:   "image exceeds the 20M limit",
 		},
 		{
 			name:      "image range",
 			header:    "\x89PNG\r\n\x1a\n",
 			arguments: `{"path":"large","limit":1}`,
-			failure:   "line ranges are not supported for images",
+			failure:   "images do not support line ranges",
 		},
 		{
 			name:      "text",
 			header:    "plain text",
 			arguments: `{"path":"large"}`,
-			failure:   "file is larger than the 20971520-byte limit",
+			failure:   "file exceeds the 20M limit",
 		},
 	}
 

@@ -2,7 +2,7 @@
  run a command on the host network while network access is withheld
 
 
-$ curl example.com ✗ 1L host network access is not granted; the user can grant it with ctrl+x n
+$ curl example.com ✗ 1L host network unavailable; ctrl+x n grants it
 
 Host network access is unavailable.
 

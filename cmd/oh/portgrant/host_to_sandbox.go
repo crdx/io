@@ -234,10 +234,10 @@ func HostToSandboxNotice(event agent.Event) (string, bool) {
 		return "", false
 	}
 	if slices.Contains(state.Ports, port) {
-		return "Exposed sandbox port " + event.Name + " to the host at " + URL(state.Host, port) + ".", true
+		return "Sandbox port " + event.Name + " exposed at " + URL(state.Host, port) + ".", true
 	}
 
-	return "Stopped exposing sandbox port " + event.Name + " to the host.", true
+	return "Sandbox port " + event.Name + " no longer exposed to host.", true
 }
 
 func ParsePort(writtenPort string) (uint16, error) {

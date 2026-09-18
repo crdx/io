@@ -195,8 +195,8 @@ func (self *proseStream) resetText() {
 }
 
 const (
-	SilentTurnNotice     = "The model ended the turn without answering."
-	PrefixRewriteNotice  = "The request changed before what had already been sent: "
+	SilentTurnNotice     = "Model returned no reply."
+	PrefixRewriteNotice  = "Request prefix changed: "
 	defaultCacheLifetime = 5 * time.Minute
 )
 

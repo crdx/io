@@ -105,13 +105,13 @@ func JobStopNotice(event agent.Event) (string, bool) {
 	}
 
 	if len(event.State) == 0 {
-		return fmt.Sprintf("The job %s was stopped from the keyboard.", markdown.CodeSpan(event.Name)), true
+		return fmt.Sprintf("Job %s stopped from the keyboard.", markdown.CodeSpan(event.Name)), true
 	}
 
 	var stopReason jobStopReason
 	if err := json.Unmarshal(event.State, &stopReason); err == nil && stopReason.Path != "" {
 		return fmt.Sprintf(
-			"The job %s was stopped because access to %s was revoked.", markdown.CodeSpan(event.Name), stopReason.Path,
+			"Job %s stopped because access to %s was revoked.", markdown.CodeSpan(event.Name), stopReason.Path,
 		), true
 	}
 
@@ -125,5 +125,5 @@ func JobStopNotice(event agent.Event) (string, bool) {
 		return "", false
 	}
 
-	return fmt.Sprintf("The job %s was stopped because %s.", markdown.CodeSpan(event.Name), reason), true
+	return fmt.Sprintf("Job %s stopped because %s.", markdown.CodeSpan(event.Name), reason), true
 }

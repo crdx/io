@@ -8,7 +8,7 @@ import (
 	"crdx.org/io/tool"
 )
 
-var ErrWithheld = errors.New("lookup access is not granted; the user can grant it with ctrl+x l")
+var ErrWithheld = errors.New("lookup access unavailable; ctrl+x l grants it")
 
 type Args struct {
 	Query string `json:"query"`
@@ -47,7 +47,7 @@ func New(
 				return "", tool.ToolCallMetrics{}, err
 			}
 			if output == "" {
-				return "", tool.ToolCallMetrics{}, errors.New("the lookup returned no content")
+				return "", tool.ToolCallMetrics{}, errors.New("lookup returned no content")
 			}
 
 			return output, tool.GetMetrics(output), nil

@@ -8,33 +8,32 @@
 \r\e[KThe docs server is up.\r
 \r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after  \e[0m\r
-\r\e[K\e[48;2;48;58;67m    12s, exit(2).                       \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exit(2).                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined:     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    getWidth                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                       \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after \e[0m\r
-\r\e[K\e[48;2;48;58;67m    14s.                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.\e[0m\r
 \r\e[K\e[48;2;48;58;67m    seeding the database                \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    [truncated at 2K of 58.6K; full     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    output in                           \e[0m\r
 \r\e[K\e[48;2;48;58;67m    /state/sessions/brave-otter/drops/ou\e[0m\r
 \r\e[K\e[48;2;48;58;67m    tput-3f2a1c8d4b5e6f70.txt]          \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after\e[0m\r
-\r\e[K\e[48;2;48;58;67m    15s (no output).                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s\e[0m\r
+\r\e[K\e[48;2;48;58;67m    (no output).                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    after 16s.                          \e[0m\r
 \r\e[K\e[48;2;48;58;67m    done                                \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    after 17s (no output).              \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after  \e[0m\r
+\r\e[K\e[48;2;48;58;67m    17s (no output).                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    note: the oldest 1K of output was   \e[0m\r
 \r\e[K\e[48;2;48;58;67m    dropped to keep the spool bounded.  \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped because the\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped because the        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    workspace was made read-only.       \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m was stopped because   \e[0m\r
-\r\e[K\e[48;2;48;58;67m    access to /reference was revoked.   \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to \e[0m\r
+\r\e[K\e[48;2;48;58;67m    /reference was revoked.             \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -44,8 +43,7 @@
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped from the   \e[0m\r
-\r\e[K\e[48;2;48;58;67m    keyboard.                           \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped from the keyboard. \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
@@ -141,13 +139,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mT\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67mJ\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -347,13 +339,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mT\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67mJ\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -646,13 +632,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mT\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67mJ\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -738,13 +718,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mT\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67mJ\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -828,13 +802,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mT\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67mJ\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -1036,13 +1004,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mT\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67mJ\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -1055,12 +1017,6 @@
 \r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80mc\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80ms\e[0m\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mw\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ma\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -1150,13 +1106,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mT\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67mJ\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -1171,12 +1121,6 @@
 \r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80me\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80mx\e[0m\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mw\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ma\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -1306,13 +1250,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mT\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67mJ\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -1325,12 +1263,6 @@
 \r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80mc\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80ms\e[0m\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mw\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ma\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -1432,21 +1364,21 @@
 The docs server is up.
 
 \e[48;2;48;58;67m\e[0m
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
 go build ./...
 cmd/oh/draw.go:41:9: undefined: getWidth
 exit status 1\e[0m
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.
 seeding the database\e[0m
 \e[48;2;48;58;67m    \e[0m
 \e[48;2;48;58;67m    [truncated at 2K of 58.6K; full output in /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]\e[0m
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).\e[0m
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).\e[0m
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.
 done\e[0m
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).
 note: the oldest 1K of output was dropped to keep the spool bounded.\e[0m
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped because the workspace was made read-only.\e[0m
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m was stopped because access to /reference was revoked.\e[0m
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped because the workspace was made read-only.\e[0m
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.\e[0m
 \e[48;2;48;58;67m\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m what happened to it\e[0m
@@ -1454,7 +1386,7 @@ note: the oldest 1K of output was dropped to keep the spool bounded.\e[0m
 \e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 \e[48;2;48;58;67m\e[0m
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped from the keyboard.\e[0m
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped from the keyboard.\e[0m
 \e[48;2;48;58;67m\e[0m
 \e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 \e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mprune\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
@@ -1471,22 +1403,22 @@ It was stopped when write access was withdrawn.
 The docs server is up.\r
 \r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \e[48;2;48;58;67m    seeding the database                                                                            \e[0m\r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \e[48;2;48;58;67m    [truncated at 2K of 58.6K; full output in                                                       \e[0m\r
 \e[48;2;48;58;67m    /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]                                  \e[0m\r
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).                                           \e[0m\r
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.                                                  \e[0m\r
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).                                               \e[0m\r
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.                                                      \e[0m\r
 \e[48;2;48;58;67m    done                                                                                            \e[0m\r
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).                                         \e[0m\r
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).                                             \e[0m\r
 \e[48;2;48;58;67m    note: the oldest 1K of output was dropped to keep the spool bounded.                            \e[0m\r
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped because the workspace was made read-only.                              \e[0m\r
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m was stopped because access to /reference was revoked.                             \e[0m\r
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped because the workspace was made read-only.                                      \e[0m\r
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.                                     \e[0m\r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -1496,7 +1428,7 @@ The docs server is up.\r
 \e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped from the keyboard.                                                     \e[0m\r
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped from the keyboard.                                                             \e[0m\r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
@@ -1514,22 +1446,22 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    seeding the database                                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    [truncated at 2K of 58.6K; full output in                                                       \e[0m\r
 \r\e[K\e[48;2;48;58;67m    /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]                                  \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).                                           \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.                                                  \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).                                               \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.                                                      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    done                                                                                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).                                         \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).                                             \e[0m\r
 \r\e[K\e[48;2;48;58;67m    note: the oldest 1K of output was dropped to keep the spool bounded.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped because the workspace was made read-only.                              \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m was stopped because access to /reference was revoked.                             \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped because the workspace was made read-only.                                      \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.                                     \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -1539,7 +1471,7 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped from the keyboard.                                                     \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped from the keyboard.                                                             \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
@@ -1557,22 +1489,22 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    seeding the database                                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    [truncated at 2K of 58.6K; full output in                                                       \e[0m\r
 \r\e[K\e[48;2;48;58;67m    /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]                                  \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).                                           \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.                                                  \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).                                               \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.                                                      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    done                                                                                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).                                         \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).                                             \e[0m\r
 \r\e[K\e[48;2;48;58;67m    note: the oldest 1K of output was dropped to keep the spool bounded.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped because the workspace was made read-only.                              \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m was stopped because access to /reference was revoked.                             \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped because the workspace was made read-only.                                      \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.                                     \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -1582,7 +1514,7 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped from the keyboard.                                                     \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped from the keyboard.                                                             \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
@@ -1600,22 +1532,22 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    seeding the database                                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    [truncated at 2K of 58.6K; full output in                                                       \e[0m\r
 \r\e[K\e[48;2;48;58;67m    /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]                                  \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).                                           \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.                                                  \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).                                               \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.                                                      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    done                                                                                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).                                         \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).                                             \e[0m\r
 \r\e[K\e[48;2;48;58;67m    note: the oldest 1K of output was dropped to keep the spool bounded.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped because the workspace was made read-only.                              \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m was stopped because access to /reference was revoked.                             \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped because the workspace was made read-only.                                      \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.                                     \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -1625,7 +1557,7 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped from the keyboard.                                                     \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped from the keyboard.                                                             \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
@@ -1648,7 +1580,7 @@ It was stopped when write access was withdrawn.\r
 \r\e[Kup.\r
 \r
 \r\e[K\e[48;2;48;58;67m            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m   \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exited: \e[0m\r
 \r\e[K\e[48;2;48;58;67m    failed  \e[0m\r
@@ -1665,8 +1597,7 @@ It was stopped when write access was withdrawn.\r
 \r\e[K\e[48;2;48;58;67m    getWidth\e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    status 1\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m    \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m    exited: \e[0m\r
 \r\e[K\e[48;2;48;58;67m    complete\e[0m\r
 \r\e[K\e[48;2;48;58;67m    after   \e[0m\r
@@ -1690,14 +1621,14 @@ It was stopped when write access was withdrawn.\r
 \r\e[K\e[48;2;48;58;67m    -3f2a1c8\e[0m\r
 \r\e[K\e[48;2;48;58;67m    d4b5e6f7\e[0m\r
 \r\e[K\e[48;2;48;58;67m    0.txt]  \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m   \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exited: \e[0m\r
 \r\e[K\e[48;2;48;58;67m    complete\e[0m\r
 \r\e[K\e[48;2;48;58;67m    after   \e[0m\r
 \r\e[K\e[48;2;48;58;67m    15s (no \e[0m\r
 \r\e[K\e[48;2;48;58;67m    output).\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mbuild`fa\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mst\e[0m\e[48;2;48;58;67m      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exited: \e[0m\r
@@ -1705,7 +1636,7 @@ It was stopped when write access was withdrawn.\r
 \r\e[K\e[48;2;48;58;67m    after   \e[0m\r
 \r\e[K\e[48;2;48;58;67m    16s.    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    done    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exited: \e[0m\r
 \r\e[K\e[48;2;48;58;67m    complete\e[0m\r
@@ -1723,8 +1654,7 @@ It was stopped when write access was withdrawn.\r
 \r\e[K\e[48;2;48;58;67m    the     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    spool   \e[0m\r
 \r\e[K\e[48;2;48;58;67m    bounded.\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m    stopped \e[0m\r
 \r\e[K\e[48;2;48;58;67m    because \e[0m\r
 \r\e[K\e[48;2;48;58;67m    the     \e[0m\r
@@ -1733,9 +1663,8 @@ It was stopped when write access was withdrawn.\r
 \r\e[K\e[48;2;48;58;67m    made    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    read-onl\e[0m\r
 \r\e[K\e[48;2;48;58;67m    y.      \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m   \e[0m\r
-\r\e[K\e[48;2;48;58;67m    was     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    stopped \e[0m\r
 \r\e[K\e[48;2;48;58;67m    because \e[0m\r
 \r\e[K\e[48;2;48;58;67m    access  \e[0m\r
@@ -1754,8 +1683,7 @@ It was stopped when write access was withdrawn.\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdo…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[K\e[48;2;48;58;67m            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m    stopped \e[0m\r
 \r\e[K\e[48;2;48;58;67m    from the\e[0m\r
 \r\e[K\e[48;2;48;58;67m    keyboard\e[0m\r
@@ -1780,21 +1708,21 @@ It was stopped when write access was withdrawn.\r
 \r\e[KThe docs server is up.
 
 \r\e[K\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
 go build ./...
 cmd/oh/draw.go:41:9: undefined: getWidth
 exit status 1\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.
 seeding the database\e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    [truncated at 2K of 58.6K; full output in /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.
 done\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).
 note: the oldest 1K of output was dropped to keep the spool bounded.\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped because the workspace was made read-only.\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m was stopped because access to /reference was revoked.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped because the workspace was made read-only.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.\e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[0m
 
 \e[48;2;52;53;65m\e[0m
@@ -1803,7 +1731,7 @@ note: the oldest 1K of output was dropped to keep the spool bounded.\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 \r\e[K\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped from the keyboard.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped from the keyboard.\e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[0m
 
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
@@ -1821,22 +1749,22 @@ note: the oldest 1K of output was dropped to keep the spool bounded.\e[0m\r
 \r\e[KThe docs server is up.\r
 \r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mseed\e[0m\e[48;2;48;58;67m exited: complete after 14s.                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    seeding the database                                                                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    [truncated at 2K of 58.6K; full output in                                                       \e[0m\r
 \r\e[K\e[48;2;48;58;67m    /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]                                  \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).                                           \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.                                                  \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mempty\e[0m\e[48;2;48;58;67m exited: complete after 15s (no output).                                               \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild`fast\e[0m\e[48;2;48;58;67m exited: complete after 16s.                                                      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    done                                                                                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).                                         \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80marchive\e[0m\e[48;2;48;58;67m exited: complete after 17s (no output).                                             \e[0m\r
 \r\e[K\e[48;2;48;58;67m    note: the oldest 1K of output was dropped to keep the spool bounded.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped because the workspace was made read-only.                              \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m was stopped because access to /reference was revoked.                             \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped because the workspace was made read-only.                                      \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mindex\e[0m\e[48;2;48;58;67m stopped because access to /reference was revoked.                                     \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -1846,7 +1774,7 @@ note: the oldest 1K of output was dropped to keep the spool bounded.\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m was stopped from the keyboard.                                                     \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m stopped from the keyboard.                                                             \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r

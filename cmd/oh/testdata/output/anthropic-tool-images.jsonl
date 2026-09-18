@@ -10,7 +10,7 @@
 {"kind":"event","event":{"kind":"model_message","text":"I can see both pictures."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"show me both pictures"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_1","name":"snapshot","input":{}},{"type":"tool_use","id":"toolu_2","name":"thumbnail","input":{}}]}}
-{"kind":"item","payload":{"content":[{"content":[{"text":"snapshot.png","type":"text"},{"source":{"data":"[image/png 2400x1200]","media_type":"image/png","type":"base64"},"type":"image"}],"tool_use_id":"toolu_1","type":"tool_result"},{"content":[{"text":"thumbnail.png","type":"text"},{"source":{"data":"[image/png 800x600]","media_type":"image/png","type":"base64"},"type":"image"}],"tool_use_id":"toolu_2","type":"tool_result"}],"role":"user"}}
+{"kind":"item","payload":{"content":[{"content":[{"text":"snapshot.png","type":"text"},{"text":"Image attached.","type":"text"},{"source":{"data":"[image/png 2400x1200]","media_type":"image/png","type":"base64"},"type":"image"}],"tool_use_id":"toolu_1","type":"tool_result"},{"content":[{"text":"thumbnail.png","type":"text"},{"text":"Image attached.","type":"text"},{"source":{"data":"[image/png 800x600]","media_type":"image/png","type":"base64"},"type":"image"}],"tool_use_id":"toolu_2","type":"tool_result"}],"role":"user"}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"I can see both pictures."}]}}
 {"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"describe the larger one"}}

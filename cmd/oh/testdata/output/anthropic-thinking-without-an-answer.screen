@@ -6,10 +6,10 @@ Auditing what the goldens draw.
 audit audit ✓ 1L
 I am adding the two missing cases and wiring them up.
 
-The model ended the turn without answering.
+Model returned no reply.
 
 
- 🤖 The previous response ended without a reply. Carry on from where it stopped.
+ 🤖 No reply was returned; continue from where you stopped.
 
 
 Both cases are covered now.

@@ -216,7 +216,7 @@ func TestACancelledContextStopsTheSearch(t *testing.T) {
 	if !errors.Is(err, context.Canceled) {
 		t.Errorf("expected context cancellation, got %v", err)
 	}
-	if want := "the search was stopped because the user pressed escape"; err.Error() != want {
+	if want := "the search stopped because the user pressed escape"; err.Error() != want {
 		t.Errorf("got %q, want %q", err.Error(), want)
 	}
 	if took := time.Since(startedAt); took > 2*time.Second {

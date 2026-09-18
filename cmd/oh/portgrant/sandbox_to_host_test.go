@@ -33,7 +33,7 @@ func TestAHostPortCanBeExposedToTheSandboxAndRevoked(t *testing.T) {
 	if !slices.Equal(exposed, []uint16{8080}) || !slices.Equal(grants.GetCurrent(), []uint16{8080}) {
 		t.Errorf("got exposer %v and grants %v, want [8080] in both", exposed, grants.GetCurrent())
 	}
-	if notice, isSaid := SandboxToHostNotice(event); !isSaid || notice != "Exposed host loopback port 8080 to the sandbox." {
+	if notice, isSaid := SandboxToHostNotice(event); !isSaid || notice != "Host loopback port 8080 exposed to sandbox." {
 		t.Errorf("got %q, %v", notice, isSaid)
 	}
 
@@ -44,7 +44,7 @@ func TestAHostPortCanBeExposedToTheSandboxAndRevoked(t *testing.T) {
 	if len(exposed) != 0 || len(grants.GetCurrent()) != 0 {
 		t.Errorf("got exposer %v and grants %v, want none", exposed, grants.GetCurrent())
 	}
-	if notice, isSaid := SandboxToHostNotice(event); !isSaid || notice != "Stopped exposing host loopback port 8080 to the sandbox." {
+	if notice, isSaid := SandboxToHostNotice(event); !isSaid || notice != "Host loopback port 8080 no longer exposed to sandbox." {
 		t.Errorf("got %q, %v", notice, isSaid)
 	}
 }

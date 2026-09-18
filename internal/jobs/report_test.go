@@ -44,8 +44,8 @@ func TestJobOutputRemainsBelowTheStatusLine(t *testing.T) {
 }
 
 func TestANoOutputMarkerStaysInsideStatusPunctuation(t *testing.T) {
-	want := "The job `build` exited: complete (no output)."
-	if got := Report("The job `build` exited: complete.", "", 0); got != want {
+	want := "Job `build` exited: complete (no output)."
+	if got := Report("Job `build` exited: complete.", "", 0); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

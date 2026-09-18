@@ -38,5 +38,5 @@ func Error(ctx context.Context, subject string) error {
 		return stopError{sentence: subject + " ran out of time", cause: context.DeadlineExceeded}
 	}
 
-	return stopError{sentence: subject + " was stopped" + Phrase(ctx), cause: context.Canceled}
+	return stopError{sentence: subject + " stopped" + Phrase(ctx), cause: context.Canceled}
 }

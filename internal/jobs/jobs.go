@@ -35,19 +35,19 @@ const (
 )
 
 var (
-	ErrClosed   = errors.New("no more jobs can be started in this session")
-	ErrTaken    = errors.New("a job of that name is already running")
-	ErrNotFound = errors.New("there is no job of that name")
+	ErrClosed   = errors.New("session is closed to new jobs")
+	ErrTaken    = errors.New("job already running")
+	ErrNotFound = errors.New("job not found")
 )
 
 func ValidateName(name string) error {
 	if len(name) == 0 || len(name) > NameLengthLimit {
-		return fmt.Errorf("job name wants 1–%d characters from [a-z0-9-]", NameLengthLimit)
+		return fmt.Errorf("job name must match [a-z0-9-]{1,%d}", NameLengthLimit)
 	}
 
 	for _, character := range name {
 		if (character < 'a' || character > 'z') && (character < '0' || character > '9') && character != '-' {
-			return fmt.Errorf("job name wants 1–%d characters from [a-z0-9-]", NameLengthLimit)
+			return fmt.Errorf("job name must match [a-z0-9-]{1,%d}", NameLengthLimit)
 		}
 	}
 

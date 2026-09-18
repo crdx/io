@@ -37,11 +37,11 @@ func New(getGrants func() []pathgrant.Grant) segment.Factory {
 		case "", base, short, full:
 		default:
 			return nil, fmt.Errorf(
-				"type is %q, and wants to be omitted or %q, %q, or %q",
-				args.Type,
+				"type must be omitted, %q, %q, or %q (got %q)",
 				base,
 				short,
 				full,
+				args.Type,
 			)
 		}
 		return state{getGrants: getGrants, pathType: args.Type}, nil

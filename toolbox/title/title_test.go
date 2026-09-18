@@ -51,7 +51,7 @@ func TestTitlingASessionRecordsDurableState(t *testing.T) {
 	if got := titleOf(t, result.State); got != "fix the picker clipping" {
 		t.Errorf("recorded %q", got)
 	}
-	if !strings.Contains(result.Output, `now titled "fix the picker clipping"`) {
+	if !strings.Contains(result.Output, `session titled "fix the picker clipping"`) {
 		t.Errorf("said %q", result.Output)
 	}
 }
@@ -85,7 +85,7 @@ func TestTitlingASessionWhatItIsCalledChangesNothing(t *testing.T) {
 	if len(again.State) != 0 {
 		t.Errorf("titling it the same thing recorded %s", again.State)
 	}
-	if !strings.Contains(again.Output, "already titled") {
+	if !strings.Contains(again.Output, "title unchanged") {
 		t.Errorf("said %q", again.Output)
 	}
 

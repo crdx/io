@@ -17,7 +17,7 @@ run a command on the host network while network access is withheld
 ## Tool calls · +0s
 
 ```
-bash: curl example.com [error, 1 line, 71B, call-1]
+bash: curl example.com [error, 1 line, 44B, call-1]
 ```
 
 ## Assistant · +0s

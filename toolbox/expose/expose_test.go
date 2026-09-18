@@ -56,7 +56,8 @@ func TestExposingSaysWhereTheUserCanOpenIt(t *testing.T) {
 	if !strings.Contains(said, "http://127.9.9.9:8080") {
 		t.Errorf("got %q, want the address the user can open", said)
 	}
-	if !strings.Contains(said, "Give the user this URL") || !strings.Contains(said, "use localhost inside the sandbox") {
+	if !strings.Contains(said, "Use http://127.9.9.9:8080 for the user") ||
+		!strings.Contains(said, "use localhost:8080 inside the sandbox") {
 		t.Errorf("got %q, want instructions for using the two addresses", said)
 	}
 }
@@ -71,8 +72,8 @@ func TestHidingClosesThePortAndSaysSo(t *testing.T) {
 	if len(ports.open) != 0 {
 		t.Errorf("got open ports %v, want none", ports.open)
 	}
-	if !strings.Contains(said, "no longer exposed") {
-		t.Errorf("got %q, want the port to be said to have gone", said)
+	if said != "Exposure removed." {
+		t.Errorf("got %q, want the exposure to be removed", said)
 	}
 }
 

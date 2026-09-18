@@ -744,7 +744,7 @@ func RenderFailure(event agent.Event) string {
 }
 
 const (
-	contextExceededNotice = "The conversation no longer fits the context window."
+	contextExceededNotice = "Context window full."
 	forkCommand           = "/fork"
 )
 
@@ -755,7 +755,7 @@ func RenderContextExceeded(event agent.Event, modelName string) (string, bool) {
 
 	notice := contextExceededNotice
 	if modelName != "" {
-		notice += " Run " + forkCommand + " " + modelName + " to carry on in a new session."
+		notice += " Run " + forkCommand + " " + modelName + " to continue in a new session."
 	}
 
 	return notice, true

@@ -5,8 +5,8 @@
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
 \e[?7l\r\e[K\e[48;2;48;58;67m                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after  \e[0m\r
-\r\e[K\e[48;2;48;58;67m    12s, exit(2).                       \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exit(2).                            \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined:     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    getWidth                            \e[0m\r
@@ -102,13 +102,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mT\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67mJ\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -546,7 +540,7 @@
 \e[48;2;52;53;65m think it through while the build finishes\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;48;58;67m\e[0m
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
 go build ./...
 cmd/oh/draw.go:41:9: undefined: getWidth
 exit status 1\e[0m
@@ -561,7 +555,7 @@ The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read 
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
-\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
@@ -579,7 +573,7 @@ The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read 
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
@@ -597,7 +591,7 @@ The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read 
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
@@ -615,7 +609,7 @@ The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read 
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
@@ -637,7 +631,7 @@ The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read 
 \e[48;2;52;53;65m            \e[0m\r
 \r
 \e[?7l\r\e[K\e[48;2;48;58;67m            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m   \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exited: \e[0m\r
 \r\e[K\e[48;2;48;58;67m    failed  \e[0m\r
@@ -690,7 +684,7 @@ The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read 
 \e[48;2;52;53;65m think it through while the build finishes\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
 go build ./...
 cmd/oh/draw.go:41:9: undefined: getWidth
 exit status 1\e[0m\r
@@ -706,7 +700,7 @@ exit status 1\e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?7l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
 \r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r

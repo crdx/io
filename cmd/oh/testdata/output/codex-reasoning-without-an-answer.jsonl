@@ -10,7 +10,7 @@
 {"kind":"event","event":{"kind":"harness_poke"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Still weighing it."}}
 {"kind":"event","event":{"kind":"silent_turn"}}
-{"kind":"item","payload":{"role":"user","content":"The previous response ended without a reply. Carry on from where it stopped."}}
+{"kind":"item","payload":{"role":"user","content":"No reply was returned; continue from where you stopped."}}
 {"kind":"item","payload":{"id":"reasoning-2","type":"reasoning","content":[],"encrypted_content":"sealed-2","summary":[{"type":"summary_text","text":"Still weighing it."}]}}
 {"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"say something this time"}}

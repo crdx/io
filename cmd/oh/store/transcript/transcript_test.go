@@ -665,11 +665,11 @@ func TestTranscriptNamesWhyATurnWasInterrupted(t *testing.T) {
 	}{
 		"with a cause": {
 			cause: interrupt.Escape,
-			want:  "The turn was interrupted because the user pressed escape.",
+			want:  "Turn stopped because the user pressed escape.",
 		},
 		"without a cause": {
 			cause: "",
-			want:  "The turn was interrupted.",
+			want:  "Turn stopped.",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -776,11 +776,11 @@ func TestTranscriptRecordsBothPortDirections(t *testing.T) {
 	}{
 		"host to sandbox": {event: hostToSandbox, want: []string{
 			"## Host → sandbox · 1 sandbox port · changed port 8080",
-			"Exposed sandbox port 8080 to the host at http://127.9.9.9:8080.",
+			"Sandbox port 8080 exposed at http://127.9.9.9:8080.",
 		}},
 		"sandbox to host": {event: sandboxToHost, want: []string{
 			"## Sandbox → host · 1 host port · changed host port 3000",
-			"Exposed host loopback port 3000 to the sandbox.",
+			"Host loopback port 3000 exposed to sandbox.",
 		}},
 	} {
 		t.Run(name, func(t *testing.T) {

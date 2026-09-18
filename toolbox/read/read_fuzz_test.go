@@ -88,7 +88,7 @@ func referenceRangeSelect(content string, offset int, limit int) (string, int64,
 		start = offset - 1
 	}
 	if start >= len(lines) {
-		return "", 0, fmt.Errorf("offset %d is past the end of the file (%d lines)", offset, len(lines))
+		return "", 0, fmt.Errorf("offset %d exceeds the file's %d lines", offset, len(lines))
 	}
 
 	end := len(lines)

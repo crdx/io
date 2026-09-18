@@ -11,8 +11,8 @@
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    host at http://127.27.192.223:8080. \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at        \e[0m\r
+\r\e[K\e[48;2;48;58;67m    http://127.27.192.223:8080.         \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r
 \r\e[KThe gradient is in place, and the\r
@@ -102,21 +102,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mE\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mx\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mp\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67md\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67mS\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -146,23 +132,19 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m0\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67me\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
+\r\e[K\e[48;2;48;58;67mx\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mp\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -271,7 +253,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;
 read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m
 
 \e[48;2;48;58;67m\e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.\e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.\e[0m
 \e[48;2;48;58;67m\e[0m
 The gradient is in place, and the preview is up.
 
@@ -287,7 +269,7 @@ The gradient is in place, and the preview is up.
 \e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 The gradient is in place, and the preview is up.\r
@@ -301,19 +283,19 @@ The gradient is in place, and the preview is up.\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[5A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e_Ga=T,U=1,q=2,f=100,t=d,i=<identifier>,c=12,r=3,m=0;<data>\e\\<picture>􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̍̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̎̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grad\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the pr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the previe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the preview is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the preview is up.\e[?25h\e[?2026l\r
@@ -327,19 +309,19 @@ The gradient is in place, and the preview is up.\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[5A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e_Ga=T,U=1,q=2,f=100,t=d,i=<identifier>,c=12,r=3,m=0;<data>\e\\<picture>􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̍̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̎̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe gradient is in place, and the preview is up.\e[?25h\e[?2026l\r
@@ -353,19 +335,19 @@ The gradient is in place, and the preview is up.\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[5A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e_Ga=T,U=1,q=2,f=100,t=d,i=<identifier>,c=12,r=3,m=0;<data>\e\\<picture>􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̍̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̎̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grad\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the pr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the previe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the preview is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe gradient is in place, and the preview is up.\e[?25h\e[?2026l\r
@@ -385,11 +367,10 @@ The gradient is in place, and the preview is up.\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mnote…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed \e[0m\r
-\r\e[K\e[48;2;48;58;67m    sandbox \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox \e[0m\r
 \r\e[K\e[48;2;48;58;67m    port    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    8080 to \e[0m\r
-\r\e[K\e[48;2;48;58;67m    the host\e[0m\r
+\r\e[K\e[48;2;48;58;67m    8080    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exposed \e[0m\r
 \r\e[K\e[48;2;48;58;67m    at      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    http://1\e[0m\r
 \r\e[K\e[48;2;48;58;67m    27.27.19\e[0m\r
@@ -411,7 +392,7 @@ The gradient is in place, and the preview is up.\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.\e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[0m
 
 \r\e[KThe gradient is in place, and the preview is up.
@@ -428,7 +409,7 @@ The gradient is in place, and the preview is up.\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \r\e[KThe gradient is in place, and the preview is up.\r

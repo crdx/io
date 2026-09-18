@@ -26,7 +26,7 @@ expose: 8005 [call_5]
 ## Host → sandbox · 1 sandbox port · changed port 8001 · +7s
 
 ```
-Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.
+Sandbox port 8001 exposed at http://127.27.192.223:8001.
 ```
 
 ## Tool calls · +8s
@@ -38,7 +38,7 @@ expose [ok, call_1]
 ## Host → sandbox · 2 sandbox ports · changed port 8002 · +9s
 
 ```
-Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.
+Sandbox port 8002 exposed at http://127.27.192.223:8002.
 ```
 
 ## Tool calls · +10s
@@ -50,7 +50,7 @@ expose [ok, call_2]
 ## Host → sandbox · 3 sandbox ports · changed port 8003 · +11s
 
 ```
-Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.
+Sandbox port 8003 exposed at http://127.27.192.223:8003.
 ```
 
 ## Tool calls · +12s
@@ -62,7 +62,7 @@ expose [ok, call_3]
 ## Host → sandbox · 4 sandbox ports · changed port 8004 · +13s
 
 ```
-Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.
+Sandbox port 8004 exposed at http://127.27.192.223:8004.
 ```
 
 ## Tool calls · +14s
@@ -74,7 +74,7 @@ expose [ok, call_4]
 ## Host → sandbox · 5 sandbox ports · changed port 8005 · +15s
 
 ```
-Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.
+Sandbox port 8005 exposed at http://127.27.192.223:8005.
 ```
 
 ## Tool calls · +16s

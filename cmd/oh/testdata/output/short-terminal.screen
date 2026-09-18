@@ -31,7 +31,7 @@ read
 read
 
 
- 🤖 The job build exited: failed, exit(2).
+ 🤖 Job build exited: failed, exit(2).
     undefined: getWidth
     exit status 1
 
@@ -52,11 +52,11 @@ expose 8004 ✓
 expose 8005 ✓
 
 
- 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.
- 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.
- 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.
- 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.
- 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.
+ 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.
+ 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.
+ 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.
+ 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.
+ 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.
 
 
 All five previews are up.

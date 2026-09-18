@@ -7,7 +7,7 @@ Reading and running commands, but not
 writing.
 
 
- 🤖 The workspace is now read-write.
+ 🤖 Workspace is now read-write.
 
 
 
@@ -17,7 +17,7 @@ writing.
 Writing it down.
 
 
- 🤖 The bash tool is now refused.
+ 🤖 Bash is now refused.
 
 
 Done.
@@ -116,13 +116,7 @@ g
 
 🤖
 
-T
-
-h
-
-e
-
-w
+W
 
 o
 
@@ -223,27 +217,13 @@ n
 
 🤖
 
-T
-
-h
-
-e
-
-b
+B
 
 a
 
 s
 
 h
-
-t
-
-o
-
-o
-
-l
 
 i
 
@@ -285,7 +265,7 @@ e
 Reading and running commands, but not writing.
 
 
- 🤖 The workspace is now read-write.
+ 🤖 Workspace is now read-write.
 
 
 
@@ -295,7 +275,7 @@ Reading and running commands, but not writing.
 Writing it down.
 
 
- 🤖 The bash tool is now refused.
+ 🤖 Bash is now refused.
 
 
 Done.
@@ -313,8 +293,7 @@ but not
 writing.
 
 
- 🤖 The
-    workspac
+ 🤖 Workspac
     e is now
     read-wri
     te.
@@ -329,8 +308,7 @@ Writing it
 down.
 
 
- 🤖 The bash
-    tool is
+ 🤖 Bash is
     now
     refused.
 
@@ -344,7 +322,7 @@ Done.
 Reading and running commands, but not writing.
 
 
- 🤖 The workspace is now read-write.
+ 🤖 Workspace is now read-write.
 
 
 
@@ -354,7 +332,7 @@ Reading and running commands, but not writing.
 Writing it down.
 
 
- 🤖 The bash tool is now refused.
+ 🤖 Bash is now refused.
 
 
 Done.

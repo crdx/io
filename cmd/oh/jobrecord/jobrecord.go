@@ -52,7 +52,7 @@ func EndedNotice(event agent.Event) (string, bool) {
 	}
 
 	return jobs.Report(
-		"The job "+markdown.CodeSpan(conclusion.Snapshot.Name)+" exited: "+conclusion.Snapshot.Outcome()+".",
+		"Job "+markdown.CodeSpan(conclusion.Snapshot.Name)+" exited: "+conclusion.Snapshot.Outcome()+".",
 		conclusion.Output,
 		conclusion.DroppedBytes,
 	), true
@@ -80,12 +80,12 @@ func EndedWithSessionNotice(event agent.Event) (string, bool) {
 		formattedNames = append(formattedNames, markdown.CodeSpan(name))
 	}
 
-	subject := "The job " + formattedNames[0] + " was"
+	subject := "Job " + formattedNames[0]
 	if len(formattedNames) > 1 {
-		subject = "The jobs " + strings.Join(formattedNames[:len(formattedNames)-1], ", ") +
-			" and " + formattedNames[len(formattedNames)-1] + " were"
+		subject = "Jobs " + strings.Join(formattedNames[:len(formattedNames)-1], ", ") +
+			" and " + formattedNames[len(formattedNames)-1]
 	}
 
-	return subject + " stopped when the session last closed. " +
-		"Call `job(action=\"start\", name=\"" + names[0] + "\")` with no command to run its command again.", true
+	return subject + " stopped when the session closed. " +
+		"Restart " + formattedNames[0] + " with `job(action=\"start\", name=\"" + names[0] + "\")`.", true
 }

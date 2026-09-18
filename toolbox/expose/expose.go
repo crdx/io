@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	actionAdd    = "add"
-	actionRemove = "remove"
-	actionList   = "list"
+	actionAdd     = "add"
+	actionRemove  = "remove"
+	actionList    = "list"
+	actionChoices = "add, remove, or list"
 )
 
 var actions = []string{actionAdd, actionRemove, actionList}
@@ -67,17 +68,17 @@ func Describe(args Args) (string, string) {
 
 func validate(args Args) error {
 	if !slices.Contains(actions, args.Action) {
-		return fmt.Errorf("action is %q, and wants to be one of: %s", args.Action, strings.Join(actions, ", "))
+		return fmt.Errorf("action must be %s (got %q)", actionChoices, args.Action)
 	}
 	if args.Action == actionList {
 		if args.Port != 0 {
-			return errors.New("port cannot be used for list")
+			return errors.New("list does not accept port")
 		}
 
 		return nil
 	}
 	if args.Port < 1 || args.Port > 65535 {
-		return fmt.Errorf("port is %d, and wants to be a number from 1 to 65535", args.Port)
+		return fmt.Errorf("port must be 1–65535 (got %d)", args.Port)
 	}
 
 	return nil
@@ -96,15 +97,14 @@ func run(ports Ports, args Args) (string, tool.ToolCallMetrics, error) {
 			return "", tool.ToolCallMetrics{}, err
 		}
 
-		return "Port " + strconv.Itoa(args.Port) + " is exposed at " + address +
-			". Give the user this URL when referring to the service; use localhost inside the sandbox " +
-			"for your own checks.", tool.ToolCallMetrics{}, nil
+		return "Use " + address + " for the user; use localhost:" + strconv.Itoa(args.Port) +
+			" inside the sandbox.", tool.ToolCallMetrics{}, nil
 	case actionRemove:
 		if err := ports.Hide(port); err != nil {
 			return "", tool.ToolCallMetrics{}, err
 		}
 
-		return "Port " + strconv.Itoa(args.Port) + " is no longer exposed.", tool.ToolCallMetrics{}, nil
+		return "Exposure removed.", tool.ToolCallMetrics{}, nil
 	case actionList:
 		return list(ports), tool.ToolCallMetrics{}, nil
 	}
@@ -117,7 +117,7 @@ func portOf(args Args) (uint16, error) {
 		return 0, nil
 	}
 	if args.Port < 1 || args.Port > 65535 {
-		return 0, fmt.Errorf("port is %d, and wants to be a number from 1 to 65535", args.Port)
+		return 0, fmt.Errorf("port must be 1–65535 (got %d)", args.Port)
 	}
 
 	return uint16(args.Port), nil

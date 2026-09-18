@@ -81,7 +81,7 @@ func TestWriteSizesUseCompactBytes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if result != "wrote 1.5K to result.txt" {
+	if result != "wrote 1.5K" {
 		t.Errorf("got %q, want compact write result", result)
 	}
 }

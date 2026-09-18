@@ -26,7 +26,7 @@ the stream ended before the response did
 
 ## Interrupted · +0s
 
-The turn was interrupted because the user pressed escape.
+Turn stopped because the user pressed escape.
 
 ## User · +0s
 

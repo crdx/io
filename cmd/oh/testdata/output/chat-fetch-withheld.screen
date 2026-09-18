@@ -2,7 +2,7 @@
  fetch a page while network access is withheld
 
 
-fetch https://example.com/news markdown ✗ 1L network access is not granted; the user can grant it w…
+fetch https://example.com/news markdown ✗ 1L network access unavailable; ctrl+x n grants it
 
 Network access is unavailable.
 

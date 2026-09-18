@@ -93,5 +93,5 @@
 \r\e[K\e[48;2;48;58;67m    Exit code: 0                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted because the user pressed ctrl+d.\e[0m\r
+\e[38;2;207;173;0mTurn stopped because the user pressed ctrl+d.\e[0m\r
 

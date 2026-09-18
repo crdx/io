@@ -188,48 +188,48 @@ func withdrawal(withdrawnCaps Set) string {
 
 func workspaceNotice(isWritable bool) string {
 	if isWritable {
-		return "The workspace is now read-write."
+		return "Workspace is now read-write."
 	}
 
-	return "The workspace is now read-only."
+	return "Workspace is now read-only."
 }
 
 func shellNotice(isGranted bool) string {
 	if isGranted {
-		return "The bash tool can now run shell commands."
+		return "Bash is now available."
 	}
 
-	return "The bash tool is now refused."
+	return "Bash is now refused."
 }
 
 func repositoryNotice(isWritable bool) string {
 	if isWritable {
-		return "The .git directory is now read-write."
+		return ".git is now read-write."
 	}
 
-	return "The .git directory is now read-only."
+	return ".git is now read-only."
 }
 
 func lookupNotice(isGranted bool) string {
 	if isGranted {
-		return "The lookup tool can now access the internet."
+		return "Lookup can now access the internet."
 	}
 
-	return "The lookup tool is now refused."
+	return "Lookup is now refused."
 }
 
 func hostNetworkNotice(isGranted bool) string {
 	if isGranted {
-		return "The bash tool can now request the host network."
+		return "Bash may now request the host network."
 	}
 
-	return "The bash tool can no longer request the host network."
+	return "Bash may no longer request the host network."
 }
 
 func fetchNotice(isGranted bool) string {
 	if isGranted {
-		return "The fetch tool can now access the internet."
+		return "Fetch can now access the internet."
 	}
 
-	return "The fetch tool is now refused."
+	return "Fetch is now refused."
 }

@@ -25,8 +25,8 @@ func TestEachLostFacilityIsToldOnce(t *testing.T) {
 	notice := state.Inject()
 	for _, want := range []string{
 		"Unix sockets no longer work",
-		"This machine no longer has IPv6",
-		"This session is now non-interactive",
+		"IPv6 unavailable",
+		"Session is non-interactive",
 	} {
 		if !strings.Contains(notice, want) {
 			t.Errorf("notice %q does not contain %q", notice, want)
@@ -43,9 +43,9 @@ func TestEachRegainedFacilityIsTold(t *testing.T) {
 
 	notice := state.Peek()
 	for _, want := range []string{
-		"Unix sockets now work beneath /tmp",
-		"This machine now has IPv6",
-		"This session is now interactive",
+		"Unix sockets now work under /tmp",
+		"IPv6 available",
+		"Session is interactive",
 	} {
 		if !strings.Contains(notice, want) {
 			t.Errorf("notice %q does not contain %q", notice, want)
@@ -183,7 +183,7 @@ func TestAMachineThatRecoversIsToldAgain(t *testing.T) {
 	}
 
 	notice := restored.State.Peek()
-	for _, want := range []string{"Unix sockets now work beneath /tmp", "This machine now has IPv6"} {
+	for _, want := range []string{"Unix sockets now work under /tmp", "IPv6 available"} {
 		if !strings.Contains(notice, want) {
 			t.Errorf("notice %q does not contain %q", notice, want)
 		}
@@ -216,7 +216,7 @@ func TestOnlyTheFacilitiesThatMovedAreTold(t *testing.T) {
 	}
 
 	notice := restored.State.Peek()
-	if want := "This machine no longer has IPv6"; !strings.Contains(notice, want) {
+	if want := "IPv6 unavailable"; !strings.Contains(notice, want) {
 		t.Errorf("notice %q does not contain %q", notice, want)
 	}
 	for _, unwanted := range []string{"Unix socket", "The user"} {

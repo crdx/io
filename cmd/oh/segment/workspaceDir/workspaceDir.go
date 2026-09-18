@@ -43,11 +43,11 @@ func New(workspace *work.Space) segment.Factory {
 			value = workspace.GetDir()
 		default:
 			return nil, fmt.Errorf(
-				"type is %q, and wants to be omitted or %q, %q, or %q",
-				args.Type,
+				"type must be omitted, %q, %q, or %q (got %q)",
 				base,
 				short,
 				full,
+				args.Type,
 			)
 		}
 

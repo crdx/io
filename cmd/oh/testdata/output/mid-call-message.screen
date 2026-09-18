@@ -11,7 +11,7 @@ Reading it now.
 
 read cmd/oh/line/render.go –
 
-The turn was interrupted.
+Turn stopped.
 
 
  never mind, what is in target.txt?
@@ -156,24 +156,14 @@ w
 –
 
 T
-h
-e
-t
 u
 r
 n
-w
-a
 s
-i
-n
 t
-e
-r
-r
-u
+o
 p
-t
+p
 e
 d
 .
@@ -285,7 +275,7 @@ Reading it now.
 
 read cmd/oh/line/render.go –
 
-The turn was interrupted.
+Turn stopped.
 
 
  never mind, what is in target.txt?
@@ -315,8 +305,8 @@ now.
 
 read cmd/… –
 
-The turn was
-interrupted.
+Turn
+stopped.
 
 
  never mind,
@@ -341,7 +331,7 @@ Reading it now.
 
 read cmd/oh/line/render.go –
 
-The turn was interrupted.
+Turn stopped.
 
 
  never mind, what is in target.txt?

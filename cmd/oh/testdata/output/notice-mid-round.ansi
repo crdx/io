@@ -10,8 +10,8 @@
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    host at http://127.27.192.223:8080. \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at        \e[0m\r
+\r\e[K\e[48;2;48;58;67m    http://127.27.192.223:8080.         \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r
 \r\e[KThe preview is up, and the notes hold\r
@@ -137,21 +137,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mE\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mx\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mp\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67md\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67mS\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -181,23 +167,19 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m0\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67me\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
+\r\e[K\e[48;2;48;58;67mx\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mp\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -307,7 +289,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m \e[38;2;76;154;4
 ls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m
 
 \e[48;2;48;58;67m\e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.\e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.\e[0m
 \e[48;2;48;58;67m\e[0m
 The preview is up, and the notes hold one line.
 
@@ -322,7 +304,7 @@ The preview is up, and the notes hold one line.
 \e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 The preview is up, and the notes hold one line.\r
@@ -339,11 +321,11 @@ The preview is up, and the notes hold one line.\r
 \r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prev\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hol\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold on\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold one li\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold one line.\e[?25h\e[?2026l\r
@@ -360,11 +342,11 @@ The preview is up, and the notes hold one line.\r
 \r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold one line.\e[?25h\e[?2026l\r
@@ -381,11 +363,11 @@ The preview is up, and the notes hold one line.\r
 \r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prev\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hol\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold on\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold one li\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe preview is up, and the notes hold one line.\e[?25h\e[?2026l\r
@@ -408,11 +390,10 @@ The preview is up, and the notes hold one line.\r
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed \e[0m\r
-\r\e[K\e[48;2;48;58;67m    sandbox \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox \e[0m\r
 \r\e[K\e[48;2;48;58;67m    port    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    8080 to \e[0m\r
-\r\e[K\e[48;2;48;58;67m    the host\e[0m\r
+\r\e[K\e[48;2;48;58;67m    8080    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exposed \e[0m\r
 \r\e[K\e[48;2;48;58;67m    at      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    http://1\e[0m\r
 \r\e[K\e[48;2;48;58;67m    27.27.19\e[0m\r
@@ -436,7 +417,7 @@ The preview is up, and the notes hold one line.\r
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.\e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[0m
 
 \r\e[KThe preview is up, and the notes hold one line.
@@ -452,7 +433,7 @@ The preview is up, and the notes hold one line.\r
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \r\e[KThe preview is up, and the notes hold one line.\r

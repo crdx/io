@@ -62,7 +62,7 @@ enabled: \e[38;2;201;166;212mfalse\e[0m
 \e[38;2;76;154;44m+new\e[0m
 
 \e[38;2;204;102;102mError\e[0m
-\e[38;2;204;102;102mold_text does not appear in the file\e[0m
+\e[38;2;204;102;102mold_text not found\e[0m
 
 === shell success ===
 \e[38;2;192;128;80m$ \e[0m\e[38;2;129;162;190mgo\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mtest\e[0m\e[38;2;150;152;150m ./...\e[0m
@@ -87,7 +87,7 @@ main.go:12: undefined: run
 === shell cancelled ===
 \e[38;2;192;128;80m$ \e[0m\e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m30\e[0m
 
-\e[38;2;207;173;0mthe command was stopped because the user pressed escape\e[0m
+\e[38;2;207;173;0mthe command stopped because the user pressed escape\e[0m
 
 === list directory ===
 \e[38;2;207;173;0mls\e[0m · \e[38;2;192;128;80mcmd\e[0m
@@ -264,7 +264,7 @@ Serving HTTP on localhost port 8080 ...
 === title ===
 \e[38;2;207;173;0mtitle\e[0m · \e[38;2;192;128;80mrender-useful-results\e[0m
 
-the session is now titled "render-useful-results"
+session titled "render-useful-results"
 
 === notification ===
 \e[38;2;207;173;0mnotify\e[0m · \e[38;2;192;128;80mChecks passed\e[0m

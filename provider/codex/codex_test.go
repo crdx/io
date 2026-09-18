@@ -450,6 +450,7 @@ func TestAnImageReturnedByAToolIsSentForTheModelToInspect(t *testing.T) {
 	}
 
 	want := `"output":[{"type":"input_text","text":"image/png image (3 bytes)"},` +
+		`{"type":"input_text","text":"Image attached."},` +
 		`{"type":"input_image","image_url":"data:image/png;base64,AQID","detail":"high"}]`
 	if !strings.Contains((*bodies)[1], want) {
 		t.Errorf("expected the tool output to carry an image, got %s", (*bodies)[1])

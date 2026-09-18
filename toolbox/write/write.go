@@ -3,7 +3,6 @@ package write
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io/fs"
 	"path/filepath"
 	"strings"
@@ -86,5 +85,5 @@ func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.T
 		Lines: lines,
 		Bytes: int64(len(args.Content)),
 	}
-	return fmt.Sprintf("wrote %s to %s", util.FormatBytes(len(args.Content), 3), args.Path), metrics, nil
+	return "wrote " + util.FormatBytes(len(args.Content), 3), metrics, nil
 }

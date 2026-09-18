@@ -286,19 +286,16 @@ func ToolsSize(tools []tool.Tool) int {
 	return len(encodedTools)
 }
 
-const attachmentNotice = "Attached image(s) from tool result:"
+const attachmentNotice = "Image attached."
 
-const emptyOutputNotice = "(no tool output)"
+const emptyOutputNotice = "No output."
 
 func toolResultText(result agent.ToolCallResult) string {
-	switch {
-	case result.Output != "":
+	if result.Output != "" {
 		return result.Output
-	case result.Image.MediaType != "" && len(result.Image.Data) > 0:
-		return "(see attached image)"
-	default:
-		return emptyOutputNotice
 	}
+
+	return emptyOutputNotice
 }
 
 func imagePart(result agent.ToolCallResult) (contentPart, bool) {

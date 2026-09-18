@@ -16,7 +16,7 @@ interrupt while forming a tool call
 
 ## Interrupted · +0s
 
-The turn was interrupted because the user pressed escape.
+Turn stopped because the user pressed escape.
 
 ## User · +0s
 

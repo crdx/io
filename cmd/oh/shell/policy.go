@@ -411,10 +411,10 @@ func protectedPolicyWithOptionalRoots(
 
 var (
 	ErrWithheld = errors.New(
-		"shell access is not granted; the user can grant it with ctrl+x x",
+		"shell access unavailable; ctrl+x x grants it",
 	)
 	ErrNetworkWithheld = errors.New(
-		"host network access is not granted; the user can grant it with ctrl+x n",
+		"host network unavailable; ctrl+x n grants it",
 	)
 )
 

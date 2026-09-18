@@ -28,8 +28,8 @@ func (self *ReasoningRendering) UnmarshalTOML(value any) error {
 	rendering, isKnown := reasoningRenderings[strings.TrimSpace(name)]
 	if !isKnown {
 		return fmt.Errorf(
-			"reasoning is %q, and wants to be one of %s",
-			name, strings.Join(reasoningRenderingNames(), ", "),
+			"reasoning must be one of %s (got %q)",
+			strings.Join(reasoningRenderingNames(), ", "), name,
 		)
 	}
 

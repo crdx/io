@@ -67,11 +67,11 @@ func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.T
 
 	switch strings.Count(content, args.OldText) {
 	case 0:
-		return "", tool.ToolCallMetrics{}, errors.New("old_text does not appear in the file")
+		return "", tool.ToolCallMetrics{}, errors.New("old_text not found")
 	case 1:
 	default:
 		return "", tool.ToolCallMetrics{}, errors.New(
-			"old_text appears more than once — include more context to disambiguate",
+			"old_text is not unique; include more context",
 		)
 	}
 
@@ -90,7 +90,7 @@ func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.T
 
 	addedLines, removedLines := changedLines(args.OldText, args.NewText)
 	metrics := tool.ToolCallMetrics{Kind: tool.MetricDiff, AddedLines: addedLines, RemovedLines: removedLines}
-	return "edited " + args.Path, metrics, nil
+	return "edited", metrics, nil
 }
 
 func changedLines(before string, after string) (int64, int64) {

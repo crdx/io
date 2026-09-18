@@ -23,7 +23,7 @@ read [ok, 1 line, 10B, call_2]
 ## Host → sandbox · 1 sandbox port · changed port 8080 · +4s
 
 ```
-Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+Sandbox port 8080 exposed at http://127.27.192.223:8080.
 ```
 
 ## Tool calls · +5s

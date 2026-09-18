@@ -28,9 +28,9 @@ smaller allocation header.
 
 
 
- 🤖 The bash tool can no longer request
-    the host network.
- 🤖 The fetch tool is now refused.
+ 🤖 Bash may no longer request the host
+    network.
+ 🤖 Fetch is now refused.
 
 
 fetch https://go.… ✗ network access is …
@@ -516,13 +516,7 @@ t
 
 🤖
 
-T
-
-h
-
-e
-
-b
+B
 
 a
 
@@ -530,19 +524,11 @@ s
 
 h
 
-t
-
-o
-
-o
-
-l
-
-c
+m
 
 a
 
-n
+y
 
 n
 
@@ -606,13 +592,7 @@ k
 
 🤖
 
-T
-
-h
-
-e
-
-f
+F
 
 e
 
@@ -621,14 +601,6 @@ t
 c
 
 h
-
-t
-
-o
-
-o
-
-l
 
 i
 
@@ -745,8 +717,8 @@ go test, and a smaller allocation header.
 
 
 
- 🤖 The bash tool can no longer request the host network.
- 🤖 The fetch tool is now refused.
+ 🤖 Bash may no longer request the host network.
+ 🤖 Fetch is now refused.
 
 
 fetch https://go.dev/doc/go1.26 text ✗ network access is not granted; the user can grant it with ct…
@@ -811,16 +783,13 @@ header.
 
 
 
- 🤖 The bash
-    tool can
+ 🤖 Bash may
     no
     longer
     request
     the host
     network.
- 🤖 The
-    fetch
-    tool is
+ 🤖 Fetch is
     now
     refused.
 
@@ -857,8 +826,8 @@ go test, and a smaller allocation header.
 
 
 
- 🤖 The bash tool can no longer request the host network.
- 🤖 The fetch tool is now refused.
+ 🤖 Bash may no longer request the host network.
+ 🤖 Fetch is now refused.
 
 
 fetch https://go.dev/doc/go1.26 text ✗ network access is not granted; the user can grant it with ct…

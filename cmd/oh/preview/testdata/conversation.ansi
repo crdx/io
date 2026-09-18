@@ -12,9 +12,9 @@ grep \e[38;2;192;128;80mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;15
 The spinner is redrawn on every beat, which is why it stutters while a tool holds the line.
 === 100 columns, ports exposed in a row ===
 \e[48;2;48;58;67m                                                                                                    \e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.9.9.9:8001.                                 \e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.9.9.9:8002.                                 \e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.9.9.9:8003.                                 \e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.9.9.9:8001.                                             \e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.9.9.9:8002.                                             \e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.9.9.9:8003.                                             \e[0m
 \e[48;2;48;58;67m                                                                                                    \e[0m
 === 100 columns, the context window filled ===
 \e[48;2;52;53;65m                                                                                                    \e[0m
@@ -22,7 +22,7 @@ The spinner is redrawn on every beat, which is why it stutters while a tool hold
 \e[48;2;52;53;65m                                                                                                    \e[0m
 
 \e[38;2;204;102;102mRequest (264481 tokens) exceeds the available context size (262144 tokens)\e[0m
-\e[38;2;207;173;0mThe conversation no longer fits the context window.\e[0m
+\e[38;2;207;173;0mContext window full.\e[0m
 === 46 columns ===
 \e[48;2;52;53;65m                                              \e[0m
 \e[48;2;52;53;65m why does the spinner stutter when a tool runs\e[0m
@@ -38,11 +38,11 @@ The spinner is redrawn on every beat, which is
 why it stutters while a tool holds the line.
 === 46 columns, ports exposed in a row ===
 \e[48;2;48;58;67m                                              \e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at  \e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at              \e[0m
 \e[48;2;48;58;67m    http://127.9.9.9:8001.                    \e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at  \e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at              \e[0m
 \e[48;2;48;58;67m    http://127.9.9.9:8002.                    \e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at  \e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at              \e[0m
 \e[48;2;48;58;67m    http://127.9.9.9:8003.                    \e[0m
 \e[48;2;48;58;67m                                              \e[0m
 === 46 columns, the context window filled ===
@@ -52,5 +52,4 @@ why it stutters while a tool holds the line.
 
 \e[38;2;204;102;102mRequest (264481 tokens) exceeds the available\e[0m
 \e[38;2;204;102;102mcontext size (262144 tokens)\e[0m
-\e[38;2;207;173;0mThe conversation no longer fits the context\e[0m
-\e[38;2;207;173;0mwindow.\e[0m
+\e[38;2;207;173;0mContext window full.\e[0m

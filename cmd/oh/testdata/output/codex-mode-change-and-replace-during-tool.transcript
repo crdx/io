@@ -22,12 +22,12 @@ work: work [cancelled, 1 line, 88B, call-1]
 
 ## Interrupted · +0s
 
-The turn was interrupted because the user changed what the harness is allowed to do.
+Turn stopped because access changed.
 
 ## Mode · rxngl · toggled w · +0s
 
 ```
-The workspace is now read-only.
+Workspace is now read-only.
 ```
 
 ## User · +0s

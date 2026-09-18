@@ -14,6 +14,7 @@ import (
 	"golang.org/x/net/html"
 
 	"crdx.org/io/internal/html2md"
+	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 )
 
@@ -23,7 +24,7 @@ const (
 	userAgent     = "oh fetch"
 )
 
-var ErrWithheld = errors.New("network access is not granted; the user can grant it with ctrl+x n")
+var ErrWithheld = errors.New("network access unavailable; ctrl+x n grants it")
 
 type Args struct {
 	URL  string `json:"url"`
@@ -69,7 +70,7 @@ func newTool(
 				return "", tool.ToolCallMetrics{}, err
 			}
 			if output == "" {
-				return "", tool.ToolCallMetrics{}, errors.New("the fetch returned no content")
+				return "", tool.ToolCallMetrics{}, errors.New("fetch returned no content")
 			}
 
 			return output, tool.GetMetrics(output), nil
@@ -79,14 +80,14 @@ func newTool(
 func validate(args Args) error {
 	address, err := url.Parse(args.URL)
 	if err != nil || address.Host == "" || (address.Scheme != "http" && address.Scheme != "https") {
-		return errors.New("url must be an absolute HTTP or HTTPS URL")
+		return errors.New("url must be an absolute HTTP(S) URL")
 	}
 
 	switch args.Type {
 	case "markdown", "clean_html", "text", "raw":
 		return nil
 	default:
-		return errors.New("type must be one of: markdown, clean_html, text, raw")
+		return errors.New("type must be markdown, clean_html, text, or raw")
 	}
 }
 
@@ -100,19 +101,19 @@ func fetchPage(ctx context.Context, client *http.Client, args Args) (string, err
 
 	response, err := client.Do(request)
 	if err != nil {
-		return "", fmt.Errorf("the fetch failed: %w", err)
+		return "", fmt.Errorf("fetch failed: %w", err)
 	}
 	defer func() { _ = response.Body.Close() }()
 
 	contents, err := io.ReadAll(io.LimitReader(response.Body, maxFetchBytes+1))
 	if err != nil {
-		return "", fmt.Errorf("could not read the web page: %w", err)
+		return "", fmt.Errorf("failed to read page: %w", err)
 	}
 	if len(contents) > maxFetchBytes {
-		return "", fmt.Errorf("web page is larger than the %d-byte limit", maxFetchBytes)
+		return "", fmt.Errorf("page exceeds the %s limit", util.FormatBytes(maxFetchBytes, 3))
 	}
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
-		return "", fmt.Errorf("the fetch failed with status %d: %s", response.StatusCode, strings.TrimSpace(string(contents)))
+		return "", fmt.Errorf("fetch returned HTTP %d: %s", response.StatusCode, strings.TrimSpace(string(contents)))
 	}
 	if args.Type == "raw" {
 		return string(contents), nil
@@ -120,7 +121,7 @@ func fetchPage(ctx context.Context, client *http.Client, args Args) (string, err
 
 	document, err := html.Parse(bytes.NewReader(contents))
 	if err != nil {
-		return "", fmt.Errorf("could not parse the web page: %w", err)
+		return "", fmt.Errorf("failed to parse page: %w", err)
 	}
 	removeUnwantedNodes(document)
 

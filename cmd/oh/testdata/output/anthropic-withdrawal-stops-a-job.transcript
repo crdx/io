@@ -13,13 +13,13 @@
 ## Mode · rxngl · toggled w · +0s
 
 ```
-The workspace is now read-only.
+Workspace is now read-only.
 ```
 
 ## job_stop · +0s
 
 ```
-The job `web` was stopped because the workspace was made read-only.
+Job `web` stopped because the workspace was made read-only.
 ```
 
 ## User · +0s

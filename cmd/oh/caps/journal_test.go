@@ -83,14 +83,14 @@ func TestAJobStoppedForARevokedPathNamesThePath(t *testing.T) {
 	if !isShown {
 		t.Fatal("a job stopped for a revoked path said nothing")
 	}
-	if !strings.Contains(notice, "job `docs`") || !strings.Contains(notice, "/reference") {
+	if !strings.Contains(notice, "Job `docs`") || !strings.Contains(notice, "/reference") {
 		t.Errorf("got %q, want it to code the job name and name the path", notice)
 	}
 }
 
 func TestAJobStoppedForACapabilityStillNamesTheCapability(t *testing.T) {
 	notice, isShown := JobStopNotice(JobStopEvent("docs", Write))
-	if !isShown || !strings.Contains(notice, "job `docs`") || !strings.Contains(notice, "read-only") {
+	if !isShown || !strings.Contains(notice, "Job `docs`") || !strings.Contains(notice, "read-only") {
 		t.Errorf("got %q (shown %v), want the coded job name and capability reason preserved", notice, isShown)
 	}
 }

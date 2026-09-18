@@ -27,6 +27,7 @@ const (
 	actionPrune   = "prune"
 	waitForAny    = "any"
 	waitForAll    = "all"
+	actionChoices = "start, status, output, wait, stop, discard, prune, or list"
 )
 
 const waitLimit = 4*time.Minute + 30*time.Second
@@ -110,7 +111,7 @@ func describeContinuation(args Args) []tool.CallRendering {
 
 func validate(args Args) error {
 	if !slices.Contains(actions, args.Action) {
-		return fmt.Errorf("action is %q, and wants to be one of: %s", args.Action, strings.Join(actions, ", "))
+		return fmt.Errorf("action must be %s (got %q)", actionChoices, args.Action)
 	}
 
 	if args.Action == actionWait {
@@ -118,13 +119,13 @@ func validate(args Args) error {
 	}
 
 	if len(args.Names) > 0 {
-		return errors.New("names can only be used for wait")
+		return errors.New(`names requires action="wait"`)
 	}
 	if args.WaitFor != "" {
-		return errors.New("wait_for can only be used for wait")
+		return errors.New(`wait_for requires action="wait"`)
 	}
 	if args.WaitSeconds != 0 {
-		return errors.New("wait_seconds can only be used for wait")
+		return errors.New(`wait_seconds requires action="wait"`)
 	}
 	if args.Action == actionList || args.Action == actionPrune {
 		return nil
@@ -141,31 +142,31 @@ func validate(args Args) error {
 
 func validateWait(args Args) error {
 	if strings.TrimSpace(args.Name) != "" && len(args.Names) > 0 {
-		return errors.New("name and names cannot both be used for wait")
+		return errors.New("name and names cannot both be set")
 	}
 
 	names := getWaitNames(args)
 	if len(names) == 0 {
-		return errors.New("name or names is required for wait")
+		return errors.New("wait requires name or names")
 	}
 
 	knownNames := make(map[string]bool, len(names))
 	for _, name := range names {
 		if strings.TrimSpace(name) == "" {
-			return errors.New("every name for wait must be non-empty")
+			return errors.New("wait names must be non-empty")
 		}
 		if knownNames[name] {
-			return fmt.Errorf("name %q is repeated", name)
+			return fmt.Errorf("duplicate name %q", name)
 		}
 		knownNames[name] = true
 	}
 
 	if !slices.Contains([]string{waitForAny, waitForAll}, getWaitFor(args)) {
-		return errors.New("wait_for wants to be either any or all")
+		return errors.New("wait_for must be any or all")
 	}
 
 	if args.WaitSeconds < 0 {
-		return errors.New("wait_seconds wants to be a positive number of seconds")
+		return errors.New("wait_seconds must be positive")
 	}
 
 	return nil
@@ -231,7 +232,7 @@ func act(
 		if command == "" {
 			rememberedCommand, isRemembered := manager.RememberedCommand(args.Name)
 			if !isRemembered {
-				return "", errors.New("command is required, since no earlier job of that name is remembered")
+				return "", errors.New("command required; this job has no remembered command")
 			}
 			command = rememberedCommand
 		}

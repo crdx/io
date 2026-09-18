@@ -6,7 +6,7 @@
 read one.txt ✓ 1L
 read two.txt – the call was cancelled b…
 
-The turn was interrupted.
+Turn stopped.
 
 
  one was all I needed
@@ -58,24 +58,14 @@ s
 –
 
 T
-h
-e
-t
 u
 r
 n
-w
-a
 s
-i
-n
 t
-e
-r
-r
-u
+o
 p
-t
+p
 e
 d
 .
@@ -121,7 +111,7 @@ d
 read one.txt ✓ 1L
 read two.txt – the call was cancelled because the user pressed escape
 
-The turn was interrupted.
+Turn stopped.
 
 
  one was all I needed
@@ -135,8 +125,8 @@ The turn was interrupted.
 read o… ✓ 1L
 read – the …
 
-The turn was
-interrupted.
+Turn
+stopped.
 
 
  one was all
@@ -149,7 +139,7 @@ interrupted.
 read one.txt ✓ 1L
 read two.txt – the call was cancelled because the user pressed escape
 
-The turn was interrupted.
+Turn stopped.
 
 
  one was all I needed

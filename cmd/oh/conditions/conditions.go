@@ -103,7 +103,7 @@ func changeNotices(knownConditions Conditions, current Conditions) []string {
 
 func unixSocketNotice(areTheyReachable bool) string {
 	if areTheyReachable {
-		return "Unix sockets now work beneath /tmp, but not beneath the workspace."
+		return "Unix sockets now work under /tmp, not the workspace."
 	}
 
 	return "Unix sockets no longer work."
@@ -111,18 +111,18 @@ func unixSocketNotice(areTheyReachable bool) string {
 
 func addressNotice(isIPv6Reachable bool) string {
 	if isIPv6Reachable {
-		return "This machine now has IPv6, so ::1 reaches the sandbox loopback."
+		return "IPv6 available; ::1 reaches the sandbox loopback."
 	}
 
-	return "This machine no longer has IPv6, so only 127.0.0.1 works."
+	return "IPv6 unavailable; use 127.0.0.1."
 }
 
 func interactionNotice(isInteractive bool) string {
 	if isInteractive {
-		return "This session is now interactive, so a question can be asked and a gated call approved."
+		return "Session is interactive; questions and approvals are available."
 	}
 
-	return "This session is now non-interactive, so nothing can be asked or approved."
+	return "Session is non-interactive; questions and approvals are unavailable."
 }
 
 const Change agent.Kind = "conditions_change"

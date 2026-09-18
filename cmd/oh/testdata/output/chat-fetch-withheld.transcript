@@ -17,7 +17,7 @@ fetch a page while network access is withheld
 ## Tool calls · +0s
 
 ```
-fetch: https://example.com/news [error, 1 line, 66B, call-1]
+fetch: https://example.com/news [error, 1 line, 46B, call-1]
 ```
 
 ## Assistant · +0s

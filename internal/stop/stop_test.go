@@ -55,7 +55,7 @@ func TestStoppedWorkIsExplainedInProse(t *testing.T) {
 	cancel(stop.Because("the user sent another message"))
 
 	err := stop.Error(ctx, "the search")
-	want := "the search was stopped because the user sent another message"
+	want := "the search stopped because the user sent another message"
 	if err.Error() != want {
 		t.Errorf("got %q, want %q", err.Error(), want)
 	}
@@ -68,7 +68,7 @@ func TestUnexplainedStoppedWorkSaysOnlyThat(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
 
-	if got := stop.Error(ctx, "the notification").Error(); got != "the notification was stopped" {
+	if got := stop.Error(ctx, "the notification").Error(); got != "the notification stopped" {
 		t.Errorf("got %q", got)
 	}
 }

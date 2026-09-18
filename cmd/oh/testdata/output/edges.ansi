@@ -11,8 +11,8 @@
 \r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mjapanese\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1.9Kt\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mtoo mu…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~4.4Kt (of ~21Kt)\e[0m\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted because the\e[0m\r
-\e[38;2;207;173;0muser asked something else.\e[0m\r
+\e[38;2;207;173;0mTurn stopped because the user asked\e[0m\r
+\e[38;2;207;173;0msomething else.\e[0m\r
 \r
 \r\e[KThat is all of the awkward ones.\r
 \e[?25h\e[?2026l
@@ -61,24 +61,14 @@
 \r\e[K\e[38;2;76;154;44m✓\e[0m\r
 \r
 \e[38;2;207;173;0mT\e[0m\r
-\e[38;2;207;173;0mh\e[0m\r
-\e[38;2;207;173;0me\e[0m\r
-\e[38;2;207;173;0mt\e[0m\r
 \e[38;2;207;173;0mu\e[0m\r
 \e[38;2;207;173;0mr\e[0m\r
 \e[38;2;207;173;0mn\e[0m\r
-\e[38;2;207;173;0mw\e[0m\r
-\e[38;2;207;173;0ma\e[0m\r
 \e[38;2;207;173;0ms\e[0m\r
-\e[38;2;207;173;0mi\e[0m\r
-\e[38;2;207;173;0mn\e[0m\r
 \e[38;2;207;173;0mt\e[0m\r
-\e[38;2;207;173;0me\e[0m\r
-\e[38;2;207;173;0mr\e[0m\r
-\e[38;2;207;173;0mr\e[0m\r
-\e[38;2;207;173;0mu\e[0m\r
+\e[38;2;207;173;0mo\e[0m\r
 \e[38;2;207;173;0mp\e[0m\r
-\e[38;2;207;173;0mt\e[0m\r
+\e[38;2;207;173;0mp\e[0m\r
 \e[38;2;207;173;0me\e[0m\r
 \e[38;2;207;173;0md\e[0m\r
 \e[38;2;207;173;0mb\e[0m\r
@@ -154,7 +144,7 @@ summon \e[38;2;192;128;80mplenty\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152
 summon \e[38;2;192;128;80mjapanese\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1.9Kt\e[0m
 summon \e[38;2;192;128;80mtoo much\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~4.4Kt (of ~21Kt)\e[0m
 
-\e[38;2;207;173;0mThe turn was interrupted because the user asked something else.\e[0m
+\e[38;2;207;173;0mTurn stopped because the user asked something else.\e[0m
 
 That is all of the awkward ones.
 
@@ -171,7 +161,7 @@ That is all of the awkward ones.
 \e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mjapanese\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1.9Kt\e[0m\r
 \e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mtoo much\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~4.4Kt (of ~21Kt)\e[0m\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted because the user asked something else.\e[0m\r
+\e[38;2;207;173;0mTurn stopped because the user asked something else.\e[0m\r
 \r
 That is all of the awkward ones.\r
 
@@ -188,7 +178,7 @@ That is all of the awkward ones.\r
 \e[?2026h\e[?25l\r\e[Ksummon \e[38;2;192;128;80mjapanese\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mjapanese\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1.9Kt\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[Ksummon \e[38;2;192;128;80mtoo much\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mtoo much\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~4.4Kt (of ~21Kt)\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted because the user asked something else.\e[0m\r
+\e[38;2;207;173;0mTurn stopped because the user asked something else.\e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the awkwa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the awkward o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the awkward ones.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -205,7 +195,7 @@ That is all of the awkward ones.\r
 \e[?2026h\e[?25l\r\e[Ksummon \e[38;2;192;128;80mjapanese\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mjapanese\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1.9Kt\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[Ksummon \e[38;2;192;128;80mtoo much\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mtoo much\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~4.4Kt (of ~21Kt)\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted because the user asked something else.\e[0m\r
+\e[38;2;207;173;0mTurn stopped because the user asked something else.\e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KThat is all of the awkward ones.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -222,7 +212,7 @@ That is all of the awkward ones.\r
 \e[?2026h\e[?25l\r\e[Ksummon \e[38;2;192;128;80mjapanese\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mjapanese\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1.9Kt\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[Ksummon \e[38;2;192;128;80mtoo much\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mtoo much\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~4.4Kt (of ~21Kt)\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted because the user asked something else.\e[0m\r
+\e[38;2;207;173;0mTurn stopped because the user asked something else.\e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the awkwa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the awkward o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is all of the awkward ones.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -240,8 +230,7 @@ That is all of the awkward ones.\r
 \r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mja…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mto…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
-\e[38;2;207;173;0mThe turn was\e[0m\r
-\e[38;2;207;173;0minterrupted\e[0m\r
+\e[38;2;207;173;0mTurn stopped\e[0m\r
 \e[38;2;207;173;0mbecause the\e[0m\r
 \e[38;2;207;173;0muser asked\e[0m\r
 \e[38;2;207;173;0msomething\e[0m\r
@@ -264,7 +253,7 @@ That is all of the awkward ones.\r
 \r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mjapanese\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1.9Kt\e[0m
 \r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mtoo much\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~4.4Kt (of ~21Kt)\e[0m
 
-\e[38;2;207;173;0mThe turn was interrupted because the user asked something else.\e[0m
+\e[38;2;207;173;0mTurn stopped because the user asked something else.\e[0m
 
 \r\e[KThat is all of the awkward ones.
 \e[?25h\e[?2026l
@@ -281,7 +270,7 @@ That is all of the awkward ones.\r
 \r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mjapanese\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1.9Kt\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\summon\e]8;;\e\\ \e[38;2;192;128;80mtoo much\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~4.4Kt (of ~21Kt)\e[0m\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted because the user asked something else.\e[0m\r
+\e[38;2;207;173;0mTurn stopped because the user asked something else.\e[0m\r
 \r
 \r\e[KThat is all of the awkward ones.\r
 \e[?25h\e[?2026l

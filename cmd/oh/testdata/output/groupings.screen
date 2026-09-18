@@ -3,14 +3,14 @@
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 
 read target.txt ✓ 1L
 ls ✓ 2L
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 A tool ran, and an answer followed it.
 
@@ -20,7 +20,7 @@ A thought after a tool call.
 
 ls cmd ✓ 1L
 
-The model ended the turn without answering.
+Model returned no reply.
 An answer after a notice.
 
 A second answer after the first.
@@ -29,20 +29,20 @@ A second thought after the first.
 An answer after a thought.
 The endpoint is having a moment
 A thought after a notice.
-The model ended the turn without answering.
+Model returned no reply.
 === notice answer, tool reasoning ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 
 read target.txt ✓ 1L
 ls ✓ 2L
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 A tool ran, and an answer followed it.
 
@@ -50,7 +50,7 @@ read README.md ✓ 1L
 A thought after a tool call.
 ls cmd ✓ 1L
 
-The model ended the turn without answering.
+Model returned no reply.
 An answer after a notice.
 
 A second answer after the first.
@@ -63,20 +63,20 @@ The endpoint is having a moment
 
 A thought after a notice.
 
-The model ended the turn without answering.
+Model returned no reply.
 === notice answer, tool, reasoning ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 
 read target.txt ✓ 1L
 ls ✓ 2L
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 A tool ran, and an answer followed it.
 
@@ -86,7 +86,7 @@ A thought after a tool call.
 
 ls cmd ✓ 1L
 
-The model ended the turn without answering.
+Model returned no reply.
 An answer after a notice.
 
 A second answer after the first.
@@ -99,20 +99,20 @@ The endpoint is having a moment
 
 A thought after a notice.
 
-The model ended the turn without answering.
+Model returned no reply.
 === notice reasoning, tool answer ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 
 read target.txt ✓ 1L
 ls ✓ 2L
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 A tool ran, and an answer followed it.
@@ -122,7 +122,7 @@ A thought after a tool call.
 
 ls cmd ✓ 1L
 
-The model ended the turn without answering.
+Model returned no reply.
 
 An answer after a notice.
 
@@ -135,20 +135,20 @@ An answer after a thought.
 
 The endpoint is having a moment
 A thought after a notice.
-The model ended the turn without answering.
+Model returned no reply.
 === notice reasoning, tool, answer ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 
 read target.txt ✓ 1L
 ls ✓ 2L
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 A tool ran, and an answer followed it.
@@ -159,7 +159,7 @@ A thought after a tool call.
 
 ls cmd ✓ 1L
 
-The model ended the turn without answering.
+Model returned no reply.
 
 An answer after a notice.
 
@@ -172,24 +172,24 @@ An answer after a thought.
 
 The endpoint is having a moment
 A thought after a notice.
-The model ended the turn without answering.
+Model returned no reply.
 === notice tool answer reasoning ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 read target.txt ✓ 1L
 ls ✓ 2L
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 A tool ran, and an answer followed it.
 read README.md ✓ 1L
 A thought after a tool call.
 ls cmd ✓ 1L
-The model ended the turn without answering.
+Model returned no reply.
 An answer after a notice.
 
 A second answer after the first.
@@ -198,18 +198,18 @@ A second thought after the first.
 An answer after a thought.
 The endpoint is having a moment
 A thought after a notice.
-The model ended the turn without answering.
+Model returned no reply.
 === notice tool answer, reasoning ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 read target.txt ✓ 1L
 ls ✓ 2L
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 A tool ran, and an answer followed it.
 read README.md ✓ 1L
@@ -217,7 +217,7 @@ read README.md ✓ 1L
 A thought after a tool call.
 
 ls cmd ✓ 1L
-The model ended the turn without answering.
+Model returned no reply.
 An answer after a notice.
 
 A second answer after the first.
@@ -230,18 +230,18 @@ The endpoint is having a moment
 
 A thought after a notice.
 
-The model ended the turn without answering.
+Model returned no reply.
 === notice tool reasoning, answer ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 read target.txt ✓ 1L
 ls ✓ 2L
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 A tool ran, and an answer followed it.
@@ -249,7 +249,7 @@ A tool ran, and an answer followed it.
 read README.md ✓ 1L
 A thought after a tool call.
 ls cmd ✓ 1L
-The model ended the turn without answering.
+Model returned no reply.
 
 An answer after a notice.
 
@@ -262,18 +262,18 @@ An answer after a thought.
 
 The endpoint is having a moment
 A thought after a notice.
-The model ended the turn without answering.
+Model returned no reply.
 === notice tool, answer reasoning ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 read target.txt ✓ 1L
 ls ✓ 2L
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 A tool ran, and an answer followed it.
@@ -283,7 +283,7 @@ read README.md ✓ 1L
 A thought after a tool call.
 
 ls cmd ✓ 1L
-The model ended the turn without answering.
+Model returned no reply.
 
 An answer after a notice.
 
@@ -296,18 +296,18 @@ The endpoint is having a moment
 
 A thought after a notice.
 
-The model ended the turn without answering.
+Model returned no reply.
 === notice tool, answer, reasoning ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 read target.txt ✓ 1L
 ls ✓ 2L
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 A tool ran, and an answer followed it.
@@ -317,7 +317,7 @@ read README.md ✓ 1L
 A thought after a tool call.
 
 ls cmd ✓ 1L
-The model ended the turn without answering.
+Model returned no reply.
 
 An answer after a notice.
 
@@ -332,20 +332,20 @@ The endpoint is having a moment
 
 A thought after a notice.
 
-The model ended the turn without answering.
+Model returned no reply.
 === notice, tool answer reasoning ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 
 read target.txt ✓ 1L
 ls ✓ 2L
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 A tool ran, and an answer followed it.
@@ -353,7 +353,7 @@ read README.md ✓ 1L
 A thought after a tool call.
 ls cmd ✓ 1L
 
-The model ended the turn without answering.
+Model returned no reply.
 
 An answer after a notice.
 
@@ -366,20 +366,20 @@ The endpoint is having a moment
 
 A thought after a notice.
 
-The model ended the turn without answering.
+Model returned no reply.
 === notice, tool answer, reasoning ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 
 read target.txt ✓ 1L
 ls ✓ 2L
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 A tool ran, and an answer followed it.
@@ -389,7 +389,7 @@ A thought after a tool call.
 
 ls cmd ✓ 1L
 
-The model ended the turn without answering.
+Model returned no reply.
 
 An answer after a notice.
 
@@ -404,20 +404,20 @@ The endpoint is having a moment
 
 A thought after a notice.
 
-The model ended the turn without answering.
+Model returned no reply.
 === notice, tool reasoning, answer ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 
 read target.txt ✓ 1L
 ls ✓ 2L
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 A tool ran, and an answer followed it.
@@ -426,7 +426,7 @@ read README.md ✓ 1L
 A thought after a tool call.
 ls cmd ✓ 1L
 
-The model ended the turn without answering.
+Model returned no reply.
 
 An answer after a notice.
 
@@ -441,20 +441,20 @@ The endpoint is having a moment
 
 A thought after a notice.
 
-The model ended the turn without answering.
+Model returned no reply.
 === notice, tool, answer reasoning ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 
 read target.txt ✓ 1L
 ls ✓ 2L
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 A tool ran, and an answer followed it.
@@ -465,7 +465,7 @@ A thought after a tool call.
 
 ls cmd ✓ 1L
 
-The model ended the turn without answering.
+Model returned no reply.
 
 An answer after a notice.
 
@@ -478,20 +478,20 @@ The endpoint is having a moment
 
 A thought after a notice.
 
-The model ended the turn without answering.
+Model returned no reply.
 === notice, tool, answer, reasoning ===
 
  walk every pair of groups so the spacing between them is written down
 
 
-The model ended the turn without answering.
+Model returned no reply.
 [#1] Request failed; retrying: The stream ended before the response did
 
 read target.txt ✓ 1L
 ls ✓ 2L
 
 
- 🤖 Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+ 🤖 Sandbox port 8080 exposed at http://127.27.192.223:8080.
 
 
 A tool ran, and an answer followed it.
@@ -502,7 +502,7 @@ A thought after a tool call.
 
 ls cmd ✓ 1L
 
-The model ended the turn without answering.
+Model returned no reply.
 
 An answer after a notice.
 
@@ -517,4 +517,4 @@ The endpoint is having a moment
 
 A thought after a notice.
 
-The model ended the turn without answering.
+Model returned no reply.

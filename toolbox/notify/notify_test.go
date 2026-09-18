@@ -82,7 +82,7 @@ func TestNotificationMapsEveryIconForNotifySend(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
-			if result.Output != "notified the user" {
+			if result.Output != "notification sent" {
 				t.Errorf("got output %q, want notification confirmation", result.Output)
 			}
 
@@ -138,7 +138,7 @@ func TestNotificationUsesKittysNotificationKittenInsideKitty(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if result.Output != "notified the user" {
+	if result.Output != "notification sent" {
 		t.Errorf("got output %q, want notification confirmation", result.Output)
 	}
 
@@ -183,7 +183,7 @@ func TestNotificationReportsATerminalThatCannotRaiseIt(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if _, err := call.Exec(t.Context()); err == nil ||
-		!strings.Contains(err.Error(), "could not notify the user") {
+		!strings.Contains(err.Error(), "notification failed") {
 		t.Errorf("expected an undeliverable notification to be reported, got %v", err)
 	}
 
@@ -192,7 +192,7 @@ func TestNotificationReportsATerminalThatCannotRaiseIt(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if _, err := call.Exec(t.Context()); err == nil ||
-		!strings.Contains(err.Error(), "could not notify the user") {
+		!strings.Contains(err.Error(), "notification failed") {
 		t.Errorf("expected a missing escape writer to be reported, got %v", err)
 	}
 }
@@ -230,7 +230,7 @@ func TestNotificationReportsNotifySendFailure(t *testing.T) {
 	}
 
 	_, err = call.Exec(t.Context())
-	if err == nil || !strings.Contains(err.Error(), "could not notify the user") {
+	if err == nil || !strings.Contains(err.Error(), "notification failed") {
 		t.Errorf("expected notify-send failure, got %v", err)
 	}
 }
@@ -258,7 +258,7 @@ func TestCancelledNotificationStopsNotifySend(t *testing.T) {
 	if !errors.Is(err, context.Canceled) {
 		t.Errorf("expected context cancellation, got %v", err)
 	}
-	if want := "the notification was stopped because the user sent another message"; err.Error() != want {
+	if want := "the notification stopped because the user sent another message"; err.Error() != want {
 		t.Errorf("got %q, want %q", err.Error(), want)
 	}
 	if took := time.Since(startedAt); took > 2*time.Second {

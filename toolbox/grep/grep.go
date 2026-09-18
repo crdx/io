@@ -118,14 +118,14 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.ToolCall
 
 	stdout, err := command.StdoutPipe()
 	if err != nil {
-		return "", tool.ToolCallMetrics{}, fmt.Errorf("could not read ripgrep output: %w", err)
+		return "", tool.ToolCallMetrics{}, fmt.Errorf("failed to read ripgrep output: %w", err)
 	}
 
 	var stderr bytes.Buffer
 	command.Stderr = &stderr
 
 	if err := command.Start(); err != nil {
-		return "", tool.ToolCallMetrics{}, fmt.Errorf("could not start ripgrep: %w", err)
+		return "", tool.ToolCallMetrics{}, fmt.Errorf("failed to start ripgrep: %w", err)
 	}
 
 	matches, isTruncated, readErr := readMatches(stdout, name == ".")
@@ -139,7 +139,7 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.ToolCall
 		return "", tool.ToolCallMetrics{}, stop.Error(ctx, "the search")
 	}
 	if readErr != nil {
-		return "", tool.ToolCallMetrics{}, fmt.Errorf("could not read ripgrep output: %w", readErr)
+		return "", tool.ToolCallMetrics{}, fmt.Errorf("failed to read ripgrep output: %w", readErr)
 	}
 
 	if isTruncated {

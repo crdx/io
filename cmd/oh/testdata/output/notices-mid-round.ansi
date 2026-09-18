@@ -11,16 +11,16 @@
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    host at http://127.27.192.223:8001. \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    host at http://127.27.192.223:8002. \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    host at http://127.27.192.223:8003. \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    host at http://127.27.192.223:8004. \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8005 to the    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    host at http://127.27.192.223:8005. \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at        \e[0m\r
+\r\e[K\e[48;2;48;58;67m    http://127.27.192.223:8001.         \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at        \e[0m\r
+\r\e[K\e[48;2;48;58;67m    http://127.27.192.223:8002.         \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at        \e[0m\r
+\r\e[K\e[48;2;48;58;67m    http://127.27.192.223:8003.         \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at        \e[0m\r
+\r\e[K\e[48;2;48;58;67m    http://127.27.192.223:8004.         \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at        \e[0m\r
+\r\e[K\e[48;2;48;58;67m    http://127.27.192.223:8005.         \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r
 \r\e[KAll five previews are up.\r
@@ -112,21 +112,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mE\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mx\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mp\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67md\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67mS\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -156,23 +142,19 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m1\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67me\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
+\r\e[K\e[48;2;48;58;67mx\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mp\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -234,21 +216,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mE\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mx\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mp\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67md\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67mS\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -278,23 +246,19 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m2\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67me\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
+\r\e[K\e[48;2;48;58;67mx\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mp\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -356,21 +320,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mE\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mx\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mp\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67md\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67mS\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -400,23 +350,19 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m3\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67me\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
+\r\e[K\e[48;2;48;58;67mx\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mp\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -478,21 +424,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mE\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mx\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mp\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67md\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67mS\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -522,23 +454,19 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m4\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67me\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
+\r\e[K\e[48;2;48;58;67mx\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mp\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -600,21 +528,7 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m🤖\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mE\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mx\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mp\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67me\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67md\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67mS\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -644,23 +558,19 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m5\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mo\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
-\r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67me\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mh\e[0m\r
+\r\e[K\e[48;2;48;58;67mx\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mp\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67mo\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ms\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
-\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67ma\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
@@ -755,11 +665,11 @@
 \e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m
 
 \e[48;2;48;58;67m\e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.\e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.\e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.\e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.\e[0m
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.\e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.\e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.\e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.\e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.\e[0m
+\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.\e[0m
 \e[48;2;48;58;67m\e[0m
 All five previews are up.
 
@@ -776,11 +686,11 @@ All five previews are up.
 \e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.                            \e[0m\r
-\e[48;2;48;58;67m 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.                            \e[0m\r
+\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
+\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
+\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.                                        \e[0m\r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 All five previews are up.\r
@@ -798,7 +708,7 @@ All five previews are up.\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8002\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8003\e[0m\r
@@ -806,43 +716,43 @@ All five previews are up.\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8003\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KAll\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five pre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five preview\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five previews ar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five previews are up\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five previews are up.\e[?25h\e[?2026l\r
@@ -860,7 +770,7 @@ All five previews are up.\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8002\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8003\e[0m\r
@@ -868,43 +778,43 @@ All five previews are up.\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8003\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KAll five previews are up.\e[?25h\e[?2026l\r
@@ -922,7 +832,7 @@ All five previews are up.\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8002\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8003\e[0m\r
@@ -930,43 +840,43 @@ All five previews are up.\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8003\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KAll\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five pre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five preview\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five previews ar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five previews are up\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAll five previews are up.\e[?25h\e[?2026l\r
@@ -989,51 +899,46 @@ All five previews are up.\r
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m80…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed \e[0m\r
-\r\e[K\e[48;2;48;58;67m    sandbox \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox \e[0m\r
 \r\e[K\e[48;2;48;58;67m    port    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    8001 to \e[0m\r
-\r\e[K\e[48;2;48;58;67m    the host\e[0m\r
+\r\e[K\e[48;2;48;58;67m    8001    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exposed \e[0m\r
 \r\e[K\e[48;2;48;58;67m    at      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    http://1\e[0m\r
 \r\e[K\e[48;2;48;58;67m    27.27.19\e[0m\r
 \r\e[K\e[48;2;48;58;67m    2.223:80\e[0m\r
 \r\e[K\e[48;2;48;58;67m    01.     \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed \e[0m\r
-\r\e[K\e[48;2;48;58;67m    sandbox \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox \e[0m\r
 \r\e[K\e[48;2;48;58;67m    port    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    8002 to \e[0m\r
-\r\e[K\e[48;2;48;58;67m    the host\e[0m\r
+\r\e[K\e[48;2;48;58;67m    8002    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exposed \e[0m\r
 \r\e[K\e[48;2;48;58;67m    at      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    http://1\e[0m\r
 \r\e[K\e[48;2;48;58;67m    27.27.19\e[0m\r
 \r\e[K\e[48;2;48;58;67m    2.223:80\e[0m\r
 \r\e[K\e[48;2;48;58;67m    02.     \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed \e[0m\r
-\r\e[K\e[48;2;48;58;67m    sandbox \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox \e[0m\r
 \r\e[K\e[48;2;48;58;67m    port    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    8003 to \e[0m\r
-\r\e[K\e[48;2;48;58;67m    the host\e[0m\r
+\r\e[K\e[48;2;48;58;67m    8003    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exposed \e[0m\r
 \r\e[K\e[48;2;48;58;67m    at      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    http://1\e[0m\r
 \r\e[K\e[48;2;48;58;67m    27.27.19\e[0m\r
 \r\e[K\e[48;2;48;58;67m    2.223:80\e[0m\r
 \r\e[K\e[48;2;48;58;67m    03.     \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed \e[0m\r
-\r\e[K\e[48;2;48;58;67m    sandbox \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox \e[0m\r
 \r\e[K\e[48;2;48;58;67m    port    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    8004 to \e[0m\r
-\r\e[K\e[48;2;48;58;67m    the host\e[0m\r
+\r\e[K\e[48;2;48;58;67m    8004    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exposed \e[0m\r
 \r\e[K\e[48;2;48;58;67m    at      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    http://1\e[0m\r
 \r\e[K\e[48;2;48;58;67m    27.27.19\e[0m\r
 \r\e[K\e[48;2;48;58;67m    2.223:80\e[0m\r
 \r\e[K\e[48;2;48;58;67m    04.     \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed \e[0m\r
-\r\e[K\e[48;2;48;58;67m    sandbox \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox \e[0m\r
 \r\e[K\e[48;2;48;58;67m    port    \e[0m\r
-\r\e[K\e[48;2;48;58;67m    8005 to \e[0m\r
-\r\e[K\e[48;2;48;58;67m    the host\e[0m\r
+\r\e[K\e[48;2;48;58;67m    8005    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exposed \e[0m\r
 \r\e[K\e[48;2;48;58;67m    at      \e[0m\r
 \r\e[K\e[48;2;48;58;67m    http://1\e[0m\r
 \r\e[K\e[48;2;48;58;67m    27.27.19\e[0m\r
@@ -1057,11 +962,11 @@ All five previews are up.\r
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.\e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[0m
 
 \r\e[KAll five previews are up.
@@ -1079,11 +984,11 @@ All five previews are up.\r
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8001 to the host at http://127.27.192.223:8001.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8002 to the host at http://127.27.192.223:8002.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8003 to the host at http://127.27.192.223:8003.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8004 to the host at http://127.27.192.223:8004.                            \e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Exposed sandbox port 8005 to the host at http://127.27.192.223:8005.                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \r\e[KAll five previews are up.\r

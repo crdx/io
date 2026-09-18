@@ -5,8 +5,8 @@
 There is no IPv6 here, so 127.0.0.1 instead.
 
 
- 🤖 This machine now has IPv6, so ::1 reaches the sandbox loopback.
- 🤖 This session is now interactive, so a question can be asked and a gated call approved.
+ 🤖 IPv6 available; ::1 reaches the sandbox loopback.
+ 🤖 Session is interactive; questions and approvals are available.
 
 
 

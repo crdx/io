@@ -11,8 +11,8 @@ summon plenty ✓ 900L+ ~700t (of ~321Kt)
 summon japanese ✓ 1L ~1.9Kt
 summon too mu… ✓ 900L+ ~4.4Kt (of ~21Kt)
 
-The turn was interrupted because the
-user asked something else.
+Turn stopped because the user asked
+something else.
 
 That is all of the awkward ones.
 === one column ===
@@ -60,24 +60,14 @@ s
 ✓
 
 T
-h
-e
-t
 u
 r
 n
-w
-a
 s
-i
-n
 t
-e
-r
-r
-u
+o
 p
-t
+p
 e
 d
 b
@@ -153,7 +143,7 @@ summon plenty ✓ 900L+ ~700t (of ~321Kt)
 summon japanese ✓ 1L ~1.9Kt
 summon too much ✓ 900L+ ~4.4Kt (of ~21Kt)
 
-The turn was interrupted because the user asked something else.
+Turn stopped because the user asked something else.
 
 That is all of the awkward ones.
 === tiny ===
@@ -170,8 +160,7 @@ summon pl… ✓
 summon ja… ✓
 summon to… ✓
 
-The turn was
-interrupted
+Turn stopped
 because the
 user asked
 something
@@ -194,6 +183,6 @@ summon plenty ✓ 900L+ ~700t (of ~321Kt)
 summon japanese ✓ 1L ~1.9Kt
 summon too much ✓ 900L+ ~4.4Kt (of ~21Kt)
 
-The turn was interrupted because the user asked something else.
+Turn stopped because the user asked something else.
 
 That is all of the awkward ones.

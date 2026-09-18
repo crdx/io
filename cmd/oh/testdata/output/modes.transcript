@@ -22,7 +22,7 @@ Reading and running commands, but not writing.
 ## Mode · rxw · toggled w · +3s
 
 ```
-The workspace is now read-write.
+Workspace is now read-write.
 ```
 
 ## User · +4s
@@ -36,7 +36,7 @@ Writing it down.
 ## Mode · rw · toggled x · +6s
 
 ```
-The bash tool is now refused.
+Bash is now refused.
 ```
 
 ## Mode · rw · toggled ? · +7s

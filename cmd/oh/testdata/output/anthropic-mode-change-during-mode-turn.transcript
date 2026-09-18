@@ -20,12 +20,12 @@ Half an ans
 
 ## Interrupted · +0s
 
-The turn was interrupted because the user changed what the harness is allowed to do.
+Turn stopped because access changed.
 
 ## Mode · rxngl · toggled w · +0s
 
 ```
-The workspace is now read-only.
+Workspace is now read-only.
 ```
 
 ## Assistant · +0s
@@ -34,12 +34,12 @@ The workspace is read-onl
 
 ## Interrupted · +0s
 
-The turn was interrupted because the user changed what the harness is allowed to do.
+Turn stopped because access changed.
 
 ## Mode · rxnl · toggled g · +0s
 
 ```
-The .git directory is now read-only.
+.git is now read-only.
 ```
 
 ## Assistant · +0s

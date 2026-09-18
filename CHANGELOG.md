@@ -6,6 +6,7 @@
 - Limit background job name length
 - Move session maintenance to `oh --ctl`
 - Regenerate transcripts inside archived sessions
+- Shorten and standardise runtime messages
 
 ## [0.6.0] - 2026-09-18
 

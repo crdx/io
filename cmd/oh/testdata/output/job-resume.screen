@@ -8,11 +8,9 @@ job docs $ python3 -m http.server … ✓ 1L
 Both are up.
 
 
- 🤖 The jobs docs and watch were stopped
-    when the session last closed. Call
-    job(action="start", name="docs")
-    with no command to run its command
-    again.
+ 🤖 Jobs docs and watch stopped when the
+    session closed. Restart docs with
+    job(action="start", name="docs").
 
 
 
@@ -103,13 +101,7 @@ p
 
 🤖
 
-T
-
-h
-
-e
-
-j
+J
 
 o
 
@@ -140,14 +132,6 @@ t
 c
 
 h
-
-w
-
-e
-
-r
-
-e
 
 s
 
@@ -191,14 +175,6 @@ o
 
 n
 
-l
-
-a
-
-s
-
-t
-
 c
 
 l
@@ -213,13 +189,35 @@ d
 
 .
 
-C
+R
+
+e
+
+s
+
+t
 
 a
 
-l
+r
 
-l
+t
+
+d
+
+o
+
+c
+
+s
+
+w
+
+i
+
+t
+
+h
 
 j
 
@@ -282,72 +280,6 @@ s
 "
 
 )
-
-w
-
-i
-
-t
-
-h
-
-n
-
-o
-
-c
-
-o
-
-m
-
-m
-
-a
-
-n
-
-d
-
-t
-
-o
-
-r
-
-u
-
-n
-
-i
-
-t
-
-s
-
-c
-
-o
-
-m
-
-m
-
-a
-
-n
-
-d
-
-a
-
-g
-
-a
-
-i
-
-n
 
 .
 
@@ -429,8 +361,8 @@ job docs $ python3 -m http.server 8080 ✓ 1L
 Both are up.
 
 
- 🤖 The jobs docs and watch were stopped when the session last closed. Call job(action="start",
-    name="docs") with no command to run its command again.
+ 🤖 Jobs docs and watch stopped when the session closed. Restart docs with job(action="start",
+    name="docs").
 
 
 
@@ -454,27 +386,21 @@ job do… ✓ 1L
 Both are up.
 
 
- 🤖 The jobs
+ 🤖 Jobs
     docs and
     watch
-    were
     stopped
     when the
     session
-    last
     closed.
-    Call
+    Restart
+    docs
+    with
     job(acti
     on="star
     t",
     name="do
-    cs")
-    with no
-    command
-    to run
-    its
-    command
-    again.
+    cs").
 
 
 
@@ -500,8 +426,8 @@ job docs $ python3 -m http.server 8080 ✓ 1L
 Both are up.
 
 
- 🤖 The jobs docs and watch were stopped when the session last closed. Call job(action="start",
-    name="docs") with no command to run its command again.
+ 🤖 Jobs docs and watch stopped when the session closed. Restart docs with job(action="start",
+    name="docs").
 
 
 

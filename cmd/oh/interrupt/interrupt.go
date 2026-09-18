@@ -21,8 +21,8 @@ var sentences = map[Cause]string{
 	Escape:       "the user pressed escape",
 	ControlD:     "the user pressed ctrl+d",
 	Replacement:  "the user sent another message",
-	AccessChange: "the user changed what the harness is allowed to do",
-	SessionClose: "the session is being closed",
+	AccessChange: "access changed",
+	SessionClose: "the session closed",
 }
 
 func Sentence(cause Cause) string {
@@ -85,8 +85,8 @@ func IsAnnounced(event agent.Event) bool {
 
 func Notice(event agent.Event) string {
 	if reason := Reason(event); reason != "" {
-		return "The turn was interrupted because " + reason + "."
+		return "Turn stopped because " + reason + "."
 	}
 
-	return "The turn was interrupted."
+	return "Turn stopped."
 }

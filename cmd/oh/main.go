@@ -88,21 +88,21 @@ var (
 	hostNetworkApproval = approval{
 		label:    "Run this command on the host network?",
 		language: "bash",
-		action:   "let this command reach the host network",
-		outcome:  "it did not run",
-		advice:   "run it again without the host network, or ask what to do instead",
+		action:   "host-network access",
+		outcome:  "command did not run",
+		advice:   "retry without it or choose another approach",
 	}
 	lookupApproval = approval{
 		label:   "Look this up on the web?",
-		action:  "look this up",
-		outcome: "nothing was searched for",
-		advice:  "ask what to do instead",
+		action:  "lookup",
+		outcome: "lookup did not run",
+		advice:  "choose another approach",
 	}
 	fetchApproval = approval{
 		label:   "Fetch this page?",
-		action:  "fetch this page",
-		outcome: "nothing was downloaded",
-		advice:  "ask what to do instead",
+		action:  "fetch",
+		outcome: "fetch did not run",
+		advice:  "choose another approach",
 	}
 )
 
@@ -131,16 +131,13 @@ func (self approval) confirm(ctx context.Context, broker *ask.Broker, subject st
 
 	switch {
 	case errors.Is(err, ask.ErrDenied):
-		return errors.New(
-			"the user refused to " + self.action + ", so " + self.outcome + "; " + self.advice,
-		)
+		return errors.New(self.action + " refused; " + self.outcome + "; " + self.advice)
 	case errors.Is(err, context.DeadlineExceeded):
 		return errors.New(
-			"nobody answered the request to " + self.action + " within " +
-				util.CompactDuration(approvalLimit) + ", so " + self.outcome,
+			"approval timed out after " + util.CompactDuration(approvalLimit) + "; " + self.outcome,
 		)
 	case errors.Is(err, ask.ErrUnavailable):
-		return errors.New("there is nobody here to ask, so " + self.outcome)
+		return errors.New("approval unavailable; " + self.outcome)
 	}
 
 	return err

@@ -47,7 +47,7 @@ func renderChildren(parent *html.Node) (string, error) {
 	var renderedText bytes.Buffer
 	for child := parent.FirstChild; child != nil; child = child.NextSibling {
 		if err := html.Render(&renderedText, child); err != nil {
-			return "", fmt.Errorf("could not render the web page: %w", err)
+			return "", fmt.Errorf("failed to render page: %w", err)
 		}
 	}
 	return strings.TrimSpace(renderedText.String()), nil

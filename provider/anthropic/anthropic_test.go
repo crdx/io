@@ -1123,17 +1123,20 @@ func TestAnImageReturnedByAToolIsSentForTheModelToInspect(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(blocks) != 2 {
-		t.Fatalf("expected the text and the image, got %+v", blocks)
+	if len(blocks) != 3 {
+		t.Fatalf("expected the text, attachment notice, and image, got %+v", blocks)
 	}
 
 	if blocks[0].Type != "text" || blocks[0].Text != "image/png image (3 bytes)" {
 		t.Errorf("expected the tool's own text first, got %+v", blocks[0])
 	}
+	if blocks[1].Type != "text" || blocks[1].Text != "Image attached." {
+		t.Errorf("expected an attachment notice, got %+v", blocks[1])
+	}
 
-	if blocks[1].Type != "image" || blocks[1].Source.Type != "base64" ||
-		blocks[1].Source.MediaType != "image/png" || blocks[1].Source.Data != "AQID" {
-		t.Errorf("expected the image to be carried as base64, got %+v", blocks[1])
+	if blocks[2].Type != "image" || blocks[2].Source.Type != "base64" ||
+		blocks[2].Source.MediaType != "image/png" || blocks[2].Source.Data != "AQID" {
+		t.Errorf("expected the image to be carried as base64, got %+v", blocks[2])
 	}
 }
 
@@ -1162,8 +1165,11 @@ func TestAToolReturningOnlyAnImageStillSaysSomething(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !strings.Contains((*bodies)[1], `"text":"(see attached image)"`) {
+	if !strings.Contains((*bodies)[1], `"text":"No output."`) {
 		t.Errorf("expected a stand-in for the missing text, got %s", (*bodies)[1])
+	}
+	if !strings.Contains((*bodies)[1], `"text":"Image attached."`) {
+		t.Errorf("expected an attachment notice, got %s", (*bodies)[1])
 	}
 }
 

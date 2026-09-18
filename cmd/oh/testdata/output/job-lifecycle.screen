@@ -8,33 +8,32 @@ job docs $ python3 -m http.server … ✓ 1L
 The docs server is up.
 
 
- 🤖 The job build exited: failed after
-    12s, exit(2).
+ 🤖 Job build exited: failed after 12s,
+    exit(2).
     go build ./...
     cmd/oh/draw.go:41:9: undefined:
     getWidth
     exit status 1
- 🤖 The job seed exited: complete after
-    14s.
+ 🤖 Job seed exited: complete after 14s.
     seeding the database
 
     [truncated at 2K of 58.6K; full
     output in
     /state/sessions/brave-otter/drops/ou
     tput-3f2a1c8d4b5e6f70.txt]
- 🤖 The job empty exited: complete after
-    15s (no output).
- 🤖 The job build`fast exited: complete
+ 🤖 Job empty exited: complete after 15s
+    (no output).
+ 🤖 Job build`fast exited: complete
     after 16s.
     done
- 🤖 The job archive exited: complete
-    after 17s (no output).
+ 🤖 Job archive exited: complete after
+    17s (no output).
     note: the oldest 1K of output was
     dropped to keep the spool bounded.
- 🤖 The job docs was stopped because the
+ 🤖 Job docs stopped because the
     workspace was made read-only.
- 🤖 The job index was stopped because
-    access to /reference was revoked.
+ 🤖 Job index stopped because access to
+    /reference was revoked.
 
 
 
@@ -44,8 +43,7 @@ The docs server is up.
 job docs status ✓ 1L
 
 
- 🤖 The job docs was stopped from the
-    keyboard.
+ 🤖 Job docs stopped from the keyboard.
 
 
 job docs discard ✓ 1L
@@ -140,13 +138,7 @@ p
 
 🤖
 
-T
-
-h
-
-e
-
-j
+J
 
 o
 
@@ -346,13 +338,7 @@ s
 
 🤖
 
-T
-
-h
-
-e
-
-j
+J
 
 o
 
@@ -645,13 +631,7 @@ t
 
 🤖
 
-T
-
-h
-
-e
-
-j
+J
 
 o
 
@@ -737,13 +717,7 @@ t
 
 🤖
 
-T
-
-h
-
-e
-
-j
+J
 
 o
 
@@ -827,13 +801,7 @@ e
 
 🤖
 
-T
-
-h
-
-e
-
-j
+J
 
 o
 
@@ -1035,13 +1003,7 @@ d
 
 🤖
 
-T
-
-h
-
-e
-
-j
+J
 
 o
 
@@ -1052,12 +1014,6 @@ d
 o
 
 c
-
-s
-
-w
-
-a
 
 s
 
@@ -1149,13 +1105,7 @@ y
 
 🤖
 
-T
-
-h
-
-e
-
-j
+J
 
 o
 
@@ -1170,12 +1120,6 @@ d
 e
 
 x
-
-w
-
-a
-
-s
 
 s
 
@@ -1305,13 +1249,7 @@ t
 
 🤖
 
-T
-
-h
-
-e
-
-j
+J
 
 o
 
@@ -1322,12 +1260,6 @@ d
 o
 
 c
-
-s
-
-w
-
-a
 
 s
 
@@ -1431,22 +1363,22 @@ job docs $ python3 -m http.server 8080 ✓ 1L
 The docs server is up.
 
 
- 🤖 The job build exited: failed after 12s, exit(2).
+ 🤖 Job build exited: failed after 12s, exit(2).
     go build ./...
     cmd/oh/draw.go:41:9: undefined: getWidth
     exit status 1
- 🤖 The job seed exited: complete after 14s.
+ 🤖 Job seed exited: complete after 14s.
     seeding the database
 
     [truncated at 2K of 58.6K; full output in
     /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]
- 🤖 The job empty exited: complete after 15s (no output).
- 🤖 The job build`fast exited: complete after 16s.
+ 🤖 Job empty exited: complete after 15s (no output).
+ 🤖 Job build`fast exited: complete after 16s.
     done
- 🤖 The job archive exited: complete after 17s (no output).
+ 🤖 Job archive exited: complete after 17s (no output).
     note: the oldest 1K of output was dropped to keep the spool bounded.
- 🤖 The job docs was stopped because the workspace was made read-only.
- 🤖 The job index was stopped because access to /reference was revoked.
+ 🤖 Job docs stopped because the workspace was made read-only.
+ 🤖 Job index stopped because access to /reference was revoked.
 
 
 
@@ -1456,7 +1388,7 @@ The docs server is up.
 job docs status ✓ 1L
 
 
- 🤖 The job docs was stopped from the keyboard.
+ 🤖 Job docs stopped from the keyboard.
 
 
 job docs discard ✓ 1L
@@ -1478,7 +1410,7 @@ server is
 up.
 
 
- 🤖 The job
+ 🤖 Job
     build
     exited:
     failed
@@ -1495,8 +1427,7 @@ up.
     getWidth
     exit
     status 1
- 🤖 The job
-    seed
+ 🤖 Job seed
     exited:
     complete
     after
@@ -1520,14 +1451,14 @@ up.
     -3f2a1c8
     d4b5e6f7
     0.txt]
- 🤖 The job
+ 🤖 Job
     empty
     exited:
     complete
     after
     15s (no
     output).
- 🤖 The job
+ 🤖 Job
     build`fa
     st
     exited:
@@ -1535,7 +1466,7 @@ up.
     after
     16s.
     done
- 🤖 The job
+ 🤖 Job
     archive
     exited:
     complete
@@ -1553,8 +1484,7 @@ up.
     the
     spool
     bounded.
- 🤖 The job
-    docs was
+ 🤖 Job docs
     stopped
     because
     the
@@ -1563,9 +1493,8 @@ up.
     made
     read-onl
     y.
- 🤖 The job
+ 🤖 Job
     index
-    was
     stopped
     because
     access
@@ -1584,8 +1513,7 @@ up.
 job do… ✓ 1L
 
 
- 🤖 The job
-    docs was
+ 🤖 Job docs
     stopped
     from the
     keyboard
@@ -1610,22 +1538,22 @@ job docs $ python3 -m http.server 8080 ✓ 1L
 The docs server is up.
 
 
- 🤖 The job build exited: failed after 12s, exit(2).
+ 🤖 Job build exited: failed after 12s, exit(2).
     go build ./...
     cmd/oh/draw.go:41:9: undefined: getWidth
     exit status 1
- 🤖 The job seed exited: complete after 14s.
+ 🤖 Job seed exited: complete after 14s.
     seeding the database
 
     [truncated at 2K of 58.6K; full output in
     /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]
- 🤖 The job empty exited: complete after 15s (no output).
- 🤖 The job build`fast exited: complete after 16s.
+ 🤖 Job empty exited: complete after 15s (no output).
+ 🤖 Job build`fast exited: complete after 16s.
     done
- 🤖 The job archive exited: complete after 17s (no output).
+ 🤖 Job archive exited: complete after 17s (no output).
     note: the oldest 1K of output was dropped to keep the spool bounded.
- 🤖 The job docs was stopped because the workspace was made read-only.
- 🤖 The job index was stopped because access to /reference was revoked.
+ 🤖 Job docs stopped because the workspace was made read-only.
+ 🤖 Job index stopped because access to /reference was revoked.
 
 
 
@@ -1635,7 +1563,7 @@ The docs server is up.
 job docs status ✓ 1L
 
 
- 🤖 The job docs was stopped from the keyboard.
+ 🤖 Job docs stopped from the keyboard.
 
 
 job docs discard ✓ 1L

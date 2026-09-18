@@ -26,12 +26,12 @@ the stream ended before the response did
 
 ## Interrupted · +0s
 
-The turn was interrupted because the user changed what the harness is allowed to do.
+Turn stopped because access changed.
 
 ## Mode · rxngl · toggled w · +0s
 
 ```
-The workspace is now read-only.
+Workspace is now read-only.
 ```
 
 ## Retrying · attempt 1 · waited 1s · +0s

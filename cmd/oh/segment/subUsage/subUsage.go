@@ -102,7 +102,7 @@ func New(settings Settings) segment.Factory {
 		}
 
 		if args.Rate < 0 {
-			return nil, fmt.Errorf("rate is %s, and wants to be longer than nothing", args.Rate)
+			return nil, fmt.Errorf("rate must not be negative (got %s)", args.Rate)
 		}
 
 		if args.Rate == 0 {

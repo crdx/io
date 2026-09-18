@@ -54,7 +54,7 @@ func validate(args Args) error {
 		return errors.New("title is required")
 	}
 	if utf8.RuneCountInString(title) > maxTitleLength {
-		return fmt.Errorf("title must be at most %d characters", maxTitleLength)
+		return fmt.Errorf("title exceeds %d characters", maxTitleLength)
 	}
 
 	return nil
@@ -73,7 +73,7 @@ func (self *titles) exec(_ context.Context, args Args) (tool.ToolCallResult, err
 	self.mutex.Unlock()
 
 	if isUnchanged {
-		return tool.ToolCallResult{Output: "the session is already titled " + strconv.Quote(title)}, nil
+		return tool.ToolCallResult{Output: "title unchanged: " + strconv.Quote(title)}, nil
 	}
 
 	state, err := json.Marshal(agent.TitleState{Title: title})
@@ -82,7 +82,7 @@ func (self *titles) exec(_ context.Context, args Args) (tool.ToolCallResult, err
 	}
 
 	return tool.ToolCallResult{
-		Output: "the session is now titled " + strconv.Quote(title),
+		Output: "session titled " + strconv.Quote(title),
 		State:  state,
 	}, nil
 }

@@ -196,9 +196,9 @@ func SandboxToHostNotice(event agent.Event) (string, bool) {
 	}
 	port := uint16(portNumber)
 	if slices.Contains(ports, port) {
-		return "Exposed host loopback port " + event.Name + " to the sandbox.", true
+		return "Host loopback port " + event.Name + " exposed to sandbox.", true
 	}
-	return "Stopped exposing host loopback port " + event.Name + " to the sandbox.", true
+	return "Host loopback port " + event.Name + " no longer exposed to sandbox.", true
 }
 
 func sandboxToHostDefinition() access.Definition[[]uint16] {

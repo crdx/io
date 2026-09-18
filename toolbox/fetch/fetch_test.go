@@ -106,7 +106,7 @@ func TestFetchReportsHTTPFailures(t *testing.T) {
 	defer server.Close()
 
 	_, err := fetchPage(t.Context(), server.Client(), Args{URL: server.URL, Type: "text"})
-	if err == nil || !strings.Contains(err.Error(), "status 418: not today") {
+	if err == nil || !strings.Contains(err.Error(), "HTTP 418: not today") {
 		t.Errorf("got %v", err)
 	}
 }

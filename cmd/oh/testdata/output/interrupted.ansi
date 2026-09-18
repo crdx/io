@@ -8,7 +8,7 @@
 \r
 \r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?     \e[0m\r
@@ -107,24 +107,14 @@
 \r\e[K\e[38;2;150;152;150m–\e[0m\r
 \r
 \e[38;2;207;173;0mT\e[0m\r
-\e[38;2;207;173;0mh\e[0m\r
-\e[38;2;207;173;0me\e[0m\r
-\e[38;2;207;173;0mt\e[0m\r
 \e[38;2;207;173;0mu\e[0m\r
 \e[38;2;207;173;0mr\e[0m\r
 \e[38;2;207;173;0mn\e[0m\r
-\e[38;2;207;173;0mw\e[0m\r
-\e[38;2;207;173;0ma\e[0m\r
 \e[38;2;207;173;0ms\e[0m\r
-\e[38;2;207;173;0mi\e[0m\r
-\e[38;2;207;173;0mn\e[0m\r
 \e[38;2;207;173;0mt\e[0m\r
-\e[38;2;207;173;0me\e[0m\r
-\e[38;2;207;173;0mr\e[0m\r
-\e[38;2;207;173;0mr\e[0m\r
-\e[38;2;207;173;0mu\e[0m\r
+\e[38;2;207;173;0mo\e[0m\r
 \e[38;2;207;173;0mp\e[0m\r
-\e[38;2;207;173;0mt\e[0m\r
+\e[38;2;207;173;0mp\e[0m\r
 \e[38;2;207;173;0me\e[0m\r
 \e[38;2;207;173;0md\e[0m\r
 \e[38;2;207;173;0m.\e[0m\r
@@ -234,7 +224,7 @@ Reading it now.
 
 read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;150;152;150m–\e[0m
 
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m
+\e[38;2;207;173;0mTurn stopped.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m never mind, what is in target.txt?\e[0m
@@ -252,7 +242,7 @@ Reading it now.\r
 \r
 read \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?                                                                 \e[0m\r
@@ -271,7 +261,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \r
 \e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?                                                                 \e[0m\r
@@ -290,7 +280,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \r
 \e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?                                                                 \e[0m\r
@@ -309,7 +299,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \r
 \e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?                                                                 \e[0m\r
@@ -333,8 +323,8 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \r
 \r\e[Kread \e[38;2;192;128;80mcmd/…\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r
-\e[38;2;207;173;0mThe turn was\e[0m\r
-\e[38;2;207;173;0minterrupted.\e[0m\r
+\e[38;2;207;173;0mTurn\e[0m\r
+\e[38;2;207;173;0mstopped.\e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m never mind,\e[0m\r
@@ -357,7 +347,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 
 \r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m
 
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m
+\e[38;2;207;173;0mTurn stopped.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?\e[0m
@@ -375,7 +365,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \r
 \r\e[Kread \e[38;2;150;152;150m\e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e]8;;\e\\\e[0m \e[38;2;150;152;150m–\e[0m\r
 \r
-\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\e[38;2;207;173;0mTurn stopped.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m never mind, what is in \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\?                                                                 \e[0m\r
