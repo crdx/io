@@ -16,6 +16,7 @@
 - Preserve raw fetch result in a session drop
 - Run the demo unsandboxed since it's safe
 - Hint that double enter sends queued messages
+- Send a desktop notification on approval prompt
 
 ## [0.6.0] - 2026-09-18
 

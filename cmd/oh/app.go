@@ -161,6 +161,7 @@ type App struct {
 	experimental    *experimental.Toggles
 	permissions     *permission.Live
 	onFailure       func(failure error)
+	onQuestion      func(question ask.Question)
 	savePastedImage func(mediaType string, data []byte) (string, error)
 	pasteExchange   paste.Exchange
 	workspace       *work.Space
@@ -995,12 +996,17 @@ func (self *App) questionChanges() <-chan struct{} {
 }
 
 func (self *App) onQuestionChange() {
+	previous := self.question.request
 	self.question.request = self.question.broker.Current()
-	if self.question.request == nil {
+	if self.question.request == nil || self.question.request == previous {
 		return
 	}
 
 	self.question.cursor = self.question.request.Question.DefaultIndex()
+
+	if self.onQuestion != nil {
+		self.onQuestion(self.question.request.Question)
+	}
 }
 
 func (self *App) hostToSandboxChanges() <-chan agent.Event {

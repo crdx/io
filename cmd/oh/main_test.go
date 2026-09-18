@@ -551,6 +551,43 @@ func TestAQuestionIgnoresOtherKeys(t *testing.T) {
 	}
 }
 
+func TestEveryQuestionSendsOneDesktopNotification(t *testing.T) {
+	broker := ask.New()
+	closeBroker := broker.Open()
+	defer closeBroker()
+
+	var notified []string
+	self := &App{question: questionState{broker: broker}}
+	self.onQuestion = func(question ask.Question) { notified = append(notified, question.Label) }
+
+	first := make(chan error, 1)
+	go func() { first <- ask.Confirm(t.Context(), broker, ask.Confirmation{Label: "Continue?"}) }()
+	<-broker.Changes()
+	self.onQuestionChange()
+
+	second := make(chan error, 1)
+	go func() { second <- ask.Confirm(t.Context(), broker, ask.Confirmation{Label: "Fetch this page?"}) }()
+	<-broker.Changes()
+	self.onQuestionChange()
+
+	self.answerQuestion(key.Key{Code: key.Rune, Value: 'y'})
+	if err := <-first; err != nil {
+		t.Fatalf("the first question was answered with %v", err)
+	}
+
+	<-broker.Changes()
+	self.onQuestionChange()
+	self.answerQuestion(key.Key{Code: key.Rune, Value: 'y'})
+	if err := <-second; err != nil {
+		t.Fatalf("the second question was answered with %v", err)
+	}
+
+	want := []string{"Continue?", "Fetch this page?"}
+	if !slices.Equal(notified, want) {
+		t.Errorf("got notifications %q, want %q", notified, want)
+	}
+}
+
 func TestAQuestionMovesItsCursorAndAnswersWhereItRests(t *testing.T) {
 	for name, test := range map[string]struct {
 		keypresses []key.Key

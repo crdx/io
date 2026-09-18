@@ -994,6 +994,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	app.onFailure = func(failure error) {
 		_ = notification.SendTurnError(context.Background(), screen.WriteEscape, workspace, failure)
 	}
+	app.onQuestion = func(question ask.Question) {
+		go func() {
+			_ = notification.SendQuestion(
+				context.Background(), screen.WriteEscape, workspace, question,
+			)
+		}()
+	}
 	app.savePastedImage = dropKeeper.SaveImage
 	toolOutputLimit.SaveOverflowWith(dropKeeper.SaveOutput)
 
