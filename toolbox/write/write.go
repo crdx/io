@@ -56,7 +56,7 @@ func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.T
 	currentContent, err := root.ReadFile(name)
 	if err == nil {
 		if err := snapshots.Check(root, name, currentContent); err != nil {
-			return "", tool.ToolCallMetrics{}, fmt.Errorf("%w; read %s before overwriting it", err, args.Path)
+			return "", tool.ToolCallMetrics{}, err
 		}
 	} else if !errors.Is(err, fs.ErrNotExist) {
 		return "", tool.ToolCallMetrics{}, err

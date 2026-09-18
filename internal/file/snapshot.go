@@ -14,7 +14,7 @@ const FileReadState = "file_read"
 
 var ErrNotRead = errors.New("read the file first")
 
-var ErrChangedSinceRead = errors.New("file has changed since it was last read")
+var ErrChangedSinceRead = errors.New("file changed; re-read it")
 
 type ReadSnapshot struct {
 	Path string `json:"path"`

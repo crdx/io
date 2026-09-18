@@ -101,7 +101,8 @@ func TestWriteRequiresTheCurrentFileToHaveBeenReadBeforeOverwriting(t *testing.T
 	writeTool := toolNamed(t, tools, "write")
 	arguments := `{"path":"a.txt","content":"two\n"}`
 
-	if err := runTool(t, writeTool, arguments); !errors.Is(err, file.ErrNotRead) {
+	if err := runTool(t, writeTool, arguments); !errors.Is(err, file.ErrNotRead) ||
+		err.Error() != file.ErrNotRead.Error() {
 		t.Errorf("expected an unread file to be refused, got %v", err)
 	}
 	if err := runTool(t, readTool, `{"path":"a.txt"}`); err != nil {
@@ -109,7 +110,8 @@ func TestWriteRequiresTheCurrentFileToHaveBeenReadBeforeOverwriting(t *testing.T
 	}
 
 	writeTestFile(t, root, "changed\n")
-	if err := runTool(t, writeTool, arguments); !errors.Is(err, file.ErrChangedSinceRead) {
+	if err := runTool(t, writeTool, arguments); !errors.Is(err, file.ErrChangedSinceRead) ||
+		err.Error() != "file changed; re-read it" {
 		t.Errorf("expected a changed file to be refused, got %v", err)
 	}
 	if err := runTool(t, readTool, `{"path":"a.txt"}`); err != nil {
