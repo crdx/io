@@ -10,6 +10,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/ctl/console"
 	"crdx.org/io/cmd/oh/store"
+	"crdx.org/io/session"
 )
 
 const (
@@ -33,6 +34,24 @@ func TestGoldenWhatIsWrittenAgainMatchesTheGolden(t *testing.T) {
 	}
 
 	assertGolden(t, "report.txt", report(screen.String(), failure.String(), name))
+}
+
+func TestGoldenAnArchivedSessionWithoutATranscriptMatchesTheGolden(t *testing.T) {
+	directory := t.TempDir()
+	name := storedSession(t, directory)
+	if err := os.Remove(filepath.Join(directory, name, "chat.md")); err != nil {
+		t.Fatal(err)
+	}
+	if err := session.Archive(directory, name); err != nil {
+		t.Fatal(err)
+	}
+
+	var screen, failure strings.Builder
+	if err := run(directory, nil, console.Output{Screen: &screen, Failure: &failure}); err != nil {
+		t.Fatal(err)
+	}
+
+	assertGolden(t, "archived.txt", report(screen.String(), failure.String(), name))
 }
 
 func TestGoldenWhatCannotBeWrittenAgainMatchesTheGolden(t *testing.T) {

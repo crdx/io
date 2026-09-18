@@ -715,6 +715,37 @@ func TestRebuildReplacesATranscriptRatherThanAppendingToIt(t *testing.T) {
 	}
 }
 
+func TestRebuildCreatesAMissingTranscriptInsideAnArchive(t *testing.T) {
+	directory := t.TempDir()
+	name := write(t, directory)
+	path := filepath.Join(directory, name, "chat.md")
+
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	if err := session.Archive(directory, name); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := store.Rebuild(directory, name); err != nil {
+		t.Fatal(err)
+	}
+
+	if !session.IsArchived(directory, name) {
+		t.Fatal("the rebuilt session was not archived again")
+	}
+	if err := session.Restore(directory, name); err != nil {
+		t.Fatal(err)
+	}
+	rebuilt, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(string(rebuilt), "# Conversation\n") {
+		t.Errorf("the rebuilt transcript does not start with a header:\n%s", rebuilt)
+	}
+}
+
 func TestRebuildLeavesTheJournalAlone(t *testing.T) {
 	directory := t.TempDir()
 	name := write(t, directory)

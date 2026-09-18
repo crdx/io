@@ -528,6 +528,12 @@ func RebuildStaleMeta(directory string) (int, error) {
 }
 
 func Rebuild(directory string, name string) error {
+	return session.Unarchived(directory, name, func() error {
+		return rebuildTranscript(directory, name)
+	})
+}
+
+func rebuildTranscript(directory string, name string) error {
 	storedSession, err := Read(directory, name)
 	if err != nil {
 		return err
