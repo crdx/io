@@ -138,7 +138,7 @@ The right side is drawn whole and the left is then fitted into what remains, so 
 | `path-grants`        | each granted path with its access flags                               | `type`: `base`, `short`, or `full`          |
 | `scroll-overflow`    | how many input lines are hidden that way, and nothing where none are  | `direction`: `up` or `down`, and no default |
 | `session-emoji`      | the emoji drawn from the session name                                 | none                                        |
-| `session-name`       | the session name                                                      | `emoji`, `true` to append it                |
+| `session-name`       | the session name linked to its directory                              | `emoji`, `true` to append it                |
 | `session-spend`      | what the session has cost, in `ui.currency`                           | none                                        |
 | `subscription-usage` | a gauge per subscription window, with its freshness and any limit     | `rate`, default `5m`                        |
 | `turn-count`         | `#n`, and nothing before the first turn                               | none                                        |

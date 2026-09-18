@@ -7,6 +7,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/cycle"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/segment"
@@ -61,9 +62,7 @@ const (
 
 type Options struct {
 	Workspace             *work.Space
-	CurrentSessionName    string
-	ModelName             string
-	ModelEffort           string
+	Session               cycle.Session
 	ModelEffortLevels     []string
 	IsFast                bool
 	IsSimulated           bool
@@ -78,6 +77,7 @@ type Options struct {
 
 type Sources struct {
 	IsTurnRunning         func() bool
+	IsSessionPersisted    func() bool
 	GetContextUsage       func() (int, int)
 	GetCacheUsage         func() (int, int)
 	GetSessionSpend       func() (float64, bool)
@@ -111,25 +111,29 @@ func NewRegistry(options Options) segment.Registry {
 		),
 		workspaceDirSegment: workspaceDir.New(options.Workspace),
 		activeModelSegment: activeModel.New(activeModel.Settings{
-			Name:         options.ModelName,
-			Effort:       options.ModelEffort,
+			Name:         options.Session.Model,
+			Effort:       options.Session.Effort,
 			EffortLevels: options.ModelEffortLevels,
 			IsFast:       options.IsFast,
 			IsSimulated:  options.IsSimulated,
 		}),
 		fastModeSegment:       fastMode.New(options.IsFast),
 		scrollOverflowSegment: scrollOverflow.New,
-		sessionNameSegment:    sessionName.New(options.CurrentSessionName),
-		sessionEmojiSegment:   sessionEmoji.New(options.CurrentSessionName),
-		localTimeSegment:      localTime.New(time.Now),
-		turnTimerSegment:      turnTimer.New(options.Sources.GetTurnTiming, options.Sources.IsTurnRunning),
-		turnCountSegment:      turnCount.New(options.Sources.GetTurnCount),
-		gitBranchSegment:      gitBranch.New(options.Workspace.GetDir()),
-		jobNamesSegment:       jobNames.New(options.Sources.GetJobs, time.Now),
+		sessionNameSegment: sessionName.New(
+			options.Session.Name,
+			options.Session.Directory,
+			options.Sources.IsSessionPersisted,
+		),
+		sessionEmojiSegment: sessionEmoji.New(options.Session.Name),
+		localTimeSegment:    localTime.New(time.Now),
+		turnTimerSegment:    turnTimer.New(options.Sources.GetTurnTiming, options.Sources.IsTurnRunning),
+		turnCountSegment:    turnCount.New(options.Sources.GetTurnCount),
+		gitBranchSegment:    gitBranch.New(options.Workspace.GetDir()),
+		jobNamesSegment:     jobNames.New(options.Sources.GetJobs, time.Now),
 		subUsageSegment: subUsage.New(subUsage.Settings{
 			Reporter:         options.UsageReporter,
 			CachePath:        options.UsageCachePath,
-			ModelName:        options.ModelName,
+			ModelName:        options.Session.Model,
 			IsSelfRefreshing: options.UsageIsSelfRefreshing,
 			IsSimulated:      options.IsSimulated,
 			Gauges:           options.UsageGauges,

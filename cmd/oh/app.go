@@ -958,6 +958,7 @@ func getBarContext(frame edit.Frame) segment.Context {
 func (self *App) getBarSources() bar.Sources {
 	return bar.Sources{
 		IsTurnRunning:         self.isTurnRunning,
+		IsSessionPersisted:    self.isSessionPersisted,
 		GetContextUsage:       self.contextUsage,
 		GetCacheUsage:         self.cacheUsage,
 		GetSessionSpend:       self.sessionSpend,
@@ -970,6 +971,10 @@ func (self *App) getBarSources() bar.Sources {
 		GetTurnCount:          self.turnCount,
 		GetJobs:               self.getJobs,
 	}
+}
+
+func (self *App) isSessionPersisted() bool {
+	return self.recorder != nil && self.recorder.IsPersisted()
 }
 
 func (self *App) getJobs() []jobs.Snapshot {

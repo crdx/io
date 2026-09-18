@@ -432,8 +432,12 @@ func TestTheSessionEmojiSegmentDrawsNothingForAnUnknownAnimal(t *testing.T) {
 	}
 }
 
+func persistedSessionName(name string, directory string) segment.Factory {
+	return sessionName.New(name, directory, func() bool { return true })
+}
+
 func TestTheSessionNameSegmentCanOmitTheAnimalEmoji(t *testing.T) {
-	built, err := sessionName.New("brave-otter")(tomlOptions("emoji = false\n"))
+	built, err := persistedSessionName("brave-otter", "/state/sessions/brave-otter")(tomlOptions("emoji = false\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -444,7 +448,7 @@ func TestTheSessionNameSegmentCanOmitTheAnimalEmoji(t *testing.T) {
 }
 
 func TestTheSessionNameSegmentCanAppendTheAnimalEmoji(t *testing.T) {
-	built, err := sessionName.New("brave-otter")(tomlOptions("emoji = true\n"))
+	built, err := persistedSessionName("brave-otter", "/state/sessions/brave-otter")(tomlOptions("emoji = true\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -454,8 +458,33 @@ func TestTheSessionNameSegmentCanAppendTheAnimalEmoji(t *testing.T) {
 	}
 }
 
+func TestTheSessionNameSegmentLinksOnlyTheNameOnceTheSessionIsPersisted(t *testing.T) {
+	isPersisted := false
+	built, err := sessionName.New(
+		"brave-otter",
+		"/state/sessions/brave otter",
+		func() bool { return isPersisted },
+	)(tomlOptions("emoji = true\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	plain := style.Subtle("brave-otter") + " 🦦"
+	if got := built.Render(segment.Context{}); got != plain {
+		t.Errorf("got %q before persistence, want %q", got, plain)
+	}
+
+	isPersisted = true
+	opening := "\x1b]8;;file:///state/sessions/brave%20otter\x1b\\"
+	closing := "\x1b]8;;\x1b\\"
+	want := opening + style.Subtle("brave-otter") + closing + " 🦦"
+	if got := built.Render(segment.Context{}); got != want {
+		t.Errorf("got %q after persistence, want only the session name linked as %q", got, want)
+	}
+}
+
 func TestTheSessionNameSegmentOmitsAnUnknownAnimalEmoji(t *testing.T) {
-	built, err := sessionName.New("brave-tester")(tomlOptions("emoji = true\n"))
+	built, err := persistedSessionName("brave-tester", "/state/sessions/brave-tester")(tomlOptions("emoji = true\n"))
 	if err != nil {
 		t.Fatal(err)
 	}

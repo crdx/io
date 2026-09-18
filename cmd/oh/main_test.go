@@ -9680,12 +9680,15 @@ func availableSegments(
 	harness *App,
 ) segment.Registry {
 	return bar.NewRegistry(bar.Options{
-		Workspace:          workspace,
-		CurrentSessionName: currentSessionName,
-		ModelName:          modelName,
-		ModelEffort:        modelEffort,
-		ModelEffortLevels:  []string{"none", "minimal", "low", "medium", "high"},
-		Sources:            harness.getBarSources(),
+		Workspace: workspace,
+		Session: cycle.Session{
+			Name:      currentSessionName,
+			Directory: filepath.Join("/state/sessions", currentSessionName),
+			Model:     modelName,
+			Effort:    modelEffort,
+		},
+		ModelEffortLevels: []string{"none", "minimal", "low", "medium", "high"},
+		Sources:           harness.getBarSources(),
 	})
 }
 
@@ -9924,6 +9927,8 @@ func TestGoldenEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 	t.Setenv("HOME", "/home/tester")
 
 	at := time.Date(2026, time.August, 23, 14, 32, 9, 0, time.UTC)
+	isPersisted := func() bool { return true }
+	isNotPersisted := func() bool { return false }
 	spinnerOptions := `
 		idle = "✧·"
 		frames = ["✦·", "·✦"]
@@ -10035,13 +10040,25 @@ func TestGoldenEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"session-name": goldenSegmentPass(
 			t,
-			sessionName.New("brave-otter"),
+			sessionName.New("brave-otter", "/state/sessions/brave-otter", isPersisted),
 			"",
+			segment.Context{},
+		),
+		"session-name / unpersisted": goldenSegmentPass(
+			t,
+			sessionName.New("brave-otter", "/state/sessions/brave-otter", isNotPersisted),
+			"",
+			segment.Context{},
+		),
+		"session-name / unpersisted / emoji": goldenSegmentPass(
+			t,
+			sessionName.New("brave-otter", "/state/sessions/brave-otter", isNotPersisted),
+			"emoji = true",
 			segment.Context{},
 		),
 		"session-name / emoji": goldenSegmentPass(
 			t,
-			sessionName.New("brave-otter"),
+			sessionName.New("brave-otter", "/state/sessions/brave-otter", isPersisted),
 			"emoji = true",
 			segment.Context{},
 		),
@@ -10107,7 +10124,7 @@ func TestGoldenEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"session-name / retired animal": goldenSegmentPass(
 			t,
-			sessionName.New(retiredAnimalSession),
+			sessionName.New(retiredAnimalSession, "/state/sessions/"+retiredAnimalSession, isPersisted),
 			"emoji = true",
 			segment.Context{},
 		),

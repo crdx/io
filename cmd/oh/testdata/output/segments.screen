@@ -132,6 +132,10 @@ brave-otter
 brave-otter 🦦
 === session-name / retired animal ===
 brave-vulture 🦅
+=== session-name / unpersisted ===
+brave-otter
+=== session-name / unpersisted / emoji ===
+brave-otter 🦦
 === session-spend / a currency without a symbol ===
 HUF 3564.00
 === session-spend / a fraction of a cent ===

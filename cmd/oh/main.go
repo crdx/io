@@ -1012,9 +1012,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	barRegistry := bar.NewRegistry(bar.Options{
 		Workspace:             workspace,
-		CurrentSessionName:    log.Name(),
-		ModelName:             selection.Model,
-		ModelEffort:           selection.Effort,
+		Session:               sessionInfo,
 		ModelEffortLevels:     choice.EffortLevels,
 		IsFast:                selection.IsFast,
 		IsSimulated:           isSimulated,

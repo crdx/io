@@ -127,11 +127,15 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫\e[0m\e[38;
 === session-emoji / unknown animal ===
 
 === session-name ===
-\e[38;2;150;152;150mbrave-otter\e[0m
+\e]8;;file:///state/sessions/brave-otter\e\\\e[38;2;150;152;150mbrave-otter\e[0m\e]8;;\e\\
 === session-name / emoji ===
-\e[38;2;150;152;150mbrave-otter\e[0m 🦦
+\e]8;;file:///state/sessions/brave-otter\e\\\e[38;2;150;152;150mbrave-otter\e[0m\e]8;;\e\\ 🦦
 === session-name / retired animal ===
-\e[38;2;150;152;150mbrave-vulture\e[0m 🦅
+\e]8;;file:///state/sessions/brave-vulture\e\\\e[38;2;150;152;150mbrave-vulture\e[0m\e]8;;\e\\ 🦅
+=== session-name / unpersisted ===
+\e[38;2;150;152;150mbrave-otter\e[0m
+=== session-name / unpersisted / emoji ===
+\e[38;2;150;152;150mbrave-otter\e[0m 🦦
 === session-spend / a currency without a symbol ===
 \e[38;2;150;152;150mHUF \e[0m3564.00
 === session-spend / a fraction of a cent ===
