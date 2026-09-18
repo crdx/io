@@ -90,7 +90,7 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 		{
 			name: "list directory",
 			exchange: resultExchange("ls", ls.Args{Path: "cmd"}, agent.SuccessStatus,
-				"oh/\nohctl/\nsimple/\n"),
+				"oh/\nsimple/\n"),
 		},
 		{
 			name:     "empty directory",
@@ -99,7 +99,7 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 		{
 			name: "find files",
 			exchange: resultExchange("find", find.Args{Pattern: "**/*.go", Path: "cmd"}, agent.SuccessStatus,
-				"cmd/oh/main.go\ncmd/ohctl/main.go\n"),
+				"cmd/oh/main.go\ncmd/oh/ctl/ctl.go\n"),
 		},
 		{
 			name:     "find without matches",
@@ -108,7 +108,7 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 		{
 			name: "grep source",
 			exchange: resultExchange("grep", grep.Args{Pattern: "func (Run|Open)", Path: "cmd", Glob: "**/*.go"}, agent.SuccessStatus,
-				"cmd/oh/main.go:12:func Run() error {\ncmd/ohctl/open.go:8:func Open() {\n"),
+				"cmd/oh/main.go:12:func Run() error {\ncmd/oh/ctl/open.go:8:func Open() {\n"),
 		},
 		{
 			name: "grep failure",

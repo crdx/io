@@ -4882,6 +4882,7 @@ const earlyExitDeadline = 10 * time.Second
 var usageOption = regexp.MustCompile(`(?m)^\s+(?:-[A-Za-z], )?(--[a-z-]+)`)
 
 var optionsThatExitEarly = map[string][]string{
+	"--ctl":     {"--ctl"},
 	"--login":   {"-L", "nobody"},
 	"--usage":   {"-U", "-J"},
 	"--list":    {"-l"},
@@ -10731,7 +10732,7 @@ func TestChoosingASessionFromANewerOhAdvisesAnUpgrade(t *testing.T) {
 	if !strings.Contains(err.Error(), "upgrade oh") {
 		t.Errorf("expected an upgrade to be advised, got %v", err)
 	}
-	if strings.Contains(err.Error(), "ohctl migrate") {
+	if strings.Contains(err.Error(), "oh --ctl migrate") {
 		t.Errorf("expected migration not to be advised for a newer format, got %v", err)
 	}
 }
@@ -10744,7 +10745,7 @@ func TestChoosingAnOutdatedSessionAdvisesMigration(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected the outdated session to be refused")
 	}
-	if !strings.Contains(err.Error(), "run `ohctl migrate`") {
+	if !strings.Contains(err.Error(), "run `oh --ctl migrate`") {
 		t.Errorf("expected migration advice, got %v", err)
 	}
 	if strings.Contains(err.Error(), "meta.json") {

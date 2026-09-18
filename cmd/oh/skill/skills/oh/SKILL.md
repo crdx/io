@@ -277,18 +277,18 @@ Each session has a scratch directory under `<state>/farm/<name>/`, holding the t
 
 ## Session Liveness
 
-A session is either running or ended, and nothing inside its directory says which. `ohctl sessions` says:
+A session is either running or ended, and nothing inside its directory says which. `oh --ctl sessions` says:
 
 ```bash
-ohctl sessions              # every stored session
-ohctl sessions --running    # only the ones still going
-ohctl sessions -w .         # only the ones in this workspace
-ohctl sessions --json       # the same listing, with the session and scratch directories in it
+oh --ctl sessions              # every stored session
+oh --ctl sessions --running    # only the ones still going
+oh --ctl sessions -w .         # only the ones in this workspace
+oh --ctl sessions --json       # the same listing, with the session and scratch directories in it
 ```
 
-The status comes from the lock the running process holds on the journal. Everything else is ambiguous: a last message an hour old reads the same whether the session ended then or has worked ever since, modification times inside a sandbox may all report when the tree was mapped, and a running session that is thinking has not written recently. Read `touched` in `meta.json` only where `ohctl` cannot run.
+The status comes from the lock the running process holds on the journal. Everything else is ambiguous: a last message an hour old reads the same whether the session ended then or has worked ever since, modification times inside a sandbox may all report when the tree was mapped, and a running session that is thinking has not written recently. Read `touched` in `meta.json` only where `oh --ctl` cannot run.
 
-`ohctl` resolves the state directory through `OH_STATE_DIR`, which oh sets inside its sandbox. It needs the sessions path granted; ask the user where it is not.
+`oh --ctl` resolves the state directory through `OH_STATE_DIR`, which oh sets inside its sandbox. It needs the sessions path granted; ask the user where it is not.
 
 Describe a running session as running, and its scratch directory as work in hand. Treat the end of a transcript as where the record stops; nothing marks a clean close. Check liveness before drawing any conclusion from a scratch directory, including whether its work has landed.
 
@@ -303,7 +303,7 @@ Take both from the invocation rather than asking:
 
 ### 2. Find Sessions
 
-`ohctl sessions --json` gives the newest first, with the status, title, workspace, and directories of each. Take the top `N`, dropping your own session, which is in the listing and running.
+`oh --ctl sessions --json` gives the newest first, with the status, title, workspace, and directories of each. Take the top `N`, dropping your own session, which is in the listing and running.
 
 Where a session has no `chat.md`, read `session.jsonl` for that one.
 

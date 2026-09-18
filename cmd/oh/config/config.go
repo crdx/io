@@ -523,7 +523,7 @@ func applySnapshot(config *Config, source sourceSnapshot) error {
 	case err != nil:
 		return fmt.Errorf("%s: %w", displayPath, err)
 	case version < Format:
-		return fmt.Errorf("%s: config format %d needs migrating: run ohctl migrate", displayPath, version)
+		return fmt.Errorf("%s: config format %d needs migrating: run oh --ctl migrate", displayPath, version)
 	}
 
 	if err := format.Check(version, Format); err != nil {

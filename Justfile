@@ -118,7 +118,7 @@ golden:
         ./cmd/oh/shell \
         ./cmd/oh/toolresult \
         ./cmd/oh/usage \
-        ./cmd/ohctl/... \
+        ./cmd/oh/ctl/... \
         ./toolbox/bash \
         -run '^TestGolden'
 
@@ -184,9 +184,6 @@ oh *args:
 
 ohm *args:
     go run ./cmd/oh -crx "$@"
-
-ohctl *args:
-    go run ./cmd/ohctl "$@"
 
 [private]
 mega:

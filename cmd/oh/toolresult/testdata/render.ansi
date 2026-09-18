@@ -93,7 +93,6 @@ main.go:12: undefined: run
 \e[38;2;207;173;0mls\e[0m · \e[38;2;192;128;80mcmd\e[0m
 
 \e[38;2;192;128;80moh/\e[0m
-\e[38;2;192;128;80mohctl/\e[0m
 \e[38;2;192;128;80msimple/\e[0m
 
 
@@ -106,7 +105,7 @@ main.go:12: undefined: run
 \e[38;2;207;173;0mfind\e[0m · \e[38;2;192;128;80m**/*.go · cmd\e[0m
 
 \e[38;2;192;128;80mcmd/oh/main.go\e[0m
-\e[38;2;192;128;80mcmd/ohctl/main.go\e[0m
+\e[38;2;192;128;80mcmd/oh/ctl/ctl.go\e[0m
 
 
 === find without matches ===
@@ -118,7 +117,7 @@ main.go:12: undefined: run
 \e[38;2;207;173;0mgrep\e[0m · \e[38;2;150;152;150mfunc \e[0m\e[38;2;150;152;150m(\e[0m\e[38;2;150;152;150mRun\e[0m\e[38;2;138;190;183m|\e[0m\e[38;2;150;152;150mOpen\e[0m\e[38;2;150;152;150m)\e[0m · \e[38;2;150;152;150mcmd **/*.go\e[0m
 
 \e[38;2;150;152;150mcmd/oh/main.go:12:\e[0m\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mRun\e[0m() \e[38;2;240;198;116merror\e[0m {
-\e[38;2;150;152;150mcmd/ohctl/open.go:8:\e[0m\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mOpen\e[0m() {
+\e[38;2;150;152;150mcmd/oh/ctl/open.go:8:\e[0m\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mOpen\e[0m() {
 
 
 === grep failure ===

@@ -84,7 +84,7 @@ func TestOnlyLibraryPackagesAreClaimed(t *testing.T) {
 		"agent/agent.go":                     false,
 		"wire/openai/responses/responses.go": false,
 		"cmd/oh/main.go":                     true,
-		"cmd/ohctl/console/console.go":       true,
+		"cmd/oh/ctl/console/console.go":      true,
 		"internal/sandbox/exec.go":           true,
 		"internal/lint/stdstream/main.go":    true,
 		"notify.go":                          false,

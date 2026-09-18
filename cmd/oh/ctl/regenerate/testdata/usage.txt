@@ -1,0 +1,6 @@
+oh --ctl regenerate — write stored transcripts again
+
+Usage:
+    oh --ctl regenerate [<session>...]
+
+Sessions are named on the command line, or every stored session is done when the command names no session.

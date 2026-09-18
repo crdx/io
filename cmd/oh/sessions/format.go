@@ -49,7 +49,7 @@ func validateEntries(entries []session.Entry) error {
 	subject, object := nameSessions(outdatedNames)
 
 	return fmt.Errorf(
-		"%s written in an older journal format: run `ohctl migrate` to bring %s up to format %d",
+		"%s written in an older journal format: run `oh --ctl migrate` to bring %s up to format %d",
 		subject, object, session.JournalFormat,
 	)
 }

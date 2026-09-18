@@ -13,6 +13,22 @@ function _oh {
         PREVIOUS=${TOKENS[-2]-}
     fi
 
+    if [[ ${TOKENS[1]-} == --ctl ]]; then
+        local COMMAND
+        COMMAND=${TOKENS[2]-}
+
+        if [[ -z $COMMAND || ( ${#TOKENS[@]} -eq 3 && -n $WORD ) ]]; then
+            KIND=command
+        elif [[ $COMMAND == analyse || $COMMAND == regenerate || $COMMAND == migrate ]]; then
+            KIND=session
+        else
+            return
+        fi
+
+        mapfile -t COMPREPLY < <("${COMP_WORDS[0]}" --ctl --complete "$KIND" "$WORD")
+        return
+    fi
+
     case $PREVIOUS in
         -r | --resume) KIND=session ;;
         -L | --login) KIND=provider ;;

@@ -24,15 +24,17 @@ Usage:
     $0 -U [--json]
     $0 -u [--ignored]
     $0 [options] [-t <tool>]... [<prompt>...]
+    $0 --ctl <command> [<args>...]
 
 Options:
+        --ctl     Control stored sessions and formats
     -r, --resume [<session>]    Resume a session
     -m, --model [<model>]       Choose a model
     -c, --caps <flags>          Set capabilities
     -t, --tool <tool>           Replace the toolbox
     -p, --print                 Stream non-interactively
-        --demo                  Enter the matrix
-        --yolo                  Disable sandbox
+        --demo    Enter the matrix
+        --yolo    Disable sandbox
     -l, --list                  List models
     -u, --update                Update model cache
     -L, --login                 Log in to a provider
@@ -44,6 +46,9 @@ Options:
 `
 
 type inputFlags struct {
+	IsControlling    bool     `docopt:"--ctl"`
+	ControlCommand   string   `docopt:"<command>"`
+	ControlArguments []string `docopt:"<args>"`
 	Message          []string `docopt:"<prompt>"`
 	Login            bool     `docopt:"--login"`
 	LoginProvider    string   `docopt:"<login-provider>"`

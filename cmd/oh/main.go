@@ -36,6 +36,7 @@ import (
 	"crdx.org/io/cmd/oh/commands"
 	"crdx.org/io/cmd/oh/conditions"
 	"crdx.org/io/cmd/oh/config"
+	"crdx.org/io/cmd/oh/ctl"
 	"crdx.org/io/cmd/oh/cycle"
 	"crdx.org/io/cmd/oh/demo"
 	"crdx.org/io/cmd/oh/drops"
@@ -170,6 +171,10 @@ var completableToolNames = []string{
 }
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == ctl.Flag {
+		os.Exit(ctl.Run(os.Args[2:]))
+	}
+
 	sandbox.Init()
 
 	if request, isRequested, err := toolresult.ParseRequest(os.Args[1:]); isRequested {

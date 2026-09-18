@@ -2,6 +2,8 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Move session maintenance to `oh --ctl`
+
 ## [0.6.0] - 2026-09-18
 
 ### Theme

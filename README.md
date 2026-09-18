@@ -115,7 +115,6 @@ The simulator deals in wire formats, not providers. A provider speaks one of the
 | `cmd/weather`   | A tool that answers questions about the weather   |
 | `cmd/streaming` | A prompt loop printing each event as it arrives   |
 | `cmd/simple`    | The same loop, with text fragments glued together |
-| `cmd/ohctl`     | Maintenance of stored sessions and formats        |
 
 ## Contributions
 

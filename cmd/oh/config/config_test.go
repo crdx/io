@@ -239,7 +239,7 @@ func TestAnUnversionedConfigNeedsMigrating(t *testing.T) {
 	}
 
 	_, err := Load(path)
-	if err == nil || !strings.Contains(err.Error(), "ohctl migrate") {
+	if err == nil || !strings.Contains(err.Error(), "oh --ctl migrate") {
 		t.Fatalf("expected migration instructions, got %v", err)
 	}
 }

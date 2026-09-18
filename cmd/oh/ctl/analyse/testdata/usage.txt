@@ -1,0 +1,8 @@
+oh --ctl analyse — analyse stored sessions
+
+Usage:
+    oh --ctl analyse [options] [<session>...]
+
+Options:
+    -j, --json    Write the analysis as JSON
+    -h, --help    Show this help
