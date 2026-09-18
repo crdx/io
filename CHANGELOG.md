@@ -27,6 +27,9 @@
 - Paste without the control characters the clipboard may carry
 - Resolve every configured path into its real path
 - Preserve nested write grants inside read-only paths
+- Keep unreadable nested directories read-only
+- Omit redundant PATH execution grants for covered targets
+- Keep deleted temporary path grants from disabling the shell
 - Report redundant and conflicting paths
 - Let a file tool follow a symlinked path
 - Ensure the max shell timeout is less than the typical prompt cache TTL

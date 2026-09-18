@@ -85,6 +85,13 @@ func (self runner) Start(
 	if err := validate(ctx, policy); err != nil {
 		return nil, err
 	}
+	if len(policy.Deny) > 0 && policy.DenyPaths == nil {
+		denyPaths, err := policy.DiscoverDenyPaths()
+		if err != nil {
+			return nil, err
+		}
+		policy.DenyPaths = append([]string{}, denyPaths...)
+	}
 
 	if err := ensureSane(directory, command); err != nil {
 		return nil, err

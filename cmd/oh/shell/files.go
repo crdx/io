@@ -3,6 +3,7 @@ package shell
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/internal/file"
@@ -17,6 +18,17 @@ func MountHomeDirectory(files *file.Root, homeDirectory string, mode *caps.Mode)
 
 	files.Mount(homeDirectory, file.New(homeRoot, caps.RefuseWrite(mode)))
 	return homeRoot, nil
+}
+
+func MountHomeCache(files *file.Root, homeDirectory string) (*os.Root, error) {
+	cacheDirectory := filepath.Join(homeDirectory, ".cache")
+	cacheRoot, err := os.OpenRoot(cacheDirectory)
+	if err != nil {
+		return nil, fmt.Errorf("could not open the shared cache: %w", err)
+	}
+
+	files.Mount(cacheDirectory, file.New(cacheRoot, func(string) error { return nil }))
+	return cacheRoot, nil
 }
 
 func MountTemporaryDirectory(files *file.Root, temporaryDirectory string) (*os.Root, error) {

@@ -2,6 +2,7 @@ package sandbox
 
 import (
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -22,7 +23,7 @@ var neverGranted = []string{
 }
 
 func TestEnvironmentIsNotGrantedBecauseItCarriesTheUsersOwn(t *testing.T) {
-	for _, granted := range base {
+	for _, granted := range systemPathGrants {
 		if granted.path == "/etc/environment" {
 			t.Error("/etc/environment is granted, and it can carry the user's own configuration")
 		}
@@ -31,7 +32,7 @@ func TestEnvironmentIsNotGrantedBecauseItCarriesTheUsersOwn(t *testing.T) {
 
 func TestNothingSecretIsGrantedToEveryCommand(t *testing.T) {
 	for _, secret := range neverGranted {
-		for _, granted := range base {
+		for _, granted := range systemPathGrants {
 			if granted.path == secret {
 				t.Errorf("%s is granted to every command", secret)
 			}
@@ -44,7 +45,7 @@ func TestNothingSecretIsGrantedToEveryCommand(t *testing.T) {
 }
 
 func TestEveryBaseGrantIsReadOnlyBeneathEtc(t *testing.T) {
-	for _, granted := range base {
+	for _, granted := range systemPathGrants {
 		if !strings.HasPrefix(granted.path, "/etc/") {
 			continue
 		}
@@ -62,7 +63,7 @@ func TestEveryBaseGrantIsReadOnlyBeneathEtc(t *testing.T) {
 func TestNoBaseGrantIsNamedTwiceOrRelatively(t *testing.T) {
 	seen := map[string]bool{}
 
-	for _, granted := range base {
+	for _, granted := range systemPathGrants {
 		if seen[granted.path] {
 			t.Errorf("%s is granted twice", granted.path)
 		}
@@ -70,6 +71,16 @@ func TestNoBaseGrantIsNamedTwiceOrRelatively(t *testing.T) {
 
 		if !filepath.IsAbs(granted.path) || filepath.Clean(granted.path) != granted.path {
 			t.Errorf("%s is not a clean absolute path", granted.path)
+		}
+	}
+}
+
+func TestBaselineReadablePathsMatchTheCommandsImplicitReadAccess(t *testing.T) {
+	readable := BaselineReadablePaths()
+	for _, granted := range systemPathGrants {
+		isBaselineReadable := granted.rights&rightsRead == rightsRead
+		if gotReadable := slices.Contains(readable, granted.path); gotReadable != isBaselineReadable {
+			t.Errorf("%s listed=%t, want %t from rights %#x", granted.path, gotReadable, isBaselineReadable, granted.rights)
 		}
 	}
 }

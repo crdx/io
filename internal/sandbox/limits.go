@@ -8,6 +8,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/pathutil"
 
 	"golang.org/x/sys/unix"
@@ -63,7 +64,7 @@ func namedPathSane(path string) error {
 }
 
 func (self Policy) namedPathsSane() error {
-	paths := slices.Concat(self.Read, self.Write, self.Exec, self.Sockets)
+	paths := slices.Concat(self.DenyPaths, self.Read, self.Write, self.Exec, self.Sockets)
 
 	if self.TmpDir != "" {
 		paths = append(paths, self.TmpDir)
@@ -81,6 +82,11 @@ func (self Policy) namedPathsSane() error {
 func (self Policy) sane() error {
 	if err := self.namedPathsSane(); err != nil {
 		return err
+	}
+	for _, pattern := range self.Deny {
+		if err := util.ValidateNameGlob(pattern); err != nil {
+			return fmt.Errorf("invalid deny pattern %q: %w", pattern, err)
+		}
 	}
 
 	if self.MaxFileSize < 0 {
@@ -102,6 +108,13 @@ func (self Policy) sane() error {
 	for _, path := range self.Sockets {
 		if !slices.Contains(self.Write, path) {
 			return fmt.Errorf("%s may resolve Unix sockets but is not writable", path)
+		}
+	}
+
+	grantedPaths := slices.Concat(self.Read, self.Write, self.Exec)
+	for _, path := range self.OptionalPaths {
+		if !slices.Contains(grantedPaths, path) {
+			return fmt.Errorf("%s is optional but is not granted", path)
 		}
 	}
 

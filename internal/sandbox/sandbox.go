@@ -8,7 +8,7 @@ import (
 	"crdx.org/io/internal/util/pathutil"
 )
 
-var base = []grant{
+var systemPathGrants = []grant{
 	{path: "/usr", rights: rightsExec, isOptional: true},
 	{path: "/bin", rights: rightsExec, isOptional: true},
 	{path: "/sbin", rights: rightsExec, isOptional: true},
@@ -52,18 +52,31 @@ var base = []grant{
 	{path: "/dev/urandom", rights: rightsRead, isOptional: true},
 }
 
+func BaselineReadablePaths() []string {
+	paths := make([]string, 0, len(systemPathGrants))
+	for _, systemGrant := range systemPathGrants {
+		if systemGrant.rights&rightsRead == rightsRead {
+			paths = append(paths, systemGrant.path)
+		}
+	}
+	return paths
+}
+
 type Policy struct {
 	Yolo    bool `json:"yolo,omitempty"`
 	Network bool `json:"network,omitempty"`
 
-	Read    []string          `json:"read"`
-	Write   []string          `json:"write"`
-	Sockets []string          `json:"sockets"`
-	Exec    []string          `json:"exec"`
-	TmpDir  string            `json:"tmpdir"`
-	Env     []string          `json:"env"`
-	SetEnv  map[string]string `json:"set_env"`
-	Timeout time.Duration     `json:"timeout"`
+	Deny          []string          `json:"deny,omitempty"`
+	DenyPaths     []string          `json:"deny_paths,omitempty"`
+	Read          []string          `json:"read"`
+	Write         []string          `json:"write"`
+	Sockets       []string          `json:"sockets"`
+	Exec          []string          `json:"exec"`
+	OptionalPaths []string          `json:"optional_paths,omitempty"`
+	TmpDir        string            `json:"tmpdir"`
+	Env           []string          `json:"env"`
+	SetEnv        map[string]string `json:"set_env"`
+	Timeout       time.Duration     `json:"timeout"`
 
 	MaxCPUTime   time.Duration `json:"cpu_time"`
 	MaxFileSize  int64         `json:"file_size"`
@@ -114,8 +127,8 @@ type grant struct {
 }
 
 func (self Policy) grants() []grant {
-	grants := make([]grant, 0, len(base)+len(self.Read)+len(self.Write)+len(self.Exec)+2)
-	grants = append(grants, base...)
+	grants := make([]grant, 0, len(systemPathGrants)+len(self.Read)+len(self.Write)+len(self.Exec)+2)
+	grants = append(grants, systemPathGrants...)
 
 	grants = append(
 		grants,
@@ -129,11 +142,15 @@ func (self Policy) grants() []grant {
 	}
 
 	for _, path := range self.Read {
-		grants = append(grants, grant{path: path, rights: rightsRead})
+		grants = append(grants, grant{
+			path: path, rights: rightsRead, isOptional: slices.Contains(self.OptionalPaths, path),
+		})
 	}
 
 	for _, path := range self.Exec {
-		grants = append(grants, grant{path: path, rights: rightsExec})
+		grants = append(grants, grant{
+			path: path, rights: rightsExec, isOptional: slices.Contains(self.OptionalPaths, path),
+		})
 	}
 
 	for _, path := range self.Write {
@@ -142,7 +159,9 @@ func (self Policy) grants() []grant {
 			rights |= accessResolveUnix
 		}
 
-		grants = append(grants, grant{path: path, rights: rights})
+		grants = append(grants, grant{
+			path: path, rights: rights, isOptional: slices.Contains(self.OptionalPaths, path),
+		})
 	}
 
 	return grants
@@ -160,6 +179,5 @@ func (self Policy) missingPaths() []string {
 			absent = append(absent, grant.path)
 		}
 	}
-
 	return absent
 }

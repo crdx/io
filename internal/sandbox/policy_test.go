@@ -141,29 +141,57 @@ func TestEveryPolicyGrantsPseudoterminals(t *testing.T) {
 	}
 }
 
-func TestWhatTheSystemMayNotHaveIsOptionalAndWhatThePolicyNamesIsNot(t *testing.T) {
-	for _, granted := range base {
+func TestOnlyExplicitlyOptionalPolicyPathsMayBeMissing(t *testing.T) {
+	for _, granted := range systemPathGrants {
 		if !granted.isOptional {
 			t.Errorf("%s is required, so a machine without it could not run a command", granted.path)
 		}
 	}
 
-	for _, granted := range (Policy{Read: []string{"/named-read"}}).grants() {
-		if granted.path == "/named-read" && granted.isOptional {
-			t.Error("a path the policy named was treated as optional")
+	policy := Policy{
+		Read:          []string{"/required-read", "/optional-read"},
+		OptionalPaths: []string{"/optional-read"},
+	}
+	for _, granted := range policy.grants() {
+		switch granted.path {
+		case "/required-read":
+			if granted.isOptional {
+				t.Error("the required path was treated as optional")
+			}
+		case "/optional-read":
+			if !granted.isOptional {
+				t.Error("the optional path was treated as required")
+			}
 		}
 	}
 }
 
-func TestOnlyAReadPathInsideAWritePathIsNested(t *testing.T) {
-	inside := Policy{Read: []string{"/work/held"}, Write: []string{"/work"}}
-	if !slices.Equal(inside.nestedPaths(), []string{"/work/held"}) {
-		t.Errorf("got %v, want the read path within the write path", inside.nestedPaths())
+func TestMountAccessFollowsNestedPolicyRefinements(t *testing.T) {
+	policy := Policy{
+		Read: []string{
+			"/elsewhere",
+			"/work/held",
+			"/work/held/open/closed",
+		},
+		Write: []string{
+			"/work",
+			"/work/held/open",
+		},
 	}
+	want := []mountRefinement{
+		{path: "/work/held", isReadOnly: true},
+		{path: "/work/held/open", isReadOnly: false},
+		{path: "/work/held/open/closed", isReadOnly: true},
+	}
+	if got := policy.mountRefinements(); !slices.Equal(got, want) {
+		t.Errorf("got %#v, want %#v", got, want)
+	}
+}
 
-	outside := Policy{Read: []string{"/elsewhere"}, Write: []string{"/work"}}
-	if len(outside.nestedPaths()) != 0 {
-		t.Errorf("got %v, want nothing nested", outside.nestedPaths())
+func TestAnExactWriteGrantWinsOverAReadGrant(t *testing.T) {
+	policy := Policy{Read: []string{"/work/held"}, Write: []string{"/work", "/work/held"}}
+	if got := policy.mountRefinements(); len(got) != 0 {
+		t.Errorf("got %#v, want no mount refinements", got)
 	}
 }
 
@@ -176,7 +204,19 @@ func TestAPathTheMachineLacksIsNamedOnceAndOnlyWhenItIsRequired(t *testing.T) {
 		t.Errorf("got %v, want only the path that is not there", missing)
 	}
 
+	optional := Policy{Read: []string{absent}, OptionalPaths: []string{absent}}
+	if missing := optional.missingPaths(); len(missing) != 0 {
+		t.Errorf("got %v, want the optional missing path accepted", missing)
+	}
+
 	if missing := (Policy{Read: []string{directory}}).missingPaths(); len(missing) != 0 {
 		t.Errorf("got %v, want a policy naming what exists to be accepted", missing)
+	}
+}
+
+func TestAnOptionalPathMustAlsoBeGranted(t *testing.T) {
+	err := (Policy{OptionalPaths: []string{"/not-granted"}}).sane()
+	if err == nil || !strings.Contains(err.Error(), "is optional but is not granted") {
+		t.Errorf("got %v, want an ungranted optional path refused", err)
 	}
 }
