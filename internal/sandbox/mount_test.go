@@ -252,3 +252,13 @@ func TestARememberedProbeStillLeavesTheNamespacesToRefuseTheCommand(t *testing.T
 
 	t.Logf("refused without the probe: %v", err)
 }
+
+func TestADeniedPathThatVanishedBeforeMountingIsAlreadySafe(t *testing.T) {
+	mounts, err := prepareDenialMounts([]string{filepath.Join(t.TempDir(), "gone")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(mounts) != 0 {
+		t.Errorf("got %d mounts for a vanished path", len(mounts))
+	}
+}

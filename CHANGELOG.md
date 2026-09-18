@@ -26,6 +26,7 @@
 - Draw a provider's model list without the control characters it may carry
 - Paste without the control characters the clipboard may carry
 - Resolve every configured path into its real path
+- Preserve nested write grants inside read-only paths
 - Report redundant and conflicting paths
 - Let a file tool follow a symlinked path
 - Ensure the max shell timeout is less than the typical prompt cache TTL

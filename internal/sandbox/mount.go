@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"syscall"
@@ -19,19 +20,56 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func (self Policy) nestedPaths() []string {
-	var inside []string
+type mountRefinement struct {
+	path       string
+	isReadOnly bool
+}
 
-	for _, read := range self.Read {
-		for _, write := range self.Write {
-			if _, ok := pathutil.RelativeTo(write, read); ok {
-				inside = append(inside, read)
-				break
+func (self Policy) mountRefinements() []mountRefinement {
+	isWritable := make(map[string]bool, len(self.Read)+len(self.Write))
+	for _, path := range self.Read {
+		isWritable[filepath.Clean(path)] = false
+	}
+	for _, path := range self.Write {
+		isWritable[filepath.Clean(path)] = true
+	}
+
+	paths := make([]string, 0, len(isWritable))
+	for path := range isWritable {
+		paths = append(paths, path)
+	}
+	slices.SortFunc(paths, func(left string, right string) int {
+		if difference := len(left) - len(right); difference != 0 {
+			return difference
+		}
+		return strings.Compare(left, right)
+	})
+
+	var refinements []mountRefinement
+	for _, path := range paths {
+		isCurrentlyReadOnly := false
+		for _, refinement := range refinements {
+			if _, isBelow := pathutil.RelativeTo(refinement.path, path); isBelow {
+				isCurrentlyReadOnly = refinement.isReadOnly
 			}
+		}
+
+		isReadOnlyWanted := !isWritable[path] && self.writeCovers(path)
+		if isReadOnlyWanted != isCurrentlyReadOnly {
+			refinements = append(refinements, mountRefinement{path: path, isReadOnly: isReadOnlyWanted})
 		}
 	}
 
-	return inside
+	return refinements
+}
+
+func (self Policy) writeCovers(path string) bool {
+	for _, write := range self.Write {
+		if _, isBelow := pathutil.RelativeTo(write, path); isBelow {
+			return true
+		}
+	}
+	return false
 }
 
 const privateNamespaces uintptr = syscall.CLONE_NEWUSER | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS
@@ -142,8 +180,15 @@ func applyMounts(policy Policy) error {
 		return err
 	}
 
-	for _, path := range policy.nestedPaths() {
-		if err := mountReadOnly(path); err != nil {
+	for _, refinement := range policy.mountRefinements() {
+		isOptional := slices.Contains(policy.OptionalPaths, refinement.path)
+		if isOptional && !pathutil.Exists(refinement.path) {
+			continue
+		}
+		if err := mountWithAccess(refinement); err != nil {
+			if isOptional && !pathutil.Exists(refinement.path) {
+				continue
+			}
 			return err
 		}
 	}
@@ -157,10 +202,100 @@ func applyMounts(policy Policy) error {
 	}
 
 	if policy.TmpDir != "" {
-		return attach(policy.TmpDir, TmpDir, nil)
+		if err := attach(policy.TmpDir, TmpDir, nil); err != nil {
+			return err
+		}
 	}
 
+	denialMounts, err := prepareDenialMounts(policy.DenyPaths)
+	if err != nil {
+		return err
+	}
+	defer closeDenialMounts(denialMounts)
+	return installDenialMounts(denialMounts)
+}
+
+type denialMount struct {
+	path        string
+	backingPath string
+	fd          int
+}
+
+func prepareDenialMounts(paths []string) ([]denialMount, error) {
+	mounts := make([]denialMount, 0, len(paths))
+	for _, path := range paths {
+		info, err := os.Stat(path)
+		if errors.Is(err, os.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			closeDenialMounts(mounts)
+			return nil, fmt.Errorf("could not inspect denied path %s: %w", path, err)
+		}
+
+		backingPath, err := makeDenialBacking(info.IsDir())
+		if err != nil {
+			closeDenialMounts(mounts)
+			return nil, fmt.Errorf("could not prepare denied path %s: %w", path, err)
+		}
+		fd, openErr := unix.OpenTree(unix.AT_FDCWD, backingPath, unix.OPEN_TREE_CLONE|unix.OPEN_TREE_CLOEXEC)
+		if openErr != nil {
+			_ = os.Remove(backingPath)
+			closeDenialMounts(mounts)
+			return nil, fmt.Errorf("could not prepare denied path %s: %w", path, openErr)
+		}
+		mounts = append(mounts, denialMount{path: path, backingPath: backingPath, fd: fd})
+	}
+	return mounts, nil
+}
+
+func makeDenialBacking(isDirectory bool) (string, error) {
+	if isDirectory {
+		path, err := os.MkdirTemp("", "sandbox-deny-")
+		if err != nil {
+			return "", err
+		}
+		if err := os.Chmod(path, 0); err != nil {
+			_ = os.Remove(path)
+			return "", err
+		}
+		return path, nil
+	}
+
+	file, err := os.CreateTemp("", "sandbox-deny-")
+	if err != nil {
+		return "", err
+	}
+	path := file.Name()
+	if err := file.Chmod(0); err != nil {
+		_ = file.Close()
+		_ = os.Remove(path)
+		return "", err
+	}
+	if err := file.Close(); err != nil {
+		_ = os.Remove(path)
+		return "", err
+	}
+	return path, nil
+}
+
+func installDenialMounts(mounts []denialMount) error {
+	for _, mount := range mounts {
+		if !pathutil.Exists(mount.path) {
+			continue
+		}
+		if err := unix.MoveMount(mount.fd, "", unix.AT_FDCWD, mount.path, unix.MOVE_MOUNT_F_EMPTY_PATH); err != nil {
+			return fmt.Errorf("could not deny access to %s: %w", mount.path, err)
+		}
+	}
 	return nil
+}
+
+func closeDenialMounts(mounts []denialMount) {
+	for _, mount := range mounts {
+		_ = unix.Close(mount.fd)
+		_ = os.Remove(mount.backingPath)
+	}
 }
 
 func mountReadOnlyTextFile(path string, contents string) error {
@@ -207,8 +342,14 @@ func writeTemporaryFile(contents string) (string, error) {
 	return file.Name(), nil
 }
 
-func mountReadOnly(path string) error {
-	return attach(path, path, &unix.MountAttr{Attr_set: unix.MOUNT_ATTR_RDONLY})
+func mountWithAccess(refinement mountRefinement) error {
+	attributes := &unix.MountAttr{}
+	if refinement.isReadOnly {
+		attributes.Attr_set = unix.MOUNT_ATTR_RDONLY
+	} else {
+		attributes.Attr_clr = unix.MOUNT_ATTR_RDONLY
+	}
+	return attach(refinement.path, refinement.path, attributes)
 }
 
 func mountProcessFilesystem() error {
