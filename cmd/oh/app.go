@@ -735,7 +735,7 @@ func (self *App) refreshPendingMessages() {
 			self.screen.LinkRoots().WithoutScratch(),
 		)
 		self.screen.Blank()
-		self.pendingNotices.block = self.screen.OpenNotice(self.pendingNotices.renderer)
+		self.pendingNotices.block = self.screen.OpenStandaloneNotice(self.pendingNotices.renderer)
 		return
 	}
 

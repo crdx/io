@@ -20,7 +20,7 @@ type groupedBlock struct {
 	handle *BlockHandle
 }
 
-func (self *Screen) Open(block Block) {
+func (self *Screen) OpenTool(block Block) {
 	self.open(block, ToolGroup, nil)
 }
 
@@ -99,7 +99,7 @@ func (self *Screen) addToOpenPanel(block Block) bool {
 	return true
 }
 
-func (self *Screen) OpenNotice(block Block) *BlockHandle {
+func (self *Screen) OpenStandaloneNotice(block Block) *BlockHandle {
 	self.SealOpenPanel()
 
 	handle := new(BlockHandle)

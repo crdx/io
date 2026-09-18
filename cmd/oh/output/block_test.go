@@ -22,7 +22,7 @@ func TestARefreshInsideASynchronisedUpdateIsDrawnOnceAtItsClose(t *testing.T) {
 	block := &mutableBlock{text: "first"}
 
 	screen.Sync(func() {
-		screen.Open(block)
+		screen.OpenTool(block)
 		block.text = "second"
 		screen.Refresh()
 		block.text = "third"
@@ -46,7 +46,7 @@ func TestSealingInsideASynchronisedUpdateDrawsTheRefreshItOwes(t *testing.T) {
 	block := &mutableBlock{text: "running"}
 
 	screen.Sync(func() {
-		screen.Open(block)
+		screen.OpenTool(block)
 		block.text = "finished"
 		screen.Refresh()
 		screen.Seal()
@@ -67,7 +67,7 @@ func TestDiscardingANoticeBlockRestoresTheDrawingOrigin(t *testing.T) {
 	before := screen.drawingState()
 	beforeInput := screen.input
 
-	handle := screen.OpenNotice(textBlock{text: "temporary notice"})
+	handle := screen.OpenStandaloneNotice(textBlock{text: "temporary notice"})
 	if !screen.DiscardBlock(handle) {
 		t.Fatal("expected the notice block to remain retractable")
 	}
@@ -83,9 +83,9 @@ func TestDiscardingANoticeBlockRestoresTheDrawingOrigin(t *testing.T) {
 func TestAnOldBlockHandleCannotDiscardANewerBlock(t *testing.T) {
 	screen, _ := region()
 
-	oldHandle := screen.OpenNotice(textBlock{text: "old"})
+	oldHandle := screen.OpenStandaloneNotice(textBlock{text: "old"})
 	screen.Seal()
-	newHandle := screen.OpenNotice(textBlock{text: "new"})
+	newHandle := screen.OpenStandaloneNotice(textBlock{text: "new"})
 
 	if screen.DiscardBlock(oldHandle) {
 		t.Error("an old handle discarded a newer block")
@@ -99,7 +99,7 @@ func TestANoticeBlockStaysItsOwnBesideALaterLine(t *testing.T) {
 	screen, screenOutput := region()
 	block := &mutableBlock{text: "unsent"}
 
-	handle := screen.OpenNotice(block)
+	handle := screen.OpenStandaloneNotice(block)
 	screen.Line("the harness said something")
 
 	block.text = "submitted"
@@ -149,7 +149,7 @@ func TestConsecutivePanelRowsShareOneFrame(t *testing.T) {
 func TestAPanelOpenedBesideAToolBlockLeavesItAlone(t *testing.T) {
 	screen, _ := region()
 
-	screen.Open(textBlock{text: "read notes.txt"})
+	screen.OpenTool(textBlock{text: "read notes.txt"})
 	screen.Panel(textBlock{text: "first notice"}, framed)
 	screen.Panel(textBlock{text: "second notice"}, framed)
 
@@ -197,7 +197,7 @@ func TestAPanelSealedIntoScrollbackFramesTheNextOneApart(t *testing.T) {
 func TestDiscardingANoticeBesideALaterLineKeepsTheLine(t *testing.T) {
 	screen, screenOutput := region()
 
-	handle := screen.OpenNotice(textBlock{text: "temporary notice"})
+	handle := screen.OpenStandaloneNotice(textBlock{text: "temporary notice"})
 	screen.Line("the harness said something")
 
 	if !screen.DiscardBlock(handle) {
@@ -228,7 +228,7 @@ func TestAChangeAboveARegionTallerThanTheTerminalIsRefusedAndReported(t *testing
 	for i := range 20 {
 		block.rows = append(block.rows, "row "+strconv.Itoa(i))
 	}
-	handle := screen.OpenNotice(block)
+	handle := screen.OpenStandaloneNotice(block)
 	screen.Footer([]string{"> "}, 0, 2)
 
 	if screen.WasRepaintRefused() {
@@ -248,7 +248,7 @@ func TestARegionWithRoomToDrawRefusesNothing(t *testing.T) {
 	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true, columns: 40, lines: 24}
 
 	block := &rowsBlock{rows: []string{"first", "second"}}
-	handle := screen.OpenNotice(block)
+	handle := screen.OpenStandaloneNotice(block)
 	screen.Footer([]string{"> "}, 0, 2)
 
 	block.rows[0] = "first changed"

@@ -182,7 +182,7 @@ func drawnKinds() []drawnKind {
 			name:  "tool",
 			group: "tool",
 			draw: func(screen *output.Screen, text string) {
-				screen.Open(fixedBlock(text))
+				screen.OpenTool(fixedBlock(text))
 				screen.Seal()
 			},
 		},
@@ -269,7 +269,7 @@ func TestNoticesInsideLiveWorkFollowTheSameGroupingRule(t *testing.T) {
 	var screenOutput bytes.Buffer
 	screen := output.New(&screenOutput)
 
-	screen.Open(fixedBlock("work"))
+	screen.OpenTool(fixedBlock("work"))
 	screen.Line("notice one")
 	screen.Line("notice two")
 	screen.Seal()
@@ -289,7 +289,7 @@ func TestNoticesInsideLiveWorkRunOnWhenTheyAreNamedTogether(t *testing.T) {
 	screen := output.New(&screenOutput)
 	screen.SetGrouping(grouping)
 
-	screen.Open(fixedBlock("work"))
+	screen.OpenTool(fixedBlock("work"))
 	screen.Line("notice one")
 	screen.Line("notice two")
 	screen.Seal()

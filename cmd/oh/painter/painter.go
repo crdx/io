@@ -158,7 +158,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.ToolCallRequestEvent:
 		if self.toolBlock == nil {
 			self.toolBlock = dynamic.NewBlock(self.screen.Refresh)
-			self.screen.Open(self.toolBlock)
+			self.screen.OpenTool(self.toolBlock)
 			self.rows = map[string]int{}
 			self.labels = map[string]call.Label{}
 		}
