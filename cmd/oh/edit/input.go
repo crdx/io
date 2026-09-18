@@ -3,6 +3,7 @@ package edit
 import (
 	"strings"
 	"time"
+	"unicode"
 
 	"crdx.org/io/cmd/oh/key"
 )
@@ -114,7 +115,16 @@ func (self *Input) Frame(width int) Frame {
 }
 
 func (self *Input) InsertPasted(text string) {
-	self.buffer.Insert([]rune(normaliseIndentation(text)))
+	position := self.buffer.Cursor()
+	runes := self.buffer.Runes()
+	isAtLineStart := position == 0 || runes[position-1] == '\n'
+	isAtLineEnd := position == len(runes) || runes[position] == '\n'
+
+	self.buffer.Insert([]rune(preparePastedText(text, isAtLineStart, isAtLineEnd)))
+}
+
+func isPastable(character rune) bool {
+	return character == '\t' || character == '\n' || !unicode.IsControl(character)
 }
 
 func (self *Input) Apply(keypress key.Key, isRunning bool) Action {
@@ -414,19 +424,22 @@ func (self *Input) paste(keypress key.Key) {
 	switch {
 	case keypress.Code == key.PasteEnd:
 		self.isPasting = false
-		self.normalisePasteIndentation()
+		self.normalisePastedText()
 	case keypress.Code == key.Enter:
 		self.buffer.Insert([]rune{'\n'})
-	case keypress.Code == key.Rune && keypress.Mod == 0:
+	case keypress.Code == key.Rune && keypress.Mod == 0 && isPastable(keypress.Value):
 		self.insert(keypress.Value)
 	}
 }
 
-func (self *Input) normalisePasteIndentation() {
+func (self *Input) normalisePastedText() {
 	end := self.buffer.Cursor()
-	pastedText := string(self.buffer.Runes()[self.pasteStart:end])
+	runes := self.buffer.Runes()
+	pastedText := string(runes[self.pasteStart:end])
+	isAtLineStart := self.pasteStart == 0 || runes[self.pasteStart-1] == '\n'
+	isAtLineEnd := end == len(runes) || runes[end] == '\n'
 
-	normalisedText := normaliseIndentation(pastedText)
+	normalisedText := preparePastedText(pastedText, isAtLineStart, isAtLineEnd)
 	if normalisedText == pastedText {
 		return
 	}

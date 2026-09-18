@@ -65,6 +65,8 @@
 
 ### Interface
 
+- Wrap long pastes in a fenced code block
+- Try to detect the language of the paste
 - Store request failures in a structured format
 - Show an input frame beneath session previews
 - Support theme colour customisation

@@ -31,6 +31,42 @@ const (
 	pasteEnd   = "\x1b[201~"
 )
 
+func TestPastedTextArrivesWithoutWhatTheTerminalWouldObey(t *testing.T) {
+	for name, pasted := range map[string]struct {
+		text string
+		want string
+	}{
+		"clear screen": {text: "ls\x1b[2J -la", want: "ls -la"},
+		"clipboard":    {text: "hello \x1b]52;c;cHduZWQ=\x07world", want: "hello world"},
+		"bell":         {text: "ding\x07", want: "ding"},
+		"carriage":     {text: "one\r\ntwo\rthree", want: "one\ntwo\nthree"},
+		"kept":         {text: "one\n\ttwo", want: "one\n\ttwo"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			input := NewInput(NewHistory("", 0))
+			input.InsertPasted(pasted.text)
+
+			if got := input.Text(); got != pasted.want {
+				t.Errorf("got %q, want %q", got, pasted.want)
+			}
+		})
+	}
+}
+
+func TestABracketedPasteDropsTheControlRunesItCarries(t *testing.T) {
+	input := NewInput(NewHistory("", 0))
+
+	input.Apply(key.Key{Code: key.PasteStart}, false)
+	for _, character := range "ls\x1b[2J -la\x07" {
+		input.Apply(key.Key{Code: key.Rune, Value: character}, false)
+	}
+	input.Apply(key.Key{Code: key.PasteEnd}, false)
+
+	if got, want := input.Text(), "ls[2J -la"; got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestAPasteKeepsItsLineBreaks(t *testing.T) {
 	for name, payload := range map[string]string{
 		"lf":   "one\ntwo\nthree",
@@ -42,6 +78,173 @@ func TestAPasteKeepsItsLineBreaks(t *testing.T) {
 		if got := self.Text(); got != "one\ntwo\nthree" {
 			t.Errorf("%s: expected three lines, got %q", name, got)
 		}
+	}
+}
+
+func TestAPasteOfMoreThanFiveLinesBecomesAFencedCodeBlock(t *testing.T) {
+	for name, pasted := range map[string]struct {
+		text string
+		want string
+	}{
+		"prose is unlabelled": {
+			text: "one\ntwo\nthree\nfour\nfive\nsix",
+			want: "```\none\ntwo\nthree\nfour\nfive\nsix\n```",
+		},
+		"distinctive Go is labelled": {
+			text: "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"hello\")\n}",
+			want: "```go\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"hello\")\n}\n```",
+		},
+		"an inner fence makes the outer fence longer": {
+			text: "one\n```\nthree\nfour\nfive\nsix",
+			want: "````\none\n```\nthree\nfour\nfive\nsix\n````",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			self := NewInput(nil)
+			self.InsertPasted(pasted.text)
+
+			if got := self.Text(); got != pasted.want {
+				t.Errorf("got %q, want %q", got, pasted.want)
+			}
+		})
+	}
+}
+
+func TestABracketedPasteOfMoreThanFiveLinesBecomesAFencedCodeBlock(t *testing.T) {
+	self := inputFromKeys(t, pasteStart+"one\ntwo\nthree\nfour\nfive\nsix"+pasteEnd)
+
+	want := "```\none\ntwo\nthree\nfour\nfive\nsix\n```"
+	if got := self.Text(); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestAPasteOfFiveLinesIsNotFenced(t *testing.T) {
+	for name, pasted := range map[string]string{
+		"without final newline": "one\ntwo\nthree\nfour\nfive",
+		"with final newline":    "one\ntwo\nthree\nfour\nfive\n",
+	} {
+		t.Run(name, func(t *testing.T) {
+			self := NewInput(nil)
+			self.InsertPasted(pasted)
+
+			if got := self.Text(); got != pasted {
+				t.Errorf("got %q, want %q", got, pasted)
+			}
+		})
+	}
+}
+
+func TestAFencedPasteStartsAndEndsOnItsOwnLines(t *testing.T) {
+	self := inputFromKeys(t, "beforeafter")
+	for range len("after") {
+		self.Apply(key.Key{Code: key.Left}, false)
+	}
+
+	self.InsertPasted("one\ntwo\nthree\nfour\nfive\nsix")
+
+	want := "before\n```\none\ntwo\nthree\nfour\nfive\nsix\n```\nafter"
+	if got := self.Text(); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestOnlyDistinctivePastesNameALanguage(t *testing.T) {
+	for name, pasted := range map[string]struct {
+		text string
+		want string
+	}{
+		"Go": {
+			text: "package main\n\nfunc main() {}",
+			want: "go",
+		},
+		"Python": {
+			text: "def greet(name: str) -> str:\n    return f\"Hello, {name}\"",
+			want: "python",
+		},
+		"bash shebang": {
+			text: "#!/usr/bin/env bash\nset -euo pipefail",
+			want: "bash",
+		},
+		"sh shebang": {
+			text: "#!/bin/sh\nset -eu",
+			want: "sh",
+		},
+		"Python shebang": {
+			text: "#!/usr/bin/python3.14\nprint(\"hello\")",
+			want: "python",
+		},
+		"Ruby shebang": {
+			text: "#!/usr/bin/env ruby\nputs \"hello\"",
+			want: "ruby",
+		},
+		"Perl shebang": {
+			text: "#!/usr/bin/perl\nprint \"hello\\n\";",
+			want: "perl",
+		},
+		"PHP shebang": {
+			text: "#!/usr/bin/php\necho \"hello\";",
+			want: "php",
+		},
+		"Lua shebang": {
+			text: "#!/usr/bin/env lua\nprint(\"hello\")",
+			want: "lua",
+		},
+		"goscript shebang": {
+			text: "#!/usr/bin/env -S goscript run\npackage main",
+			want: "go",
+		},
+		"JSON object": {
+			text: "{\n  \"name\": \"oh\"\n}",
+			want: "json",
+		},
+		"HTML doctype": {
+			text: "<!DOCTYPE html>\n<html></html>",
+			want: "html",
+		},
+		"XML declaration": {
+			text: "<?xml version=\"1.0\"?>\n<message>hello</message>",
+			want: "xml",
+		},
+		"PHP opening tag": {
+			text: "<?php\necho \"hello\";",
+			want: "php",
+		},
+		"Git diff": {
+			text: "diff --git a/old b/new\n--- a/old\n+++ b/new",
+			want: "diff",
+		},
+		"Dockerfile": {
+			text: "FROM alpine:3.23\nRUN echo hello",
+			want: "dockerfile",
+		},
+		"a JSON scalar is ambiguous": {
+			text: "true",
+		},
+		"a Go package without a declaration is ambiguous": {
+			text: "package delivery",
+		},
+		"Docker instructions after prose are ambiguous": {
+			text: "build notes\nFROM alpine:3.23\nRUN echo hello",
+		},
+		"C and C++ are ambiguous": {
+			text: "#include <stdio.h>\nint main(void) { return 0; }",
+		},
+		"JavaScript and TypeScript are ambiguous": {
+			text: "const greet = (name) => {\n  console.log(name)\n}",
+		},
+		"TOML and INI are ambiguous": {
+			text: "[server]\nport = 8080",
+		},
+		"YAML and plain mappings are ambiguous": {
+			text: "name: oh\nversion: 1",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := pasteLanguage(pasted.text); got != pasted.want {
+				t.Errorf("got %q, want %q", got, pasted.want)
+			}
+		})
 	}
 }
 

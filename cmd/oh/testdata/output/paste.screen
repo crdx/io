@@ -16,13 +16,68 @@ conversation remains in scrollback
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 pasted text
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-=== 4 a paste of many lines ===
+=== 4 exactly five lines ===
 conversation remains in scrollback
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 first line
 second line
 third line
+fourth line
+fifth line
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== 4a six prose lines ===
+conversation remains in scrollback
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+```
+first line
+second line
+third line
+fourth line
+fifth line
+sixth line
+```
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== 4b ambiguous code-like text ===
+conversation remains in scrollback
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+```
+const greet = (name) => {
+  const message = `Hello ${name}`
+  console.log(message)
+  return message
+}
+greet("world")
+```
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== 4c a Go paste of many lines ===
+conversation remains in scrollback
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+```go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("hello")
+}
+```
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== 4d a paste containing a fence ===
+conversation remains in scrollback
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+````
+one
+```
+three
+four
+five
+six
+````
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === 5 an indented paste ===
 conversation remains in scrollback
@@ -52,13 +107,19 @@ conversation remains in scrollback
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 review /state/sessions/brave-otter/drops/image-456.png
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-=== 9 a pasted text ===
+=== 9 a long pasted text after typed prose ===
 conversation remains in scrollback
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-explain if isReady {
-    begin()
-}
+explain
+```
+first line
+second line
+third line
+fourth line
+fifth line
+sixth line
+```
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === a1 a paste from the primary selection ===
 conversation remains in scrollback
