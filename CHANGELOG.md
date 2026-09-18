@@ -11,6 +11,7 @@
 - Remove the built-in mise support
 - Shorten and standardise runtime messages
 - Highlight URLs in red in host networking prompt
+- Tell forks to follow the chain of forks
 
 ## [0.6.0] - 2026-09-18
 

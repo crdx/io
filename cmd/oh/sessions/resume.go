@@ -32,7 +32,8 @@ func forkSourcePrompt(sourceName string, transcriptPath string) string {
 	return fmt.Sprintf(
 		"This session was forked from %s.\n"+
 			"Check %s's size first, then read its head and tail before continuing.\n"+
-			"Its own opening message will say whether %s was forked from an earlier session.",
+			"Its own opening message will say whether %s was forked from an earlier session.\n"+
+			"If so, follow the chain to get the full context.",
 		sourceName, transcriptPath, sourceName,
 	)
 }
