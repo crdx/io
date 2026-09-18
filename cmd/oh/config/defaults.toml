@@ -28,14 +28,16 @@ status_danger = "#cc6666"
 syntax_type = "#f0c674"
 syntax_literal = "#b5bd68"
 syntax_operator = "#8abeb7"
+syntax_keyword = "#c9a6d4"
+skill = "#c9a6d4"
 
 [tool]
 output = "12K"
 
 [permissions]
 network = "ask"
+fetch = "ask"
 lookup = "allow"
-fetch = "allow"
 
 [snippets]
 
@@ -57,7 +59,7 @@ include = []
 exclude = []
 
 [sandbox]
-host_loopback = []
+deny = []
 read = []
 write = []
 exec = []
@@ -66,7 +68,6 @@ home = []
 [bar.top]
 left = [
     { segment = "activity-spinner", idle = "·✦·", frames = ["✦··", "·✦·", "··✦", "··✦", "·✦·", "✦··"], rate = "125ms" },
-    { segment = "path-grants", type = "base" },
     { segment = "exposed-ports" },
     { segment = "jobs" },
 ]
@@ -82,6 +83,7 @@ right = [
 left = [
     { segment = "mode-toggle" },
     { segment = "workspace-dir", type = "base" },
+    { segment = "path-grants", type = "base" },
 ]
 center = [
     { segment = "subscription-usage" },

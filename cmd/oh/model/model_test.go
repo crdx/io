@@ -13,6 +13,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/style"
@@ -403,6 +404,41 @@ func TestAnEffortACachedModelDoesNotTakeIsRefused(t *testing.T) {
 
 	if _, _, _, err := parseModelSelection("sonnet@max"); err == nil {
 		t.Error("expected an effort the model does not take to be refused")
+	}
+}
+
+func TestACachedModelListIsReadWithoutWhatATerminalWouldObey(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	path := modelCachePath()
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	data := fmt.Appendf(nil,
+		`{"version":%d,"providers":{"anthropic":{"models":[`+
+			`{"id":"claude-\u001b[2Jsonnet-5","name":"Sonnet \u001b]52;c;cHduZWQ=\u0007"}]}}}`,
+		cacheVersion,
+	)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	models := loadModelCache(path).Providers["anthropic"].Models
+	if len(models) != 1 {
+		t.Fatalf("got %d models, want the one that was cached", len(models))
+	}
+
+	for name, text := range map[string]string{"id": models[0].ID, "name": models[0].Name} {
+		for _, character := range text {
+			if unicode.IsControl(character) {
+				t.Errorf("the cached %s holds %q: %q", name, character, text)
+			}
+		}
+	}
+
+	if got, want := models[0].ID, "claude-[2Jsonnet-5"; got != want {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 

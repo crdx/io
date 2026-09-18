@@ -20,6 +20,11 @@
 
 ### Security
 
+- Refuse workspace config flags: editor, experimental, provider, sandbox, skills
+- Refuse a bar segment option holding text the terminal would obey
+- Refuse a `ports.hostname` that is not a hostname
+- Draw a provider's model list without the control characters it may carry
+- Paste without the control characters the clipboard may carry
 - Resolve every configured path into its real path
 - Report redundant and conflicting paths
 - Let a file tool follow a symlinked path
