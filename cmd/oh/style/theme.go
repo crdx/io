@@ -1,42 +1,25 @@
 package style
 
 import (
-	"fmt"
 	"image/color"
-	"strings"
 	"sync/atomic"
 )
 
-const defaultColour = "default"
-
-type Colour string
-
-func (self *Colour) UnmarshalText(text []byte) error {
-	value := strings.ToLower(strings.TrimSpace(string(text)))
-	if value == defaultColour {
-		*self = ""
-		return nil
-	}
-	if _, isColour := colour(value); !isColour {
-		return fmt.Errorf("%q is not a colour; write #rrggbb or %q", text, defaultColour)
-	}
-	*self = Colour(value)
-	return nil
-}
-
 type Theme struct {
-	Normal         Colour `toml:"normal"`
-	Dim            Colour `toml:"dim"`
-	Accent         Colour `toml:"accent"`
-	StatusSuccess  Colour `toml:"status_success"`
-	StatusInfo     Colour `toml:"status_info"`
-	StatusWarning  Colour `toml:"status_warning"`
-	StatusDanger   Colour `toml:"status_danger"`
-	SyntaxType     Colour `toml:"syntax_type"`
-	SyntaxLiteral  Colour `toml:"syntax_literal"`
-	SyntaxOperator Colour `toml:"syntax_operator"`
-	User           Colour `toml:"user"`
-	Harness        Colour `toml:"harness"`
+	Normal         Paint `toml:"normal"`
+	Dim            Paint `toml:"dim"`
+	Accent         Paint `toml:"accent"`
+	StatusSuccess  Paint `toml:"status_success"`
+	StatusInfo     Paint `toml:"status_info"`
+	StatusWarning  Paint `toml:"status_warning"`
+	StatusDanger   Paint `toml:"status_danger"`
+	SyntaxType     Paint `toml:"syntax_type"`
+	SyntaxLiteral  Paint `toml:"syntax_literal"`
+	SyntaxOperator Paint `toml:"syntax_operator"`
+	SyntaxKeyword  Paint `toml:"syntax_keyword"`
+	Skill          Paint `toml:"skill"`
+	User           Paint `toml:"user"`
+	Harness        Paint `toml:"harness"`
 }
 
 var defaultTheme = Theme{
@@ -50,6 +33,8 @@ var defaultTheme = Theme{
 	SyntaxType:     "#f0c674",
 	SyntaxLiteral:  "#b5bd68",
 	SyntaxOperator: "#8abeb7",
+	SyntaxKeyword:  "#c9a6d4",
+	Skill:          "#c9a6d4",
 	User:           "#343541",
 	Harness:        "#303a43",
 }
@@ -69,6 +54,8 @@ type compiledTheme struct {
 	syntaxType     string
 	syntaxLiteral  string
 	syntaxOperator string
+	syntaxKeyword  string
+	skill          string
 	user           string
 	harness        string
 
@@ -99,18 +86,20 @@ func compileTheme(theme Theme) *compiledTheme {
 	statusDangerColour := graphicColour(theme.StatusDanger, defaultTheme.StatusDanger)
 
 	return &compiledTheme{
-		normal:              sgr(string(theme.Normal)),
-		dim:                 sgr(string(theme.Dim)),
-		accent:              sgr(string(theme.Accent)),
-		statusWarning:       sgr(string(theme.StatusWarning)),
-		statusSuccess:       sgr(string(theme.StatusSuccess)),
-		statusInfo:          sgr(string(theme.StatusInfo)),
-		statusDanger:        sgr(string(theme.StatusDanger)),
-		syntaxType:          sgr(string(theme.SyntaxType)),
-		syntaxLiteral:       sgr(string(theme.SyntaxLiteral)),
-		syntaxOperator:      sgr(string(theme.SyntaxOperator)),
-		user:                backgroundSequence(string(theme.User)),
-		harness:             backgroundSequence(string(theme.Harness)),
+		normal:              foregroundSequence(theme.Normal),
+		dim:                 foregroundSequence(theme.Dim),
+		accent:              foregroundSequence(theme.Accent),
+		statusWarning:       foregroundSequence(theme.StatusWarning),
+		statusSuccess:       foregroundSequence(theme.StatusSuccess),
+		statusInfo:          foregroundSequence(theme.StatusInfo),
+		statusDanger:        foregroundSequence(theme.StatusDanger),
+		syntaxType:          foregroundSequence(theme.SyntaxType),
+		syntaxLiteral:       foregroundSequence(theme.SyntaxLiteral),
+		syntaxOperator:      foregroundSequence(theme.SyntaxOperator),
+		syntaxKeyword:       foregroundSequence(theme.SyntaxKeyword),
+		skill:               foregroundSequence(theme.Skill),
+		user:                backgroundSequence(theme.User),
+		harness:             backgroundSequence(theme.Harness),
 		dimColour:           dimColour,
 		statusWarningColour: statusWarningColour,
 		statusInfoColour:    statusInfoColour,
@@ -118,12 +107,14 @@ func compileTheme(theme Theme) *compiledTheme {
 	}
 }
 
-func graphicColour(value Colour, fallback Colour) color.RGBA {
-	if parsedColour, isColour := colour(string(value)); isColour {
-		return parsedColour
+func graphicColour(value Paint, fallback Paint) color.RGBA {
+	if plan, err := parsePaint(string(value)); err == nil && plan.hasColour {
+		return plan.colour
 	}
-	parsedColour, _ := colour(string(fallback))
-	return parsedColour
+
+	fallbackPlan, _ := parsePaint(string(fallback))
+
+	return fallbackPlan.colour
 }
 
 func DimColour() color.RGBA {

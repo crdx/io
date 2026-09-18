@@ -48,6 +48,8 @@ func TestEveryStyleFollowsItsOwnPaletteRole(t *testing.T) {
 		SyntaxType:     "#080808",
 		SyntaxLiteral:  "#090909",
 		SyntaxOperator: "#0a0a0a",
+		SyntaxKeyword:  "#0b0b0b",
+		Skill:          "#0c0c0c",
 	}))
 
 	roles := map[string]map[string]Style{
@@ -84,10 +86,11 @@ func TestEveryStyleFollowsItsOwnPaletteRole(t *testing.T) {
 			"subject":    Subject,
 		},
 		"38;2;4;4;4": {
-			"inserted text": InsertedText,
-			"low price":     LowPrice,
-			"read":          Read,
-			"success":       Success,
+			"inserted text":     InsertedText,
+			"low price":         LowPrice,
+			"preview load hint": PreviewLoadHint,
+			"read":              Read,
+			"success":           Success,
 		},
 		"38;2;5;5;5": {
 			"function":     Function,
@@ -100,11 +103,12 @@ func TestEveryStyleFollowsItsOwnPaletteRole(t *testing.T) {
 			"shell":        Shell,
 		},
 		"38;2;6;6;6": {
-			"change":       Change,
-			"heading":      Heading,
-			"high price":   HighPrice,
-			"stopped turn": StoppedTurn,
-			"write":        Write,
+			"change":               Change,
+			"heading":              Heading,
+			"high price":           HighPrice,
+			"preview running hint": PreviewRunningHint,
+			"stopped turn":         StoppedTurn,
+			"write":                Write,
 		},
 		"38;2;7;7;7": {
 			"deleted text":  DeletedText,
@@ -115,6 +119,8 @@ func TestEveryStyleFollowsItsOwnPaletteRole(t *testing.T) {
 		"38;2;8;8;8":    {"type": Type},
 		"38;2;9;9;9":    {"literal": Literal},
 		"38;2;10;10;10": {"operator": Operator},
+		"38;2;11;11;11": {"keyword": Keyword},
+		"38;2;12;12;12": {"skill": Skill},
 	}
 
 	for sequence, styles := range roles {
@@ -123,16 +129,6 @@ func TestEveryStyleFollowsItsOwnPaletteRole(t *testing.T) {
 				t.Errorf("%s did not follow its palette role: %q", name, got)
 			}
 		}
-	}
-}
-
-func TestAThemeColourAcceptsTheTerminalDefault(t *testing.T) {
-	var value Colour
-	if err := value.UnmarshalText([]byte(" DEFAULT ")); err != nil {
-		t.Fatal(err)
-	}
-	if value != "" {
-		t.Errorf("got %q, want the terminal default", value)
 	}
 }
 
@@ -145,13 +141,6 @@ func TestAThemeCanUseTheTerminalDefault(t *testing.T) {
 
 	if got := Subject("subject"); got != "subject" {
 		t.Errorf("terminal-default accent was painted %q", got)
-	}
-}
-
-func TestAThemeColourRefusesAnythingOtherThanSixDigitHex(t *testing.T) {
-	var value Colour
-	if err := value.UnmarshalText([]byte("blue")); err == nil {
-		t.Fatal("expected a named colour to be refused")
 	}
 }
 
@@ -194,7 +183,7 @@ func TestAUserMessageHasABackgroundThatSurvivesInnerStyles(t *testing.T) {
 func TestAStyleOverAnotherResumesWhereTheInnerOneReset(t *testing.T) {
 	enableColor(t)
 
-	opening := "\x1b[" + sgr(string(DefaultTheme().Accent)) + "m"
+	opening := "\x1b[" + foregroundSequence(DefaultTheme().Accent) + "m"
 	got := ChosenRow.Over("row " + Qualifier("note") + " tail")
 
 	if count := strings.Count(got, opening); count != 2 {
@@ -218,17 +207,35 @@ func TestAStyleOverAnotherPaintsNothingWhereNothingIsPainted(t *testing.T) {
 	}
 }
 
-func TestReasoningIsItalic(t *testing.T) {
+func TestItalicTextStylesAreItalic(t *testing.T) {
 	enableColor(t)
 
-	got := Reasoning("looking %s", "here")
-
-	if !strings.Contains(got, "\x1b[3m") {
-		t.Errorf("expected italic reasoning, got %q", got)
+	for name, paint := range map[string]Style{
+		"preview load hint":    PreviewLoadHint,
+		"preview running hint": PreviewRunningHint,
+		"reasoning":            Reasoning,
+		"running session":      RunningSession,
+	} {
+		got := paint("looking %s", "here")
+		if !strings.Contains(got, "\x1b[3m") {
+			t.Errorf("expected italic %s, got %q", name, got)
+		}
+		if plain := Plain(got); plain != "looking here" {
+			t.Errorf("expected the %s text unchanged, got %q", name, plain)
+		}
 	}
+}
 
-	if plain := Plain(got); plain != "looking here" {
-		t.Errorf("expected the reasoning text unchanged, got %q", plain)
+func TestPreviewHintsAreDim(t *testing.T) {
+	enableColor(t)
+
+	for name, paint := range map[string]Style{
+		"load":    PreviewLoadHint,
+		"running": PreviewRunningHint,
+	} {
+		if got := paint("hint"); !strings.Contains(got, "\x1b[2m") {
+			t.Errorf("expected dim %s hint, got %q", name, got)
+		}
 	}
 }
 

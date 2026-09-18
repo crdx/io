@@ -2,6 +2,13 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+### Theme
+
+- Theme skill names with `skill` and code keywords with `syntax_keyword`
+- Decorate any theme key with bold, faint, italic, underline, blink, reverse, hidden, strikethrough, and overline
+- Give an underline its own shape and colour with `underline:curly` and `underline:#rrggbb`
+- Reference theme change as `ui.theme` rather than every single colour in the universe
+
 ### Permissions
 
 - Add `[permissions]` for granular control
