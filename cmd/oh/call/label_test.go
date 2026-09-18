@@ -1,12 +1,15 @@
 package call_test
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/call"
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/jobs"
 	"crdx.org/io/tool"
@@ -43,6 +46,41 @@ func TestAResultLinkWrapsOnlyTheCallName(t *testing.T) {
 	}
 	if strings.Index(rendered, "\x1b]8;;\x1b\\") > strings.Index(rendered, "main.go") {
 		t.Errorf("subject is inside the result link in %q", rendered)
+	}
+}
+
+func TestAReadLinkIncludesItsRangeAndOpensAtTheFirstLine(t *testing.T) {
+	workspace := t.TempDir()
+	path := filepath.Join(workspace, "main.go")
+	if err := os.WriteFile(path, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, test := range []struct {
+		lineRange string
+		firstLine string
+	}{
+		{lineRange: "10-14", firstLine: "10"},
+		{lineRange: "10+", firstLine: "10"},
+		{lineRange: "1-5", firstLine: "1"},
+	} {
+		label := call.LabelFor(agent.Event{
+			Name: "read",
+			FallbackRendering: agent.FallbackRendering{
+				Subject: "main.go",
+				Note:    test.lineRange,
+			},
+		}, nil, nil)
+		label.PathRoots = link.Roots{Workspace: workspace}
+		rendered := label.Render()
+
+		wantAddress := "file://" + filepath.ToSlash(path) + "#" + test.firstLine
+		if !strings.Contains(rendered, "\x1b]8;;"+wantAddress+"\x1b\\") {
+			t.Errorf("%s: read URI does not start at its first line in %q", test.lineRange, rendered)
+		}
+		if closeAt := strings.Index(rendered, "\x1b]8;;\x1b\\"); closeAt < strings.Index(rendered, test.lineRange) {
+			t.Errorf("%s: line range is outside the hyperlink in %q", test.lineRange, rendered)
+		}
 	}
 }
 

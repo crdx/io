@@ -92,6 +92,7 @@ func LabelFor(event agent.Event, getTool ToolLookup, workspace *work.Space) Labe
 
 	skillName, isSkillLoad := "", false
 	if event.Name == readTool {
+		label.lineRange = rendering.Note
 		skillName, isSkillLoad = skill.NameFromPath(rendering.Subject)
 	}
 

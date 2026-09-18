@@ -131,6 +131,15 @@ func Render(text string, roots Roots) string {
 	return output.String()
 }
 
+func RenderPathAtLine(text string, path string, roots Roots, line string) string {
+	target, exists := resolve(path, roots)
+	if !exists {
+		return text
+	}
+
+	return RenderURL(text, linkURL(target, line, ""))
+}
+
 type visibleText struct {
 	text     string
 	starts   []int

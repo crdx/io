@@ -70,6 +70,25 @@ func TestSourceLocationsBecomeFileFragmentsWithoutChangingTheirText(t *testing.T
 	}
 }
 
+func TestAPathCanLinkItsLabelAtALine(t *testing.T) {
+	workspace := t.TempDir()
+	path := prepareFile(t, workspace, "cmd/oh/draw.go")
+	text := "cmd/oh/draw.go 42-47"
+
+	got := RenderPathAtLine(text, "cmd/oh/draw.go", Roots{Workspace: workspace}, "42")
+	address := linkAddress(t, got)
+
+	if address.Scheme != "file" || address.Path != filepath.ToSlash(path) || address.Fragment != "42" {
+		t.Errorf("got address %q", address)
+	}
+	if stripEscapes(got) != text {
+		t.Errorf("expected the visible text unchanged, got %q", stripEscapes(got))
+	}
+	if beforeClose, _, _ := strings.Cut(got, closeLink); !strings.Contains(beforeClose, "42-47") {
+		t.Errorf("expected the range inside the link, got %q", got)
+	}
+}
+
 func TestPathsWithSpacesBecomeLinks(t *testing.T) {
 	workspace := t.TempDir()
 	relativePath := prepareFile(t, workspace, "reports/final draft.txt")

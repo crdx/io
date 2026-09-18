@@ -37,6 +37,7 @@ type Label struct {
 	TimeLimit       time.Duration
 	PathRoots       link.Roots
 	Continuation    []Label
+	lineRange       string
 	renderedSubject string
 }
 
@@ -53,12 +54,21 @@ func (self Label) Render() string {
 		}
 	}
 	line := name
+	isQualifierLinked := false
 
 	if self.Subject != "" {
-		line += " " + self.renderSubject()
+		subject := self.renderSubject()
+		if firstLine := lineRangeStart(self.lineRange); firstLine != "" {
+			if self.Qualifier != "" {
+				subject += " " + self.renderQualifier()
+				isQualifierLinked = true
+			}
+			subject = link.RenderPathAtLine(subject, self.Subject, self.PathRoots, firstLine)
+		}
+		line += " " + subject
 	}
 
-	if self.Qualifier != "" {
+	if self.Qualifier != "" && !isQualifierLinked {
 		line += " " + self.renderQualifier()
 	}
 
@@ -72,6 +82,17 @@ func (self Label) Render() string {
 	}
 
 	return link.Render(line, self.PathRoots)
+}
+
+func lineRangeStart(lineRange string) string {
+	if separator := strings.IndexAny(lineRange, "-+"); separator >= 0 {
+		lineRange = lineRange[:separator]
+	}
+	if _, err := strconv.ParseUint(lineRange, 10, 64); err != nil {
+		return ""
+	}
+
+	return lineRange
 }
 
 func (self Label) Width() int {

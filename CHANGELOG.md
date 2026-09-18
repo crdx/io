@@ -3,6 +3,7 @@
 ## [N.N.N] - XXXX-XX-XX
 
 - Linkify the session-name bar segment
+- Include line range in read tool hyperlinks
 - Limit background job name length and format
 - Clarify job wait stopped reason
 - Move session maintenance to `oh --ctl`
