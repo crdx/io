@@ -245,13 +245,13 @@ func refreshedWindow(t *testing.T, storedResetsAt time.Time, freshResetsAt time.
 	return got[0]
 }
 
-func TestAStandingWindowKeepsTheEarlierOfTwoResets(t *testing.T) {
+func TestAStandingWindowTakesTheFreshReset(t *testing.T) {
 	storedResetsAt := testNow.Add(7 * 24 * time.Hour).Add(-time.Minute)
-	want := storedResetsAt
+	want := testNow.Add(rate).Add(7 * 24 * time.Hour)
 
-	got := refreshedWindow(t, storedResetsAt, testNow.Add(rate).Add(7*24*time.Hour))
+	got := refreshedWindow(t, storedResetsAt, want)
 	if !got.ResetsAt.Equal(want) {
-		t.Errorf("the reset moved to %s, want %s", got.ResetsAt, want)
+		t.Errorf("the reset reads %s, want %s", got.ResetsAt, want)
 	}
 }
 

@@ -165,7 +165,7 @@ func mergeWindows(
 	}
 
 	for i, window := range windows {
-		windows[i].ResetsAt = steadyReset(storedWindows, window, now)
+		windows[i].ResetsAt = resetWithFallback(storedWindows, window, now)
 
 		if isSpokenFor {
 			continue
@@ -177,20 +177,20 @@ func mergeWindows(
 	return windows
 }
 
-func steadyReset(
+func resetWithFallback(
 	storedWindows []agent.UsageWindow, window agent.UsageWindow, now time.Time,
 ) time.Time {
-	for _, candidate := range storedWindows {
-		if !isSameWindow(candidate, window) || !candidate.ResetsAt.After(now) {
-			continue
-		}
+	if !window.ResetsAt.IsZero() {
+		return window.ResetsAt
+	}
 
-		if window.ResetsAt.IsZero() || candidate.ResetsAt.Before(window.ResetsAt) {
+	for _, candidate := range storedWindows {
+		if isSameWindow(candidate, window) && candidate.ResetsAt.After(now) {
 			return candidate.ResetsAt
 		}
 	}
 
-	return window.ResetsAt
+	return time.Time{}
 }
 
 func wasLimited(storedWindows []agent.UsageWindow, window agent.UsageWindow, now time.Time) bool {

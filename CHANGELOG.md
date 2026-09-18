@@ -51,6 +51,7 @@
 
 ### Usage
 
+- Use fresh usage reset times rather than cached ones
 - Show when a limited usage window resets
 - Refresh frozen limits in case of an external reset (hello OpenAI)
 - Fix detection of usage window timespans
