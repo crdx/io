@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"strings"
+
+	"crdx.org/io/cmd/oh/edit"
 )
 
 func ReadPipedPrompt(source io.Reader) (string, error) {
@@ -24,4 +26,12 @@ func JoinPrompt(prompt string, addition string) string {
 	default:
 		return prompt + "\n\n" + addition
 	}
+}
+
+func JoinPipedPrompt(prompt string, pipedPrompt string) string {
+	if prompt == "" || pipedPrompt == "" {
+		return JoinPrompt(prompt, pipedPrompt)
+	}
+
+	return JoinPrompt(prompt, edit.FencedCodeBlock(pipedPrompt))
 }

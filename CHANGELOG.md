@@ -34,6 +34,7 @@
 - Dismiss feedback with backspace, escape, or ^D
 - List changed models on update
 - Remove trailing new line at the end of `chat.md`
+- Fence piped input when there is also a prompt
 
 ## [0.6.0] - 2026-09-18
 

@@ -54,3 +54,29 @@ func TestAJoinedPromptKeepsABlankLineBetweenItsParts(t *testing.T) {
 		}
 	}
 }
+
+func TestPipedPromptIsFencedWhenItFollowsAGivenPrompt(t *testing.T) {
+	for name, joining := range map[string]struct {
+		prompt      string
+		pipedPrompt string
+		want        string
+	}{
+		"both": {
+			prompt:      "review this",
+			pipedPrompt: "one\ntwo",
+			want:        "review this\n\n```\none\ntwo\n```",
+		},
+		"a distinctive language": {
+			prompt:      "review this",
+			pipedPrompt: "diff --git a/x b/x\n```",
+			want:        "review this\n\n````diff\ndiff --git a/x b/x\n```\n````",
+		},
+		"the given prompt only": {prompt: "review this", pipedPrompt: "", want: "review this"},
+		"the piped prompt only": {prompt: "", pipedPrompt: "one\ntwo", want: "one\ntwo"},
+		"neither":               {prompt: "", pipedPrompt: "", want: ""},
+	} {
+		if got := JoinPipedPrompt(joining.prompt, joining.pipedPrompt); got != joining.want {
+			t.Errorf("%s: got %q, want %q", name, got, joining.want)
+		}
+	}
+}

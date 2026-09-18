@@ -4,6 +4,6 @@ Usage:
     oh --ctl gc [options]
 
 Options:
-    -a, --aggressive    Look through the whole of each directory, and take rebuildable Go binaries
+    -a, --aggressive    Look through the whole of each directory, and delete rebuildable Go binaries
     -n, --dry-run       Report what would be removed without removing it
     -h, --help          Show this help

@@ -657,7 +657,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		if err != nil {
 			return "", err
 		}
-		args.Message = startup.JoinPrompt(args.Message, pipedPrompt)
+		args.Message = startup.JoinPipedPrompt(args.Message, pipedPrompt)
 	}
 
 	if len(args.AddedFiles) > 0 {

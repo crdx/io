@@ -27,13 +27,7 @@ func preparePastedText(text string, isAtLineStart bool, isAtLineEnd bool) string
 		return text
 	}
 
-	fence := strings.Repeat("`", max(3, longestBacktickRun(text)+1))
-	openingFence := fence + pasteLanguage(text)
-	codeBlock := openingFence + "\n" + text
-	if !strings.HasSuffix(codeBlock, "\n") {
-		codeBlock += "\n"
-	}
-	codeBlock += fence
+	codeBlock := FencedCodeBlock(text)
 
 	if !isAtLineStart {
 		codeBlock = "\n" + codeBlock
@@ -43,6 +37,17 @@ func preparePastedText(text string, isAtLineStart bool, isAtLineEnd bool) string
 	}
 
 	return codeBlock
+}
+
+func FencedCodeBlock(text string) string {
+	fence := strings.Repeat("`", max(3, longestBacktickRun(text)+1))
+	openingFence := fence + pasteLanguage(text)
+	codeBlock := openingFence + "\n" + text
+	if !strings.HasSuffix(codeBlock, "\n") {
+		codeBlock += "\n"
+	}
+
+	return codeBlock + fence
 }
 
 func pastedLineCount(text string) int {

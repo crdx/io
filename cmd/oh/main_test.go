@@ -12360,14 +12360,14 @@ func plainInputStream(t *testing.T, scenario plainInputScenario) string {
 	if scenario == plainInputPipedAndPrinted {
 		self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines).AppendOnly()
 		self.runMode.isPrinting = true
-		self.print(history, startup.JoinPrompt(givenPrompt, pipedPrompt))
+		self.print(history, startup.JoinPipedPrompt(givenPrompt, pipedPrompt))
 		requireNothingWasDrawnOver(t, screenOutput.String())
 
 		return screenOutput.String()
 	}
 
 	self.runMode.isPlain = true
-	self.acceptPlainInput(history, startup.JoinPrompt(givenPrompt, pipedPrompt))
+	self.acceptPlainInput(history, startup.JoinPipedPrompt(givenPrompt, pipedPrompt))
 	self.screen.End()
 
 	return screenOutput.String()
