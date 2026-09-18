@@ -2907,15 +2907,17 @@ func TestASilentTurnIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	self.screen = output.NewTerminalOfSize(&replayOutput, 80, 24)
 	self.replay()
 
-	if visibleScreen(t, live.String(), 80) == nil ||
-		strings.Join(visibleScreen(t, live.String(), 80), "\n") !=
-			strings.Join(visibleScreen(t, replayOutput.String(), 80), "\n") {
-		t.Errorf(
-			"a notice said live leaves a different screen from one replayed\nlive:\n%s\nreplayed:\n%s",
-			strings.Join(visibleScreen(t, live.String(), 80), "\n"),
-			strings.Join(visibleScreen(t, replayOutput.String(), 80), "\n"),
-		)
+	if visibleScreen(t, live.String(), 80) == nil {
+		t.Fatal("a notice said live left nothing on the screen")
 	}
+
+	requireSameVisibleScreenInColumns(
+		t,
+		"a notice said live leaves a different screen from one replayed",
+		80,
+		live.String(),
+		replayOutput.String(),
+	)
 }
 
 func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
@@ -3646,11 +3648,13 @@ func TestDiscardedReasoningLeavesTheSameScreenAsReplay(t *testing.T) {
 	replayPainter.DrawEvent(failure)
 	replayPainter.End()
 
-	live := visibleScreen(t, liveOutput.String(), 80)
-	replayed := visibleScreen(t, replayOutput.String(), 80)
-	if !slices.Equal(live, replayed) {
-		t.Errorf("discarded reasoning changed the settled screen\nlive:\n%s\nreplayed:\n%s", strings.Join(live, "\n"), strings.Join(replayed, "\n"))
-	}
+	requireSameVisibleScreenInColumns(
+		t,
+		"discarded reasoning changed the settled screen",
+		80,
+		liveOutput.String(),
+		replayOutput.String(),
+	)
 }
 
 func TestASuccessfulNoticeUsesTheSuccessStyle(t *testing.T) {
@@ -7105,19 +7109,14 @@ func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
 		t.Run(journal.name, func(t *testing.T) {
 			entries := readJournal(t, journal.path)
 
-			replayed := visibleScreen(t, replayAtWidth(t, entries, replayColumns), replayColumns)
+			replayed := replayAtWidth(t, entries, replayColumns)
 
 			for name, streamingMode := range everyStreamingMode() {
-				live := visibleScreen(t, streamIntoBuffer(t, entries, streamingMode), replayColumns)
-
-				if slices.Equal(replayed, live) {
-					continue
-				}
-
-				t.Errorf(
-					"a live %s turn and a replay of it left different screens\n--- replayed ---\n%s\n--- live ---\n%s",
-					name,
-					strings.Join(replayed, "\n"), strings.Join(live, "\n"),
+				requireSameVisibleScreen(
+					t,
+					"a live "+name+" turn and a replay of it left different screens",
+					replayed,
+					streamIntoBuffer(t, entries, streamingMode),
 				)
 			}
 		})
@@ -8996,15 +8995,12 @@ func TestEphemeralInterfaceFeedbackStaysOutOfConversationHistory(t *testing.T) {
 	}
 	replayed.replay()
 
-	liveScreen := visibleScreen(t, liveOutput.String(), replayColumns)
-	restoredScreen := visibleScreen(t, replayOutput.String(), replayColumns)
-	if !slices.Equal(liveScreen, restoredScreen) {
-		t.Errorf(
-			"ephemeral interface feedback changed the stored replay\nlive:\n%s\nreplayed:\n%s",
-			strings.Join(liveScreen, "\n"),
-			strings.Join(restoredScreen, "\n"),
-		)
-	}
+	requireSameVisibleScreen(
+		t,
+		"ephemeral interface feedback changed the stored replay",
+		liveOutput.String(),
+		replayOutput.String(),
+	)
 }
 
 func TestRetryRemainsDurableConversationHistory(t *testing.T) {
@@ -9315,33 +9311,135 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 	replayed.replay()
 	replayed.show(edit.NewInput(nil))
 
-	liveScreen := visibleScreen(t, screenOutput.String(), replayColumns)
-	restoredScreen := visibleScreen(t, replayOutput.String(), replayColumns)
-	if !slices.Equal(liveScreen, restoredScreen) {
-		t.Errorf(
-			"reloaded config changed after replay\nlive:\n%s\nreplayed:\n%s",
-			strings.Join(liveScreen, "\n"),
-			strings.Join(restoredScreen, "\n"),
-		)
-	}
+	requireSameVisibleScreen(
+		t,
+		"reloaded config changed after replay",
+		screenOutput.String(),
+		replayOutput.String(),
+	)
+
 	return replayOutput.String()
 }
 
 type screen struct {
 	t           *testing.T
-	rows        [][]string
+	rows        [][]cell
 	row, column int
 	columns     int
 	isWrapping  bool
+	style       graphicStyle
 }
 
-func visibleScreen(t *testing.T, stream string, columns int) []string {
+type cell struct {
+	grapheme string
+	styles   string
+}
+
+type graphicStyle struct {
+	foreground  string
+	background  string
+	underline   string
+	decorations []string
+}
+
+const picturePlaceholder = "\U0010EEEE"
+
+var decorationsOff = map[string][]string{
+	"21": {"1"},
+	"22": {"1", "2"},
+	"23": {"3"},
+	"24": {"4"},
+	"25": {"5", "6"},
+	"27": {"7"},
+	"28": {"8"},
+	"29": {"9"},
+	"55": {"53"},
+}
+
+func (self graphicStyle) String() string {
+	parts := slices.Clone(self.decorations)
+	slices.Sort(parts)
+
+	for _, colour := range []string{self.foreground, self.background, self.underline} {
+		if colour != "" {
+			parts = append(parts, colour)
+		}
+	}
+
+	if len(parts) == 0 {
+		return ""
+	}
+
+	return "\x1b[" + strings.Join(parts, ";") + "m"
+}
+
+func TestAScreenTellsTheSameWordsInDifferentColoursApart(t *testing.T) {
+	red := playScreen(t, "\x1b[38;2;204;102;102m$\x1b[0m curl", replayColumns)
+	blue := playScreen(t, "\x1b[38;2;129;162;190m$\x1b[0m curl", replayColumns)
+
+	if !slices.Equal(red.text(), blue.text()) {
+		t.Fatalf("the two screens read differently: %q and %q", red.text(), blue.text())
+	}
+	if slices.Equal(red.styled(), blue.styled()) {
+		t.Errorf("the two screens were styled alike: %q", strutil.VisibleEscapes(strings.Join(red.styled(), "")))
+	}
+}
+
+func TestAScreenReadsADefaultForegroundAsClearingTheColourBeforeIt(t *testing.T) {
+	cleared := playScreen(t, "\x1b[38;2;1;2;3m\x1b[39mplain", replayColumns)
+	never := playScreen(t, "plain", replayColumns)
+
+	if !slices.Equal(cleared.styled(), never.styled()) {
+		t.Errorf(
+			"a cleared foreground drew %q, want %q",
+			strutil.VisibleEscapes(strings.Join(cleared.styled(), "")),
+			strutil.VisibleEscapes(strings.Join(never.styled(), "")),
+		)
+	}
+}
+
+func TestAScreenIgnoresThePictureIdentityCarriedAsAColour(t *testing.T) {
+	first := playScreen(t, "\x1b[38;2;0;0;27m"+picturePlaceholder+"\x1b[39m", replayColumns)
+	second := playScreen(t, "\x1b[38;2;0;0;28m"+picturePlaceholder+"\x1b[39m", replayColumns)
+
+	if !slices.Equal(first.styled(), second.styled()) {
+		t.Errorf(
+			"two placements of the same picture were styled differently: %q and %q",
+			strutil.VisibleEscapes(strings.Join(first.styled(), "")),
+			strutil.VisibleEscapes(strings.Join(second.styled(), "")),
+		)
+	}
+}
+
+func TestAScreenKeepsADecorationApartFromItsColour(t *testing.T) {
+	together := playScreen(t, "\x1b[3;38;2;1;2;3mword\x1b[0m", replayColumns)
+	apart := playScreen(t, "\x1b[38;2;1;2;3m\x1b[3mword\x1b[0m", replayColumns)
+
+	if !slices.Equal(together.styled(), apart.styled()) {
+		t.Errorf(
+			"one sequence drew %q and two drew %q",
+			strutil.VisibleEscapes(strings.Join(together.styled(), "")),
+			strutil.VisibleEscapes(strings.Join(apart.styled(), "")),
+		)
+	}
+	if plain := playScreen(t, "word", replayColumns); slices.Equal(together.styled(), plain.styled()) {
+		t.Error("an italic coloured word was styled like a plain one")
+	}
+}
+
+func playScreen(t *testing.T, stream string, columns int) *screen {
 	t.Helper()
 
 	self := &screen{t: t, columns: columns, isWrapping: true}
 	self.play(stream)
 
-	return self.text()
+	return self
+}
+
+func visibleScreen(t *testing.T, stream string, columns int) []string {
+	t.Helper()
+
+	return playScreen(t, stream, columns).text()
 }
 
 func (self *screen) play(stream string) {
@@ -9455,6 +9553,7 @@ func (self *screen) apply(command byte, parameters string) {
 
 	switch command {
 	case 'm':
+		self.restyle(parameters)
 	case 'A':
 		self.row = max(0, self.row-count)
 	case 'B':
@@ -9502,7 +9601,7 @@ func (self *screen) eraseInRow(mode int) {
 		}
 	case 1:
 		for at := range min(self.column+1, len(row)) {
-			row[at] = " "
+			row[at] = cell{grapheme: " "}
 		}
 	case 2:
 		self.rows[self.row] = nil
@@ -9530,7 +9629,7 @@ func (self *screen) put(grapheme string, cells int) {
 			self.rows = append(self.rows, nil)
 		}
 		if self.column > 0 {
-			self.rows[self.row][self.column-1] += grapheme
+			self.rows[self.row][self.column-1].grapheme += grapheme
 		}
 		return
 	}
@@ -9551,22 +9650,125 @@ func (self *screen) put(grapheme string, cells int) {
 	drawnCells := min(cells, self.columns-self.column)
 	row := self.rows[self.row]
 	for len(row) < self.column+drawnCells {
-		row = append(row, " ")
+		row = append(row, cell{grapheme: " "})
 	}
 
-	row[self.column] = grapheme
+	styles := self.style.String()
+	if strings.HasPrefix(grapheme, picturePlaceholder) {
+		styles = ""
+	}
+
+	row[self.column] = cell{grapheme: grapheme, styles: styles}
 	for i := 1; i < drawnCells; i++ {
-		row[self.column+i] = ""
+		row[self.column+i] = cell{styles: styles}
 	}
 	self.rows[self.row] = row
 	self.column = min(self.column+cells, self.columns)
 }
 
+func (self *screen) restyle(parameters string) {
+	tokens := strings.Split(parameters, ";")
+
+	for at := 0; at < len(tokens); at++ {
+		switch token := tokens[at]; {
+		case token == "" || token == "0":
+			self.style = graphicStyle{}
+		case token == "38" || token == "48" || token == "58":
+			colour, next := self.readColour(tokens, at)
+			switch token {
+			case "38":
+				self.style.foreground = colour
+			case "48":
+				self.style.background = colour
+			default:
+				self.style.underline = colour
+			}
+			at = next
+		case token == "39":
+			self.style.foreground = ""
+		case token == "49":
+			self.style.background = ""
+		case token == "59":
+			self.style.underline = ""
+		case decorationsOff[token] != nil:
+			self.style.decorations = slices.DeleteFunc(self.style.decorations, func(one string) bool {
+				name, _, _ := strings.Cut(one, ":")
+				return slices.Contains(decorationsOff[token], name)
+			})
+		case isDecoration(token):
+			if !slices.Contains(self.style.decorations, token) {
+				self.style.decorations = append(self.style.decorations, token)
+			}
+		default:
+			self.t.Fatalf("the screen was sent a graphic rendition it does not know: ESC [ %sm", parameters)
+		}
+	}
+}
+
+func (self *screen) readColour(tokens []string, at int) (string, int) {
+	remaining := 0
+	if at+1 < len(tokens) {
+		switch tokens[at+1] {
+		case "2":
+			remaining = 4
+		case "5":
+			remaining = 2
+		}
+	}
+
+	if remaining == 0 || at+remaining >= len(tokens) {
+		self.t.Fatalf("the screen was sent a colour it does not know: %q", strings.Join(tokens[at:], ";"))
+		return "", len(tokens)
+	}
+
+	return strings.Join(tokens[at:at+remaining+1], ";"), at + remaining
+}
+
+func isDecoration(token string) bool {
+	name, _, _ := strings.Cut(token, ":")
+	number, err := strconv.Atoi(name)
+
+	return err == nil && (number >= 1 && number <= 9 || number == 53)
+}
+
 func (self *screen) text() []string {
+	return self.lines(func(row []cell) string {
+		var drawn strings.Builder
+		for _, one := range row {
+			drawn.WriteString(one.grapheme)
+		}
+
+		return drawn.String()
+	})
+}
+
+func (self *screen) styled() []string {
+	return self.lines(func(row []cell) string {
+		var drawn strings.Builder
+		styles := ""
+		for _, one := range row {
+			if one.styles != styles {
+				if styles != "" {
+					drawn.WriteString("\x1b[0m")
+				}
+				drawn.WriteString(one.styles)
+				styles = one.styles
+			}
+			drawn.WriteString(one.grapheme)
+		}
+		if styles != "" {
+			drawn.WriteString("\x1b[0m")
+		}
+
+		return drawn.String()
+	})
+}
+
+func (self *screen) lines(draw func(row []cell) string) []string {
 	lines := make([]string, 0, len(self.rows))
 
 	for _, row := range self.rows {
-		lines = append(lines, strings.TrimRight(strings.Join(row, ""), " "))
+		lines = append(lines, strings.TrimRight(draw(row), " "))
 	}
 
 	for len(lines) > 0 && lines[len(lines)-1] == "" {
@@ -13434,14 +13636,37 @@ func requireNothingWasDrawnOver(t *testing.T, printedOutput string) {
 func requireSameVisibleScreen(t *testing.T, description string, firstOutput string, secondOutput string) {
 	t.Helper()
 
-	firstScreen := visibleScreen(t, firstOutput, replayColumns)
-	secondScreen := visibleScreen(t, secondOutput, replayColumns)
-	if !slices.Equal(firstScreen, secondScreen) {
+	requireSameVisibleScreenInColumns(t, description, replayColumns, firstOutput, secondOutput)
+}
+
+func requireSameVisibleScreenInColumns(
+	t *testing.T,
+	description string,
+	columns int,
+	firstOutput string,
+	secondOutput string,
+) {
+	t.Helper()
+
+	firstScreen := playScreen(t, firstOutput, columns)
+	secondScreen := playScreen(t, secondOutput, columns)
+
+	if first, second := firstScreen.text(), secondScreen.text(); !slices.Equal(first, second) {
 		t.Errorf(
 			"%s\nfirst:\n%s\nsecond:\n%s",
 			description,
-			strings.Join(firstScreen, "\n"),
-			strings.Join(secondScreen, "\n"),
+			strings.Join(first, "\n"),
+			strings.Join(second, "\n"),
+		)
+		return
+	}
+
+	if first, second := firstScreen.styled(), secondScreen.styled(); !slices.Equal(first, second) {
+		t.Errorf(
+			"%s, in its styling\nfirst:\n%s\nsecond:\n%s",
+			description,
+			strutil.VisibleEscapes(strings.Join(first, "\n")),
+			strutil.VisibleEscapes(strings.Join(second, "\n")),
 		)
 	}
 }
