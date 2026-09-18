@@ -795,6 +795,54 @@ func TestARefreshThatFailsKeepsWhatIsCachedAndWaitsBeforeAskingAgain(t *testing.
 	}
 }
 
+func TestAnUpdateThatFindsTheSameModelsNamesNoChange(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	endpoint := serveRegistry(t, oneCodexModel)
+
+	var firstOutput bytes.Buffer
+	if err := Update(&firstOutput, endpoint, modelCachePath(), listingModels(firstListings()), false); err != nil {
+		t.Fatal(err)
+	}
+
+	var output bytes.Buffer
+	if err := Update(&output, endpoint, modelCachePath(), listingModels(firstListings()), false); err != nil {
+		t.Fatal(err)
+	}
+
+	if output.String() != firstOutput.String() {
+		t.Errorf(
+			"expected an update finding the same models to draw what it drew before\n--- got ---\n%s--- want ---\n%s",
+			output.String(), firstOutput.String(),
+		)
+	}
+}
+
+func TestAProviderNobodyCouldListKeepsItsModelsAndNamesNoRemoval(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	endpoint := serveRegistry(t, oneCodexModel)
+
+	var firstOutput bytes.Buffer
+	if err := Update(&firstOutput, endpoint, modelCachePath(), listingModels(firstListings()), false); err != nil {
+		t.Fatal(err)
+	}
+
+	var output bytes.Buffer
+	if err := Update(&output, endpoint, modelCachePath(), unreachableProviders, false); err != nil {
+		t.Fatal(err)
+	}
+
+	if strings.Contains(style.Plain(output.String()), removedChange) {
+		t.Errorf("expected the models nobody could list to stand, got %q", output.String())
+	}
+
+	cached := loadModelCache(modelCachePath()).Providers[anthropicProvider]
+	if len(cached.Models) != 2 {
+		t.Errorf("expected the cached models to survive, got %v", cached.Models)
+	}
+}
+
 func TestNothingCachedAndNothingReachableIsAnError(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 

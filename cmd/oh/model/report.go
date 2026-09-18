@@ -26,6 +26,7 @@ type providerReport struct {
 	ListedCount     int
 	SelectableCount int
 	IgnoredModels   []ignoredModel
+	ChangedModels   []modelChange
 	IsRecorded      bool
 }
 
@@ -48,6 +49,14 @@ func ignoredTable(rows [][]string) *table.Table {
 		table.Column{Title: "Provider"},
 		table.Column{Title: "Model"},
 		table.Column{Title: "Reason", Style: style.Subtle},
+	).Fit(rows)
+}
+
+func changeTable(rows [][]string) *table.Table {
+	return table.New(
+		table.Column{Title: "Provider"},
+		table.Column{Title: "Model"},
+		table.Column{Title: "Change"},
 	).Fit(rows)
 }
 
@@ -88,6 +97,46 @@ func writeIgnoredModels(output io.Writer, reports []providerReport) {
 
 	for _, row := range rows {
 		writeLine(output, ignoredModelsTable.Row(row, 0))
+	}
+}
+
+func changeRows(reports []providerReport) [][]string {
+	var rows [][]string
+
+	for _, report := range reports {
+		for _, change := range report.ChangedModels {
+			rows = append(rows, []string{
+				ProviderName(report.Provider),
+				change.Name,
+				changeCell(change.Change),
+			})
+		}
+	}
+
+	return rows
+}
+
+func changeCell(change string) string {
+	if change == addedChange {
+		return style.InsertedText(change)
+	}
+
+	return style.DeletedText(change)
+}
+
+func writeChangedModels(output io.Writer, reports []providerReport) {
+	rows := changeRows(reports)
+	if len(rows) == 0 {
+		return
+	}
+
+	changedModelsTable := changeTable(rows)
+
+	_, _ = fmt.Fprintln(output)
+	writeLine(output, style.Column(changedModelsTable.Header(0)))
+
+	for _, row := range rows {
+		writeLine(output, changedModelsTable.Row(row, 0))
 	}
 }
 

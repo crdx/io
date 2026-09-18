@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -128,11 +129,7 @@ func ignoredModelListings() map[string][]agent.Model {
 	}
 }
 
-func listingIgnoredModels(t *testing.T) ProviderLister {
-	t.Helper()
-
-	listedByProvider := ignoredModelListings()
-
+func listingModels(listedByProvider map[string][]agent.Model) ProviderLister {
 	return func(ctx context.Context, providerName string) ([]agent.Model, error) {
 		if listed, isFound := listedByProvider[providerName]; isFound {
 			return listed, nil
@@ -140,6 +137,113 @@ func listingIgnoredModels(t *testing.T) ProviderLister {
 
 		return unreachableProviders(ctx, providerName)
 	}
+}
+
+func listingIgnoredModels(t *testing.T) ProviderLister {
+	t.Helper()
+
+	return listingModels(ignoredModelListings())
+}
+
+func TestGoldenAnUpdateNamesTheModelsThatCameAndWent(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	endpoint := serveRegistry(t, oneCodexModel)
+
+	var firstOutput bytes.Buffer
+	if err := Update(&firstOutput, endpoint, modelCachePath(), listingModels(firstListings()), false); err != nil {
+		t.Fatal(err)
+	}
+
+	if strings.Contains(style.Plain(firstOutput.String()), addedChange) {
+		t.Errorf("expected a first update to have nothing to compare with, got %q", firstOutput.String())
+	}
+
+	var output bytes.Buffer
+	if err := Update(&output, endpoint, modelCachePath(), listingModels(secondListings()), false); err != nil {
+		t.Fatal(err)
+	}
+
+	assertGolden(t, "update-naming-changes.ansi", report(t, output.String()))
+}
+
+func firstListings() map[string][]agent.Model {
+	return map[string][]agent.Model{
+		AnthropicProvider: {
+			{ID: "claude-sonnet-4-6", EffortLevels: []string{"high"}, MaxOutputTokens: 64_000},
+			{ID: "claude-opus-4-6", EffortLevels: []string{"high"}, MaxOutputTokens: 64_000},
+		},
+		OllamaProvider: {
+			{ID: "llama-4", EffortLevels: []string{"medium"}, MaxOutputTokens: 8_000},
+		},
+	}
+}
+
+func secondListings() map[string][]agent.Model {
+	return map[string][]agent.Model{
+		AnthropicProvider: {
+			{ID: "claude-sonnet-4-6", EffortLevels: []string{"high"}, MaxOutputTokens: 64_000},
+			{ID: "claude-fable-5-1", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
+		},
+		OllamaProvider: {
+			{ID: "llama-4", EffortLevels: []string{"medium"}, MaxOutputTokens: 8_000},
+		},
+	}
+}
+
+func changedModelListings() map[string][]agent.Model {
+	return map[string][]agent.Model{
+		OpencodeGoProvider: {
+			{ID: "grok-4.6", EffortLevels: []string{"high"}, MaxOutputTokens: 32_000},
+			{ID: "qwen3-max", EffortLevels: []string{"high"}, MaxOutputTokens: 32_000},
+		},
+		AnthropicProvider: {
+			{ID: "claude-sonnet-4-6", EffortLevels: []string{"high"}, MaxOutputTokens: 64_000},
+			{ID: "claude-sonnet-4-7", EffortLevels: []string{"high"}, MaxOutputTokens: 64_000},
+			{ID: "claude-opus-4-5", EffortLevels: []string{"high"}, MaxOutputTokens: 32_000},
+		},
+		OllamaProvider: {
+			{ID: "llama-4", EffortLevels: []string{"medium"}},
+			{ID: "mistral-3", EffortLevels: []string{"medium"}, MaxOutputTokens: 8_000},
+		},
+	}
+}
+
+func updateOverStoredModels(t *testing.T, output io.Writer, isShowingIgnored bool) {
+	t.Helper()
+
+	endpoint := serveRegistry(t, oneCodexModel)
+
+	var storingOutput bytes.Buffer
+	if err := Update(&storingOutput, endpoint, modelCachePath(), listingIgnoredModels(t), false); err != nil {
+		t.Fatal(err)
+	}
+
+	lister := listingModels(changedModelListings())
+	if err := Update(output, endpoint, modelCachePath(), lister, isShowingIgnored); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestGoldenAnUpdateDrawsWhatChangedBesideWhatItIgnored(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	var output bytes.Buffer
+	updateOverStoredModels(t, &output, true)
+
+	assertGolden(t, "update-changed-and-ignored.ansi", report(t, output.String()))
+}
+
+func TestGoldenChangesWithoutColourKeepTheirColumns(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	var output bytes.Buffer
+	restoreStyle := style.Init(&output)
+	defer restoreStyle()
+
+	updateOverStoredModels(t, &output, false)
+
+	assertGolden(t, "update-changed-plain.txt", report(t, output.String()))
 }
 
 func TestGoldenAnUpdateNamesEveryModelItIgnoresAndWhy(t *testing.T) {

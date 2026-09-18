@@ -31,6 +31,7 @@
 - Mark user messages with OSC 133
 - Render `/jobs` commands like bash tool calls
 - Dismiss feedback with backspace, escape, or ^D
+- List changed models on update
 
 ## [0.6.0] - 2026-09-18
 

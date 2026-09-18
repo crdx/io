@@ -358,7 +358,7 @@ func unselectableReason(model agent.Model) string {
 
 const unnamedModelName = "(unnamed)"
 
-func ignoredName(model agent.Model) string {
+func modelName(model agent.Model) string {
 	switch {
 	case model.ID != "":
 		return model.ID
@@ -370,7 +370,41 @@ func ignoredName(model agent.Model) string {
 }
 
 func ignoredFor(model agent.Model, reason string) ignoredModel {
-	return ignoredModel{Name: ignoredName(model), Reason: reason}
+	return ignoredModel{Name: modelName(model), Reason: reason}
+}
+
+const (
+	addedChange   = "added"
+	removedChange = "removed"
+)
+
+type modelChange struct {
+	Name   string
+	Change string
+}
+
+func modelChanges(storedModels []agent.Model, models []agent.Model) []modelChange {
+	var changes []modelChange
+
+	for _, model := range models {
+		if !holdsModel(storedModels, model.ID) {
+			changes = append(changes, modelChange{Name: modelName(model), Change: addedChange})
+		}
+	}
+
+	for _, model := range storedModels {
+		if !holdsModel(models, model.ID) {
+			changes = append(changes, modelChange{Name: modelName(model), Change: removedChange})
+		}
+	}
+
+	return changes
+}
+
+func holdsModel(models []agent.Model, id string) bool {
+	return slices.ContainsFunc(models, func(model agent.Model) bool {
+		return model.ID == id
+	})
 }
 
 func unselectableModels(models []agent.Model) []ignoredModel {
@@ -512,6 +546,7 @@ func updateModels(
 
 	for _, providerName := range ProviderNames() {
 		registeredModels := registry.Provider(registryNames[providerName])
+		storedListing, isStored := cache.Providers[providerName]
 
 		listedModels, source, why := describeProviderModels(ctx, providerName, registeredModels, listProviderModels)
 		listedModels = plainModels(listedModels)
@@ -532,6 +567,9 @@ func updateModels(
 		} else {
 			report.IsRecorded = true
 			report.Why = why
+			if isStored {
+				report.ChangedModels = modelChanges(storedListing.Models, models)
+			}
 			cache.Providers[providerName] = cachedModels{
 				FetchedAt: time.Now(),
 				Source:    source,
@@ -543,6 +581,8 @@ func updateModels(
 		reports = append(reports, report)
 		writeProviderReport(output, report)
 	}
+
+	writeChangedModels(output, reports)
 
 	if isShowingIgnored {
 		writeIgnoredModels(output, reports)
