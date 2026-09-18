@@ -20,16 +20,16 @@ func TestAStartupEventKeepsItsFactsForReplay(t *testing.T) {
 		ToolBytes:     3373,
 		LocalConfig: &LocalConfig{
 			Name:     "oh.toml",
-			Settings: []string{"input.continue", "sandbox.write"},
+			Settings: []string{"ui.currency", "sandbox.write"},
 		},
 	}
 
 	event := NewEvent(12*time.Millisecond, info)
-	if facts := string(event.State); !strings.Contains(facts, `"local_config":{"name":"oh.toml","settings":["input.continue","sandbox.write"]}`) {
+	if facts := string(event.State); !strings.Contains(facts, `"local_config":{"name":"oh.toml","settings":["ui.currency","sandbox.write"]}`) {
 		t.Errorf("local config facts were not grouped in %s", facts)
 	}
 	got := style.Plain(RenderEvent(event, 80, false))
-	want := "Agent brave-otter 🦦 ready in 12ms with 5 skills ⧸ 4 snippets ⧸ ~13Kt context ⧸ oh.toml: input.continue, sandbox.write."
+	want := "Agent brave-otter 🦦 ready in 12ms with 5 skills ⧸ 4 snippets ⧸ ~13Kt context ⧸ oh.toml: ui.currency, sandbox.write."
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
@@ -104,6 +104,21 @@ func TestStartupQuantitiesPutOnlyTheirNumbersInTheNormalForeground(t *testing.T)
 				t.Errorf("got %q, want %q", got, test.want)
 			}
 		})
+	}
+}
+
+func TestOneSkillAndOneSnippetAreCountedInTheSingular(t *testing.T) {
+	line := style.Plain(RenderBanner(
+		time.Millisecond,
+		false,
+		Info{GlobalSkills: 1, Snippets: 1},
+		80,
+		false,
+	))
+	want := "Agent ready in 1ms with 1 skill ⧸ 1 snippet ⧸ 0t context."
+
+	if line != want {
+		t.Errorf("got %q, want %q", line, want)
 	}
 }
 

@@ -19,7 +19,7 @@
 - Ensure the max shell timeout is less than the typical prompt cache TTL
 - Notify which keys changed on auto-reload
 
-### Tools
+### Tools & Skills
 
 - Rename `web_search` to `lookup`, toggled with `l` cap
 - Rename `web_fetch` to `fetch`, toggled with `n` cap
@@ -27,6 +27,7 @@
 - Limit background job cleanup to one second on close
 - Save truncated remains in the session drops directory
 - Shorten file refusal messages
+- Serve a built-in `oh` skill
 
 ### Usage
 

@@ -19,7 +19,7 @@ import (
 
 const (
 	filename      = "SKILL.md"
-	directoryName = "skills"
+	DirectoryName = "skills"
 )
 
 type Skill struct {
@@ -75,7 +75,7 @@ func NameFromPath(path string) (string, bool) {
 	}
 
 	directory := filepath.Dir(path)
-	if filepath.Base(filepath.Dir(directory)) != directoryName {
+	if filepath.Base(filepath.Dir(directory)) != DirectoryName {
 		return "", false
 	}
 
@@ -83,7 +83,7 @@ func NameFromPath(path string) (string, bool) {
 }
 
 func Discover(project string, globalDirectories []string, warnings io.Writer) ([]Skill, error) {
-	projectSkills, err := discover(filepath.Join(project, ".agents", directoryName), false, warnings)
+	projectSkills, err := discover(filepath.Join(project, ".agents", DirectoryName), false, warnings)
 	if err != nil {
 		return nil, err
 	}
