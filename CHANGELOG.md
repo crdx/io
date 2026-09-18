@@ -46,6 +46,8 @@
 - Save truncated remains in the session drops directory
 - Shorten file refusal messages
 - Serve a built-in `oh` skill
+- Detail the read-only workflow better
+- Tell the model it can ask for hugh `/grant`
 
 ### Usage
 

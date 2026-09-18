@@ -144,6 +144,7 @@ func TestContextcontextFilesFollowTheOrderTheyAreConcatenatedIn(t *testing.T) {
 
 func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 	paths := shell.Paths{
+		Deny:  []string{"*.env"},
 		Read:  []string{"/reference"},
 		Write: []string{"/output"},
 		Exec:  []string{"/commands"},
@@ -158,12 +159,53 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 	})
 
 	for _, want := range []string{
+		"cannot access any file or directory named by the configured deny pattern *.env",
 		"configured path /reference is read-only",
 		"configured path /output is read-write and follows the workspace write state",
-		"shell may also execute files at or under /commands",
+		"shell can execute files at or under /commands",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("system prompt does not contain %q: %q", want, got)
+		}
+	}
+}
+
+var pathGrantWording = []string{
+	"The user can grant access to paths with /grant, and take them back with /revoke.",
+	"Ask the user to grant a needed path rather than working around it or giving up.",
+}
+
+func TestTheHarnessDisclosesThatAPathOutOfReachCanBeGranted(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/state/farm/session",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{Read: []string{"/reference"}},
+		Conditions:  conditions.Conditions{Interactive: true},
+	})
+
+	for _, want := range pathGrantWording {
+		if !strings.Contains(got, want) {
+			t.Errorf("system prompt does not contain %q: %q", want, got)
+		}
+	}
+}
+
+func TestAPathCanBeAskedForEvenWhenNobodyIsListening(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/state/farm/session",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{Read: []string{"/reference"}},
+	})
+
+	for _, want := range pathGrantWording {
+		if !strings.Contains(got, want) {
+			t.Errorf("non-interactive prompt does not contain %q: %q", want, got)
 		}
 	}
 }
@@ -280,7 +322,7 @@ func TestTheHarnessDisclosesPrivateLoopbackNetworking(t *testing.T) {
 	for _, want := range []string{
 		"private loopback interface",
 		"127.0.0.1 and ::1",
-		"A Unix socket works beneath /tmp, and is refused beneath the workspace",
+		"Unix sockets work beneath /tmp, but not beneath the workspace",
 		"host's loopback interface and external networks are unreachable",
 	} {
 		if !strings.Contains(got, want) {
@@ -301,7 +343,7 @@ func TestTheHarnessDisclosesWhatThisMachineCannotDo(t *testing.T) {
 
 	for _, want := range []string{
 		"127.0.0.1, and this machine has no IPv6 at all",
-		"A Unix socket is unavailable whatever its path",
+		"Unix sockets do not work",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("harness context does not contain %q: %q", want, got)
@@ -403,26 +445,6 @@ func TestTheHarnessDoesNotOfferTheHostNetworkWhenItIsNotGranted(t *testing.T) {
 	}
 }
 
-func TestTheHarnessDisclosesForwardedHostLoopbackPorts(t *testing.T) {
-	got := harnessContext(Config{
-		Workspace:   work.At("/workspace"),
-		SessionName: "session-id",
-		TmpDir:      "/tmp/x",
-		HomeDir:     "/state/home",
-		CurrentCaps: caps.Read,
-		ExtraPaths:  shell.Paths{HostLoopback: []uint16{80, 3000}},
-	})
-
-	for _, want := range []string{
-		"host's loopback TCP ports 80, 3000 are reachable",
-		"All other host loopback traffic and external networks are unreachable",
-	} {
-		if !strings.Contains(got, want) {
-			t.Errorf("harness context does not contain %q: %q", want, got)
-		}
-	}
-}
-
 func TestTheScratchMappingIsWrittenInFull(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 
@@ -457,7 +479,7 @@ func TestTheHarnessDisclosesTheShellHome(t *testing.T) {
 	})
 
 	for _, want := range []string{
-		"path can only access the workspace, private home, and /tmp",
+		"path can only access the workspace, private home, /tmp, and read-only system and executable search paths",
 		"HOME is /state/home",
 		"A tilde (~) for you is not the same as for the user",
 	} {
@@ -663,7 +685,7 @@ func TestAnOfferedToolIsStillMentioned(t *testing.T) {
 		"# Network",
 		"The bash tool is granted",
 		"A service started with the job tool",
-		"The shell may also execute files at or under /commands.",
+		"The shell can execute files at or under /commands.",
 		"git clone --shared",
 	} {
 		if !strings.Contains(got, want) {
@@ -750,14 +772,14 @@ func TestTheShellReportsWhereItMayExecuteFiles(t *testing.T) {
 		OfferedTools: []string{"bash"},
 	})
 
-	want := "The shell may execute files under the system directories, every directory in PATH, " +
+	want := "The shell can execute files under the system directories, every directory in PATH, " +
 		"the workspace, HOME, and /tmp."
 	if !strings.Contains(got, want) {
 		t.Errorf("harness context does not contain %q: %q", want, got)
 	}
 }
 
-func TestTheShellReportsThatItReadsWiderThanThePathTools(t *testing.T) {
+func TestTheShellAndPathToolsReportSystemReadAccess(t *testing.T) {
 	got := harnessContext(Config{
 		Workspace:    work.At("/workspace"),
 		SessionName:  "session-id",
@@ -767,10 +789,14 @@ func TestTheShellReportsThatItReadsWiderThanThePathTools(t *testing.T) {
 		OfferedTools: []string{"bash"},
 	})
 
-	want := "The shell may also read the system directories, but it can only write where the " +
-		"path tools can."
-	if !strings.Contains(got, want) {
-		t.Errorf("harness context does not contain %q: %q", want, got)
+	for _, want := range []string{
+		"Tools that accept a path can only access the workspace, private home, /tmp, and read-only system and executable search paths.",
+		"The shell shares those read grants and additionally sees private process, terminal, resolver, and language-package cache files needed to run commands.",
+		"The shell follows the same workspace and configured-path write state as path tools; runtime devices are the only additional writable exceptions.",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("harness context does not contain %q: %q", want, got)
+		}
 	}
 }
 
@@ -785,8 +811,11 @@ func TestAnUnconfinedShellDoesNotReportWhereItMayRead(t *testing.T) {
 		Yolo:         true,
 	})
 
-	if unwanted := "may also read the system directories"; strings.Contains(got, unwanted) {
+	if unwanted := "private process, terminal, resolver, and language-package cache files"; strings.Contains(got, unwanted) {
 		t.Errorf("harness context mentions %q with no sandbox: %q", unwanted, got)
+	}
+	if want := "The shell is unconfined in --yolo mode; path tools remain limited to the paths above."; !strings.Contains(got, want) {
+		t.Errorf("harness context does not contain %q: %q", want, got)
 	}
 }
 
@@ -825,6 +854,77 @@ func TestTheHarnessDisclosesThatABashCallTakesItsProcessesWithIt(t *testing.T) {
 	}
 }
 
+func TestTheReadOnlyWorkspaceWorkflowHasItsOwnSection(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read | caps.Shell,
+		OfferedTools: []string{"bash"},
+	})
+
+	for _, rule := range []string{
+		"no workflow below covers it",
+		"# Read-only Workspaces",
+		"use this workflow instead of asking for write access",
+		"git clone --shared <workspace> <destination>",
+		"git -C <workspace> diff --binary HEAD",
+		"Do the work and run its checks in the scratch copy",
+		"hand off only unapplied patches",
+		"git -C <workspace> apply --check <patch>",
+	} {
+		if !strings.Contains(got, rule) {
+			t.Errorf("read-only workspace workflow does not contain %q: %q", rule, got)
+		}
+	}
+
+	state := strings.Index(got, "# State")
+	workflow := strings.Index(got, "# Read-only Workspaces")
+	if state == -1 || workflow <= state {
+		t.Errorf("read-only workspace workflow is not its own section after state: %q", got)
+	}
+}
+
+func TestWaitingForTheUserFollowsJobAvailability(t *testing.T) {
+	for name, testCase := range map[string]struct {
+		jobsGranted bool
+		expected    bool
+	}{
+		"available":   {jobsGranted: true, expected: true},
+		"unavailable": {jobsGranted: false, expected: false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			got := harnessContext(Config{
+				Workspace:    work.At("/workspace"),
+				SessionName:  "session-id",
+				TmpDir:       "/state/farm/session",
+				HomeDir:      "/state/home",
+				CurrentCaps:  caps.Read | caps.Shell,
+				OfferedTools: []string{"bash", "job"},
+				JobsGranted:  testCase.jobsGranted,
+			})
+
+			for _, rule := range []string{
+				"# Waiting for the User",
+				"If waiting on the user, start a job",
+				"command whose success proves completion",
+				"recheck after each relevant event until the command succeeds",
+				"if unavailable, poll with a modest delay",
+				"Once the job completes, continue",
+			} {
+				present := strings.Contains(got, rule)
+				if present != testCase.expected {
+					t.Errorf("waiting rule presence is %t, want %t: %q", present, testCase.expected, got)
+				}
+			}
+			if unwanted := "Before handing a patch off, start a background job"; strings.Contains(got, unwanted) {
+				t.Errorf("patch-specific waiting rule remains in the harness context: %q", got)
+			}
+		})
+	}
+}
+
 func TestTheHarnessOffersNoJobToolForAProcessThatMustOutliveACall(t *testing.T) {
 	got := harnessContext(Config{
 		Workspace:    work.At("/workspace"),
@@ -858,5 +958,56 @@ func TestAnUnconfinedShellKeepsItsBackgroundProcessesUnmentioned(t *testing.T) {
 
 	if unwanted := "leaves running is killed"; strings.Contains(got, unwanted) {
 		t.Errorf("harness context mentions %q with no sandbox: %q", unwanted, got)
+	}
+}
+
+func TestEveryConfiguredPathKindHasItsFileToolAccessDocumented(t *testing.T) {
+	userHome := t.TempDir()
+	t.Setenv("HOME", userHome)
+	homePath := filepath.Join(userHome, ".config", "git", "ignore")
+	outsideHomePath := filepath.Join(t.TempDir(), "git", "ignore")
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/state/farm/session",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read | caps.Shell,
+		ExtraPaths: shell.Paths{
+			Exec: []string{"/commands"},
+			Path: []string{"/toolbox/bin"},
+			Home: []string{homePath, outsideHomePath},
+		},
+	})
+
+	for _, want := range []string{
+		"The configured executable path /commands is read-only to path tools.",
+		"The configured PATH directory /toolbox/bin is read-only to path tools.",
+		"The configured home path " + homePath + " is read-only and exposed at HOME/.config/git/ignore.",
+		"The configured home path " + outsideHomePath + " is read-only to path tools but cannot be exposed in private HOME because it is outside the user's home.",
+		"The shell can execute files at or under /commands.",
+		"The shell can execute files at or under /toolbox/bin, which is in PATH.",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("harness context does not contain %q: %q", want, got)
+		}
+	}
+}
+
+func TestAConfinedJobDocumentsItsNetworkDifferenceFromBash(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read | caps.Shell | caps.Network,
+		OfferedTools: []string{"bash", "job"},
+		JobsGranted:  true,
+	})
+
+	if want := "A job command has only private loopback networking and cannot request the host network"; !strings.Contains(got, want) {
+		t.Errorf("harness context does not contain %q: %q", want, got)
+	}
+	if want := "The bash tool takes network=loopback or network=host"; !strings.Contains(got, want) {
+		t.Errorf("harness context does not contain %q: %q", want, got)
 	}
 }

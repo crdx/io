@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strconv"
 	"strings"
 	"text/template"
 
@@ -35,17 +34,19 @@ const (
 var (
 	projectContextNames    = []string{"AGENTS.md", "AGENTS.local.md"}
 	harnessContextTemplate = template.Must(template.New("harness").Funcs(template.FuncMap{
-		"filesystem":     filesystem,
-		"filepathJoin":   filepath.Join,
-		"scopeRules":     scopeRules,
-		"shellAccess":    shellAccess,
-		"lookupAccess":   lookupAccess,
-		"networkSection": networkSection,
-		"stateRules":     stateRules,
-		"scratchRules":   scratchRules,
-		"homeWriteRule":  homeWriteRule,
-		"shellSandbox":   shellSandbox,
-		"sandboxHeader":  sandboxHeader,
+		"filesystem":               filesystem,
+		"filepathJoin":             filepath.Join,
+		"scopeRules":               scopeRules,
+		"shellAccess":              shellAccess,
+		"lookupAccess":             lookupAccess,
+		"networkSection":           networkSection,
+		"stateRules":               stateRules,
+		"scratchRules":             scratchRules,
+		"waitingForUserSection":    waitingForUserSection,
+		"readOnlyWorkspaceSection": readOnlyWorkspaceSection,
+		"homeWriteRule":            homeWriteRule,
+		"shellSandbox":             shellSandbox,
+		"sandboxHeader":            sandboxHeader,
 	}).Parse(hereduck.D(`
 		{{ sandboxHeader .Yolo }}# Harness
 
@@ -87,7 +88,9 @@ var (
 		{{ stateRules . }}
 
 		These states can change at any time. You will be told what changed when it does.
-		When one of these states blocks the work, ask the user to change that state.
+		When a state blocks the work and no workflow below covers it, ask the user to change that state.
+
+		{{ waitingForUserSection . }}{{ readOnlyWorkspaceSection . }}
 	`)))
 )
 
@@ -280,17 +283,22 @@ func scopeRules(data harnessContextTemplateData) string {
 
 	var lines []string
 
+	configuredPathCount := len(extraPaths.Read) + len(extraPaths.Write) + len(extraPaths.Exec) +
+		len(extraPaths.Path) + len(extraPaths.Home)
 	switch {
 	case dropsDirectory != "":
-		lines = append(lines, "- Tools that accept a path can access the workspace, private home, /tmp, and the paths listed here.")
-	case len(extraPaths.Read)+len(extraPaths.Write) > 0:
-		lines = append(lines, "- Tools that accept a path can access the workspace, private home, /tmp, and the configured paths listed here.")
+		lines = append(lines, "- Tools that accept a path can access the workspace, private home, /tmp, read-only system and executable search paths, and the paths listed here.")
+	case configuredPathCount > 0:
+		lines = append(lines, "- Tools that accept a path can access the workspace, private home, /tmp, read-only system and executable search paths, and the configured paths listed here.")
 	default:
-		lines = append(lines, "- Tools that accept a path can only access the workspace, private home, and /tmp.")
+		lines = append(lines, "- Tools that accept a path can only access the workspace, private home, /tmp, and read-only system and executable search paths.")
 	}
 
 	if dropsDirectory != "" {
 		lines = append(lines, "- "+dropsRule(dropsDirectory))
+	}
+	for _, pattern := range extraPaths.Deny {
+		lines = append(lines, "- Path tools and shell commands cannot access any file or directory named by the configured deny pattern "+pattern+".")
 	}
 	for _, path := range extraPaths.Read {
 		lines = append(lines, "- The configured path "+path+" is read-only"+scratchException(path, data)+".")
@@ -299,17 +307,42 @@ func scopeRules(data harnessContextTemplateData) string {
 		lines = append(lines, "- The configured path "+path+" is "+
 			filesystem(data.WorkspaceWritable)+" and follows the workspace write state.")
 	}
-	if data.ShellOffered && !data.Yolo {
-		lines = append(lines, "- The shell may also read the system directories, "+
-			"but it can only write where the path tools can.")
-		lines = append(lines, "- The shell may execute files under the system directories, "+
-			"every directory in PATH, the workspace, HOME, and /tmp.")
-		for _, path := range extraPaths.Exec {
-			lines = append(lines, "- The shell may also execute files at or under "+path+".")
+	for _, path := range extraPaths.Exec {
+		lines = append(lines, "- The configured executable path "+path+" is read-only to path tools.")
+	}
+	for _, path := range extraPaths.Path {
+		lines = append(lines, "- The configured PATH directory "+path+" is read-only to path tools.")
+	}
+	for _, path := range extraPaths.Home {
+		relative, isHomePath := shell.HomeRelativePath(path)
+		if isHomePath {
+			lines = append(lines, "- The configured home path "+path+" is read-only and exposed at HOME/"+relative+".")
+		} else {
+			lines = append(lines, "- The configured home path "+path+" is read-only to path tools but cannot be exposed in private HOME because it is outside the user's home.")
 		}
 	}
+	if data.ShellOffered && !data.Yolo {
+		lines = append(lines, "- The shell shares those read grants and additionally sees private process, terminal, resolver, and language-package cache files needed to run commands.")
+		lines = append(lines, "- The shell follows the same workspace and configured-path write state as path tools; runtime devices are the only additional writable exceptions.")
+		lines = append(lines, "- The shell can execute files under the system directories, every directory in PATH, the workspace, HOME, and /tmp.")
+		for _, path := range extraPaths.Exec {
+			lines = append(lines, "- The shell can execute files at or under "+path+".")
+		}
+		for _, path := range extraPaths.Path {
+			lines = append(lines, "- The shell can execute files at or under "+path+", which is in PATH.")
+		}
+	} else if data.ShellOffered && data.Yolo {
+		lines = append(lines, "- The shell is unconfined in --yolo mode; path tools remain limited to the paths above.")
+	}
 
-	return strings.Join(lines, "\n")
+	return strings.Join(append(lines, pathGrantRules()...), "\n")
+}
+
+func pathGrantRules() []string {
+	return []string{
+		"- The user can grant access to paths with /grant, and take them back with /revoke.",
+		"- Ask the user to grant a needed path rather than working around it or giving up.",
+	}
 }
 
 func scratchException(path string, data harnessContextTemplateData) string {
@@ -456,6 +489,7 @@ func networkRules(data harnessContextTemplateData) string {
 	if data.JobsGranted {
 		lines = append(
 			lines,
+			"- A job command has only private loopback networking and cannot request the host network",
 			"- A service started with the job tool stays running, and can be reached on 127.0.0.1 afterwards",
 		)
 	}
@@ -465,29 +499,6 @@ func networkRules(data harnessContextTemplateData) string {
 		"the host's loopback interface and external networks are unreachable",
 		canRequestHostNetwork,
 	)
-	if len(data.ExtraPaths.HostLoopback) > 0 {
-		ports := make([]string, len(data.ExtraPaths.HostLoopback))
-		for i, port := range data.ExtraPaths.HostLoopback {
-			ports[i] = strconv.Itoa(int(port))
-		}
-		subject := "TCP ports " + strings.Join(ports, ", ")
-		verb := " are"
-		destination := "ports"
-		if len(ports) == 1 {
-			subject = "TCP port " + ports[0]
-			verb = " is"
-			destination = "port"
-		}
-		lines = append(
-			lines,
-			"- The host's loopback "+subject+verb+" reachable on the same sandbox loopback "+destination,
-		)
-		hostReachability = unreachableRule(
-			"all other host loopback traffic and external networks are unreachable",
-			canRequestHostNetwork,
-		)
-	}
-
 	lines = append(lines, unixSocketRule(data.Conditions.UnixSockets), hostReachability)
 	lines = append(lines, networkToolRules(data)...)
 
@@ -505,10 +516,10 @@ func homeWriteRule(data harnessContextTemplateData) string {
 
 func unixSocketRule(areUnixSocketsReachable bool) string {
 	if areUnixSocketsReachable {
-		return "- A Unix socket works beneath /tmp, and is refused beneath the workspace"
+		return "- Unix sockets work beneath /tmp, but not beneath the workspace"
 	}
 
-	return "- A Unix socket is unavailable whatever its path, so nothing can listen on one"
+	return "- Unix sockets do not work"
 }
 
 func unreachableRule(text string, canRequest bool) string {
@@ -596,20 +607,46 @@ func scratchRules(data harnessContextTemplateData) string {
 		}
 	}
 
-	if data.ShellOffered {
-		lines = append(lines, readOnlyWorkspaceRules...)
-	}
-
 	return strings.Join(lines, "\n")
 }
 
-var readOnlyWorkspaceRules = []string{
-	"- If you encounter a read-only workspace, follow this process:",
-	"\t- Clone it into your scratch space with: git clone --shared <workspace> <destination>",
-	"\t- Bring uncommitted work across with: git -C <workspace> diff HEAD | git -C <destination> apply",
-	"\t- Copy untracked files you need by hand, and use cp -r only when the workspace is not a repository",
-	"\t- Do the work there, then produce a *.patch file the user can apply to their repo",
-	"\t- Tell the user to apply it with: cd <workspace> && git apply <user's path to patch>",
+func waitingForUserSection(data harnessContextTemplateData) string {
+	if !data.JobsGranted {
+		return ""
+	}
+
+	return strings.Join([]string{
+		"# Waiting for the User",
+		"",
+		"- If waiting on the user, start a job that watches for completion, if feasible",
+		"- Define a command whose success proves completion, and have the job check it immediately",
+		"- Have the job recheck after each relevant event until the command succeeds",
+		"- For filesystem changes, prefer inotifywait on relevant paths; if unavailable, poll with a modest delay",
+		"- Once the job completes, continue where you left off",
+	}, "\n") + "\n\n"
+}
+
+func readOnlyWorkspaceSection(data harnessContextTemplateData) string {
+	if !data.ShellOffered {
+		return ""
+	}
+
+	lines := []string{
+		"# Read-only Workspaces",
+		"",
+		"- When implementation would modify a read-only workspace, use this workflow instead of asking for write access:",
+		"\t- Clone it into your scratch space with: git clone --shared <workspace> <destination>",
+		"\t- Bring tracked changes across with: git -C <workspace> diff --binary HEAD | git -C <destination> apply",
+		"\t- Copy untracked files you need by hand, and use cp -r only when the workspace is not a repository",
+		"\t- Do the work and run its checks in the scratch copy",
+		"\t- Produce workspace-relative *.patch files the user can apply to the real repository",
+		"\t- Check each patch with git -C <workspace> apply --reverse --check <patch>; hand off only unapplied patches",
+		"\t- Verify each unapplied patch with: git -C <workspace> apply --check <patch>",
+		"\t- Start a watcher (see \"Waiting for the User\") that exits once the user has applied the patch",
+		"\t- Tell the user to apply it with: cd <workspace> && git apply <user's path to patch>",
+	}
+
+	return strings.Join(lines, "\n")
 }
 
 func shellSandbox(isYolo bool) string {
