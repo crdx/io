@@ -1,9 +1,9 @@
 === screen ===
-[4m[38;2;150;152;150mKind        Directory                            Size[0m[0m
-[38;2;150;152;150m.cache    [0m  home/.cache                           24K
-[38;2;150;152;150mno-session[0m  farm/able-dolphin                     16K
-[38;2;150;152;150m.cache    [0m  farm/stored-session/.cache            16K
-[38;2;150;152;150m.cache    [0m  farm/stored-session/checkout/.cache    8K
+[4m[38;2;150;152;150mKind        Size  Path[0m[0m
+[38;2;150;152;150m.cache    [0m   24K  home/.cache
+[38;2;150;152;150mno-session[0m   16K  farm/able-dolphin
+[38;2;150;152;150m.cache    [0m   16K  farm/stored-session/.cache
+[38;2;150;152;150m.cache    [0m    8K  farm/stored-session/checkout/.cache
 
-[38;2;150;152;150m4 directories, 64K reclaimed[0m
+[38;2;150;152;150m4 paths, 64K reclaimed[0m
 === failure ===

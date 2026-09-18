@@ -1,6 +1,7 @@
 package gc
 
 import (
+	"debug/buildinfo"
 	"flag"
 	"os"
 	"path/filepath"
@@ -14,8 +15,9 @@ import (
 )
 
 const (
-	goldenName      = "stored-session"
-	homePlaceholder = "<home>"
+	goldenName         = "stored-session"
+	homePlaceholder    = "<home>"
+	binaryFixtureBytes = 32 << 20
 )
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
@@ -267,6 +269,117 @@ func TestGoldenARootThatCannotBeReadIsNamedAndCountedAgainstTheTotal(t *testing.
 
 	drawn := report(screen.String(), failure.String()) + "=== error ===\n" + err.Error() + "\n"
 	assertGolden(t, "unreadable.txt", strings.ReplaceAll(drawn, unreadable, homePlaceholder))
+}
+
+func TestGoldenAGoBinaryGoesWhenItsOwnSourceStandsAboveIt(t *testing.T) {
+	directories, scratch := withBinaries(t)
+
+	var screen, failure strings.Builder
+	choice := options{isAggressive: true}
+	if err := run(directories, choice, console.Output{Screen: &screen, Failure: &failure}); err != nil {
+		t.Fatal(err)
+	}
+
+	assertGolden(t, "binaries.txt", report(screen.String(), failure.String()))
+	assertGone(t, filepath.Join(scratch, "checkout", "dist", "oh"))
+
+	for _, kept := range []string{
+		filepath.Join("elsewhere", "tool"),
+		filepath.Join("loose", "oh"),
+		filepath.Join("checkout", "build.sh"),
+		filepath.Join("checkout", "main.go"),
+	} {
+		if _, err := os.Stat(filepath.Join(scratch, kept)); err != nil {
+			t.Errorf("a sweep took %s", kept)
+		}
+	}
+}
+
+func TestAPlainSweepLeavesEveryBinaryAlone(t *testing.T) {
+	directories, scratch := withBinaries(t)
+
+	var screen, failure strings.Builder
+	if err := run(directories, options{}, console.Output{Screen: &screen, Failure: &failure}); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := os.Stat(filepath.Join(scratch, "checkout", "dist", "oh")); err != nil {
+		t.Error("a sweep of the roots took a binary below one")
+	}
+}
+
+func withBinaries(t *testing.T) (Directories, string) {
+	t.Helper()
+
+	directories := Directories{Farm: t.TempDir(), Sessions: t.TempDir(), Home: t.TempDir()}
+	storedSessionNamed(t, directories.Sessions, goldenName)
+	scratch := filepath.Join(directories.Farm, goldenName)
+
+	writeText(t, filepath.Join(scratch, "checkout", "go.mod"), "module "+ownModule(t)+"\n")
+	writeBinary(t, filepath.Join(scratch, "checkout", "dist", "oh"))
+	write(t, filepath.Join(scratch, "checkout", "main.go"), 512)
+	writeText(t, filepath.Join(scratch, "checkout", "build.sh"), "#!/bin/sh\ngo build .\n")
+	if err := os.Chmod(filepath.Join(scratch, "checkout", "build.sh"), 0o700); err != nil { //nolint:gosec // the fixture is an executable script
+		t.Fatal(err)
+	}
+
+	writeText(t, filepath.Join(scratch, "elsewhere", "go.mod"), "module crdx.org/somebody-else\n")
+	writeBinary(t, filepath.Join(scratch, "elsewhere", "tool"))
+
+	writeBinary(t, filepath.Join(scratch, "loose", "oh"))
+
+	return directories, scratch
+}
+
+func ownModule(t *testing.T) string {
+	t.Helper()
+
+	self, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	information, err := buildinfo.ReadFile(self)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return information.Main.Path
+}
+
+func writeBinary(t *testing.T, path string) {
+	t.Helper()
+
+	self, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	image, err := os.ReadFile(self) //nolint:gosec // the test binary is the only Go binary to hand
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(image) > binaryFixtureBytes {
+		t.Fatalf("the test binary outgrew the fixture size of %d bytes", binaryFixtureBytes)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	padded := make([]byte, binaryFixtureBytes)
+	copy(padded, image)
+	if err := os.WriteFile(path, padded, 0o700); err != nil { //nolint:gosec // an executable is the point
+		t.Fatal(err)
+	}
+}
+
+func writeText(t *testing.T, path string, text string) {
+	t.Helper()
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(text), 0o600); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestGoldenNothingToRemoveIsStillReported(t *testing.T) {

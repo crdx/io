@@ -2,6 +2,7 @@ package gc
 
 import (
 	"cmp"
+	"debug/buildinfo"
 	"fmt"
 	"io"
 	"io/fs"
@@ -31,20 +32,21 @@ Usage:
     $0 --ctl gc [options]
 
 Options:
-    -a, --aggressive    Look through the whole of each directory rather than only its root
+    -a, --aggressive    Look through the whole of each directory, and delete rebuildable Go binaries
     -n, --dry-run       Report what would be removed without removing it
     -h, --help          Show this help
 `
 
 const (
-	cacheName     = ".cache"
-	bytePrecision = 3
-	farmLabel     = "farm"
-	homeLabel     = "home"
-	sweepsPerCPU  = 4
-	minimumSweeps = 32
-	ownerPerm     = 0o700
-	blockBytes    = 512
+	cacheName      = ".cache"
+	bytePrecision  = 3
+	farmLabel      = "farm"
+	homeLabel      = "home"
+	sweepsPerCPU   = 4
+	minimumSweeps  = 32
+	ownerPerm      = 0o700
+	blockBytes     = 512
+	executablePerm = 0o111
 )
 
 const (
@@ -55,6 +57,8 @@ const (
 	downloadName    = "download"
 	moduleCacheName = "cache"
 	domainSeparator = "."
+	moduleFileName  = "go.mod"
+	modulePrefix    = "module "
 )
 
 const (
@@ -63,6 +67,7 @@ const (
 	buildCacheKind  = "go-build-cache"
 	moduleCacheKind = "go-module-cache"
 	abandonedKind   = "no-session"
+	binaryKind      = "go-binary"
 )
 
 var (
@@ -178,13 +183,13 @@ func writeRemovals(removals []removal, writer io.Writer) {
 
 	rows := make([][]string, len(removals))
 	for index, one := range removals {
-		rows[index] = []string{one.kind, one.name, util.FormatBytes(one.bytes, bytePrecision)}
+		rows[index] = []string{one.kind, util.FormatBytes(one.bytes, bytePrecision), one.name}
 	}
 
 	removalTable := table.New(
 		table.Column{Title: "Kind", Style: style.Qualifier},
-		table.Column{Title: "Directory"},
 		table.Column{Title: "Size", Align: table.Right},
+		table.Column{Title: "Path"},
 	).Fit(rows)
 
 	_, _ = fmt.Fprintln(writer, style.Column(removalTable.Header(0)))
@@ -354,7 +359,7 @@ func find(next root, isAggressive bool) ([]cache, error) {
 		return nil, err
 	}
 
-	hunt := search{root: next, isAggressive: isAggressive}
+	hunt := search{root: next, isAggressive: isAggressive, modules: map[string]string{}}
 	if err := hunt.gather(next.path, entries); err != nil {
 		return hunt.caches, err
 	}
@@ -366,15 +371,22 @@ type search struct {
 	root         root
 	isAggressive bool
 	caches       []cache
+	modules      map[string]string
 }
 
 func (self *search) gather(path string, entries []os.DirEntry) error {
 	for _, entry := range entries {
+		child := filepath.Join(path, entry.Name())
+
 		if !entry.IsDir() {
+			if self.isAggressive && self.isRebuildable(child, entry) {
+				if err := self.keep(child, binaryKind); err != nil {
+					return err
+				}
+			}
+
 			continue
 		}
-
-		child := filepath.Join(path, entry.Name())
 
 		childEntries, err := os.ReadDir(child)
 		if err != nil {
@@ -416,6 +428,51 @@ func (self *search) keep(path string, kind string) error {
 	})
 
 	return nil
+}
+
+func (self *search) isRebuildable(path string, entry os.DirEntry) bool {
+	info, err := entry.Info()
+	if err != nil || !info.Mode().IsRegular() || info.Mode()&executablePerm == 0 {
+		return false
+	}
+
+	information, err := buildinfo.ReadFile(path)
+	if err != nil {
+		return false
+	}
+
+	module := self.moduleAbove(filepath.Dir(path))
+
+	return module != "" && module == information.Main.Path
+}
+
+func (self *search) moduleAbove(directory string) string {
+	if module, isKnown := self.modules[directory]; isKnown {
+		return module
+	}
+
+	module := declaredModule(filepath.Join(directory, moduleFileName))
+	if module == "" && directory != self.root.path && strings.HasPrefix(directory, self.root.path) {
+		module = self.moduleAbove(filepath.Dir(directory))
+	}
+	self.modules[directory] = module
+
+	return module
+}
+
+func declaredModule(path string) string {
+	data, err := os.ReadFile(path) //nolint:gosec // a path beneath a root the sweep already reached
+	if err != nil {
+		return ""
+	}
+
+	for line := range strings.Lines(string(data)) {
+		if after, isDeclaration := strings.CutPrefix(strings.TrimSpace(line), modulePrefix); isDeclaration {
+			return strings.Trim(strings.TrimSpace(after), `"`)
+		}
+	}
+
+	return ""
 }
 
 func cacheKind(path string, name string, entries []os.DirEntry) string {
@@ -488,11 +545,7 @@ func isMarker(contents map[string]bool, name string) bool {
 }
 
 func takenNoun(count int) string {
-	if count == 1 {
-		return "directory"
-	}
-
-	return "directories"
+	return util.PluralNoun(count, "path")
 }
 
 func summary(count int, reclaimedBytes int64, runningCount int, isDryRun bool) string {

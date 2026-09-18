@@ -1,6 +1,6 @@
 === screen ===
-[4m[38;2;150;152;150mKind    Directory                   Size[0m[0m
-[38;2;150;152;150m.cache[0m  farm/stored-session/.cache    8K
+[4m[38;2;150;152;150mKind    Size  Path[0m[0m
+[38;2;150;152;150m.cache[0m    8K  farm/stored-session/.cache
 
-[38;2;150;152;150m1 directory, 8K reclaimed[0m
+[38;2;150;152;150m1 path, 8K reclaimed[0m
 === failure ===

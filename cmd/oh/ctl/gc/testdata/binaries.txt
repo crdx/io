@@ -1,0 +1,6 @@
+=== screen ===
+[4m[38;2;150;152;150mKind       Size  Path[0m[0m
+[38;2;150;152;150mgo-binary[0m   32M  farm/stored-session/checkout/dist/oh
+
+[38;2;150;152;150m1 path, 32M reclaimed[0m
+=== failure ===
