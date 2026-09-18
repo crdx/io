@@ -1,0 +1,23 @@
+{"event": {"kind": "user_message", "text": "see what the working tree looks like"}}
+{"event": {"kind": "host_command_ran", "name": "git status --short", "state": {"command": "git status --short", "output": " M README.md\n?? notes.txt\n"}}}
+{"event": {"kind": "model_message", "text": "One tracked file has changed and `notes.txt` is not tracked yet."}}
+{"event": {"kind": "host_command_ran", "name": "git push", "state": {"command": "git push", "output": "error: failed to push some refs\n", "exit_code": 1}}}
+{"event": {"kind": "host_command_ran", "name": "touch notes.txt", "state": {"command": "touch notes.txt"}}}
+{"event": {"kind": "host_command_ran", "name": "sleep 600", "state": {"command": "sleep 600", "stopped_after": 30000000000}}}
+{"event": {"kind": "host_command_ran", "name": "cat <<'EOF' > notes.txt\nfirst\nsecond\nEOF", "state": {"command": "cat <<'EOF' > notes.txt\nfirst\nsecond\nEOF"}}}
+{"event": {"kind": "host_command_ran", "name": "sed -n '1,4p' README.md", "state": {"command": "sed -n '1,4p' README.md", "output": "# Title\n\n```go\nfmt.Println(\"hello\")\n```\n"}}}
+{"event": {"kind": "host_command_ran", "name": "find / -name '*.go'", "state": {"command": "find / -name '*.go'", "output": "/one.go\n/two.go\n\n[truncated at 18B of 3.1K; full output in /workspace/drops/output-9f2a.txt]"}}}
+{"event": {"kind": "model_message", "text": "The push was refused, so pull first."}}
+{"event": {"kind": "user_message", "text": "check the notes while that runs"}}
+{"event": {"kind": "tool_call_request", "id": "call_1", "name": "read", "arguments": "{\"path\":\"notes.txt\"}", "render": "notes.txt", "read_only": true}}
+{"event": {"kind": "host_command_ran", "name": "wc -l notes.txt", "state": {"command": "wc -l notes.txt", "output": "2 notes.txt\n"}}}
+{"event": {"kind": "tool_call_result", "status": "success", "text": "first\nsecond\n", "id": "call_1", "name": "read", "took": 0, "stats": {"kind": "read", "lines": 2, "bytes": 13}}}
+{"event": {"kind": "host_command_ran", "name": "ls --color=always", "state": {"command": "ls --color=always", "output": "\u001b[0m\u001b[01;34mcmd\u001b[0m\n\u001b[01;32mbuild.sh\u001b[0m\n\u001b[2J\u001b]52;c;cHduZWQ=\u0007README.md\n"}}}
+{"event": {"kind": "host_command_ran", "name": "git log -1 --format=%s", "state": {"command": "git log -1 --format=%s", "output": "rewrite the drawing layer so a live region never repaints above its own top row, which used to silently lose every row beneath it\n"}}}
+{"event": {"kind": "host_command_ran", "name": "find . -type f -name '*.go' -newer go.mod -not -path './vendor/*' -exec grep -l 'drawSubmittedBeforeResult' {} + | sort -u", "state": {"command": "find . -type f -name '*.go' -newer go.mod -not -path './vendor/*' -exec grep -l 'drawSubmittedBeforeResult' {} + | sort -u", "output": "cmd/oh/painter/painter.go\n"}}}
+{"event": {"kind": "host_command_ran", "name": "printf '   \\n\\n'", "state": {"command": "printf '   \\n\\n'", "output": "   \n\n"}}}
+{"event": {"kind": "model_message", "text": "Two lines, as the count said."}}
+{"event": {"kind": "user_message", "text": "explain the fix while i poke at the tree"}}
+{"event": {"kind": "model_message", "text": "The call was being unsettled because the notice closed the live block."}}
+{"event": {"kind": "host_command_ran", "name": "git diff --stat", "state": {"command": "git diff --stat", "output": " cmd/oh/painter/painter.go | 4 +--\n 1 file changed, 2 insertions(+), 2 deletions(-)\n"}}}
+{"event": {"kind": "model_message", "text": "That is the whole change, and your diff agrees."}}

@@ -49,11 +49,18 @@ type Arguments struct {
 }
 
 type Command struct {
-	Name          string
-	Description   string
-	Run           func(Context, Arguments) error
-	listArguments func() []string
-	argumentUsage string
+	Name                  string
+	Description           string
+	Run                   func(Context, Arguments) error
+	listArguments         func() []string
+	argumentUsage         string
+	takesAttachedArgument bool
+}
+
+func (self Command) WithAttachedArgument(usage string) Command {
+	self.takesAttachedArgument = true
+	self.argumentUsage = usage
+	return self
 }
 
 func (self Command) WithArguments(arguments ...string) Command {
@@ -233,7 +240,8 @@ func validatePrefix(prefix string) error {
 }
 
 func (self Registry) Find(message string) (Invocation, bool) {
-	fields := strings.Fields(message)
+	text := strings.TrimLeftFunc(message, unicode.IsSpace)
+	fields := strings.Fields(text)
 	if len(fields) == 0 {
 		return Invocation{}, false
 	}
@@ -246,22 +254,40 @@ func (self Registry) Find(message string) (Invocation, bool) {
 	bareName := strings.TrimPrefix(fields[0], set.prefix)
 	command, isFound := set.commands[bareName]
 	if !isFound {
-		return Invocation{}, false
+		if command, isFound = set.attachedCommand(bareName); !isFound {
+			return Invocation{}, false
+		}
 	}
 
+	name := set.prefix + command.Name
+
 	return Invocation{
-		Name:    set.prefix + command.Name,
-		Usage:   command.usage(set.prefix),
-		Command: command,
-		Arguments: Arguments{
-			Fields: fields[1:],
-			Text:   argumentText(message, fields[0]),
-		},
+		Name:      name,
+		Usage:     command.usage(set.prefix),
+		Command:   command,
+		Arguments: argumentsAfter(text, name),
 	}, true
 }
 
-func argumentText(message string, name string) string {
-	return strings.TrimSpace(strings.TrimPrefix(strings.TrimLeftFunc(message, unicode.IsSpace), name))
+func (self CommandSet) attachedCommand(bareName string) (*Command, bool) {
+	var longest *Command
+	for _, name := range self.order {
+		command := self.commands[name]
+		if !command.takesAttachedArgument || !strings.HasPrefix(bareName, name) {
+			continue
+		}
+		if longest == nil || len(name) > len(longest.Name) {
+			longest = command
+		}
+	}
+
+	return longest, longest != nil
+}
+
+func argumentsAfter(text string, name string) Arguments {
+	argument := strings.TrimSpace(strings.TrimPrefix(text, name))
+
+	return Arguments{Fields: strings.Fields(argument), Text: argument}
 }
 
 func (self Registry) CommandName(message string) (string, bool) {
@@ -354,7 +380,10 @@ func (self Registry) completions(prefix string) []string {
 
 func (self CommandSet) commandNames() []string {
 	names := make([]string, 0, len(self.commands))
-	for name := range self.commands {
+	for name, command := range self.commands {
+		if command.takesAttachedArgument {
+			continue
+		}
 		names = append(names, name)
 	}
 	return names

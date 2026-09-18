@@ -46,6 +46,66 @@ func TestRegistryKeepsTheWhitespaceWithinAnArgument(t *testing.T) {
 	}
 }
 
+func TestAnAttachedArgumentMayFollowTheNameWithOrWithoutASpace(t *testing.T) {
+	registry := mustRegistry(t, mustSet(t, "/",
+		slash.Command{Name: "!", Run: commandHandler}.WithAttachedArgument("<command>"),
+		slash.Command{Name: "open", Run: commandHandler},
+	))
+
+	for _, input := range []string{"/!ls -la /tmp", "/! ls -la /tmp", "  /!   ls -la /tmp  "} {
+		invocation, found := registry.Find(input)
+		if !found {
+			t.Fatalf("Find(%q) did not find the command", input)
+		}
+		if invocation.Name != "/!" || invocation.Usage != "/! <command>" {
+			t.Errorf("Find(%q) got invocation %+v", input, invocation)
+		}
+		if invocation.Arguments.Text != "ls -la /tmp" {
+			t.Errorf("Find(%q) got text %q", input, invocation.Arguments.Text)
+		}
+		if !slices.Equal(invocation.Arguments.Fields, []string{"ls", "-la", "/tmp"}) {
+			t.Errorf("Find(%q) got fields %q", input, invocation.Arguments.Fields)
+		}
+	}
+
+	invocation, found := registry.Find("/!")
+	if !found {
+		t.Fatal("expected a bare /! to be found")
+	}
+	if invocation.Arguments.Text != "" || len(invocation.Arguments.Fields) != 0 {
+		t.Errorf("got arguments %+v", invocation.Arguments)
+	}
+}
+
+func TestAnAttachedArgumentDoesNotSwallowALongerName(t *testing.T) {
+	registry := mustRegistry(t, mustSet(t, "/",
+		slash.Command{Name: "!", Run: commandHandler}.WithAttachedArgument("<command>"),
+		slash.Command{Name: "!!", Run: commandHandler}.WithAttachedArgument("<command>"),
+	))
+
+	invocation, found := registry.Find("/!!echo hello")
+	if !found {
+		t.Fatal("expected /!! to be found")
+	}
+	if invocation.Name != "/!!" || invocation.Arguments.Text != "echo hello" {
+		t.Errorf("got invocation %+v with arguments %+v", invocation, invocation.Arguments)
+	}
+}
+
+func TestAnAttachedArgumentIsNotOfferedAsACompletion(t *testing.T) {
+	registry := mustRegistry(t, mustSet(t, "/",
+		slash.Command{Name: "!", Run: commandHandler}.WithAttachedArgument("<command>"),
+		slash.Command{Name: "conf", Run: commandHandler},
+	))
+
+	assertCompletionCycle(t, registry, "/", []string{"/conf", "/conf"})
+
+	var completion slash.Completion
+	if completed, found := completion.Next(registry, "/!"); found {
+		t.Errorf(`Next("/!") unexpectedly got %q`, completed)
+	}
+}
+
 func TestSetRejectsInvalidDefinitions(t *testing.T) {
 	tests := map[string]struct {
 		prefix  string

@@ -14,6 +14,7 @@ import (
 	"crdx.org/io/session"
 
 	"crdx.org/io/cmd/oh/conditions"
+	"crdx.org/io/cmd/oh/hostcommand"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/cmd/oh/store/wire"
@@ -28,7 +29,6 @@ type Meta struct {
 	SystemPrompt string                 `json:"system_prompt,omitempty"`
 	Tools        []string               `json:"tools,omitempty"`
 	Conditions   *conditions.Conditions `json:"conditions,omitempty"`
-	HostLoopback []uint16               `json:"host_loopback,omitempty"`
 	Yolo         bool                   `json:"yolo,omitempty"`
 }
 
@@ -244,7 +244,7 @@ func (self *Writer) release(event agent.Event) []agent.Event {
 	self.writerMutex.Lock()
 	defer self.writerMutex.Unlock()
 
-	if !self.innerWriter.IsPersisted() && event.Kind != agent.UserMessageEvent {
+	if !self.innerWriter.IsPersisted() && !isSaidByThePerson(event.Kind) {
 		self.eventBuffer = append(self.eventBuffer, event)
 		return nil
 	}
@@ -253,6 +253,10 @@ func (self *Writer) release(event agent.Event) []agent.Event {
 	self.eventBuffer = nil
 
 	return append(releasedEvents, event)
+}
+
+func isSaidByThePerson(kind agent.Kind) bool {
+	return kind == agent.UserMessageEvent || kind == hostcommand.Ran
 }
 
 func (self *Writer) appendEvent(event agent.Event) error {

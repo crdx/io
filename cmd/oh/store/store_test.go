@@ -18,6 +18,7 @@ import (
 	"crdx.org/io/session"
 
 	"crdx.org/io/cmd/oh/conditions"
+	"crdx.org/io/cmd/oh/hostcommand"
 	"crdx.org/io/cmd/oh/store"
 )
 
@@ -120,28 +121,6 @@ func TestASessionReadsBackAsItWasWritten(t *testing.T) {
 	}
 	if meta.Title != "what is the weather in London?" || meta.Messages != 3 {
 		t.Errorf("unexpected metadata: %+v", meta)
-	}
-}
-
-func TestHostLoopbackPortsSurviveWithTheSession(t *testing.T) {
-	directory := t.TempDir()
-	log, err := store.Create(directory, store.Meta{HostLoopback: []uint16{80, 3000}})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "store it"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := log.Close(); err != nil {
-		t.Fatal(err)
-	}
-
-	storedSession, err := store.Read(directory, log.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(storedSession.Meta.HostLoopback, []uint16{80, 3000}) {
-		t.Errorf("got host loopback ports %v, want [80 3000]", storedSession.Meta.HostLoopback)
 	}
 }
 
@@ -354,6 +333,46 @@ func TestWhatWasHeldBackIsWrittenInFrontOfTheFirstMessage(t *testing.T) {
 	}
 
 	want := []agent.Kind{agent.StartupEvent, caps.ModeChange, agent.UserMessageEvent}
+
+	got := make([]agent.Kind, 0, len(storedSession.Events))
+	for _, event := range storedSession.Events {
+		got = append(got, event.Kind)
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("expected %v, got %v", want, got)
+	}
+}
+
+func TestAHostCommandCountsAsTheFirstThingSaid(t *testing.T) {
+	directory := t.TempDir()
+
+	log, err := store.Create(directory, store.Meta{Model: "gpt-5.6-sol"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := log.Event(agent.Event{Kind: agent.StartupEvent, Took: time.Millisecond}); err != nil {
+		t.Fatal(err)
+	}
+	if err := log.Event(hostcommand.RanEvent(hostcommand.Result{Command: "ls", Output: "readme\n"})); err != nil {
+		t.Fatal(err)
+	}
+
+	if !log.IsPersisted() {
+		t.Error("expected a command the person ran to begin the session")
+	}
+
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := store.Read(directory, log.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []agent.Kind{agent.StartupEvent, hostcommand.Ran}
 
 	got := make([]agent.Kind, 0, len(storedSession.Events))
 	for _, event := range storedSession.Events {

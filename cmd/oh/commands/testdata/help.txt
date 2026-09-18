@@ -1,4 +1,5 @@
 Commands:
+  /! <command>
   /conf
   /copy {last-message|session-chat|session-id|session-name|<target>}
   /edit <target>

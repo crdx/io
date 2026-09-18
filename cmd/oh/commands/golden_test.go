@@ -12,6 +12,7 @@ import (
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/snippets"
+	"crdx.org/io/internal/jobs"
 )
 
 func TestGoldenCompletionMatchesGolden(t *testing.T) {
@@ -216,6 +217,29 @@ func TestGoldenSnippetExpansionMatchesGolden(t *testing.T) {
 	}
 
 	assertGolden(t, "snippet-expansion.txt", output.String())
+}
+
+func TestGoldenJobOutputMatchesGolden(t *testing.T) {
+	var output strings.Builder
+	for _, test := range []struct {
+		label  string
+		output string
+	}{
+		{label: "with output", output: "built successfully\n"},
+		{label: "without output", output: " \n\t"},
+	} {
+		managedJobs, _ := fixtureJobs()
+		managedJobs.Output = func(string) (string, jobs.Snapshot, error) {
+			return test.output, jobs.Snapshot{Name: "build", State: jobs.StateComplete}, nil
+		}
+		context, err := invokeJobCommand(t, managedJobs, "/job output build")
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Fprintf(&output, "=== %s ===\n%s\n", test.label, context.notice)
+	}
+
+	assertGolden(t, "job-output.txt", output.String())
 }
 
 var updateGoldens = flag.Bool("update", false, "write command output back to the golden files")

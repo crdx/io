@@ -68,6 +68,7 @@
 
 ### Interface
 
+- Add `/!` to run a command on the host
 - Wrap long pastes in a fenced code block
 - Try to detect the language of the paste
 - Store request failures in a structured format

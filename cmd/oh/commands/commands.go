@@ -14,6 +14,7 @@ import (
 
 	"crdx.org/io/cmd/oh/column"
 	"crdx.org/io/cmd/oh/editor"
+	"crdx.org/io/cmd/oh/hostcommand"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/terminal"
@@ -46,6 +47,7 @@ type Options struct {
 	Jobs          Jobs
 	GetInfo       func() (string, error)
 	StartSession  func(SessionStart) error
+	LimitOutput   func(string) string
 }
 
 type Session struct {
@@ -71,15 +73,17 @@ type commandEnvironment struct {
 	homeDir          string
 	session          commandSession
 
-	openEditor    func([]string) error
-	openTarget    func([]string) error
-	copyText      func([]string) error
-	pathGrants    PathGrants
-	hostToSandbox HostToSandbox
-	sandboxToHost SandboxToHost
-	jobs          Jobs
-	getInfo       func() (string, error)
-	startSession  func(SessionStart) error
+	openEditor     func([]string) error
+	openTarget     func([]string) error
+	copyText       func([]string) error
+	runHostCommand func(string, string) (hostcommand.Result, error)
+	limitOutput    func(string) string
+	pathGrants     PathGrants
+	hostToSandbox  HostToSandbox
+	sandboxToHost  SandboxToHost
+	jobs           Jobs
+	getInfo        func() (string, error)
+	startSession   func(SessionStart) error
 }
 
 type commandSession struct {
@@ -122,16 +126,25 @@ func New(options Options) (slash.CommandSet, error) {
 		copyText: func(values []string) error {
 			return terminal.Copy(options.Output, strings.Join(values, "\n"))
 		},
-		pathGrants:    options.PathGrants,
-		hostToSandbox: options.HostToSandbox,
-		sandboxToHost: options.SandboxToHost,
-		jobs:          options.Jobs,
-		getInfo:       options.GetInfo,
-		startSession:  options.StartSession,
+		runHostCommand: hostcommand.Run,
+		limitOutput:    options.LimitOutput,
+		pathGrants:     options.PathGrants,
+		hostToSandbox:  options.HostToSandbox,
+		sandboxToHost:  options.SandboxToHost,
+		jobs:           options.Jobs,
+		getInfo:        options.GetInfo,
+		startSession:   options.StartSession,
 	})
 }
 
 func buildCommands(environment commandEnvironment) (slash.CommandSet, error) {
+	if environment.runHostCommand == nil {
+		environment.runHostCommand = hostcommand.Run
+	}
+	if environment.limitOutput == nil {
+		environment.limitOutput = func(output string) string { return output }
+	}
+
 	targets := locationTargets(environment)
 	targetNames := slices.Sorted(maps.Keys(targets))
 
@@ -141,6 +154,7 @@ func buildCommands(environment commandEnvironment) (slash.CommandSet, error) {
 		return helpText(set.Usages(), systemCommandPrefix+help.Name, targetNames)
 	})
 	commands := []slash.Command{
+		shellCommand(environment),
 		editorCommand("conf", configTarget(environment), environment.openEditor),
 		targetCommand("copy", copyTargets(environment, targets), targetNames, environment.copyText, copyConfirmation),
 		targetCommand("edit", targets, targetNames, environment.openEditor, nil),
