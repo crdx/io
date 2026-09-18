@@ -29,7 +29,7 @@
 - Report redundant and conflicting paths
 - Let a file tool follow a symlinked path
 - Ensure the max shell timeout is less than the typical prompt cache TTL
-- Notify which keys changed on auto-reload
+- Notify which config keys changed on auto-reload
 - Remove `sandbox.host_loopback`
 
 ### Tools & Skills

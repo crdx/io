@@ -46,6 +46,7 @@ func errorText(err error) string {
 type revision struct {
 	sourceSnapshots      []sourceSnapshot
 	snippetFileSnapshots map[string]snapshot
+	snippetSettings      map[string][]string
 }
 
 func (self revision) equal(other revision) bool {
@@ -70,6 +71,7 @@ func (self revision) equal(other revision) bool {
 
 func (self revision) changesSince(previous revision) []SourceChange {
 	changes := make([]SourceChange, 0, len(self.sourceSnapshots))
+	isNamed := map[string]bool{}
 
 	for i, source := range self.sourceSnapshots {
 		var was snapshot
@@ -79,9 +81,13 @@ func (self revision) changesSince(previous revision) []SourceChange {
 				continue
 			}
 		}
+		settings := changedSettings(was, source.snapshot)
+		for _, setting := range settings {
+			isNamed[setting] = true
+		}
 		changes = append(changes, SourceChange{
 			Path:      filepath.Base(source.source.Path),
-			Settings:  changedSettings(was, source.snapshot),
+			Settings:  settings,
 			IsRemoved: source.snapshot.isMissing,
 		})
 	}
@@ -91,13 +97,30 @@ func (self revision) changesSince(previous revision) []SourceChange {
 		if was, isKnown := previous.snippetFileSnapshots[path]; isKnown && current.equal(was) {
 			continue
 		}
+		settings := self.snippetSettings[path]
+		if isEverySettingNamed(settings, isNamed) {
+			continue
+		}
 		changes = append(changes, SourceChange{
 			Path:      filepath.Base(path),
+			Settings:  settings,
 			IsRemoved: current.isMissing,
 		})
 	}
 
 	return changes
+}
+
+func isEverySettingNamed(settings []string, isNamed map[string]bool) bool {
+	if len(settings) == 0 {
+		return false
+	}
+	for _, setting := range settings {
+		if !isNamed[setting] {
+			return false
+		}
+	}
+	return true
 }
 
 func changedSettings(previous snapshot, current snapshot) []string {
@@ -155,7 +178,19 @@ func flatten(into map[string]any, prefix []string, values map[string]any) {
 }
 
 func isLeafTable(path []string) bool {
-	return len(path) == 2 && path[0] == snippetsSetting
+	if len(path) != 2 {
+		return false
+	}
+	return path[0] == snippetsSetting || (path[0] == uiSetting && path[1] == themeSetting)
+}
+
+func leafTableOf(key toml.Key) toml.Key {
+	for depth := 1; depth < len(key); depth++ {
+		if isLeafTable(key[:depth]) {
+			return key[:depth]
+		}
+	}
+	return key
 }
 
 func (self revision) getPaths() []string {
@@ -172,7 +207,21 @@ func readRevision(sources []Source) (Config, revision, error) {
 		snapshots = append(snapshots, sourceSnapshot{source: source, snapshot: readSnapshot(source.Path)})
 	}
 	settings, err := loadSnapshots(snapshots)
-	return settings, revision{sourceSnapshots: snapshots, snippetFileSnapshots: settings.snippetFileSnapshots}, err
+	return settings, revision{
+		sourceSnapshots:      snapshots,
+		snippetFileSnapshots: settings.snippetFileSnapshots,
+		snippetSettings:      snippetSettings(settings),
+	}, err
+}
+
+func snippetSettings(settings Config) map[string][]string {
+	names := make(map[string][]string, len(settings.snippetFileSnapshots))
+	for _, name := range slices.Sorted(maps.Keys(settings.Snippets)) {
+		if path := settings.Snippets[name].File; path != "" {
+			names[path] = append(names[path], snippetsSetting+"."+name)
+		}
+	}
+	return names
 }
 
 type Observer struct {

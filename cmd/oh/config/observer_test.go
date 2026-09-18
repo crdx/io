@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"crdx.org/io/cmd/oh/output"
 )
 
 const watchTestTimeout = 2 * time.Second
@@ -46,15 +48,15 @@ func awaitObservedConfig(t *testing.T, observer *Observer) (Config, error) {
 
 func TestWritingAnObservedConfigLoadsTheNewRevision(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui]\ncurrency = \"GBP\"\n"); err != nil {
 		t.Fatal(err)
 	}
 
 	settings, observer := observeConfig(t, path)
-	if settings.Input.Continue != "first" {
-		t.Errorf("got initial message %q", settings.Input.Continue)
+	if settings.Ui.Currency != "GBP" {
+		t.Errorf("got initial currency %q", settings.Ui.Currency)
 	}
-	if err := writeConfigFile(path, "[input]\ncontinue = \"second\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui]\ncurrency = \"EUR\"\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -62,8 +64,8 @@ func TestWritingAnObservedConfigLoadsTheNewRevision(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Input.Continue != "second" {
-		t.Errorf("got changed message %q", settings.Input.Continue)
+	if settings.Ui.Currency != "EUR" {
+		t.Errorf("got changed currency %q", settings.Ui.Currency)
 	}
 }
 
@@ -102,7 +104,7 @@ func TestWritingAnObservedSnippetFileLoadsTheNewPrompt(t *testing.T) {
 func TestCreatingAMissingObservedSnippetFileRecoversTheConfig(t *testing.T) {
 	directory := t.TempDir()
 	configPath := filepath.Join(directory, "config.toml")
-	if err := writeConfigFile(configPath, "[input]\ncontinue = \"first\"\n"); err != nil {
+	if err := writeConfigFile(configPath, "[ui]\ncurrency = \"GBP\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer := observeConfig(t, configPath)
@@ -134,13 +136,13 @@ func TestCreatingAMissingObservedSnippetFileRecoversTheConfig(t *testing.T) {
 func TestAtomicallyReplacingAnObservedConfigLoadsTheNewRevision(t *testing.T) {
 	directory := t.TempDir()
 	path := filepath.Join(directory, "config.toml")
-	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui]\ncurrency = \"GBP\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer := observeConfig(t, path)
 
 	replacement := filepath.Join(directory, "replacement.toml")
-	if err := writeConfigFile(replacement, "[input]\ncontinue = \"replacement\"\n"); err != nil {
+	if err := writeConfigFile(replacement, "[ui]\ncurrency = \"CHF\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Rename(replacement, path); err != nil {
@@ -151,21 +153,21 @@ func TestAtomicallyReplacingAnObservedConfigLoadsTheNewRevision(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Input.Continue != "replacement" {
-		t.Errorf("got replacement message %q", settings.Input.Continue)
+	if settings.Ui.Currency != "CHF" {
+		t.Errorf("got replacement currency %q", settings.Ui.Currency)
 	}
 }
 
 func TestCreatingAConfigBelowMissingDirectoriesReplacesTheDefaults(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "one", "two", "config.toml")
 	settings, observer := observeConfig(t, path)
-	if settings.Input.Continue != "yes" {
-		t.Errorf("initial default message=%q", settings.Input.Continue)
+	if settings.Ui.Currency != "" {
+		t.Errorf("initial default currency=%q", settings.Ui.Currency)
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	if err := writeConfigFile(path, "[input]\ncontinue = \"created\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui]\ncurrency = \"SEK\"\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -173,14 +175,14 @@ func TestCreatingAConfigBelowMissingDirectoriesReplacesTheDefaults(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Input.Continue != "created" {
-		t.Errorf("got created message %q", settings.Input.Continue)
+	if settings.Ui.Currency != "SEK" {
+		t.Errorf("got created currency %q", settings.Ui.Currency)
 	}
 }
 
 func TestDeletingAnObservedConfigRestoresTheDefaults(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[input]\ncontinue = \"configured\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui]\ncurrency = \"NOK\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer := observeConfig(t, path)
@@ -192,15 +194,15 @@ func TestDeletingAnObservedConfigRestoresTheDefaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Input.Continue != "yes" {
-		t.Errorf("got default message %q", settings.Input.Continue)
+	if settings.Ui.Currency != "" {
+		t.Errorf("got default currency %q", settings.Ui.Currency)
 	}
 }
 
 func TestCreatingAnObservedOverrideReplacesTheGlobalConfig(t *testing.T) {
 	directory := t.TempDir()
 	globalPath := filepath.Join(directory, "config.toml")
-	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n"); err != nil {
+	if err := writeConfigFile(globalPath, "[ui]\ncurrency = \"AUD\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	overridePath := filepath.Join(directory, "oh.toml")
@@ -212,10 +214,10 @@ func TestCreatingAnObservedOverrideReplacesTheGlobalConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(observer.Close)
-	if settings.Input.Continue != "globally" {
-		t.Errorf("got initial message %q", settings.Input.Continue)
+	if settings.Ui.Currency != "AUD" {
+		t.Errorf("got initial currency %q", settings.Ui.Currency)
 	}
-	if err := os.WriteFile(overridePath, []byte("[input]\ncontinue = \"created\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(overridePath, []byte("[ui]\ncurrency = \"SEK\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -223,19 +225,19 @@ func TestCreatingAnObservedOverrideReplacesTheGlobalConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Input.Continue != "created" {
-		t.Errorf("got overridden message %q", settings.Input.Continue)
+	if settings.Ui.Currency != "SEK" {
+		t.Errorf("got overridden currency %q", settings.Ui.Currency)
 	}
 }
 
 func TestEditingAnObservedOverrideReplacesItsLiveSettings(t *testing.T) {
 	directory := t.TempDir()
 	globalPath := filepath.Join(directory, "config.toml")
-	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n"); err != nil {
+	if err := writeConfigFile(globalPath, "[ui]\ncurrency = \"AUD\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	overridePath := filepath.Join(directory, "oh.toml")
-	if err := os.WriteFile(overridePath, []byte("[input]\ncontinue = \"first\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(overridePath, []byte("[ui]\ncurrency = \"GBP\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	_, observer, err := ObserveSources(
@@ -246,7 +248,7 @@ func TestEditingAnObservedOverrideReplacesItsLiveSettings(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(observer.Close)
-	if err := os.WriteFile(overridePath, []byte("[input]\ncontinue = \"second\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(overridePath, []byte("[ui]\ncurrency = \"EUR\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -254,19 +256,19 @@ func TestEditingAnObservedOverrideReplacesItsLiveSettings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Input.Continue != "second" {
-		t.Errorf("got changed message %q", settings.Input.Continue)
+	if settings.Ui.Currency != "EUR" {
+		t.Errorf("got changed currency %q", settings.Ui.Currency)
 	}
 }
 
 func TestAtomicallyReplacingAnObservedOverrideLoadsItsNewSettings(t *testing.T) {
 	directory := t.TempDir()
 	globalPath := filepath.Join(directory, "config.toml")
-	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n"); err != nil {
+	if err := writeConfigFile(globalPath, "[ui]\ncurrency = \"AUD\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	overridePath := filepath.Join(directory, "oh.toml")
-	if err := os.WriteFile(overridePath, []byte("[input]\ncontinue = \"first\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(overridePath, []byte("[ui]\ncurrency = \"GBP\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	_, observer, err := ObserveSources(
@@ -278,7 +280,7 @@ func TestAtomicallyReplacingAnObservedOverrideLoadsItsNewSettings(t *testing.T) 
 	}
 	t.Cleanup(observer.Close)
 	replacementPath := filepath.Join(directory, "replacement.toml")
-	if err := os.WriteFile(replacementPath, []byte("[input]\ncontinue = \"replacement\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(replacementPath, []byte("[ui]\ncurrency = \"CHF\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Rename(replacementPath, overridePath); err != nil {
@@ -289,19 +291,19 @@ func TestAtomicallyReplacingAnObservedOverrideLoadsItsNewSettings(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Input.Continue != "replacement" {
-		t.Errorf("got replacement message %q", settings.Input.Continue)
+	if settings.Ui.Currency != "CHF" {
+		t.Errorf("got replacement currency %q", settings.Ui.Currency)
 	}
 }
 
 func TestDeletingAnObservedOverrideRestoresTheGlobalConfig(t *testing.T) {
 	directory := t.TempDir()
 	globalPath := filepath.Join(directory, "config.toml")
-	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n"); err != nil {
+	if err := writeConfigFile(globalPath, "[ui]\ncurrency = \"AUD\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	overridePath := filepath.Join(directory, "oh.toml")
-	if err := os.WriteFile(overridePath, []byte("[input]\ncontinue = \"locally\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(overridePath, []byte("[ui]\ncurrency = \"CAD\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	settings, observer, err := ObserveSources(
@@ -312,8 +314,8 @@ func TestDeletingAnObservedOverrideRestoresTheGlobalConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(observer.Close)
-	if settings.Input.Continue != "locally" {
-		t.Errorf("got initial message %q", settings.Input.Continue)
+	if settings.Ui.Currency != "CAD" {
+		t.Errorf("got initial currency %q", settings.Ui.Currency)
 	}
 	if err := os.Remove(overridePath); err != nil {
 		t.Fatal(err)
@@ -323,14 +325,14 @@ func TestDeletingAnObservedOverrideRestoresTheGlobalConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Input.Continue != "globally" {
-		t.Errorf("got restored message %q", settings.Input.Continue)
+	if settings.Ui.Currency != "AUD" {
+		t.Errorf("got restored currency %q", settings.Ui.Currency)
 	}
 }
 
 func TestAnInvalidObservedRevisionIsReportedOnlyOnce(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui]\ncurrency = \"GBP\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer := observeConfig(t, path)
@@ -349,7 +351,7 @@ func TestAnInvalidObservedRevisionIsReportedOnlyOnce(t *testing.T) {
 func TestAnUnrelatedDirectoryEventDoesNotChangeTheObservedConfig(t *testing.T) {
 	directory := t.TempDir()
 	path := filepath.Join(directory, "config.toml")
-	if err := writeConfigFile(path, "[input]\ncontinue = \"kept\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui]\ncurrency = \"PLN\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer := observeConfig(t, path)
@@ -369,7 +371,7 @@ func TestAnUnrelatedDirectoryEventDoesNotChangeTheObservedConfig(t *testing.T) {
 
 func TestAValidReloadAfterAFailureIsApplied(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui]\nreasoning = \"plain\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer := observeConfig(t, path)
@@ -378,7 +380,7 @@ func TestAValidReloadAfterAFailureIsApplied(t *testing.T) {
 	if failed.Status != ReloadFailed || failed.Failure == nil {
 		t.Fatalf("failed reload status=%v failure=%v", failed.Status, failed.Failure)
 	}
-	if err := writeConfigFile(path, "[input]\ncontinue = \"recovered\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui]\nreasoning = \"markdown\"\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -386,8 +388,8 @@ func TestAValidReloadAfterAFailureIsApplied(t *testing.T) {
 	if applied.Status != ReloadApplied || applied.Failure != nil {
 		t.Fatalf("applied reload status=%v failure=%v", applied.Status, applied.Failure)
 	}
-	if applied.LiveConfig.ContinueMessage != "recovered" {
-		t.Errorf("applied message=%q", applied.LiveConfig.ContinueMessage)
+	if applied.LiveConfig.ReasoningRendering != output.ReasoningMarkdown {
+		t.Errorf("applied reasoning=%v", applied.LiveConfig.ReasoningRendering)
 	}
 }
 
@@ -395,7 +397,7 @@ func TestAnAppliedReloadNamesTheFileThatChangedAndWhatItSupplies(t *testing.T) {
 	directory := t.TempDir()
 	globalPath := filepath.Join(directory, "config.toml")
 	overridePath := filepath.Join(directory, "oh.toml")
-	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"first\"\n"); err != nil {
+	if err := writeConfigFile(globalPath, "[ui]\ncurrency = \"GBP\"\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -408,7 +410,7 @@ func TestAnAppliedReloadNamesTheFileThatChangedAndWhatItSupplies(t *testing.T) {
 	}
 	t.Cleanup(observer.Close)
 
-	if err := os.WriteFile(overridePath, []byte("[editor]\ncommand = [\"vi\"]\n\n[ui]\nstreaming = \"asap\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(overridePath, []byte("[ui]\ncurrency = \"EUR\"\nstreaming = \"asap\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -423,11 +425,11 @@ func TestAnAppliedReloadNamesTheFileThatChangedAndWhatItSupplies(t *testing.T) {
 	if !strings.HasSuffix(change.Path, "oh.toml") || change.IsRemoved {
 		t.Errorf("got path %q removed=%t", change.Path, change.IsRemoved)
 	}
-	if want := []string{"editor.command", "ui.streaming"}; !slices.Equal(change.Settings, want) {
+	if want := []string{"ui.currency", "ui.streaming"}; !slices.Equal(change.Settings, want) {
 		t.Errorf("got settings %v, want %v", change.Settings, want)
 	}
 
-	if err := os.WriteFile(overridePath, []byte("[editor]\ncommand = [\"vi\"]\n\n[ui]\nstreaming = \"line\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(overridePath, []byte("[ui]\ncurrency = \"EUR\"\nstreaming = \"line\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -440,14 +442,34 @@ func TestAnAppliedReloadNamesTheFileThatChangedAndWhatItSupplies(t *testing.T) {
 	}
 }
 
-func TestAReloadOfAnUnchangedSettingBesideACommentNamesNoSetting(t *testing.T) {
+func TestARetintedPaletteIsNamedAsOneSettingRatherThanEveryColour(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui.theme]\naccent = \"#c08050\"\ndim = \"#969896\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer := observeConfig(t, path)
 
-	if err := writeConfigFile(path, "# a note to self\n[input]\ncontinue = \"first\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui.theme]\naccent = \"#a0d0f0\"\ndim = \"#404040\"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	applied := observer.Reload(nil, testSegments())
+	if applied.Status != ReloadApplied {
+		t.Fatalf("reload status=%v failure=%v", applied.Status, applied.Failure)
+	}
+	if want := []string{"ui.theme"}; !slices.Equal(applied.Changes[0].Settings, want) {
+		t.Errorf("got settings %v, want %v", applied.Changes[0].Settings, want)
+	}
+}
+
+func TestAReloadOfAnUnchangedSettingBesideACommentNamesNoSetting(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[ui]\ncurrency = \"GBP\"\n"); err != nil {
+		t.Fatal(err)
+	}
+	_, observer := observeConfig(t, path)
+
+	if err := writeConfigFile(path, "# a note to self\n[ui]\ncurrency = \"GBP\"\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -464,7 +486,7 @@ func TestAReloadReportsAnOverrideThatWentAway(t *testing.T) {
 	directory := t.TempDir()
 	globalPath := filepath.Join(directory, "config.toml")
 	overridePath := filepath.Join(directory, "oh.toml")
-	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"first\"\n"); err != nil {
+	if err := writeConfigFile(globalPath, "[ui]\ncurrency = \"GBP\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(overridePath, []byte("[ui]\nstreaming = \"asap\"\n"), 0o600); err != nil {
@@ -523,6 +545,34 @@ func TestAChangedSnippetFileIsNamedBesideTheConfigThatReferencesIt(t *testing.T)
 	if len(applied.Changes) != 1 || !strings.HasSuffix(applied.Changes[0].Path, "review.md") {
 		t.Fatalf("got %v, want the snippet file alone", applied.Changes)
 	}
+	if want := []string{"snippets.review"}; !slices.Equal(applied.Changes[0].Settings, want) {
+		t.Errorf("got %v, want the snippet it supplies: %v", applied.Changes[0].Settings, want)
+	}
+}
+
+func TestASnippetFileTheChangedConfigAlreadyNamesIsNotRepeated(t *testing.T) {
+	directory := t.TempDir()
+	snippetPath := filepath.Join(directory, "review.md")
+	if err := os.WriteFile(snippetPath, []byte("Review the first revision."), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	configPath := filepath.Join(directory, "config.toml")
+	if err := writeConfigFile(configPath, "[ui]\ncurrency = \"GBP\"\n"); err != nil {
+		t.Fatal(err)
+	}
+	_, observer := observeConfig(t, configPath)
+
+	if err := writeConfigFile(configPath, "[snippets]\nreview = { file = \"review.md\" }\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	applied := observer.Reload(nil, testSegments())
+	if applied.Status != ReloadApplied {
+		t.Fatalf("reload status=%v failure=%v", applied.Status, applied.Failure)
+	}
+	if len(applied.Changes) != 1 || !strings.HasSuffix(applied.Changes[0].Path, "config.toml") {
+		t.Fatalf("got %v, want the config alone", applied.Changes)
+	}
 }
 
 func TestObserveReportsAnInvalidInitialConfig(t *testing.T) {
@@ -539,7 +589,7 @@ func TestObserveReportsAnInvalidInitialConfig(t *testing.T) {
 
 func TestClosingAnObserverClosesItsChanges(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui]\ncurrency = \"GBP\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer, err := Observe(path)
