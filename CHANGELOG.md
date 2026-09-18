@@ -2,6 +2,8 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+## [0.6.0] - 2026-09-18
+
 ### Theme
 
 - Theme skill names with `skill` and code keywords with `syntax_keyword`
