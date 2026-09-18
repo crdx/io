@@ -1,0 +1,6 @@
+=== screen ===
+[4m[38;2;150;152;150mKind        Directory          Size[0m[0m
+[38;2;150;152;150mno-session[0m  farm/able-dolphin    8K
+
+[38;2;150;152;150m1 directory, 8K reclaimed, 1 running session left alone[0m
+=== failure ===

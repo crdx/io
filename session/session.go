@@ -916,8 +916,12 @@ func metaPath(directory string, name string) string {
 	return filepath.Join(Dir(directory, name), metaName)
 }
 
+func IsName(name string) bool {
+	return namePattern.MatchString(name)
+}
+
 func validateName(name string) error {
-	if !namePattern.MatchString(name) {
+	if !IsName(name) {
 		return fmt.Errorf("invalid session name %q", name)
 	}
 	return nil

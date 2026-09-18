@@ -1,24 +1,31 @@
 package gc
 
 import (
+	"cmp"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"slices"
+	"strconv"
+	"strings"
 	"sync"
+	"syscall"
 
 	"crdx.org/duckopt/v2"
 
 	"crdx.org/io/cmd/oh/ctl/console"
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/table"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/session"
 )
 
-const usage = `oh --ctl gc — remove the caches sessions leave behind
+const usage = `oh --ctl gc — remove what sessions leave behind
 
 Usage:
     $0 --ctl gc [options]
@@ -38,6 +45,30 @@ const (
 	minimumSweeps = 32
 	writablePerm  = 0o200
 	ownerPerm     = 0o700
+	blockBytes    = 512
+)
+
+const (
+	buildTrimName   = "trim.txt"
+	buildReadmeName = "README"
+	firstBucketName = "00"
+	lastBucketName  = "ff"
+	downloadName    = "download"
+	moduleCacheName = "cache"
+	domainSeparator = "."
+)
+
+const (
+	namedCacheKind  = ".cache"
+	buildWorkKind   = "go-build-work"
+	buildCacheKind  = "go-build-cache"
+	moduleCacheKind = "go-module-cache"
+	abandonedKind   = "no-session"
+)
+
+var (
+	buildWorkPattern = regexp.MustCompile(`^go-build[0-9]*$`)
+	buildStepPattern = regexp.MustCompile(`^b[0-9]+$`)
 )
 
 type Directories struct {
@@ -49,17 +80,24 @@ type Directories struct {
 type root struct {
 	path  string
 	label string
+	kind  string
 }
 
 type cache struct {
 	path string
 	name string
+	kind string
+}
+
+type removal struct {
+	name  string
+	kind  string
+	bytes int64
 }
 
 type result struct {
-	count          int
-	reclaimedBytes int64
-	failures       []string
+	removals []removal
+	failures []string
 }
 
 type inputOpts struct {
@@ -102,15 +140,59 @@ func run(directories Directories, choice options, output console.Output) error {
 		_, _ = fmt.Fprintln(output.Failure, style.Failure(failure))
 	}
 
+	slices.SortFunc(total.removals, byLargest)
+	writeRemovals(total.removals, output.Screen)
+
+	count := len(total.removals)
 	_, _ = fmt.Fprintln(output.Screen, style.Subtle(
-		summary(total.count, total.reclaimedBytes, runningCount, choice.isDryRun),
+		summary(count, reclaimedBytes(total.removals), runningCount, choice.isDryRun),
 	))
 
 	if failureCount := len(total.failures); failureCount > 0 {
-		return fmt.Errorf("%d of %d could not be removed", failureCount, total.count+failureCount)
+		return fmt.Errorf("%d of %d could not be removed", failureCount, count+failureCount)
 	}
 
 	return nil
+}
+
+func byLargest(one removal, other removal) int {
+	if difference := cmp.Compare(other.bytes, one.bytes); difference != 0 {
+		return difference
+	}
+
+	return strings.Compare(one.name, other.name)
+}
+
+func reclaimedBytes(removals []removal) int64 {
+	var totalBytes int64
+	for _, one := range removals {
+		totalBytes += one.bytes
+	}
+
+	return totalBytes
+}
+
+func writeRemovals(removals []removal, writer io.Writer) {
+	if len(removals) == 0 {
+		return
+	}
+
+	rows := make([][]string, len(removals))
+	for index, one := range removals {
+		rows[index] = []string{one.kind, one.name, util.FormatBytes(one.bytes, bytePrecision)}
+	}
+
+	removalTable := table.New(
+		table.Column{Title: "Kind", Style: style.Qualifier},
+		table.Column{Title: "Directory"},
+		table.Column{Title: "Size", Align: table.Right},
+	).Fit(rows)
+
+	_, _ = fmt.Fprintln(writer, style.Column(removalTable.Header(0)))
+	for _, cells := range rows {
+		_, _ = fmt.Fprintln(writer, removalTable.Row(cells, 0))
+	}
+	_, _ = fmt.Fprintln(writer)
 }
 
 func collect(directories Directories) ([]root, int, error) {
@@ -136,10 +218,19 @@ func collect(directories Directories) ([]root, int, error) {
 		roots = append(roots, root{
 			path:  filepath.Join(directories.Farm, entry.Name()),
 			label: filepath.Join(farmLabel, entry.Name()),
+			kind:  wholeKind(directories.Sessions, entry.Name()),
 		})
 	}
 
 	return append(roots, root{path: directories.Home, label: homeLabel}), runningCount, nil
+}
+
+func wholeKind(sessions string, name string) string {
+	if session.IsName(name) && !session.Exists(sessions, name) {
+		return abandonedKind
+	}
+
+	return ""
 }
 
 func sweep(roots []root, choice options) result {
@@ -169,8 +260,7 @@ func sweep(roots []root, choice options) result {
 
 	var total result
 	for one := range results {
-		total.count += one.count
-		total.reclaimedBytes += one.reclaimedBytes
+		total.removals = append(total.removals, one.removals...)
 		total.failures = append(total.failures, one.failures...)
 	}
 
@@ -195,8 +285,11 @@ func take(next root, choice options) result {
 			continue
 		}
 
-		outcome.count++
-		outcome.reclaimedBytes += removedBytes
+		outcome.removals = append(outcome.removals, removal{
+			name:  found.name,
+			kind:  found.kind,
+			bytes: removedBytes,
+		})
 	}
 
 	return outcome
@@ -250,48 +343,156 @@ func unlock(root string) error {
 }
 
 func find(next root, isAggressive bool) ([]cache, error) {
-	if !isAggressive {
-		return atRoot(next), nil
+	if next.kind != "" {
+		return []cache{{path: next.path, name: next.label, kind: next.kind}}, nil
 	}
 
-	var caches []cache
-
-	err := filepath.WalkDir(next.path, func(path string, entry fs.DirEntry, err error) error {
-		if err != nil {
-			return skip(entry)
+	entries, err := os.ReadDir(next.path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
 		}
-		if !entry.IsDir() || entry.Name() != cacheName {
-			return nil
-		}
-
-		name, err := filepath.Rel(next.path, path)
-		if err != nil {
-			return err
-		}
-		caches = append(caches, cache{path: path, name: filepath.Join(next.label, name)})
-
-		return fs.SkipDir
-	})
-	if err != nil && !os.IsNotExist(err) {
-		return caches, err
+		return nil, err
 	}
 
-	return caches, nil
+	hunt := search{root: next, isAggressive: isAggressive}
+	if err := hunt.gather(next.path, entries); err != nil {
+		return hunt.caches, err
+	}
+
+	return hunt.caches, nil
 }
 
-func atRoot(next root) []cache {
-	path := filepath.Join(next.path, cacheName)
+type search struct {
+	root         root
+	isAggressive bool
+	caches       []cache
+}
 
-	info, err := os.Stat(path)
-	if err != nil || !info.IsDir() {
-		return nil
+func (self *search) gather(path string, entries []os.DirEntry) error {
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+
+		child := filepath.Join(path, entry.Name())
+
+		childEntries, err := os.ReadDir(child)
+		if err != nil {
+			continue
+		}
+
+		if kind := cacheKind(child, entry.Name(), childEntries); kind != "" {
+			if err := self.keep(child, kind); err != nil {
+				return err
+			}
+			continue
+		}
+
+		if self.isAggressive {
+			if err := self.gather(child, childEntries); err != nil {
+				return err
+			}
+		}
 	}
 
-	return []cache{{path: path, name: filepath.Join(next.label, cacheName)}}
+	return nil
+}
+
+func (self *search) keep(path string, kind string) error {
+	name, err := filepath.Rel(self.root.path, path)
+	if err != nil {
+		return err
+	}
+	self.caches = append(self.caches, cache{
+		path: path,
+		name: filepath.Join(self.root.label, name),
+		kind: kind,
+	})
+
+	return nil
+}
+
+func cacheKind(path string, name string, entries []os.DirEntry) string {
+	if name == cacheName {
+		return namedCacheKind
+	}
+
+	contents := make(map[string]bool, len(entries))
+	for _, entry := range entries {
+		contents[entry.Name()] = entry.IsDir()
+	}
+
+	switch {
+	case holdsBuildWork(name, contents):
+		return buildWorkKind
+	case holdsBuildCache(contents):
+		return buildCacheKind
+	case holdsModuleCache(path, contents):
+		return moduleCacheKind
+	}
+
+	return ""
+}
+
+func holdsBuildWork(name string, contents map[string]bool) bool {
+	if !buildWorkPattern.MatchString(name) {
+		return false
+	}
+
+	for entry, isDirectory := range contents {
+		if !isDirectory || !buildStepPattern.MatchString(entry) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func holdsBuildCache(contents map[string]bool) bool {
+	if !contents[firstBucketName] || !contents[lastBucketName] {
+		return false
+	}
+
+	return isMarker(contents, buildTrimName) || isMarker(contents, buildReadmeName)
+}
+
+func holdsModuleCache(path string, contents map[string]bool) bool {
+	if !contents[moduleCacheName] {
+		return false
+	}
+
+	downloads, err := os.ReadDir(filepath.Join(path, moduleCacheName, downloadName))
+	if err != nil {
+		return false
+	}
+
+	for _, entry := range downloads {
+		if entry.IsDir() && strings.Contains(entry.Name(), domainSeparator) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isMarker(contents map[string]bool, name string) bool {
+	isDirectory, isPresent := contents[name]
+
+	return isPresent && !isDirectory
+}
+
+func takenNoun(count int) string {
+	if count == 1 {
+		return "directory"
+	}
+
+	return "directories"
 }
 
 func summary(count int, reclaimedBytes int64, runningCount int, isDryRun bool) string {
-	text := util.Plural(count, "cache") + ", " + util.FormatBytes(reclaimedBytes, bytePrecision)
+	text := strconv.Itoa(count) + " " + takenNoun(count) + ", " +
+		util.FormatBytes(reclaimedBytes, bytePrecision)
 	if isDryRun {
 		text += " to reclaim"
 	} else {
@@ -320,18 +521,24 @@ func size(root string) (int64, error) {
 		if err != nil {
 			return skip(entry)
 		}
-		if !entry.Type().IsRegular() {
-			return nil
-		}
 
 		info, err := entry.Info()
 		if err != nil {
 			return skip(entry)
 		}
-		totalBytes += info.Size()
+		totalBytes += occupiedBytes(info)
 
 		return nil
 	})
 
 	return totalBytes, err
+}
+
+func occupiedBytes(info fs.FileInfo) int64 {
+	stat, isSystem := info.Sys().(*syscall.Stat_t)
+	if !isSystem {
+		return 0
+	}
+
+	return stat.Blocks * blockBytes
 }

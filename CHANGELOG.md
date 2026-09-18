@@ -21,6 +21,11 @@
 - Reword the host networking prompt
 - Don't include prompt waiting time in tool call time
 - Highlight `Targets` header in the same blue as `Commands`
+- `oh --ctl gc`:
+    - Report real space on disk
+    - Find caches by their contents
+    - List nuked caches, largest first
+    - Delete dangling farm dirs
 
 ## [0.6.0] - 2026-09-18
 

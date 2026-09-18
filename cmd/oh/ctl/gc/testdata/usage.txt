@@ -1,4 +1,4 @@
-oh --ctl gc — remove the caches sessions leave behind
+oh --ctl gc — remove what sessions leave behind
 
 Usage:
     oh --ctl gc [options]

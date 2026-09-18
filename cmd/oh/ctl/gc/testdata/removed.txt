@@ -1,3 +1,8 @@
 === screen ===
-[38;2;150;152;150m3 caches, 29K reclaimed[0m
+[4m[38;2;150;152;150mKind        Directory                   Size[0m[0m
+[38;2;150;152;150m.cache    [0m  home/.cache                  24K
+[38;2;150;152;150mno-session[0m  farm/able-dolphin            16K
+[38;2;150;152;150m.cache    [0m  farm/stored-session/.cache   16K
+
+[38;2;150;152;150m3 directories, 56K reclaimed[0m
 === failure ===
