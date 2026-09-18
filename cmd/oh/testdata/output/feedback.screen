@@ -45,7 +45,7 @@ Commands:
 ─────────────────────────────────────── ⚠ auto-denies in 1m ────────────────────────────────────────
 Run this command on the host network?
 
-$ curl example.com
+$ curl https://example.com/status
 
 [Yes]  No
 ────────────────────────────────────────────────────────────────────────────────────────────────────

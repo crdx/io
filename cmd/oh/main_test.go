@@ -8635,7 +8635,7 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		go func() {
 			_ = ask.Confirm(questionContext, broker, ask.Confirmation{
 				Label:    "Run this command on the host network?",
-				Detail:   "curl example.com",
+				Detail:   "curl https://example.com/status",
 				Language: "bash",
 			})
 		}()

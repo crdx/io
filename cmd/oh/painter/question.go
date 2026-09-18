@@ -20,6 +20,7 @@ const (
 	optionGap     = " "
 	headGap       = " "
 	lapseFallback = "auto-cancels"
+	shellLanguage = "bash"
 )
 
 func RenderQuestion(question ask.Question, cursor int, columns int) []string {
@@ -59,10 +60,7 @@ func renderQuestionDetail(question ask.Question, columns int) []string {
 		return nil
 	}
 
-	detail := question.Detail
-	if question.Language != "" {
-		detail = markdown.Highlight(detail, detail, question.Language, false)
-	}
+	detail := highlightedDetail(question)
 
 	mark, markStyle := detailMark(question.Language)
 	indent := strings.Repeat(" ", style.Width(mark)+1)
@@ -78,6 +76,17 @@ func renderQuestionDetail(question ask.Question, columns int) []string {
 	}
 
 	return rows
+}
+
+func highlightedDetail(question ask.Question) string {
+	switch question.Language {
+	case "":
+		return question.Detail
+	case shellLanguage:
+		return markdown.HighlightURLs(question.Detail)
+	default:
+		return markdown.Highlight(question.Detail, question.Detail, question.Language, false)
+	}
 }
 
 func detailMark(language string) (string, style.Style) {

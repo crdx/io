@@ -8,6 +8,7 @@
 - Regenerate transcripts inside archived sessions
 - Remove the `ohctl` command
 - Shorten and standardise runtime messages
+- Highlight URLs in red in host networking prompt
 
 ## [0.6.0] - 2026-09-18
 

