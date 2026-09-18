@@ -63,7 +63,7 @@ func New(
 			Description: description(doesWake),
 			Schema: tool.Schema{
 				tool.Enum("action", "what to do", actions...),
-				tool.String("name", "compact single-word name for the job; suffix it with -2, -3, and so on when more are needed (for all actions except 'list', 'prune')").Optional(),
+				tool.String("name", fmt.Sprintf("the job name; 1–%d characters from [a-z0-9-] (for all actions except 'list', 'prune')", jobs.NameLengthLimit)).Optional(),
 				tool.StringArray("names", "the job names to watch for wait").Optional(),
 				tool.Enum("wait_for", "whether wait returns after any or all watched jobs end", waitForAny, waitForAll).Optional(),
 				tool.Integer("wait_seconds", fmt.Sprintf("how many seconds to wait at most — max %d (default)", int(waitLimit.Seconds()))).Optional(),
@@ -131,6 +131,9 @@ func validate(args Args) error {
 	}
 	if strings.TrimSpace(args.Name) == "" {
 		return errors.New("name is required")
+	}
+	if args.Action == actionStart {
+		return jobs.ValidateName(args.Name)
 	}
 
 	return nil

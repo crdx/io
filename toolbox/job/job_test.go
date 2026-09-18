@@ -170,6 +170,41 @@ func TestEverySingleJobActionNeedsAName(t *testing.T) {
 	}
 }
 
+func TestStartingValidatesTheJobName(t *testing.T) {
+	built := job.New(nil, nil, nil, false)
+	testCases := []struct {
+		name    string
+		isValid bool
+	}{
+		{name: "a", isValid: true},
+		{name: "abc123", isValid: true},
+		{name: "abcdefghij", isValid: true},
+		{name: "doc-server", isValid: true},
+		{name: "-", isValid: true},
+		{name: "abcdefghijk"},
+		{name: "Job"},
+		{name: "job_name"},
+		{name: "two words"},
+		{name: "é"},
+	}
+
+	for _, testCase := range testCases {
+		encoded, err := json.Marshal(map[string]string{
+			"action":  "start",
+			"name":    testCase.name,
+			"command": "true",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, err = built.Parse(string(encoded))
+		if (err == nil) != testCase.isValid {
+			t.Errorf("starting %q gave %v, want validity %v", testCase.name, err, testCase.isValid)
+		}
+	}
+}
+
 func TestAWaitNeedsEitherNameOrNames(t *testing.T) {
 	if _, err := run(t, jobs.New(nil), map[string]string{"action": "wait"}); err == nil ||
 		!strings.Contains(err.Error(), "name or names is required") {
@@ -264,7 +299,7 @@ func TestAJobCallIsRenderedByItsSubject(t *testing.T) {
 	}
 }
 
-func TestTheNameParameterAsksForCompactSingleWordNames(t *testing.T) {
+func TestTheNameParameterStatesTheNameLimit(t *testing.T) {
 	var description string
 	for _, parameter := range job.New(nil, nil, nil, false).Schema() {
 		if parameter.Name == "name" {
@@ -272,7 +307,7 @@ func TestTheNameParameterAsksForCompactSingleWordNames(t *testing.T) {
 		}
 	}
 
-	for _, wanted := range []string{"compact single-word", "suffix it with -2, -3"} {
+	for _, wanted := range []string{"1–10", "[a-z0-9-]"} {
 		if !strings.Contains(description, wanted) {
 			t.Errorf("name description %q does not contain %q", description, wanted)
 		}

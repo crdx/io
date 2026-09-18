@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Limit background job name length
 - Move session maintenance to `oh --ctl`
 - Regenerate transcripts inside archived sessions
 

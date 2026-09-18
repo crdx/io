@@ -16,6 +16,7 @@ import (
 )
 
 const (
+	NameLengthLimit       = 10
 	normalGracePeriod     = 5 * time.Second
 	shutdownGracePeriod   = time.Second
 	reportedBytePrecision = 3
@@ -38,6 +39,20 @@ var (
 	ErrTaken    = errors.New("a job of that name is already running")
 	ErrNotFound = errors.New("there is no job of that name")
 )
+
+func ValidateName(name string) error {
+	if len(name) == 0 || len(name) > NameLengthLimit {
+		return fmt.Errorf("job name wants 1–%d characters from [a-z0-9-]", NameLengthLimit)
+	}
+
+	for _, character := range name {
+		if (character < 'a' || character > 'z') && (character < '0' || character > '9') && character != '-' {
+			return fmt.Errorf("job name wants 1–%d characters from [a-z0-9-]", NameLengthLimit)
+		}
+	}
+
+	return nil
+}
 
 type Snapshot struct {
 	Name         string    `json:"name"`
@@ -421,15 +436,15 @@ func (self *Manager) remove(name string) {
 }
 
 func (self *Manager) claim(name string, command string, policy sandbox.Policy) (*job, error) {
+	if err := ValidateName(name); err != nil {
+		return nil, err
+	}
+
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
 	if self.isClosed {
 		return nil, ErrClosed
-	}
-
-	if strings.TrimSpace(name) == "" {
-		return nil, errors.New("a job needs a name to be addressed by")
 	}
 
 	if found, isKnown := self.jobs[name]; isKnown && isLive(found.state) {
