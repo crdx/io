@@ -66,7 +66,7 @@ func RenderQueuedMessages(messages []string, columns int, shouldRenderHyperlinks
 	}
 
 	rows := make([]string, 0, len(messages)+2)
-	rows = append(rows, renderQueuedRow("", columns))
+	rows = append(rows, frameQueuedRow(renderSendHintRow(columns), columns))
 
 	for _, message := range messages {
 		summary := summariseQueuedMessage(message, shouldRenderHyperlinks, roots)
@@ -104,11 +104,24 @@ func renderQueuedRow(text string, columns int) string {
 		row = width.Elide(" "+text, columns)
 	}
 
+	return frameQueuedRow(row, columns)
+}
+
+func frameQueuedRow(row string, columns int) string {
 	if room := columns - style.Width(row); room > 0 {
 		row += strings.Repeat(" ", room)
 	}
 
 	return style.User(row)
+}
+
+func renderSendHintRow(columns int) string {
+	room := columns - width.Of(sendHint) - 1
+	if room < 1 {
+		return ""
+	}
+
+	return strings.Repeat(" ", room) + style.Subtle(sendHint)
 }
 
 type PendingMessages struct {
@@ -158,12 +171,7 @@ func (self *PendingMessages) sendHintRow(columns int) string {
 		return ""
 	}
 
-	room := columns - width.Of(sendHint) - 1
-	if room < 1 {
-		return ""
-	}
-
-	return strings.Repeat(" ", room) + style.Subtle(sendHint)
+	return renderSendHintRow(columns)
 }
 
 func HarnessNotices(event agent.Event) ([]string, bool) {

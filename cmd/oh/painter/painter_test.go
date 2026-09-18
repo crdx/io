@@ -198,11 +198,29 @@ func TestStandingNoticesSayHowToSendThemNow(t *testing.T) {
 	}
 }
 
-func TestTheSendHintIsDroppedWhenItDoesNotFit(t *testing.T) {
-	rows := NewPendingMessages([]string{"one"}, false, link.Roots{}).Rows(len(sendHint))
+func TestQueuedMessagesSayHowToSendThemNow(t *testing.T) {
+	rows := RenderQueuedMessages([]string{"one"}, 40, false, link.Roots{})
 
-	if len(rows) != 3 {
-		t.Errorf("got %d rows, want a pad, the notice, and a pad: %q", len(rows), rows)
+	if !strings.Contains(style.Plain(rows[0]), sendHint) {
+		t.Errorf("got rows %q, want the hint above the queued message", rows)
+	}
+}
+
+func TestTheSendHintIsDroppedWhenItDoesNotFit(t *testing.T) {
+	renderings := map[string][]string{
+		"notices": NewPendingMessages([]string{"one"}, false, link.Roots{}).Rows(len(sendHint)),
+		"queue":   RenderQueuedMessages([]string{"one"}, len(sendHint), false, link.Roots{}),
+	}
+
+	for name, rows := range renderings {
+		t.Run(name, func(t *testing.T) {
+			if len(rows) != 3 {
+				t.Errorf("got %d rows, want a pad, the message, and a pad: %q", len(rows), rows)
+			}
+			if strings.Contains(style.Plain(rows[0]), sendHint) {
+				t.Errorf("got rows %q, want no hint where it does not fit", rows)
+			}
+		})
 	}
 }
 
