@@ -192,6 +192,28 @@ t
 r
 y
 
+D
+i
+a
+g
+r
+a
+m
+n
+e
+e
+d
+s
+3
+5
+c
+o
+l
+u
+m
+n
+s
+.
 s
 e
 q
@@ -358,6 +380,9 @@ interaction.
 Application
 retry
 
+Diagram
+needs 35
+columns.
 sequenceDiag
 ram
 participant

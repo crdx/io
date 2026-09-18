@@ -254,7 +254,13 @@ func (self *renderer) code(lines []string) {
 }
 
 func (self *renderer) mermaid(lines []string, block int) bool {
-	if rows, isDrawable := renderMermaidRows(lines, self.columns); isDrawable {
+	if rows, isDrawable := renderMermaidRows(lines); isDrawable {
+		if neededColumns := widestRow(rows); neededColumns > self.columns {
+			self.forgetMermaidRows(block)
+			self.appendWrapped(over(col.Italic, style.Subtle(diagramWidthNotice(neededColumns))))
+			return false
+		}
+
 		self.rows = append(self.rows, rows...)
 		self.rememberMermaidRows(block, rows)
 		return true
@@ -264,25 +270,24 @@ func (self *renderer) mermaid(lines []string, block int) bool {
 		return false
 	}
 	cachedRows, hasCachedRows := self.stream.mermaidRows[block]
-	if !hasCachedRows || !rowsFit(cachedRows, self.columns) {
+	if !hasCachedRows || widestRow(cachedRows) > self.columns {
 		return false
 	}
 	self.rows = append(self.rows, cachedRows...)
 	return true
 }
 
-func renderMermaidRows(lines []string, columns int) ([]string, bool) {
+func diagramWidthNotice(neededColumns int) string {
+	return "Diagram needs " + strconv.Itoa(neededColumns) + " columns."
+}
+
+func renderMermaidRows(lines []string) ([]string, bool) {
 	diagram, err := mermaid.Render(strings.Join(lines, "\n"))
 	if err != nil || diagram == "" {
 		return nil, false
 	}
 
-	rows := strings.Split(diagram, "\n")
-	if !rowsFit(rows, columns) {
-		return nil, false
-	}
-
-	return rows, true
+	return strings.Split(diagram, "\n"), true
 }
 
 func (self *renderer) rememberMermaidRows(block int, rows []string) {
@@ -297,13 +302,21 @@ func (self *renderer) rememberMermaidRows(block int, rows []string) {
 	self.stream.mermaidRows[block] = rows
 }
 
-func rowsFit(rows []string, columns int) bool {
-	for _, row := range rows {
-		if width.Of(row) > columns {
-			return false
-		}
+func (self *renderer) forgetMermaidRows(block int) {
+	if self.stream == nil {
+		return
 	}
-	return true
+
+	delete(self.stream.mermaidRows, block)
+}
+
+func widestRow(rows []string) int {
+	widest := 0
+	for _, row := range rows {
+		widest = max(widest, width.Of(row))
+	}
+
+	return widest
 }
 
 func (self *renderer) quote(node ast.Node) {

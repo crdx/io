@@ -11,6 +11,7 @@ Mapping the request path.
 
 Request processing
 
+Diagram needs 51 columns.
 graph TD
 request[👩‍🚀 Receive] --> validate[❤️
 Validate]
@@ -175,6 +176,28 @@ i
 n
 g
 
+D
+i
+a
+g
+r
+a
+m
+n
+e
+e
+d
+s
+5
+1
+c
+o
+l
+u
+m
+n
+s
+.
 g
 r
 a
@@ -449,6 +472,9 @@ path.
 Request
 processing
 
+Diagram
+needs 51
+columns.
 graph TD
 request[👩‍🚀
 Receive] -->

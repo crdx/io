@@ -1,0 +1,4 @@
+{"event":{"kind":"session_startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
+{"event":{"kind":"user_message","text":"map out what a session does"}}
+{"event":{"kind":"model_reasoning","text":"Laying the session out."}}
+{"event":{"kind":"model_message","text":"# What a session does\n\n```mermaid\nflowchart TD\nroot[\"Session\"] --> replay[\"Replay the journal\"]\nroot --> stream[\"Stream the turn\"]\nroot --> seal[\"Seal into scrollback\"]\nroot --> notice[\"Draw the harness notice\"]\nroot --> question[\"Ask the person\"]\n```\n\nEach branch stands on its own.\n"}}

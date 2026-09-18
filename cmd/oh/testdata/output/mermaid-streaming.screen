@@ -4,6 +4,13 @@
 │ A ├────►│ B │
 │   │     │   │
 └───┘     └───┘
+=== 10 outgrowing the terminal ===
+Diagram needs 107 columns.
+flowchart TD
+root["Session"] --> replay["Replay the journal"]
+root --> stream["Stream the turn"]
+root --> seal["Seal into scrollback"]
+root --> notice["Draw the harness notice"]
 === 2 tilde-fenced prefix ===
 ┌───┐     ┌───┐
 │   │     │   │

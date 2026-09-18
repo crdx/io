@@ -4582,6 +4582,15 @@ func TestGoldenMermaidStreamingDrawsWhatItDrewBefore(t *testing.T) {
 		"9 completed invalid diagram": func() string {
 			return completedInvalidMermaidScreen(t)
 		},
+		"10 outgrowing the terminal": func() string {
+			return mermaidStreamingScreen(
+				t,
+				"```mermaid\nflowchart TD\nroot[\"Session\"] --> replay[\"Replay the journal\"]",
+				"\nroot --> stream[\"Stream the turn\"]",
+				"\nroot --> seal[\"Seal into scrollback\"]",
+				"\nroot --> notice[\"Draw the harness notice\"]",
+			)
+		},
 	})
 }
 
@@ -7056,7 +7065,18 @@ func replayInto(rig *replayRig, entries []replayEntry) string {
 func streamIntoBuffer(t *testing.T, entries []replayEntry, streamingMode output.StreamingMode) string {
 	t.Helper()
 
-	rig := newReplayRig(t, replayColumns)
+	return streamIntoBufferAtWidth(t, entries, streamingMode, replayColumns)
+}
+
+func streamIntoBufferAtWidth(
+	t *testing.T,
+	entries []replayEntry,
+	streamingMode output.StreamingMode,
+	columns int,
+) string {
+	t.Helper()
+
+	rig := newReplayRig(t, columns)
 	rig.chat.display.streamingMode = streamingMode
 
 	return streamThrough(t, rig, entries)
@@ -7282,15 +7302,18 @@ func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
 		t.Run(journal.name, func(t *testing.T) {
 			entries := readJournal(t, journal.path)
 
-			replayed := replayAtWidth(t, entries, replayColumns)
+			for _, columns := range []int{replayColumns, narrowColumns, tinyColumns} {
+				replayed := replayAtWidth(t, entries, columns)
 
-			for name, streamingMode := range everyStreamingMode() {
-				requireSameVisibleScreen(
-					t,
-					"a live "+name+" turn and a replay of it left different screens",
-					replayed,
-					streamIntoBuffer(t, entries, streamingMode),
-				)
+				for name, streamingMode := range everyStreamingMode() {
+					requireSameVisibleScreenInColumns(
+						t,
+						"a live "+name+" turn and a replay of it left different screens",
+						columns,
+						replayed,
+						streamIntoBufferAtWidth(t, entries, streamingMode, columns),
+					)
+				}
 			}
 		})
 	}

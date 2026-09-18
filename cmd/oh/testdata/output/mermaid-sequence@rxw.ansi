@@ -193,6 +193,28 @@
 \r\e[K\e[1m\e[38;2;207;173;0mr\e[0m\r
 \r\e[K\e[1m\e[38;2;207;173;0my\e[0m\e[0m\r
 \r\e[K\r
+\r\e[K\e[3m\e[38;2;150;152;150mD\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mg\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mm\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m3\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m5\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mc\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ml\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mu\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mm\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m.\e[0m\e[0m\r
 \r\e[K\e[38;2;150;152;150ms\e[0m\r
 \r\e[K\e[38;2;150;152;150me\e[0m\r
 \r\e[K\e[38;2;150;152;150mq\e[0m\r
@@ -319,6 +341,7 @@
 
 \e[1m\e[38;2;207;173;0mApplication retry\e[0m\e[0m
 
+\e[3m\e[38;2;150;152;150mDiagram needs 35 columns.\e[0m\e[0m
 \e[38;2;150;152;150msequenceDiagram\e[0m
 \e[38;2;150;152;150mparticipant U as 👩‍🚀 User\e[0m
 \e[38;2;150;152;150mparticipant A as ❤️ App\e[0m
@@ -562,6 +585,9 @@
 \r\e[K\e[1m\e[38;2;207;173;0mApplication\e[0m\r
 \r\e[K\e[1m\e[38;2;207;173;0mretry\e[0m\e[0m\r
 \r\e[K\r
+\r\e[K\e[3m\e[38;2;150;152;150mDiagram\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mneeds 35\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mcolumns.\e[0m\e[0m\r
 \r\e[K\e[38;2;150;152;150msequenceDiag\e[0m\r
 \r\e[K\e[38;2;150;152;150mram\e[0m\r
 \r\e[K\e[38;2;150;152;150mparticipant\e[0m\r
@@ -589,6 +615,7 @@
 
 \r\e[K\e[1m\e[38;2;207;173;0mApplication retry\e[0m\e[0m\r
 \r\e[K\r
+\r\e[K\e[3m\e[38;2;150;152;150mDiagram needs 35 columns.\e[0m\e[0m\r
 \r\e[K\e[38;2;150;152;150msequenceDiagram\e[0m\r
 \r\e[K\e[38;2;150;152;150mparticipant U as 👩‍🚀 User\e[0m\r
 \r\e[K\e[38;2;150;152;150mparticipant A as ❤️ App\e[0m\r

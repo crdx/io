@@ -518,6 +518,28 @@ k
 4
 0
 
+D
+i
+a
+g
+r
+a
+m
+n
+e
+e
+d
+s
+2
+1
+c
+o
+l
+u
+m
+n
+s
+.
 g
 r
 a
@@ -765,6 +787,9 @@ a sandbox
 with no
 network | 40
 
+Diagram
+needs 21
+columns.
 graph LR
 read[read]
 -->

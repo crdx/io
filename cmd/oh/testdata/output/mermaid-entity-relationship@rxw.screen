@@ -11,6 +11,7 @@ Sketching the data model.
 
 Customer orders
 
+Diagram needs 63 columns.
 erDiagram
 CUSTOMER[👩‍🚀 Customer] {
 int id PK
@@ -185,6 +186,28 @@ e
 r
 s
 
+D
+i
+a
+g
+r
+a
+m
+n
+e
+e
+d
+s
+6
+3
+c
+o
+l
+u
+m
+n
+s
+.
 e
 r
 D
@@ -342,6 +365,9 @@ model.
 Customer
 orders
 
+Diagram
+needs 63
+columns.
 erDiagram
 CUSTOMER[👩‍🚀
 Customer] {

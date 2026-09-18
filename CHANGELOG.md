@@ -26,6 +26,7 @@
     - Find caches by their contents
     - List nuked caches, largest first
     - Delete dangling farm dirs
+- Render required width for wide Mermaid diagrams
 
 ## [0.6.0] - 2026-09-18
 

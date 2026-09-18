@@ -366,6 +366,36 @@ func TestAMermaidFenceFallsBackToSourceWhenItCannotBeDrawn(t *testing.T) {
 	}
 }
 
+func TestADiagramTooWideToDrawSaysWhatItNeeded(t *testing.T) {
+	source := "```mermaid\ngraph LR\nAlpha --> Bravo --> Charlie\n```"
+
+	got := style.Plain(strings.Join(Render(source, 30), "\n"))
+
+	if !strings.Contains(got, "Diagram needs 39 columns.") {
+		t.Errorf("got %q, want it to say the columns the diagram needed", got)
+	}
+	if !strings.Contains(got, "Alpha -->") {
+		t.Errorf("got %q, want the source beneath what it said", got)
+	}
+}
+
+func TestADiagramOutgrowingTheTerminalIsDrawnTheSameStreamedAsWhole(t *testing.T) {
+	source := "```mermaid\ngraph LR\nAlpha --> Bravo --> Charlie\n```"
+	const narrow = 20
+
+	var stream StreamRenderer
+	var streamed []string
+	for length := range len(source) + 1 {
+		streamed = stream.Render(source[:length], narrow)
+	}
+
+	whole := Render(source, narrow)
+
+	if !slices.Equal(streamed, whole) {
+		t.Errorf("streamed %q, want the %q a replay draws", streamed, whole)
+	}
+}
+
 func FuzzMermaidFenceStreaming(fuzzer *testing.F) {
 	for _, source := range []string{
 		"graph LR\nA --> B",

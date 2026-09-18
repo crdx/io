@@ -1,0 +1,512 @@
+=== narrow ===
+Agent 000000000000000000000000 ready in
+0s with 0 skills ⧸ 0 snippets ⧸ ~800t
+context.
+
+
+ map out what a session does
+
+
+Laying the session out.
+
+What a session does
+
+Diagram needs 130 columns.
+flowchart TD
+root["Session"] --> replay["Replay the
+journal"]
+root --> stream["Stream the turn"]
+root --> seal["Seal into scrollback"]
+root --> notice["Draw the harness
+notice"]
+root --> question["Ask the person"]
+
+Each branch stands on its own.
+=== one column ===
+A
+g
+e
+n
+t
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+r
+e
+a
+d
+y
+i
+n
+0
+s
+w
+i
+t
+h
+0
+s
+k
+i
+l
+l
+s
+⧸
+0
+s
+n
+i
+p
+p
+e
+t
+s
+⧸
+~
+8
+0
+0
+t
+c
+o
+n
+t
+e
+x
+t
+.
+
+
+
+m
+
+a
+
+p
+
+o
+
+u
+
+t
+
+w
+
+h
+
+a
+
+t
+
+a
+
+s
+
+e
+
+s
+
+s
+
+i
+
+o
+
+n
+
+d
+
+o
+
+e
+
+s
+
+
+L
+a
+y
+i
+n
+g
+t
+h
+e
+s
+e
+s
+s
+i
+o
+n
+o
+u
+t
+.
+
+W
+h
+a
+t
+a
+s
+e
+s
+s
+i
+o
+n
+d
+o
+e
+s
+
+D
+i
+a
+g
+r
+a
+m
+n
+e
+e
+d
+s
+1
+3
+0
+c
+o
+l
+u
+m
+n
+s
+.
+f
+l
+o
+w
+c
+h
+a
+r
+t
+T
+D
+r
+o
+o
+t
+[
+"
+S
+e
+s
+s
+i
+o
+n
+"
+]
+-
+-
+>
+r
+e
+p
+l
+a
+y
+[
+"
+R
+e
+p
+l
+a
+y
+t
+h
+e
+j
+o
+u
+r
+n
+a
+l
+"
+]
+r
+o
+o
+t
+-
+-
+>
+s
+t
+r
+e
+a
+m
+[
+"
+S
+t
+r
+e
+a
+m
+t
+h
+e
+t
+u
+r
+n
+"
+]
+r
+o
+o
+t
+-
+-
+>
+s
+e
+a
+l
+[
+"
+S
+e
+a
+l
+i
+n
+t
+o
+s
+c
+r
+o
+l
+l
+b
+a
+c
+k
+"
+]
+r
+o
+o
+t
+-
+-
+>
+n
+o
+t
+i
+c
+e
+[
+"
+D
+r
+a
+w
+t
+h
+e
+h
+a
+r
+n
+e
+s
+s
+n
+o
+t
+i
+c
+e
+"
+]
+r
+o
+o
+t
+-
+-
+>
+q
+u
+e
+s
+t
+i
+o
+n
+[
+"
+A
+s
+k
+t
+h
+e
+p
+e
+r
+s
+o
+n
+"
+]
+
+E
+a
+c
+h
+b
+r
+a
+n
+c
+h
+s
+t
+a
+n
+d
+s
+o
+n
+i
+t
+s
+o
+w
+n
+.
+=== printed ===
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
+
+
+ map out what a session does
+
+
+Laying the session out.
+
+What a session does
+
+Diagram needs 130 columns.
+flowchart TD
+root["Session"] --> replay["Replay the journal"]
+root --> stream["Stream the turn"]
+root --> seal["Seal into scrollback"]
+root --> notice["Draw the harness notice"]
+root --> question["Ask the person"]
+
+Each branch stands on its own.
+=== tiny ===
+Agent
+000000000000
+000000000000
+ready in 0s
+with 0
+skills ⧸ 0
+snippets ⧸
+~800t
+context.
+
+
+ map out
+ what a
+ session
+ does
+
+
+Laying the
+session out.
+
+What a
+session does
+
+Diagram
+needs 130
+columns.
+flowchart TD
+root["Sessio
+n"] -->
+replay["Repl
+ay the
+journal"]
+root -->
+stream["Stre
+am the
+turn"]
+root -->
+seal["Seal
+into
+scrollback"]
+root -->
+notice["Draw
+the harness
+notice"]
+root -->
+question["As
+k the
+person"]
+
+Each branch
+stands on
+its own.
+=== wide ===
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
+
+
+ map out what a session does
+
+
+Laying the session out.
+
+What a session does
+
+Diagram needs 130 columns.
+flowchart TD
+root["Session"] --> replay["Replay the journal"]
+root --> stream["Stream the turn"]
+root --> seal["Seal into scrollback"]
+root --> notice["Draw the harness notice"]
+root --> question["Ask the person"]
+
+Each branch stands on its own.
