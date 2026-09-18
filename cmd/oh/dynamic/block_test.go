@@ -422,6 +422,27 @@ func TestARunningRowLeavesOutTheTimeItWasHeldFor(t *testing.T) {
 	}
 }
 
+func TestARowAddedWhileTimingIsHeldStartsWhenTheHoldLifts(t *testing.T) {
+	block := testBlock()
+	block.isSlow = true
+
+	block.Add(rowLabel("bash", "curl example.com"), 0)
+
+	block.HoldTiming()
+	block.heldAt = block.heldAt.Add(-time.Minute)
+	block.Add(rowLabel("read", "main.go"), 0)
+
+	if held := block.elapsedTime(block.rows[1]); held != 0 {
+		t.Errorf("got %s while held, want a row that has counted nothing yet", held)
+	}
+
+	block.ResumeTiming()
+
+	if resumed := time.Since(block.rows[1].startedAt); resumed < 0 {
+		t.Errorf("got %s after the hold lifted, want a row that has not started in the future", resumed)
+	}
+}
+
 func TestAHeldBlockStopsSpinning(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		var refreshes atomic.Int64

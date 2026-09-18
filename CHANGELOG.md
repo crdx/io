@@ -28,6 +28,7 @@
     - Delete dangling farm dirs
 - Render required width for wide Mermaid diagrams
 - Truncate a tall footer so it doesn't flicker
+- Mark user messages with OSC 133
 
 ## [0.6.0] - 2026-09-18
 

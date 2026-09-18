@@ -54,6 +54,7 @@ import (
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/editor"
+	"crdx.org/io/cmd/oh/escape"
 	"crdx.org/io/cmd/oh/experimental"
 	"crdx.org/io/cmd/oh/feedback"
 	"crdx.org/io/cmd/oh/hostcommand"
@@ -3833,6 +3834,7 @@ func TestGoldenFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"groupings":              {".screen"},
 		"reasonings":             {".ansi", ".screen"},
 		"mermaid-streaming":      {".screen"},
+		"message-marks":          {".screen"},
 		"mode-takeback":          {".ansi", ".screen"},
 		"model-arguments":        {".txt"},
 		"new-session":            {".txt"},
@@ -6136,6 +6138,131 @@ func TestGoldenEveryScenarioShowsWhatItShowedBefore(t *testing.T) {
 	}
 }
 
+var markedScenarios = []string{"host-commands", "mid-call-message", "modes"}
+
+func TestGoldenAMarkStandsWhereEachUserMessageBegins(t *testing.T) {
+	passes := map[string]func() string{}
+
+	for _, name := range markedScenarios {
+		entries := readJournal(t, filepath.Join("testdata", "input", name+".jsonl"))
+
+		passes[name+", wide"] = func() string {
+			return shownWithMarks(t, replayAtWidth(t, entries, replayColumns), replayColumns)
+		}
+		passes[name+", narrow"] = func() string {
+			return shownWithMarks(t, replayAtWidth(t, entries, narrowColumns), narrowColumns)
+		}
+		passes[name+", streamed"] = func() string {
+			return shownWithMarks(t, streamIntoBuffer(t, entries, output.StreamingModeLine), replayColumns)
+		}
+		passes[name+", printed"] = func() string {
+			return shownWithMarks(t, replayAsPrinted(t, entries), replayColumns)
+		}
+		passes[name+", plain"] = func() string {
+			return shownWithMarks(t, replayPlainly(t, entries), replayColumns)
+		}
+		passes[name+", tiny"] = func() string {
+			return shownWithMarks(t, replayAtWidth(t, entries, tinyColumns), tinyColumns)
+		}
+	}
+
+	passes["queued, standing unsent"] = func() string {
+		return shownWithMarks(t, queuedMessagesStream(t, queuedTwo), replayColumns)
+	}
+	passes["queued, delivered at the boundary"] = func() string {
+		return shownWithMarks(t, queuedMessagesStream(t, queuedDelivered), replayColumns)
+	}
+
+	compareWithGolden(t, "message-marks", ".screen", passes)
+}
+
+const markGutter = "▸ "
+
+func shownWithMarks(t *testing.T, stream string, columns int) string {
+	t.Helper()
+
+	drawn := playScreen(t, stream, columns)
+	rows := drawn.text()
+
+	for _, row := range drawn.marked() {
+		for len(rows) <= row {
+			rows = append(rows, "")
+		}
+	}
+
+	shownRows := make([]string, 0, len(rows))
+	for at, row := range rows {
+		gutter := strings.Repeat(" ", width.Of(markGutter))
+		if drawn.marks[at] {
+			gutter = markGutter
+		}
+
+		shownRows = append(shownRows, strings.TrimRight(gutter+row, " "))
+	}
+
+	return strings.Join(shownRows, "\n")
+}
+
+func TestEveryUserMessageIsMarkedWhereItBegins(t *testing.T) {
+	background := userBackground(t)
+
+	for _, journal := range everyJournal(t) {
+		t.Run(journal.name, func(t *testing.T) {
+			entries := readJournal(t, journal.path)
+			drawn := playScreen(t, replayAtWidth(t, entries, replayColumns), replayColumns)
+
+			marked := drawn.marked()
+			if got, want := len(marked), countUserMessages(entries); got != want {
+				t.Fatalf("%d rows were marked, want one per user message, of which there are %d: %v", got, want, marked)
+			}
+
+			for _, row := range marked {
+				if drawn.backgroundAt(row) != background {
+					t.Errorf("row %d was marked but holds no user message: %q", row, drawn.text()[row])
+				}
+				if row > 0 && drawn.backgroundAt(row-1) == background {
+					t.Errorf("row %d was marked part way into a user message", row)
+				}
+			}
+		})
+	}
+}
+
+func TestNothingIsMarkedWhereAConversationIsPreviewedInsideAMenu(t *testing.T) {
+	entries := readJournal(t, filepath.Join("testdata", "input", markedScenarios[0]+".jsonl"))
+
+	events := make([]agent.Event, 0, len(entries))
+	for _, entry := range entries {
+		events = append(events, *entry.Event)
+	}
+
+	drawn := preview.Draw(events, layOutWorkspace(t), replayColumns)
+
+	if found := strings.Contains(strings.Join(drawn, "\n"), escape.MessageMark); found {
+		t.Error("a previewed conversation marked rows the menu draws wherever it likes")
+	}
+}
+
+func userBackground(t *testing.T) string {
+	t.Helper()
+
+	drawn := playScreen(t, style.User(" "), replayColumns)
+
+	return drawn.backgroundAt(0)
+}
+
+func countUserMessages(entries []replayEntry) int {
+	count := 0
+
+	for _, entry := range entries {
+		if entry.Event != nil && entry.Event.Kind == agent.UserMessageEvent {
+			count++
+		}
+	}
+
+	return count
+}
+
 const groupingScenario = "groups.jsonl"
 
 func everyGrouping() [][]string {
@@ -7248,6 +7375,12 @@ func replayAfterAQuestion(t *testing.T, entries []replayEntry) string {
 
 		rig.chat.question.broker = broker
 		rig.chat.onQuestionChange()
+		rig.chat.currentTurn.painter.DrawEvent(agent.Event{
+			Kind:              agent.ToolCallRequestEvent,
+			ID:                "call-during-question",
+			Name:              "read",
+			FallbackRendering: agent.FallbackRendering{Subject: "main.go", ReadOnly: true},
+		})
 
 		time.Sleep(deliberation)
 		synctest.Wait()
@@ -7270,7 +7403,7 @@ func replayAfterAQuestion(t *testing.T, entries []replayEntry) string {
 
 const (
 	revealAndSomeFrames = 7 * time.Second
-	carryingOn          = 2 * time.Second
+	carryingOn          = 8 * time.Second
 )
 
 func entriesUpToFirstCall(entries []replayEntry) []replayEntry {
@@ -9639,6 +9772,7 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 type screen struct {
 	t           *testing.T
 	rows        [][]cell
+	marks       map[int]bool
 	row, column int
 	columns     int
 	isWrapping  bool
@@ -9710,6 +9844,33 @@ func TestAScreenReadsADefaultForegroundAsClearingTheColourBeforeIt(t *testing.T)
 			strutil.VisibleEscapes(strings.Join(cleared.styled(), "")),
 			strutil.VisibleEscapes(strings.Join(never.styled(), "")),
 		)
+	}
+}
+
+func TestAScreenRemembersEveryRowAMarkArrivedOn(t *testing.T) {
+	drawn := playScreen(t, "one\n"+escape.MessageMark+"two\nthree\n"+escape.MessageMark+"four", replayColumns)
+
+	if got, want := drawn.marked(), []int{1, 3}; !slices.Equal(got, want) {
+		t.Errorf("the screen marked rows %v, want %v", got, want)
+	}
+	if got, want := drawn.text(), []string{"one", "two", "three", "four"}; !slices.Equal(got, want) {
+		t.Errorf("a mark was drawn as something: %q", got)
+	}
+}
+
+func TestAScreenMarksTheRowAMarkLandsOnRatherThanTheOneItFollows(t *testing.T) {
+	drawn := playScreen(t, "one"+escape.MessageMark+" two", replayColumns)
+
+	if got, want := drawn.marked(), []int{0}; !slices.Equal(got, want) {
+		t.Errorf("the screen marked rows %v, want %v", got, want)
+	}
+}
+
+func TestAScreenForgetsTheMarksOnTheRowsItIsToldToErase(t *testing.T) {
+	drawn := playScreen(t, "one\n"+escape.MessageMark+"two\n"+escape.MessageMark+"three\x1b[1;1H\x1b[0J", replayColumns)
+
+	if got := drawn.marked(); len(got) != 0 {
+		t.Errorf("the screen kept marks %v over an erased screen", got)
 	}
 }
 
@@ -9812,6 +9973,11 @@ func (self *screen) operatingSystemCommand(stream string, at int) int {
 		terminatorWidth = 2
 	}
 	payload := stream[at+2 : end-terminatorWidth]
+	if strings.HasPrefix(payload, "133;") {
+		self.semanticPrompt(payload)
+		return end
+	}
+
 	if !strings.HasPrefix(payload, "66;") {
 		return end
 	}
@@ -9831,6 +9997,21 @@ func (self *screen) operatingSystemCommand(stream string, at int) int {
 	self.putSized(parts[2], scale*declaredWidth)
 
 	return end
+}
+
+const messageMarkPayload = "133;A"
+
+func (self *screen) semanticPrompt(payload string) {
+	if payload != messageMarkPayload {
+		self.t.Fatalf("the screen was sent a semantic prompt it does not know: OSC %s", payload)
+		return
+	}
+
+	if self.marks == nil {
+		self.marks = map[int]bool{}
+	}
+
+	self.marks[self.row] = true
 }
 
 func (self *screen) putSized(grapheme string, cells int) {
@@ -9931,8 +10112,11 @@ func (self *screen) erase(mode int) {
 		if self.row+1 < len(self.rows) {
 			self.rows = self.rows[:self.row+1]
 		}
+
+		maps.DeleteFunc(self.marks, func(row int, _ bool) bool { return row > self.row })
 	case 2, 3:
 		self.rows = nil
+		self.marks = nil
 	default:
 		self.t.Fatalf("the screen was asked to erase in a way it does not know: ESC [ %dJ", mode)
 	}
@@ -10077,6 +10261,18 @@ func (self *screen) styled() []string {
 
 		return drawn.String()
 	})
+}
+
+func (self *screen) marked() []int {
+	return slices.Sorted(maps.Keys(self.marks))
+}
+
+func (self *screen) backgroundAt(row int) string {
+	if row >= len(self.rows) || len(self.rows[row]) == 0 {
+		return ""
+	}
+
+	return self.rows[row][0].styles
 }
 
 func (self *screen) lines(draw func(row []cell) string) []string {
@@ -13987,6 +14183,11 @@ func requireSameVisibleScreenInColumns(
 			strutil.VisibleEscapes(strings.Join(first, "\n")),
 			strutil.VisibleEscapes(strings.Join(second, "\n")),
 		)
+		return
+	}
+
+	if first, second := firstScreen.marked(), secondScreen.marked(); !slices.Equal(first, second) {
+		t.Errorf("%s, in the rows it marked\nfirst: %v\nsecond: %v", description, first, second)
 	}
 }
 

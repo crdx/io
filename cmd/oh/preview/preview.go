@@ -25,7 +25,9 @@ func Read(directory string, name string, workspace *work.Space, room int) ([]str
 func Draw(events []agent.Event, workspace *work.Space, room int) []string {
 	var conversation strings.Builder
 
-	screen := output.NewTerminalOfSize(&conversation, max(room, minimumRoom), 0).AppendOnly()
+	screen := output.NewTerminalOfSize(&conversation, max(room, minimumRoom), 0).
+		AppendOnly().
+		WithoutMessageMarks()
 	picasso := painter.New(screen, false, nil, workspace, output.StreamingModeLine)
 
 	for _, event := range events {

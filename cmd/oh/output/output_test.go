@@ -8,9 +8,11 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/escape"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/internal/util/strutil"
 )
 
 func TestTextSizingSupportIsRemembered(t *testing.T) {
@@ -302,6 +304,8 @@ func TestNoticesInsideLiveWorkRunOnWhenTheyAreNamedTogether(t *testing.T) {
 const (
 	appendOnlyColumns = 40
 	appendOnlyLines   = 24
+	markColumns       = 40
+	markLines         = 24
 )
 
 func appendOnlyScreen(writer *bytes.Buffer) *output.Screen {
@@ -351,5 +355,113 @@ func TestAnAppendOnlyTerminalStillLinksThePathsItNames(t *testing.T) {
 
 	if got := screenOutput.String(); !strings.Contains(got, "\x1b]8;;file://") {
 		t.Errorf("expected the answer to be linked, got %q", got)
+	}
+}
+
+func TestAMarkedLineOpensWithTheMarkSoTheTerminalKnowsWhereItBegan(t *testing.T) {
+	var screenOutput bytes.Buffer
+
+	screen := output.NewTerminalOfSize(&screenOutput, markColumns, markLines)
+	screen.MarkedLine("hello")
+	screen.End()
+
+	if got, want := screenOutput.String(), escape.MessageMark+"hello\r\n"; got != want {
+		t.Errorf("got %q, want %q", strutil.VisibleEscapes(got), strutil.VisibleEscapes(want))
+	}
+}
+
+func TestAMarkedLineIsMarkedAfterTheBlankRowsOwedBeforeIt(t *testing.T) {
+	var screenOutput bytes.Buffer
+
+	screen := output.NewTerminalOfSize(&screenOutput, markColumns, markLines)
+	screen.Line("banner")
+	screen.Blank()
+	screen.MarkedLine("hello")
+	screen.End()
+
+	if got, want := screenOutput.String(), "banner\r\n\r\n"+escape.MessageMark+"hello\r\n"; got != want {
+		t.Errorf("got %q, want %q", strutil.VisibleEscapes(got), strutil.VisibleEscapes(want))
+	}
+}
+
+func TestAMarkedLineWrappedOverSeveralRowsIsMarkedOnlyOnTheFirst(t *testing.T) {
+	var screenOutput bytes.Buffer
+
+	screen := output.NewTerminalOfSize(&screenOutput, markColumns, markLines)
+	screen.MarkedLine(strings.Repeat("word ", markColumns))
+	screen.End()
+
+	if got := strings.Count(screenOutput.String(), escape.MessageMark); got != 1 {
+		t.Errorf("a wrapped message carried %d marks, want 1: %q", got, strutil.VisibleEscapes(screenOutput.String()))
+	}
+	if got := screenOutput.String(); !strings.HasPrefix(got, escape.MessageMark) {
+		t.Errorf("a wrapped message was marked away from its first row: %q", strutil.VisibleEscapes(got))
+	}
+}
+
+func TestAMarkedLineCostsTheSameRowsAsAnUnmarkedOne(t *testing.T) {
+	long := strings.Repeat("word ", markColumns)
+
+	var markedOutput bytes.Buffer
+	marked := output.NewTerminalOfSize(&markedOutput, markColumns, markLines)
+	marked.MarkedLine(long)
+	marked.End()
+
+	var plainOutput bytes.Buffer
+	plain := output.NewTerminalOfSize(&plainOutput, markColumns, markLines)
+	plain.Line(long)
+	plain.End()
+
+	if got, want := strings.ReplaceAll(markedOutput.String(), escape.MessageMark, ""), plainOutput.String(); got != want {
+		t.Errorf("a mark changed how the message was laid out\ngot  %q\nwant %q",
+			strutil.VisibleEscapes(got), strutil.VisibleEscapes(want))
+	}
+}
+
+func TestAMarkReachesATerminalThatOnlyAppends(t *testing.T) {
+	var screenOutput bytes.Buffer
+
+	screen := appendOnlyScreen(&screenOutput)
+	screen.MarkedLine("hello")
+	screen.End()
+
+	if got := screenOutput.String(); !strings.HasPrefix(got, escape.MessageMark) {
+		t.Errorf("an append-only terminal dropped the mark: %q", strutil.VisibleEscapes(got))
+	}
+}
+
+func TestNothingIsMarkedWhereThereIsNoTerminalToNavigate(t *testing.T) {
+	var screenOutput bytes.Buffer
+
+	screen := output.New(&screenOutput)
+	screen.MarkedLine("hello")
+	screen.End()
+
+	if got := screenOutput.String(); strings.Contains(got, escape.MessageMark) {
+		t.Errorf("a plain writer was sent a mark: %q", strutil.VisibleEscapes(got))
+	}
+}
+
+func TestAScreenToldToMarkNothingMarksNothing(t *testing.T) {
+	var screenOutput bytes.Buffer
+
+	screen := output.NewTerminalOfSize(&screenOutput, markColumns, markLines).WithoutMessageMarks()
+	screen.MarkedLine("hello")
+	screen.End()
+
+	if got := screenOutput.String(); strings.Contains(got, escape.MessageMark) {
+		t.Errorf("a screen asked for no marks drew one: %q", strutil.VisibleEscapes(got))
+	}
+}
+
+func TestAnOrdinaryLineIsNeverMarked(t *testing.T) {
+	var screenOutput bytes.Buffer
+
+	screen := output.NewTerminalOfSize(&screenOutput, markColumns, markLines)
+	screen.Line("hello")
+	screen.End()
+
+	if got := screenOutput.String(); strings.Contains(got, escape.MessageMark) {
+		t.Errorf("an ordinary line was marked: %q", strutil.VisibleEscapes(got))
 	}
 }

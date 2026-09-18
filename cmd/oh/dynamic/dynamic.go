@@ -72,7 +72,7 @@ func (self *Block) Add(label Label, timeLimit time.Duration) int {
 	index := 0
 
 	self.change(func() {
-		self.rows = append(self.rows, row{label: label, startedAt: time.Now(), timeLimit: timeLimit})
+		self.rows = append(self.rows, row{label: label, startedAt: self.startedNow(), timeLimit: timeLimit})
 		index = len(self.rows) - 1
 	})
 
@@ -311,6 +311,14 @@ func labelGuard(result string, labelWidth int) int {
 	}
 
 	return resultSpacing(result) + 1
+}
+
+func (self *Block) startedNow() time.Time {
+	if self.heldAt.IsZero() {
+		return time.Now()
+	}
+
+	return self.heldAt
 }
 
 func (self *Block) elapsedTime(item row) time.Duration {

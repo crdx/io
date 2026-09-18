@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"crdx.org/io/cmd/oh/escape"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
@@ -28,6 +29,7 @@ type Screen struct {
 
 	isTerminal            bool
 	canRepaint            bool
+	marksMessages         bool
 	isTextSizingSupported bool
 	linkRoots             link.Roots
 	isProgressReported    bool
@@ -54,7 +56,12 @@ type Screen struct {
 
 func New(writer io.Writer) *Screen {
 	isTerminal := tty.Is(writer)
-	self := &Screen{writer: writer, isTerminal: isTerminal, canRepaint: isTerminal}
+	self := &Screen{
+		writer:        writer,
+		isTerminal:    isTerminal,
+		canRepaint:    isTerminal,
+		marksMessages: isTerminal,
+	}
 
 	self.measureTerminal()
 
@@ -63,16 +70,22 @@ func New(writer io.Writer) *Screen {
 
 func NewTerminalOfSize(writer io.Writer, columns int, lines int) *Screen {
 	return &Screen{
-		writer:     writer,
-		isTerminal: true,
-		canRepaint: true,
-		columns:    columns,
-		lines:      lines,
+		writer:        writer,
+		isTerminal:    true,
+		canRepaint:    true,
+		marksMessages: true,
+		columns:       columns,
+		lines:         lines,
 	}
 }
 
 func (self *Screen) AppendOnly() *Screen {
 	self.canRepaint = false
+	return self
+}
+
+func (self *Screen) WithoutMessageMarks() *Screen {
+	self.marksMessages = false
 	return self
 }
 
@@ -105,25 +118,11 @@ func (self *Screen) LinkPathsUnder(roots link.Roots) *Screen {
 }
 
 func (self *Screen) Line(text string) {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
+	self.line(text, false)
+}
 
-	text = self.linkifyScrollback(text)
-	if len(self.blocks) > 0 {
-		self.blocks = append(self.blocks, groupedBlock{Block: textBlock{text: text}, group: NoticeGroup})
-		self.refresh()
-
-		return
-	}
-
-	self.seal()
-	self.makeRoomFor(NoticeGroup)
-
-	if self.isMidLine {
-		self.newline()
-	}
-
-	self.write(self.wrapToWidth(text))
+func (self *Screen) MarkedLine(text string) {
+	self.line(text, true)
 }
 
 func (self *Screen) Blank() {
@@ -148,6 +147,32 @@ func (self *Screen) End() {
 		self.isMidLine = false
 		self.hasPendingText = false
 	}
+}
+
+func (self *Screen) line(text string, isMarked bool) {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	text = self.linkifyScrollback(text)
+	if isMarked && self.marksMessages {
+		text = escape.MessageMark + text
+	}
+
+	if len(self.blocks) > 0 {
+		self.blocks = append(self.blocks, groupedBlock{Block: textBlock{text: text}, group: NoticeGroup})
+		self.refresh()
+
+		return
+	}
+
+	self.seal()
+	self.makeRoomFor(NoticeGroup)
+
+	if self.isMidLine {
+		self.newline()
+	}
+
+	self.write(self.wrapToWidth(text))
 }
 
 func (self *Screen) wrapToWidth(text string) string {

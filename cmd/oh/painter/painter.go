@@ -495,6 +495,12 @@ func (self *Picasso) submittedContent(message submittedMessage, columns int) []s
 
 func (self *Picasso) drawSubmittedLine(message submittedMessage) {
 	self.screen.Blank()
+
+	if message.kind == userSubmission {
+		self.screen.MarkedLine(self.renderSubmitted(message))
+		return
+	}
+
 	self.screen.Line(self.renderSubmitted(message))
 }
 

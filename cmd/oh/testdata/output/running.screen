@@ -9,7 +9,8 @@ Looking for where the prompt is drawn.
 
 I'll have a look at how the editor draws its prompt.
 
-grep prompt *.go ✦· 9s
+grep prompt *.go ✦· 15s
+read ✦· 8s
 === a call still running ===
 Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
 
