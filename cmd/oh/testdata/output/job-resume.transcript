@@ -27,6 +27,10 @@ Both are up.
 
 ## jobs_ended_with_session · +5s
 
+```
+The jobs `docs` and `watch` were stopped when the session last closed. Call `job(action="start", name="docs")` with no command to run its command again.
+```
+
 ## User · +6s
 
 carry on

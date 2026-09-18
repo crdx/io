@@ -2,6 +2,7 @@ package output
 
 import (
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -208,5 +209,52 @@ func TestDiscardingANoticeBesideALaterLineKeepsTheLine(t *testing.T) {
 	drawn := screenOutput.String()
 	if !strings.Contains(drawn, "the harness said something") {
 		t.Errorf("the line beside the discarded notice was lost: %q", drawn)
+	}
+}
+
+type rowsBlock struct {
+	rows []string
+}
+
+func (self *rowsBlock) Rows(_ int) []string {
+	return self.rows
+}
+
+func TestAChangeAboveARegionTallerThanTheTerminalIsRefusedAndReported(t *testing.T) {
+	screenOutput := &strings.Builder{}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true, columns: 40, lines: 8}
+
+	block := &rowsBlock{}
+	for i := range 20 {
+		block.rows = append(block.rows, "row "+strconv.Itoa(i))
+	}
+	handle := screen.OpenNotice(block)
+	screen.Footer([]string{"> "}, 0, 2)
+
+	if screen.WasRepaintRefused() {
+		t.Fatal("the region was refused before anything above its top row changed")
+	}
+
+	block.rows[0] = "the row that scrolled away changed"
+	screen.RefreshBlock(handle)
+
+	if !screen.WasRepaintRefused() {
+		t.Error("a change above the top row of the region was drawn rather than refused")
+	}
+}
+
+func TestARegionWithRoomToDrawRefusesNothing(t *testing.T) {
+	screenOutput := &strings.Builder{}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true, columns: 40, lines: 24}
+
+	block := &rowsBlock{rows: []string{"first", "second"}}
+	handle := screen.OpenNotice(block)
+	screen.Footer([]string{"> "}, 0, 2)
+
+	block.rows[0] = "first changed"
+	screen.RefreshBlock(handle)
+
+	if screen.WasRepaintRefused() {
+		t.Error("a region with room to draw refused its repaint")
 	}
 }

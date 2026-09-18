@@ -8,11 +8,11 @@ job docs $ python3 -m http.server … ✓ 1L
 Both are up.
 
 
- 🤖 The jobs docs and watch are no
-    longer running, having been stopped
-    when the session last closed. Start
-    one again by name to run its command
-    afresh.
+ 🤖 The jobs docs and watch were stopped
+    when the session last closed. Call
+    job(action="start", name="docs")
+    with no command to run its command
+    again.
 
 
 
@@ -141,63 +141,13 @@ c
 
 h
 
-a
-
-r
-
-e
-
-n
-
-o
-
-l
-
-o
-
-n
-
-g
+w
 
 e
 
 r
 
-r
-
-u
-
-n
-
-n
-
-i
-
-n
-
-g
-
-,
-
-h
-
-a
-
-v
-
-i
-
-n
-
-g
-
-b
-
 e
-
-e
-
-n
 
 s
 
@@ -263,7 +213,39 @@ d
 
 .
 
-S
+C
+
+a
+
+l
+
+l
+
+j
+
+o
+
+b
+
+(
+
+a
+
+c
+
+t
+
+i
+
+o
+
+n
+
+=
+
+"
+
+s
 
 t
 
@@ -273,25 +255,9 @@ r
 
 t
 
-o
+"
 
-n
-
-e
-
-a
-
-g
-
-a
-
-i
-
-n
-
-b
-
-y
+,
 
 n
 
@@ -300,6 +266,48 @@ a
 m
 
 e
+
+=
+
+"
+
+d
+
+o
+
+c
+
+s
+
+"
+
+)
+
+w
+
+i
+
+t
+
+h
+
+n
+
+o
+
+c
+
+o
+
+m
+
+m
+
+a
+
+n
+
+d
 
 t
 
@@ -333,15 +341,13 @@ d
 
 a
 
-f
+g
 
-r
+a
 
-e
+i
 
-s
-
-h
+n
 
 .
 
@@ -423,8 +429,8 @@ job docs $ python3 -m http.server 8080 ✓ 1L
 Both are up.
 
 
- 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.
-    Start one again by name to run its command afresh.
+ 🤖 The jobs docs and watch were stopped when the session last closed. Call job(action="start",
+    name="docs") with no command to run its command again.
 
 
 
@@ -451,23 +457,24 @@ Both are up.
  🤖 The jobs
     docs and
     watch
-    are no
-    longer
-    running,
-    having
-    been
+    were
     stopped
     when the
     session
     last
     closed.
-    Start
-    one
-    again by
-    name to
-    run its
+    Call
+    job(acti
+    on="star
+    t",
+    name="do
+    cs")
+    with no
     command
-    afresh.
+    to run
+    its
+    command
+    again.
 
 
 
@@ -493,8 +500,8 @@ job docs $ python3 -m http.server 8080 ✓ 1L
 Both are up.
 
 
- 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.
-    Start one again by name to run its command afresh.
+ 🤖 The jobs docs and watch were stopped when the session last closed. Call job(action="start",
+    name="docs") with no command to run its command again.
 
 
 

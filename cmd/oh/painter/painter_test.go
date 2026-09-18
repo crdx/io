@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
@@ -167,6 +168,61 @@ func TestQueuedMessagePathsAreLinkedAsHostPaths(t *testing.T) {
 				t.Errorf("got drawing %q, want link to %q", rendering, wantTarget)
 			}
 		})
+	}
+}
+
+func TestPendingMessagesShareOneBlock(t *testing.T) {
+	rows := NewPendingMessages([]string{"one", "two"}, false, link.Roots{}).Rows(40)
+
+	if len(rows) != 4 {
+		t.Fatalf("got %d rows, want the hint, both messages, and a pad: %q", len(rows), rows)
+	}
+	if !strings.Contains(rows[1], "one") || !strings.Contains(rows[2], "two") {
+		t.Errorf("got rows %q, want the messages beside each other", rows)
+	}
+}
+
+func TestStandingNoticesSayHowToSendThemNow(t *testing.T) {
+	pending := NewPendingMessages([]string{"one"}, false, link.Roots{})
+
+	standing := pending.Rows(40)
+	if !strings.Contains(style.Plain(standing[0]), sendHint) {
+		t.Errorf("got rows %q, want the hint above the standing notice", standing)
+	}
+
+	pending.MarkSent()
+	for _, row := range pending.Rows(40) {
+		if strings.Contains(style.Plain(row), sendHint) {
+			t.Errorf("got rows %q, want no hint once the notices have gone", pending.Rows(40))
+		}
+	}
+}
+
+func TestTheSendHintIsDroppedWhenItDoesNotFit(t *testing.T) {
+	rows := NewPendingMessages([]string{"one"}, false, link.Roots{}).Rows(len(sendHint))
+
+	if len(rows) != 3 {
+		t.Errorf("got %d rows, want a pad, the notice, and a pad: %q", len(rows), rows)
+	}
+}
+
+func TestConsecutiveHarnessNoticesShareOneBlock(t *testing.T) {
+	var screenOutput strings.Builder
+	screen := output.NewTerminalOfSize(&screenOutput, 80, 24)
+	paint := New(screen, false, nil, nil, output.StreamingModeLine)
+
+	paint.DrawEvent(caps.ModeToggleEvent(caps.Write, caps.Read))
+	paint.DrawEvent(caps.ModeToggleEvent(caps.Git, caps.Read|caps.Git))
+	screen.End()
+
+	drawn := screenOutput.String()
+	first := strings.Index(drawn, "read-only")
+	second := strings.Index(drawn, "read-write")
+	if first < 0 || second < 0 {
+		t.Fatalf("got drawing %q, want both notices", drawn)
+	}
+	if between := drawn[first:second]; strings.Count(between, "\n") > 1 {
+		t.Errorf("got %q between the notices, want them in one block", between)
 	}
 }
 
@@ -367,5 +423,60 @@ func TestALongFaultedCallIsCutRatherThanDrawnWhole(t *testing.T) {
 	}
 	if !strings.Contains(drawn, `{"text": "xxx`) {
 		t.Errorf("expected what was kept to start the call, got %q", drawn)
+	}
+}
+
+func TestRenderContextExceededAdvisesForkingWithTheSameModel(t *testing.T) {
+	event := agent.Event{
+		Kind: agent.FailureEvent,
+		Failure: &agent.Failure{
+			Kind:       agent.HTTPStatusFailure,
+			HTTPStatus: 400,
+			Code:       "context_length_exceeded",
+			Message:    "the prompt is bigger than the window",
+		},
+	}
+
+	notice, isSaid := RenderContextExceeded(event, "qwen4:70b")
+	if !isSaid {
+		t.Fatal("expected the notice to be said")
+	}
+	if !strings.Contains(notice, "/fork qwen4:70b") {
+		t.Errorf("expected the model to be named for the fork, got %q", notice)
+	}
+}
+
+func TestRenderContextExceededNamesNoForkWithoutAModel(t *testing.T) {
+	event := agent.Event{
+		Kind: agent.FailureEvent,
+		Failure: &agent.Failure{
+			Kind:       agent.HTTPStatusFailure,
+			HTTPStatus: 400,
+			Code:       "context_length_exceeded",
+		},
+	}
+
+	notice, isSaid := RenderContextExceeded(event, "")
+	if !isSaid {
+		t.Fatal("expected the notice to be said")
+	}
+	if strings.Contains(notice, forkCommand) {
+		t.Errorf("expected no fork to be advised without a model, got %q", notice)
+	}
+}
+
+func TestRenderContextExceededStaysSilentForOtherFailures(t *testing.T) {
+	for name, event := range map[string]agent.Event{
+		"another refusal": {
+			Kind:    agent.FailureEvent,
+			Failure: &agent.Failure{Kind: agent.HTTPStatusFailure, HTTPStatus: 404},
+		},
+		"no failure at all": {Kind: agent.FailureEvent, Text: "the context length is fine"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if notice, isSaid := RenderContextExceeded(event, "qwen4:70b"); isSaid {
+				t.Errorf("expected silence, got %q", notice)
+			}
+		})
 	}
 }

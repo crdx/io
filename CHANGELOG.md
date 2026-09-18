@@ -78,6 +78,8 @@
 - Gather consecutive mid-round notices into one panel
 - Handle pending notices correctly
 - Tell the model exactly what the harness drew
+- Deliver harness notices before turn end
+- Gather consecutive harness notices into one block
 - Display each capability change as its own notice
 - Display each machine condition change as its own notice
 - Shorten harness notices in general

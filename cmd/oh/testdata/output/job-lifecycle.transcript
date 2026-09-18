@@ -28,7 +28,7 @@ The docs server is up.
 ## job_ended · +5s
 
 ```
-The job build exited: failed after 12s, exit(2).
+The job `build` exited: failed after 12s, exit(2).
 go build ./...
 cmd/oh/draw.go:41:9: undefined: getWidth
 exit status 1
@@ -37,34 +37,68 @@ exit status 1
 ## job_ended · +6s
 
 ```
-The job seed exited: complete after 14s.
+The job `seed` exited: complete after 14s.
 seeding the database
 
 [truncated at 2K of 58.6K; full output in /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]
 ```
 
-## job_stop · +7s
+## job_ended · +7s
 
-## User · +8s
+```
+The job `empty` exited: complete after 15s (no output).
+```
+
+## job_ended · +8s
+
+```
+The job `` build`fast `` exited: complete after 16s.
+done
+```
+
+## job_ended · +9s
+
+```
+The job `archive` exited: complete after 17s (no output).
+note: the oldest 1K of output was dropped to keep the spool bounded.
+```
+
+## job_stop · +10s
+
+```
+The job `docs` was stopped because the workspace was made read-only.
+```
+
+## job_stop · +11s
+
+```
+The job `index` was stopped because access to /reference was revoked.
+```
+
+## User · +12s
 
 what happened to it
 
-## Tool calls · +9s
+## Tool calls · +13s
 
 ```
 job: stale status rendering [ok, 1 line, 26B, call_2]
 ```
 
-## job_stop · +11s
+## job_stop · +15s
 
-## Tool calls · +12s
+```
+The job `docs` was stopped from the keyboard.
+```
+
+## Tool calls · +16s
 
 ```
 job: stale discard rendering [ok, 1 line, 52B, call_3]
 job: stale prune rendering [ok, 1 line, 67B, call_4]
 ```
 
-## Assistant · +16s
+## Assistant · +20s
 
 It was stopped when write access was withdrawn.
 

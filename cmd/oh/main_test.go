@@ -56,6 +56,7 @@ import (
 	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/experimental"
 	"crdx.org/io/cmd/oh/feedback"
+	"crdx.org/io/cmd/oh/hostcommand"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/jobrecord"
@@ -755,6 +756,100 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheContinueMessage(t *testing.T) {
 	t.Error("expected the configured prompt")
 }
 
+func TestTwoReturnsWithAPendingNoticeSubmitItRatherThanTheContinueMessage(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.continueMessage = "carry on"
+	self.settleAccess()
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+
+	self.apply(inputLine, history, key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl})
+	self.apply(inputLine, history, key.Key{Code: key.Rune, Value: 'w'})
+
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+
+	if !self.currentTurn.Running() {
+		t.Fatal("expected the second return to start a turn")
+	}
+
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	messages := submittedTexts(self.recordedEvents)
+	wantMessages := []string{workspaceNowReadOnly()}
+	if !slices.Equal(messages, wantMessages) {
+		t.Errorf("got messages %q, want %q", messages, wantMessages)
+	}
+}
+
+func TestTwoReturnsWithARestoredJobNoticeSubmitItRatherThanTheContinueMessage(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.continueMessage = "carry on"
+	self.settleAccess()
+	self.jobs = jobState{manager: jobs.New(nil)}
+	self.restoreJobs([]agent.Event{
+		jobrecord.ListingEvent([]jobs.Snapshot{{Name: "docs", Command: "python3", State: jobs.StateRunning}}),
+	})
+
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+
+	if !self.currentTurn.Running() {
+		t.Fatal("expected the second return to start a turn")
+	}
+
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	notice, _ := jobrecord.EndedWithSessionNotice(jobrecord.EndedWithSessionEvent([]string{"docs"}))
+	messages := submittedTexts(self.recordedEvents)
+	if !slices.Equal(messages, []string{notice}) {
+		t.Errorf("got messages %q, want %q", messages, []string{notice})
+	}
+}
+
+func TestTwoReturnsWithAnEndedJobNoticeSubmitItRatherThanTheContinueMessage(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.continueMessage = "carry on"
+	self.settleAccess()
+	self.jobs = jobState{manager: jobs.New(nil)}
+	self.jobEnded(jobs.Conclusion{
+		Snapshot: jobs.Snapshot{Name: "build", Command: "just build", State: jobs.StateFailed},
+	})
+
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+
+	if !self.currentTurn.Running() {
+		t.Fatal("expected the second return to start a turn")
+	}
+
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	if messages := submittedTexts(self.recordedEvents); len(messages) != 1 ||
+		!strings.Contains(messages[0], "build") ||
+		strings.Contains(messages[0], "carry on") {
+		t.Errorf("got messages %q, want the ended job notice alone", messages)
+	}
+}
+
 func TestAcceptedInputCanImmediatelyBeRecalled(t *testing.T) {
 	self := &App{currentTurn: Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true})}}
 	history := edit.NewHistory("", historyLimit)
@@ -778,8 +873,8 @@ func submittedTexts(events []agent.Event) []string {
 			texts = append(texts, event.Text)
 			continue
 		}
-		if notice, isSaid := painter.HarnessNotice(event); isSaid {
-			texts = append(texts, notice)
+		if notices, areSaid := painter.HarnessNotices(event); areSaid {
+			texts = append(texts, notices...)
 		}
 	}
 
@@ -3583,74 +3678,76 @@ func TestGoldenFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		".transcript",
 	})
 	for name, extensions := range map[string][]string{
-		"app-plain-resume":         {".jsonl", ".transcript"},
-		"app-plain-turn":           {".jsonl", ".transcript"},
-		"authorisation-url":        {".ansi", ".screen"},
-		"banner":                   {".ansi", ".screen"},
-		"clearing":                 {".ansi", ".screen"},
-		"completion":               {".txt"},
-		"config-reload":            {".ansi", ".screen"},
-		"corrupt-session":          {".txt"},
-		"default-bar":              {".ansi", ".screen"},
-		"feedback":                 {".ansi", ".screen", ".txt"},
-		"fork-message":             {".txt"},
-		"context":                  {".prompt"},
-		"context-drops":            {".prompt"},
-		"context-jobs":             {".prompt"},
-		"context-loopback":         {".prompt"},
-		"context-network":          {".prompt"},
-		"context-network-loopback": {".prompt"},
-		"context-network-print":    {".prompt"},
-		"context-print":            {".prompt"},
-		"context-file-tools":       {".prompt"},
-		"context-no-sockets":       {".prompt"},
-		"context-repository":       {".prompt"},
-		"context-scratch-root":     {".prompt"},
-		"context-yolo":             {".prompt"},
-		"inputblock":               {".ansi", ".screen"},
-		"legacy-alt-enter":         {".ansi", ".screen"},
-		"lifecycle":                {".ansi", ".screen"},
-		"line-resize":              {".screen"},
-		"short-terminal":           {".screen"},
-		"streaming-modes":          {".screen"},
-		"groupings":                {".screen"},
-		"reasonings":               {".ansi", ".screen"},
-		"mermaid-streaming":        {".screen"},
-		"mode-takeback":            {".ansi", ".screen"},
-		"model-arguments":          {".txt"},
-		"new-session":              {".txt"},
-		"ordinary-tab":             {".ansi", ".screen"},
-		"path-grant-lifecycle":     {".ansi", ".screen"},
-		"port-directions":          {".ansi", ".screen"},
-		"path-message":             {".ansi", ".screen"},
-		"user-path-links":          {".ansi", ".screen"},
-		"workspace-paths":          {".ansi", ".screen"},
-		"pending-mode-messages":    {".ansi", ".screen"},
-		"paste":                    {".ansi", ".screen"},
-		"pictures":                 {".ansi", ".screen"},
-		"picker-menu":              {".ansi", ".screen"},
-		"plain-input":              {".ansi", ".screen"},
-		"print-arguments":          {".txt"},
-		"queued-messages":          {".ansi", ".screen"},
-		"readline-bindings":        {".ansi", ".screen"},
-		"resume-arguments":         {".txt"},
-		"resume-model-arguments":   {".txt"},
-		"resume-mode":              {".ansi"},
-		"resume-confinement":       {".ansi"},
-		"running":                  {".ansi", ".screen"},
-		"schedule":                 {".ansi", ".screen"},
-		"segments":                 {".ansi", ".screen"},
-		"signal-restoration":       {".ansi"},
-		"special-links":            {".ansi", ".screen"},
-		"startup":                  {".ansi", ".screen"},
-		"startup-local-config":     {".ansi", ".screen"},
-		"startup-sized":            {".ansi", ".screen"},
-		"startup-sized-output":     {".ansi", ".screen"},
-		"terminal-escape":          {".ansi", ".screen"},
-		"theme-reload":             {".ansi", ".screen"},
-		"usage":                    {".json"},
-		"usage-arguments":          {".txt"},
-		"vertical-movement":        {".ansi", ".screen"},
+		"app-plain-resume":       {".jsonl", ".transcript"},
+		"app-plain-turn":         {".jsonl", ".transcript"},
+		"authorisation-url":      {".ansi", ".screen"},
+		"banner":                 {".ansi", ".screen"},
+		"clearing":               {".ansi", ".screen"},
+		"completion":             {".txt"},
+		"config-reload":          {".ansi", ".screen"},
+		"corrupt-session":        {".txt"},
+		"default-bar":            {".ansi", ".screen"},
+		"feedback":               {".ansi", ".screen", ".txt"},
+		"fork-message":           {".txt"},
+		"context":                {".prompt"},
+		"context-drops":          {".prompt"},
+		"context-jobs":           {".prompt"},
+		"context-network":        {".prompt"},
+		"context-network-print":  {".prompt"},
+		"context-print":          {".prompt"},
+		"context-file-tools":     {".prompt"},
+		"context-no-sockets":     {".prompt"},
+		"context-no-paths":       {".prompt"},
+		"context-path-kinds":     {".prompt"},
+		"context-repository":     {".prompt"},
+		"context-scratch-root":   {".prompt"},
+		"context-yolo":           {".prompt"},
+		"host-command":           {".ansi", ".screen"},
+		"inputblock":             {".ansi", ".screen"},
+		"legacy-alt-enter":       {".ansi", ".screen"},
+		"lifecycle":              {".ansi", ".screen"},
+		"line-resize":            {".screen"},
+		"short-terminal":         {".screen"},
+		"streaming-modes":        {".screen"},
+		"groupings":              {".screen"},
+		"reasonings":             {".ansi", ".screen"},
+		"mermaid-streaming":      {".screen"},
+		"mode-takeback":          {".ansi", ".screen"},
+		"model-arguments":        {".txt"},
+		"new-session":            {".txt"},
+		"ordinary-tab":           {".ansi", ".screen"},
+		"path-grant-lifecycle":   {".ansi", ".screen"},
+		"port-directions":        {".ansi", ".screen"},
+		"path-message":           {".ansi", ".screen"},
+		"user-path-links":        {".ansi", ".screen"},
+		"workspace-paths":        {".ansi", ".screen"},
+		"pending-mode-messages":  {".ansi", ".screen"},
+		"pending-notices":        {".ansi", ".screen"},
+		"paste":                  {".ansi", ".screen"},
+		"pictures":               {".ansi", ".screen"},
+		"picker-menu":            {".ansi", ".screen"},
+		"plain-input":            {".ansi", ".screen"},
+		"print-arguments":        {".txt"},
+		"queued-messages":        {".ansi", ".screen"},
+		"readline-bindings":      {".ansi", ".screen"},
+		"resume-arguments":       {".txt"},
+		"resume-model-arguments": {".txt"},
+		"resume-mode":            {".ansi"},
+		"resume-confinement":     {".ansi"},
+		"running":                {".ansi", ".screen"},
+		"schedule":               {".ansi", ".screen"},
+		"segments":               {".ansi", ".screen"},
+		"signal-restoration":     {".ansi"},
+		"special-links":          {".ansi", ".screen"},
+		"startup":                {".ansi", ".screen"},
+		"startup-local-config":   {".ansi", ".screen"},
+		"startup-sized":          {".ansi", ".screen"},
+		"startup-sized-output":   {".ansi", ".screen"},
+		"terminal-escape":        {".ansi", ".screen"},
+		"theme-reload":           {".ansi", ".screen"},
+		"usage":                  {".json"},
+		"usage-arguments":        {".txt"},
+		"vertical-movement":      {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)
 	}
@@ -4003,7 +4100,7 @@ func TestACapabilitySwappedBackLeavesTheOtherChangesSayingWhatTheySaid(t *testin
 	}
 
 	self.toggleCap(caps.Git)
-	if again, _ := caps.ModeNotice(self.pendingNotices.items[0].state); again != shown {
+	if again, _ := caps.ModeNotice(self.pendingNotices.items[0].state); !slices.Equal(again, shown) {
 		t.Errorf("expected %q, got %q", shown, again)
 	}
 
@@ -4127,7 +4224,7 @@ func TestAModeChangeSaysItselfInTheScrollback(t *testing.T) {
 	}
 }
 
-func TestGoldenPendingModeMessagesAreSeparatedFromStartupAndEachOther(t *testing.T) {
+func TestGoldenPendingModeMessagesAreSeparatedFromStartupAndJoinedToEachOther(t *testing.T) {
 	requireSameVisibleScreen(
 		t,
 		"messages a turn has taken differ from independently submitted messages",
@@ -4153,7 +4250,7 @@ func TestGoldenPendingModeMessagesAreSeparatedFromStartupAndEachOther(t *testing
 	}))
 }
 
-const laterHarnessLine = "The job build exited: complete after 30s."
+const laterHarnessLine = "The job `build` exited: complete after 30s."
 
 func pendingModeMessagesStream(t *testing.T, toggleCount int) string {
 	t.Helper()
@@ -4216,8 +4313,18 @@ func TestGoldenTakingBackAModeChangeDrawsWhatItDrewBefore(t *testing.T) {
 		"lookup complete interaction":     completeInteraction('l', ""),
 		"lookup taken back beside a line": completeInteraction('l', laterHarnessLine),
 		"network complete interaction":    completeInteraction('n', ""),
+		"one of several taken back":       func() string { return modeTakebackFromRunStream(t, 4) },
 	})
 	compareWithGolden(t, "mode-takeback", ".screen", shownPasses(t, map[string]func() string{
+		"11 toggled once past a stopped job":   func() string { return modeTakebackPastAStoppedJob(t, 1) },
+		"12 toggled twice past a stopped job":  func() string { return modeTakebackPastAStoppedJob(t, 2) },
+		"13 toggled thrice past a stopped job": func() string { return modeTakebackPastAStoppedJob(t, 3) },
+		"14 toggled four times past a stopped job": func() string {
+			return modeTakebackPastAStoppedJob(t, 4)
+		},
+		"15 toggled past a job another capability stopped": func() string {
+			return modeTakebackPastAJobAnotherCapabilityStopped(t)
+		},
 		"1 before either chord":  func() string { return modeTakebackStream(t, 'l', 0, "") },
 		"2 after ctrl+x l":       func() string { return modeTakebackStream(t, 'l', 1, "") },
 		"3 after ctrl+x l twice": func() string { return modeTakebackStream(t, 'l', 2, "") },
@@ -4226,7 +4333,78 @@ func TestGoldenTakingBackAModeChangeDrawsWhatItDrewBefore(t *testing.T) {
 		"6 taken back beside a later line": func() string {
 			return modeTakebackStream(t, 'l', 2, laterHarnessLine)
 		},
+		"7 one notice standing":            func() string { return modeTakebackFromRunStream(t, 1) },
+		"8 three notices standing":         func() string { return modeTakebackFromRunStream(t, 3) },
+		"9 the middle notice taken back":   func() string { return modeTakebackFromRunStream(t, 4) },
+		"10 the run carried by a new turn": func() string { return modeTakebackFromRunStream(t, 5) },
 	}))
+}
+
+func modeTakebackPastAStoppedJob(t *testing.T, toggleCount int) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	self := &App{
+		screen: output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines),
+		mode:   caps.NewMode(caps.Read),
+	}
+	self.pendingNotices.add(caps.ModeToggleEvent(caps.Write, caps.Read))
+	self.pendingNotices.add(caps.JobStopEvent("web", caps.Write))
+	self.refreshPendingMessages()
+
+	for range toggleCount {
+		self.toggleCap(caps.Write)
+	}
+	self.screen.End()
+
+	return screenOutput.String()
+}
+
+func modeTakebackPastAJobAnotherCapabilityStopped(t *testing.T) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	self := &App{
+		screen: output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines),
+		mode:   caps.NewMode(caps.Read | caps.Write | caps.Shell),
+	}
+
+	self.toggleCap(caps.Write)
+	self.pendingNotices.add(caps.JobStopEvent("web", caps.Shell))
+	self.toggleCap(caps.Write)
+	self.screen.End()
+
+	return screenOutput.String()
+}
+
+func modeTakebackFromRunStream(t *testing.T, stepCount int) string {
+	t.Helper()
+
+	self, _ := modeFixture(t)
+	var screenOutput strings.Builder
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+	self.inputLine = inputLine
+
+	self.screen.Line("conversation remains in scrollback")
+	self.show(inputLine)
+
+	steps := []func(){
+		func() { self.toggleCap(caps.Write) },
+		func() { self.toggleCap(caps.Lookup) },
+		func() { self.toggleCap(caps.Git) },
+		func() { self.toggleCap(caps.Lookup) },
+		func() { self.settleAccess() },
+	}
+
+	for _, step := range steps[:stepCount] {
+		step()
+		self.show(inputLine)
+	}
+
+	return screenOutput.String()
 }
 
 func modeTakebackStream(t *testing.T, letter rune, toggleCount int, laterLine string) string {
@@ -5648,13 +5826,14 @@ type promptGolden struct {
 	isYolo              bool
 	areJobsGiven        bool
 	hasClipboardDrops   bool
-	hasHostLoopbackPort bool
 	isNetworkGranted    bool
 	isPrinting          bool
 	offeredTools        []string
 	hasNoSockets        bool
 	isRepository        bool
 	readsTheScratchRoot bool
+	hasNoExtraPaths     bool
+	hasEveryPathKind    bool
 }
 
 func TestGoldenTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
@@ -5663,18 +5842,15 @@ func TestGoldenTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 		"context-yolo":          {isYolo: true},
 		"context-jobs":          {areJobsGiven: true},
 		"context-drops":         {hasClipboardDrops: true},
-		"context-loopback":      {hasHostLoopbackPort: true},
 		"context-network":       {isNetworkGranted: true},
 		"context-network-print": {isNetworkGranted: true, isPrinting: true},
 		"context-print":         {isPrinting: true},
 		"context-file-tools":    {offeredTools: []string{"read", "ls", "grep"}},
 		"context-no-sockets":    {hasNoSockets: true},
+		"context-no-paths":      {hasNoExtraPaths: true},
+		"context-path-kinds":    {hasEveryPathKind: true},
 		"context-repository":    {isRepository: true},
 		"context-scratch-root":  {readsTheScratchRoot: true},
-		"context-network-loopback": {
-			hasHostLoopbackPort: true,
-			isNetworkGranted:    true,
-		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			compareSystemPromptWithGolden(t, name, shape)
@@ -5684,6 +5860,7 @@ func TestGoldenTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 
 func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden) {
 	t.Helper()
+	t.Setenv("HOME", "/users/alice")
 
 	workspaceDirectory := t.TempDir()
 	for fileName, body := range map[string]string{
@@ -5718,10 +5895,17 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 	if shape.readsTheScratchRoot {
 		readPaths = []string{"/state/farm", "/state/sessions"}
 	}
-
-	var hostLoopback []uint16
-	if shape.hasHostLoopbackPort {
-		hostLoopback = []uint16{3000}
+	extraPaths := shell.Paths{
+		Read:  readPaths,
+		Write: []string{"/output"},
+		Exec:  []string{"/commands"},
+	}
+	if shape.hasNoExtraPaths {
+		extraPaths = shell.Paths{}
+	}
+	if shape.hasEveryPathKind {
+		extraPaths.Path = []string{"/toolbox"}
+		extraPaths.Home = []string{"/users/alice/.config/git/ignore", "/outside/git/ignore"}
 	}
 
 	currentCaps := caps.Read | caps.Write | caps.Git | caps.Shell
@@ -5730,21 +5914,16 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 	}
 
 	got, _, err := prompt.Load(prompt.Config{
-		GlobalPath:  globalPath,
-		Workspace:   workspace,
-		SessionName: "brave-otter",
-		SessionsDir: "/state/sessions",
-		SessionDir:  "/state/sessions/brave-otter",
-		ConfigFile:  "/config/config.toml",
-		TmpDir:      "/state/farm/brave-otter",
-		HomeDir:     "/state/home",
-		CurrentCaps: currentCaps,
-		ExtraPaths: shell.Paths{
-			HostLoopback: hostLoopback,
-			Read:         readPaths,
-			Write:        []string{"/output"},
-			Exec:         []string{"/commands"},
-		},
+		GlobalPath:     globalPath,
+		Workspace:      workspace,
+		SessionName:    "brave-otter",
+		SessionsDir:    "/state/sessions",
+		SessionDir:     "/state/sessions/brave-otter",
+		ConfigFile:     "/config/config.toml",
+		TmpDir:         "/state/farm/brave-otter",
+		HomeDir:        "/state/home",
+		CurrentCaps:    currentCaps,
+		ExtraPaths:     extraPaths,
 		DropsDirectory: dropsDirectory,
 		Skills: []skill.Skill{{
 			Name:        "golden",
@@ -5973,12 +6152,115 @@ func streamThoughts(t *testing.T, rendering output.ReasoningRendering, streaming
 	return streamThrough(t, rig, thoughtEntries(t))
 }
 
+const noticeMidThoughtScenario = "notice-mid-thought.jsonl"
+
+func noticeMidThoughtEntries(t *testing.T) []replayEntry {
+	t.Helper()
+
+	return readJournal(t, filepath.Join("testdata", "input", noticeMidThoughtScenario))
+}
+
+func streamThroughHoldingTheNotice(t *testing.T, rig *replayRig, entries []replayEntry, isHeld bool) string {
+	t.Helper()
+
+	rig.chat.currentTurn = Turn{Stream: testRunningTurnStream(), painter: rig.chat.newPainter(true)}
+	rig.chat.screen.ReportProgress(true)
+
+	var held *agent.Event
+
+	for _, entry := range entries {
+		event := *entry.Event
+
+		if isHeld && event.Kind == jobrecord.Ended {
+			held = entry.Event
+			continue
+		}
+
+		if event.Kind == agent.ModelMessageEvent || event.Kind == agent.ModelReasoningEvent {
+			pieces := slices.Collect(deltaSized(event.Text))
+			for at, piece := range pieces {
+				if held != nil && at == len(pieces)/2 {
+					rig.chat.recordedEvents = append(rig.chat.recordedEvents, *held)
+					rig.chat.currentTurn.painter.DrawEvent(*held)
+					held = nil
+				}
+				rig.chat.currentTurn.painter.DrawDelta(agent.Delta{Kind: event.Kind, Text: piece})
+			}
+		}
+
+		rig.chat.recordedEvents = append(rig.chat.recordedEvents, event)
+		rig.chat.currentTurn.painter.DrawEvent(event)
+
+		if rig.chat.currentTurn.painter.Stale() {
+			rig.chat.redraw()
+		}
+	}
+
+	rig.chat.currentTurn.painter.Close(dynamic.Done)
+	rig.chat.screen.End()
+	rig.chat.screen.ReportProgress(false)
+
+	return rig.drawn()
+}
+
+func streamOneThought(
+	t *testing.T,
+	rendering output.ReasoningRendering,
+	streamingMode output.StreamingMode,
+	isInterrupted bool,
+) string {
+	t.Helper()
+
+	rig := newThinkingRig(t, rendering, false, replayColumns)
+	rig.chat.display.streamingMode = streamingMode
+
+	return streamThroughHoldingTheNotice(t, rig, noticeMidThoughtEntries(t), isInterrupted)
+}
+
 func everyThinkingWidth() map[string]int {
 	return map[string]int{
 		"wide":       replayColumns,
 		"narrow":     narrowColumns,
 		"tiny":       tinyColumns,
 		"one column": oneColumn,
+	}
+}
+
+func TestANoticeArrivingMidThoughtKeepsEveryWordOfIt(t *testing.T) {
+	for streamingName, streamingMode := range everyStreamingMode() {
+		t.Run(streamingName, func(t *testing.T) {
+			whole := shown(t, streamOneThought(t, output.ReasoningMarkdown, streamingMode, false), replayColumns)
+			drawn := shown(t, streamOneThought(t, output.ReasoningMarkdown, streamingMode, true), replayColumns)
+
+			for row := range strings.SplitSeq(whole, "\n") {
+				if row = strings.TrimSpace(row); row == "" {
+					continue
+				}
+				if !strings.Contains(drawn, row) {
+					t.Errorf("the notice took %q out of the thought:\n%s", row, drawn)
+				}
+			}
+		})
+	}
+}
+
+func TestANoticeArrivingMidThoughtIsRestoredWhereItArrived(t *testing.T) {
+	for name, rendering := range everyReasoningRendering() {
+		for streamingName, streamingMode := range everyStreamingMode() {
+			t.Run(name+" "+streamingName, func(t *testing.T) {
+				replayed := replayInto(
+					newThinkingRig(t, rendering, false, replayColumns),
+					noticeMidThoughtEntries(t),
+				)
+
+				requireSameVisibleScreen(
+					t,
+					"a thought a notice arrived during differs from the same conversation replayed",
+					streamOneThought(t, rendering, streamingMode, true),
+					replayed,
+				)
+			})
+		}
 	}
 }
 
@@ -6005,6 +6287,9 @@ func TestGoldenEveryReasoningRenderingDrawsAThoughtAsItSays(t *testing.T) {
 			}
 			writtenPasses[name+" streamed "+streamingName] = func() string {
 				return streamThoughts(t, rendering, streamingMode)
+			}
+			shownPasses[name+" under a notice streamed "+streamingName] = func() string {
+				return shown(t, streamOneThought(t, rendering, streamingMode, true), replayColumns)
 			}
 		}
 	}
@@ -6114,6 +6399,26 @@ func TestGoldenATallRegionOnAShortTerminalIsRepairedRatherThanFrozen(t *testing.
 			drawn,
 		)
 	}
+
+	noticeBeside := func(openTurn func(*testing.T, *bytes.Buffer) (*App, *edit.Input)) string {
+		var screenOutput bytes.Buffer
+		self, inputLine := openTurn(t, &screenOutput)
+		self.jobEnded(endedJobConclusion())
+		self.show(inputLine)
+
+		return screenOutput.String()
+	}
+
+	frozen := noticeBeside(frozenTallTurn)
+
+	requireSameVisibleScreen(
+		t,
+		"a notice beside a region taller than the terminal differs from the same one with room to draw",
+		noticeBeside(roomyTallTurn),
+		frozen,
+	)
+
+	passes["a notice beside a frozen region"] = func() string { return shown(t, frozen, replayColumns) }
 
 	compareWithGolden(t, "short-terminal", ".screen", passes)
 }
@@ -7009,11 +7314,10 @@ func TestGoldenTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 	wordyConfig := &startup.LocalConfig{Name: "oh.toml", Settings: []string{
 		"caps.default",
 		"editor.command",
-		"input.continue",
 		"model.round_robin",
 		"ports.hostname",
-		"sandbox.host_loopback",
 		"skills.include",
+		"ui.currency",
 		"ui.streaming",
 	}}
 
@@ -7052,7 +7356,7 @@ func TestGoldenLocalConfigsDrawMegathoroughly(t *testing.T) {
 		"mixed global and local settings": {
 			LocalConfig: &startup.LocalConfig{
 				Name:     "oh.toml",
-				Settings: []string{"input.continue", "sandbox.write", "snippets.review"},
+				Settings: []string{"sandbox.write", "snippets.review", "ui.currency"},
 			},
 		},
 		"many local settings": {
@@ -7063,17 +7367,16 @@ func TestGoldenLocalConfigsDrawMegathoroughly(t *testing.T) {
 					"bar.top.center",
 					"caps.default",
 					"editor.command",
-					"input.continue",
 					"model.round_robin",
 					"ports.hostname",
 					"provider.ollama.host",
-					"sandbox.host_loopback",
 					"sandbox.read",
 					"sandbox.write",
 					"skills.exclude",
 					"skills.include",
 					"snippets.review",
 					"tool.output",
+					"ui.currency",
 					"ui.grouping",
 					"ui.reasoning",
 					"ui.streaming",
@@ -7414,6 +7717,14 @@ func writeLiveConfig(t *testing.T, path string, body string) {
 	}
 }
 
+func writeSnippetFile(t *testing.T, path string, prompt string) {
+	t.Helper()
+
+	if err := os.WriteFile(path, []byte(prompt+"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func prepareLiveConfig(t *testing.T, self *App, path string) {
 	t.Helper()
 	prepareLiveConfigSources(t, self, config.Source{Path: path})
@@ -7508,6 +7819,46 @@ func TestTheReloadConfirmationNamesEveryFileAndWhatItChanged(t *testing.T) {
 			changes: []config.SourceChange{{Path: "oh.toml"}},
 			want:    "Configuration reloaded automatically\noh.toml: no setting changed",
 		},
+		"a grant this run will never read": {
+			changes: []config.SourceChange{
+				{Path: "config.toml", Settings: []string{"sandbox.read", "sandbox.write"}},
+			},
+			want: "Configuration reloaded automatically\n" +
+				"config.toml: sandbox.read, sandbox.write\n" +
+				"sandbox.read, sandbox.write land when oh next starts",
+		},
+		"a grant withdrawn is no more immediate": {
+			changes: []config.SourceChange{
+				{Path: "config.toml", Settings: []string{"sandbox.read"}, IsRemoved: true},
+			},
+			want: "Configuration reloaded automatically\n" +
+				"config.toml: gone, dropping sandbox.read\n" +
+				"sandbox.read lands when oh next starts",
+		},
+		"both waits beside a setting that landed": {
+			changes: []config.SourceChange{
+				{Path: "config.toml", Settings: []string{
+					"caps.default",
+					"model.round_robin",
+					"sandbox.exec",
+					"ui.streaming",
+				}},
+			},
+			want: "Configuration reloaded automatically\n" +
+				"config.toml: caps.default, model.round_robin, sandbox.exec, ui.streaming\n" +
+				"sandbox.exec lands when oh next starts\n" +
+				"caps.default, model.round_robin land in a new session",
+		},
+		"one setting named by two files is said once": {
+			changes: []config.SourceChange{
+				{Path: "config.toml", Settings: []string{"skills.include"}},
+				{Path: "oh.toml", Settings: []string{"skills.include"}},
+			},
+			want: "Configuration reloaded automatically\n" +
+				"config.toml: skills.include\n" +
+				"oh.toml: skills.include\n" +
+				"skills.include lands when oh next starts",
+		},
 	}
 
 	for name, testCase := range cases {
@@ -7541,6 +7892,7 @@ func TestGoldenReloadingAThemeReplaysTheWholeConversation(t *testing.T) {
 		"inherited theme restored":     func() string { return inheritedThemeReloadStream(t) },
 		"invalid theme left untouched": func() string { return invalidThemeReloadStream(t) },
 		"every palette role":           func() string { return themePaletteStream(t) },
+		"decorated palette roles":      func() string { return decoratedThemeStream(t) },
 	}
 	compareWithGolden(t, "theme-reload", ".ansi", passes)
 	compareWithGolden(t, "theme-reload", ".screen", shownPasses(t, passes))
@@ -7730,6 +8082,8 @@ func themePaletteStream(t *testing.T) string {
 	theme.SyntaxType = "#080808"
 	theme.SyntaxLiteral = "#090909"
 	theme.SyntaxOperator = "#0a0a0a"
+	theme.SyntaxKeyword = "#0b0b0b"
+	theme.Skill = "#0e0e0e"
 	theme.User = "#0c0c0c"
 	theme.Harness = "#0d0d0d"
 	restoreTheme := style.ApplyTheme(theme)
@@ -7746,8 +8100,32 @@ func themePaletteStream(t *testing.T) string {
 		style.Type("syntax type"),
 		style.Literal("syntax literal"),
 		style.Operator("syntax operator"),
+		style.Keyword("syntax keyword"),
+		style.Skill("skill"),
 		style.User("user background"),
 		style.Harness("harness background"),
+	}, "\r\n") + "\r\n"
+}
+
+func decoratedThemeStream(t *testing.T) string {
+	t.Helper()
+	theme := style.DefaultTheme()
+	theme.Accent = "#030303 italic"
+	theme.Dim = "underline"
+	theme.StatusInfo = "#060606 underline:curly underline:#0a0b0c"
+	theme.StatusDanger = "#070707 bold strikethrough"
+	theme.SyntaxType = "faint overline"
+	theme.User = "#0c0c0c italic underline"
+	restoreTheme := style.ApplyTheme(theme)
+	defer restoreTheme()
+
+	return strings.Join([]string{
+		style.Subject("italic accent"),
+		style.Dim("underlined terminal default"),
+		style.Info("curly coloured underline"),
+		style.Failure("bold strikethrough"),
+		style.Type("faint overline"),
+		style.User("decorated user background"),
 	}, "\r\n") + "\r\n"
 }
 
@@ -8052,9 +8430,12 @@ func drawUserPathLinks(t *testing.T, columns int) string {
 	t.Helper()
 
 	rig := newReplayRig(t, columns)
+	if err := os.WriteFile(filepath.Join(rig.workspace.GetDir(), "spaced target.txt"), nil, 0o600); err != nil {
+		t.Fatalf("prepare spaced path: %v", err)
+	}
 	rig.chat.recordedEvents = []agent.Event{{
 		Kind: agent.UserMessageEvent,
-		Text: "read target.txt and cmd/oh/line/render.go:12:3; also /etc/hosts and [the target](https://example.test).",
+		Text: "read target.txt and spaced target.txt and cmd/oh/line/render.go:12:3; also /etc/hosts and [the target](https://example.test).",
 	}}
 	rig.chat.replay()
 
@@ -8492,32 +8873,39 @@ const (
 	configReloadWatchFailure
 	configReloadReplay
 	configReloadSettingThatIsNotLive
+	configReloadGrantThatWaitsForTheNextRun
 	configReloadSnippets
+	configReloadSnippetFile
+	configReloadSharedSnippetFile
+	configReloadSnippetFileTheConfigNames
+	configReloadWithoutASettingChange
 	configReloadDismissedConfirmation
 	configReloadAutoDismissedConfirmation
 	configReloadPreservedFailure
 )
 
 func TestGoldenReloadingConfigDrawsEveryVisibleState(t *testing.T) {
-	passes := map[string]func() string{
-		"valid revision":                   func() string { return configReloadStream(t, configReloadValid) },
-		"invalid revision then recovery":   func() string { return configReloadStream(t, configReloadInvalidRecovery) },
-		"deleted config restores defaults": func() string { return configReloadStream(t, configReloadDeletion) },
-		"filesystem watch failure":         func() string { return configReloadStream(t, configReloadWatchFailure) },
-		"replayed failure and recovery":    func() string { return configReloadStream(t, configReloadReplay) },
-		"reloaded snippets":                func() string { return configReloadStream(t, configReloadSnippets) },
-		"confirmation dismissed by typing": func() string {
-			return configReloadStream(t, configReloadDismissedConfirmation)
-		},
-		"confirmation dismissed automatically": func() string {
-			return configReloadStream(t, configReloadAutoDismissedConfirmation)
-		},
-		"failure showing when the reload lands": func() string {
-			return configReloadStream(t, configReloadPreservedFailure)
-		},
-		"revision to a setting that only a restart picks up": func() string {
-			return configReloadStream(t, configReloadSettingThatIsNotLive)
-		},
+	scenarios := map[string]configReloadScenario{
+		"valid revision":                                    configReloadValid,
+		"invalid revision then recovery":                    configReloadInvalidRecovery,
+		"deleted config restores defaults":                  configReloadDeletion,
+		"filesystem watch failure":                          configReloadWatchFailure,
+		"replayed failure and recovery":                     configReloadReplay,
+		"reloaded snippets":                                 configReloadSnippets,
+		"reloaded snippet file":                             configReloadSnippetFile,
+		"a snippet file two snippets share":                 configReloadSharedSnippetFile,
+		"a snippet file the revision itself names":          configReloadSnippetFileTheConfigNames,
+		"a revision changing no setting":                    configReloadWithoutASettingChange,
+		"confirmation dismissed by typing":                  configReloadDismissedConfirmation,
+		"confirmation dismissed automatically":              configReloadAutoDismissedConfirmation,
+		"failure showing when the reload lands":             configReloadPreservedFailure,
+		"revision to a setting only a new session picks up": configReloadSettingThatIsNotLive,
+		"a grant that waits for the next run":               configReloadGrantThatWaitsForTheNextRun,
+	}
+
+	passes := make(map[string]func() string, len(scenarios))
+	for name, scenario := range scenarios {
+		passes[name] = func() string { return configReloadStream(t, scenario) }
 	}
 
 	compareWithGolden(t, "config-reload", ".ansi", passes)
@@ -8527,8 +8915,8 @@ func TestGoldenReloadingConfigDrawsEveryVisibleState(t *testing.T) {
 func TestEphemeralInterfaceFeedbackStaysOutOfConversationHistory(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
 	writeLiveConfig(t, path, `
-		[input]
-		continue = "first"
+		[ui]
+		currency = "GBP"
 	`)
 
 	directory := t.TempDir()
@@ -8564,13 +8952,13 @@ func TestEphemeralInterfaceFeedbackStaysOutOfConversationHistory(t *testing.T) {
 	self.handleCommand("/foo")
 	self.handleCommand("/help")
 	writeLiveConfig(t, path, `
-		[input]
-		continue = "second"
+		[ui]
+		currency = "EUR"
 	`)
 	settleLiveConfig(t, self)
 	writeLiveConfig(t, path, `
-		[input]
-		continue = "third"
+		[ui]
+		currency = "JPY"
 	`)
 	settleLiveConfig(t, self)
 
@@ -8686,8 +9074,8 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 
 	path := filepath.Join(t.TempDir(), "config.toml")
 	writeLiveConfig(t, path, `
-		[input]
-		continue = "first"
+		[ui]
+		currency = "GBP"
 
 		[bar.top]
 		left = [{ segment = "session-name" }]
@@ -8726,8 +9114,8 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 		return screenOutput.String()
 	case configReloadSnippets:
 		writeLiveConfig(t, path, `
-			[input]
-			continue = "first"
+			[ui]
+			currency = "GBP"
 
 			[snippets]
 			review = { prompt = "Review the changes.", description = "Review the working tree." }
@@ -8746,13 +9134,126 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 		self.handleCommand("//help")
 		self.show(inputLine)
 		return screenOutput.String()
+	case configReloadSnippetFile:
+		snippetPath := filepath.Join(filepath.Dir(path), "review.md")
+		writeSnippetFile(t, snippetPath, "Review the first revision.")
+		writeLiveConfig(t, path, `
+			[ui]
+			currency = "GBP"
+
+			[snippets]
+			review = { file = "review.md", description = "Review the working tree." }
+
+			[bar.top]
+			left = [{ segment = "session-name" }]
+			center = []
+			right = []
+
+			[bar.bottom]
+			left = []
+			center = []
+			right = []
+		`)
+		settleLiveConfig(t, self)
+		writeSnippetFile(t, snippetPath, "Review the reloaded revision.")
+		settleLiveConfig(t, self)
+		self.show(inputLine)
+		return screenOutput.String()
+	case configReloadSharedSnippetFile:
+		snippetPath := filepath.Join(filepath.Dir(path), "review.md")
+		writeSnippetFile(t, snippetPath, "Review the first revision.")
+		writeLiveConfig(t, path, `
+			[ui]
+			currency = "GBP"
+
+			[snippets]
+			check = { file = "review.md", description = "Check the working tree." }
+			review = { file = "review.md", description = "Review the working tree." }
+
+			[bar.top]
+			left = [{ segment = "session-name" }]
+			center = []
+			right = []
+
+			[bar.bottom]
+			left = []
+			center = []
+			right = []
+		`)
+		settleLiveConfig(t, self)
+		writeSnippetFile(t, snippetPath, "Review the reloaded revision.")
+		settleLiveConfig(t, self)
+		self.show(inputLine)
+		return screenOutput.String()
+	case configReloadSnippetFileTheConfigNames:
+		writeSnippetFile(t, filepath.Join(filepath.Dir(path), "review.md"), "Review the changes.")
+		writeLiveConfig(t, path, `
+			[ui]
+			currency = "GBP"
+
+			[snippets]
+			review = { file = "review.md", description = "Review the working tree." }
+
+			[bar.top]
+			left = [{ segment = "session-name" }]
+			center = []
+			right = []
+
+			[bar.bottom]
+			left = []
+			center = []
+			right = []
+		`)
+		settleLiveConfig(t, self)
+		self.show(inputLine)
+		return screenOutput.String()
+	case configReloadWithoutASettingChange:
+		writeLiveConfig(t, path, `
+			# The currency below is the one it already had.
+			[ui]
+			currency = "GBP"
+
+			[bar.top]
+			left = [{ segment = "session-name" }]
+			center = []
+			right = []
+
+			[bar.bottom]
+			left = []
+			center = []
+			right = []
+		`)
+		settleLiveConfig(t, self)
+		self.show(inputLine)
+		return screenOutput.String()
 	case configReloadSettingThatIsNotLive:
 		writeLiveConfig(t, path, `
-			[input]
-			continue = "first"
+			[ui]
+			currency = "GBP"
 
 			[model]
 			round_robin = ["ollama/example"]
+
+			[bar.top]
+			left = [{ segment = "session-name" }]
+			center = []
+			right = []
+
+			[bar.bottom]
+			left = []
+			center = []
+			right = []
+		`)
+		settleLiveConfig(t, self)
+		self.show(inputLine)
+		return screenOutput.String()
+	case configReloadGrantThatWaitsForTheNextRun:
+		writeLiveConfig(t, path, `
+			[ui]
+			currency = "GBP"
+
+			[sandbox]
+			read = ["~/Dropbox/iso"]
 
 			[bar.top]
 			left = [{ segment = "session-name" }]
@@ -8779,8 +9280,8 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 	}
 
 	writeLiveConfig(t, path, `
-		[input]
-		continue = "second"
+		[ui]
+		currency = "EUR"
 
 		[bar.top]
 		left = []
@@ -10338,7 +10839,7 @@ func TestSandboxToHostChangeBecomesPendingAccessAndUpdatesTheModel(t *testing.T)
 	}
 
 	self.settleAccess()
-	if message := self.accessMessage(); !strings.Contains(message, "8080") {
+	if message := self.takeSettledNotes(); !strings.Contains(message, "8080") {
 		t.Errorf("model access did not name the port: %q", message)
 	}
 	if message := grants.Inject(); message != "" {
@@ -10479,13 +10980,11 @@ func FuzzPendingPathGrantsSayWhatTheModelHasNotBeenTold(fuzzer *testing.F) {
 				self.handleCommand("/revoke " + path)
 			case 5:
 				self.settleAccess()
-				self.accessMessage()
 			}
 			assertPendingPathGrants(t, self, grants, paths)
 		}
 
 		self.settleAccess()
-		self.accessMessage()
 		assertPendingPathGrants(t, self, grants, paths)
 		if len(self.pendingNotices.items) != 0 {
 			t.Fatalf("a settled turn left %d pending messages", len(self.pendingNotices.items))
@@ -11650,9 +12149,12 @@ type sessionGoldenTurn struct {
 	ToggleDuringModeTurn      string                  `toml:"toggle-during-mode-turn"`
 	CancelAfterToolToggle     bool                    `toml:"cancel-after-tool-toggle"`
 	EndJobAfterToolRequest    string                  `toml:"end-job-after-tool-request"`
+	EndJobAfterReasoningEvent string                  `toml:"end-job-after-reasoning-event"`
 }
 
 const exposeToolName = "expose"
+
+const notifyToolName = "notify"
 
 const printedSessionIsImpossible = "this scenario drives the interface, which a printed session has none of\n"
 
@@ -11663,7 +12165,9 @@ func (self sessionGoldenScenario) usesTheInterface() bool {
 		return true
 	}
 
-	return self.ToggleBeforeFirst != "" || self.EndJobBeforeFirst != "" || self.FirstTurn.usesTheInterface()
+	return self.ToggleBeforeFirst != "" || self.EndJobBeforeFirst != "" ||
+		self.RunBeforeFirst != "" || self.JobHoldingWorkspace != "" ||
+		self.FirstTurn.usesTheInterface()
 }
 
 func (self sessionGoldenTurn) usesTheInterface() bool {
@@ -11672,6 +12176,7 @@ func (self sessionGoldenTurn) usesTheInterface() bool {
 		self.ToggleAfterToolRequest != "" ||
 		self.ToggleDuringModeTurn != "" ||
 		self.EndJobAfterToolRequest != "" ||
+		self.EndJobAfterReasoningEvent != "" ||
 		self.FlushAfterToolRequest ||
 		self.CancelAfterQueueing ||
 		len(self.QueueAfterToolRequest) > 0 ||
@@ -11683,6 +12188,7 @@ type sessionGoldenTool struct {
 	Name                  string   `toml:"name"`
 	Outputs               []string `toml:"outputs"`
 	Image                 string   `toml:"image"`
+	ImageByteCount        int64    `toml:"image-bytes"`
 	StateKey              string   `toml:"state-key"`
 	ShellWithheld         bool     `toml:"shell-withheld"`
 	ShouldWithholdNetwork bool     `toml:"network-withheld"`
@@ -11697,25 +12203,27 @@ type sessionGoldenTool struct {
 }
 
 type sessionGoldenScenario struct {
-	Name               string              `toml:"-"`
-	Provider           string              `toml:"provider"`
-	Model              string              `toml:"model"`
-	Effort             string              `toml:"effort"`
-	IsFast             bool                `toml:"fast"`
-	IdleAfter          string              `toml:"idle-after"`
-	Grouping           output.Grouping     `toml:"grouping"`
-	Hostname           string              `toml:"hostname"`
-	FirstTokenError    string              `toml:"first-token-error"`
-	CredentialRefresh  string              `toml:"credential-refresh"`
-	ToggleBeforeFirst  string              `toml:"toggle-before-first"`
-	Conditions         string              `toml:"conditions"`
-	ConditionsOnResume string              `toml:"conditions-on-resume"`
-	EndJobBeforeFirst  string              `toml:"end-job-before-first"`
-	Tools              []sessionGoldenTool `toml:"tool"`
-	FirstTurn          sessionGoldenTurn   `toml:"first"`
-	ResumeTurn         sessionGoldenTurn   `toml:"resume"`
-	CredentialsPath    string              `toml:"-"`
-	CredentialRecovery func()              `toml:"-"`
+	Name                string              `toml:"-"`
+	Provider            string              `toml:"provider"`
+	Model               string              `toml:"model"`
+	Effort              string              `toml:"effort"`
+	IsFast              bool                `toml:"fast"`
+	IdleAfter           string              `toml:"idle-after"`
+	Grouping            output.Grouping     `toml:"grouping"`
+	Hostname            string              `toml:"hostname"`
+	FirstTokenError     string              `toml:"first-token-error"`
+	CredentialRefresh   string              `toml:"credential-refresh"`
+	ToggleBeforeFirst   string              `toml:"toggle-before-first"`
+	Conditions          string              `toml:"conditions"`
+	ConditionsOnResume  string              `toml:"conditions-on-resume"`
+	EndJobBeforeFirst   string              `toml:"end-job-before-first"`
+	JobHoldingWorkspace string              `toml:"job-holding-workspace"`
+	RunBeforeFirst      string              `toml:"run-before-first"`
+	Tools               []sessionGoldenTool `toml:"tool"`
+	FirstTurn           sessionGoldenTurn   `toml:"first"`
+	ResumeTurn          sessionGoldenTurn   `toml:"resume"`
+	CredentialsPath     string              `toml:"-"`
+	CredentialRecovery  func()              `toml:"-"`
 }
 
 func TestGoldenScenariosProduceCanonicalOutputs(t *testing.T) {
@@ -11953,7 +12461,7 @@ func newSessionGoldenPorts(sessionName string, hostnameTemplate string) *portgra
 	return portgrant.NewHostToSandbox(portgrant.HostToSandboxExposer{
 		Expose: func(uint16) error { return nil },
 		Hide:   func(uint16) error { return nil },
-	}, hostname, nil)
+	}, hostname)
 }
 
 func newSessionGoldenTools(
@@ -11993,6 +12501,11 @@ func newSessionGoldenTools(
 			continue
 		}
 
+		if specification.Name == notifyToolName {
+			tools = append(tools, notify.New(func(string) bool { return true }))
+			continue
+		}
+
 		if specification.ShouldRefuseLookup {
 			broker := newRefusingAskBroker(t)
 			tools = append(tools, lookup.New(
@@ -12029,7 +12542,7 @@ func newSessionGoldenTools(
 				return json.Unmarshal(state, &callCount)
 			})
 		}
-		attachment, attachmentMetrics := sessionGoldenImage(t, specification.Image)
+		attachment, attachmentMetrics := sessionGoldenImage(t, specification.Image, specification.ImageByteCount)
 		tools = append(tools, builder.Run(func(context.Context, struct{}) (tool.ToolCallResult, error) {
 			if callCount >= len(specification.Outputs) {
 				return tool.ToolCallResult{}, fmt.Errorf("tool %s has no output for call %d", specification.Name, callCount+1)
@@ -12077,11 +12590,14 @@ func newSessionGoldenLargeReadTool(t *testing.T) tool.Tool {
 	return read.New(root, file.NewSnapshots())
 }
 
-func sessionGoldenImage(t *testing.T, size string) (tool.Image, tool.ToolCallMetrics) {
+func sessionGoldenImage(t *testing.T, size string, byteCount int64) (tool.Image, tool.ToolCallMetrics) {
 	t.Helper()
 
 	if size == "" {
 		return tool.Image{}, tool.ToolCallMetrics{}
+	}
+	if byteCount <= 0 {
+		t.Fatalf("scenario image %q has no byte count", size)
 	}
 
 	var width, height int
@@ -12099,7 +12615,7 @@ func sessionGoldenImage(t *testing.T, size string) (tool.Image, tool.ToolCallMet
 
 	imageMetrics := tool.ToolCallMetrics{
 		Kind:            tool.MetricImage,
-		Bytes:           int64(encoded.Len()),
+		Bytes:           byteCount,
 		EstimatedTokens: util.EstimateImageTokenCount(imageutil.Fit(width, height)),
 	}
 
@@ -12575,21 +13091,33 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		screen:        scenario.screen(&firstScreenOutput),
 		recorder:      record.New(log),
 		hostToSandbox: goldenPorts,
+		display:       displayState{modelName: scenario.Model},
 	}
 	if scenario.Provider == model.CodexProvider {
 		firstHarness.openingEvents = []agent.Event{model.FastModeEvent(scenario.IsFast)}
 	}
 	firstHarness.conditions = conditions.NewRestored(firstConditions, firstConditions)
 	settleSessionGoldenMode(firstHarness)
+	if scenario.JobHoldingWorkspace != "" {
+		startSessionGoldenJobHoldingTheWorkspace(t, firstHarness, scenario.JobHoldingWorkspace)
+	}
 	if scenario.ToggleBeforeFirst != "" {
 		toggleSessionGoldenCaps(t, firstHarness, scenario.ToggleBeforeFirst)
 		firstHarness.settleAccess()
-		firstAssistant.AddUserMessage(firstHarness.mode.Inject())
+		firstAssistant.AddUserMessage(firstHarness.takeSettledNotes())
+	}
+	if scenario.JobHoldingWorkspace != "" {
+		settleSessionGoldenJob(t, firstHarness, scenario.JobHoldingWorkspace)
 	}
 	if scenario.EndJobBeforeFirst != "" {
 		firstHarness.jobEnded(endedSessionGoldenJob(scenario.EndJobBeforeFirst))
 		firstHarness.settleAccess()
-		firstAssistant.AddUserMessage(firstHarness.takeEndedJobsNote())
+		firstAssistant.AddUserMessage(firstHarness.takeSettledNotes())
+	}
+	if scenario.RunBeforeFirst != "" {
+		firstHarness.holdNotice(sessionGoldenHostCommand(scenario.RunBeforeFirst))
+		firstHarness.settleAccess()
+		firstAssistant.AddUserMessage(firstHarness.takeSettledNotes())
 	}
 	firstHarness.currentTurn = Turn{Stream: testRunningTurnStream(), painter: firstHarness.newPainter(true)}
 	firstTurns := runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
@@ -12647,6 +13175,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		recorder:       resumedRecorder,
 		recordedEvents: slices.Clone(storedSession.Events),
 		hostToSandbox:  goldenPorts,
+		display:        displayState{modelName: scenario.Model},
 	}
 	settleResumedSessionGoldenMode(resumedHarness, storedSession.Events)
 	restoredEvents := restoreSessionGoldenConditions(
@@ -12704,6 +13233,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		agent:          resumedAssistant,
 		screen:         scenario.screen(&replayOutput),
 		recordedEvents: storedSession.Events,
+		display:        displayState{modelName: scenario.Model},
 	}
 	replayHarness.replay()
 
@@ -12720,6 +13250,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		screen:         scenario.screen(&printedReplayOutput).AppendOnly(),
 		recordedEvents: storedSession.Events,
 		runMode:        runMode{isPrinting: true},
+		display:        displayState{modelName: scenario.Model},
 	}
 	printedReplayHarness.replay()
 
@@ -12972,6 +13503,33 @@ func settleResumedSessionGoldenMode(testHarness *App, events []agent.Event) {
 	testHarness.settledCaps = resumedCaps
 }
 
+const sessionGoldenWorkspace = "/workspace"
+
+func startSessionGoldenJobHoldingTheWorkspace(t *testing.T, testHarness *App, name string) {
+	t.Helper()
+
+	manager := jobs.New(stoppableRunner{})
+	t.Cleanup(func() { _ = manager.Close() })
+
+	testHarness.jobs = jobState{manager: manager}
+	testHarness.workspace = work.At(sessionGoldenWorkspace)
+
+	policy := sandbox.Policy{Write: []string{sessionGoldenWorkspace}}
+	if _, err := manager.Start(t.Context(), name, ".", "just "+name, policy); err != nil {
+		t.Fatalf("the job did not start: %v", err)
+	}
+}
+
+func settleSessionGoldenJob(t *testing.T, testHarness *App, name string) {
+	t.Helper()
+
+	if _, err := testHarness.jobs.manager.Wait(t.Context(), []string{name}); err != nil {
+		t.Fatalf("the stopped job never settled: %v", err)
+	}
+
+	testHarness.jobs.manager.PruneFinished()
+}
+
 func toggleSessionGoldenCaps(t *testing.T, testHarness *App, flags string) {
 	t.Helper()
 
@@ -13026,6 +13584,7 @@ func drawPrintedSessionGoldenTurn(
 		screen:   scenario.screen(&screenOutput).AppendOnly(),
 		recorder: record.New(log),
 		runMode:  runMode{isPrinting: true},
+		display:  displayState{modelName: scenario.Model},
 	}
 	if len(restoredEvents) > 0 {
 		printedHarness.recordedEvents = slices.Clone(restoredEvents)
@@ -13145,6 +13704,9 @@ func runSessionGoldenTurn(
 			if reasoningEvents == turn.CancelAfterReasoningEvent {
 				interruptWithStopKey()
 			}
+			if reasoningEvents == 1 && turn.EndJobAfterReasoningEvent != "" {
+				testHarness.jobEnded(endedSessionGoldenJob(turn.EndJobAfterReasoningEvent))
+			}
 		}
 		if update.Event != nil && update.Event.Kind == agent.RetryingEvent {
 			retryNotices++
@@ -13207,6 +13769,13 @@ func takeFirstSessionGoldenToolRequest(
 	if turn.EndJobAfterToolRequest != "" {
 		testHarness.jobEnded(endedSessionGoldenJob(turn.EndJobAfterToolRequest))
 	}
+}
+
+func sessionGoldenHostCommand(command string) agent.Event {
+	return hostcommand.RanEvent(hostcommand.Result{
+		Command: command,
+		Output:  " M cmd/oh/draw.go\n?? notes.txt\n",
+	})
 }
 
 func endedSessionGoldenJob(name string) jobs.Conclusion {
@@ -14000,8 +14569,20 @@ func TestGoldenAPasteDrawsWhatItDrewBefore(t *testing.T) {
 		"3 after the paste": func() string {
 			return pasteStream(t, "pasted text", pasteFinished)
 		},
-		"4 a paste of many lines": func() string {
-			return pasteStream(t, "first line\nsecond line\nthird line", pasteFinished)
+		"4 exactly five lines": func() string {
+			return pasteStream(t, "first line\nsecond line\nthird line\nfourth line\nfifth line", pasteFinished)
+		},
+		"4a six prose lines": func() string {
+			return pasteStream(t, "first line\nsecond line\nthird line\nfourth line\nfifth line\nsixth line", pasteFinished)
+		},
+		"4b ambiguous code-like text": func() string {
+			return pasteStream(t, "const greet = (name) => {\n  const message = `Hello ${name}`\n  console.log(message)\n  return message\n}\ngreet(\"world\")", pasteFinished)
+		},
+		"4c a Go paste of many lines": func() string {
+			return pasteStream(t, "package main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"hello\")\n}", pasteFinished)
+		},
+		"4d a paste containing a fence": func() string {
+			return pasteStream(t, "one\n```\nthree\nfour\nfive\nsix", pasteFinished)
 		},
 		"5 an indented paste": func() string {
 			return pasteStream(t, "    if isReady {\n        begin()\n    }", pasteFinished)
@@ -14015,7 +14596,7 @@ func TestGoldenAPasteDrawsWhatItDrewBefore(t *testing.T) {
 		"8 an image arriving in chunks": func() string {
 			return chunkedImagePasteStream(t)
 		},
-		"9 a pasted text": func() string {
+		"9 a long pasted text after typed prose": func() string {
 			return pastedTextStream(t)
 		},
 		"a1 a paste from the primary selection": func() string {
@@ -14090,7 +14671,7 @@ func pastedTextStream(t *testing.T) string {
 
 	return pasteEventStream(t, "explain ", nil, slices.Concat(
 		pasteEvent("text/plain"),
-		pasteContent("text/plain", []byte("    if isReady {\n        begin()\n    }")),
+		pasteContent("text/plain", []byte("    first line\n    second line\n    third line\n    fourth line\n    fifth line\n    sixth line")),
 	))
 }
 
@@ -15262,8 +15843,16 @@ func appWithOneWritableJob(t *testing.T) *App {
 	manager := jobs.New(stoppableRunner{})
 	t.Cleanup(func() { _ = manager.Close() })
 
+	log, err := store.Create(t.TempDir(), store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = log.Close() })
+
 	self := &App{
+		agent:     agent.New("", quietProvider{}, nil),
 		screen:    output.New(&bytes.Buffer{}),
+		recorder:  record.New(log),
 		mode:      caps.NewMode(caps.Read | caps.Write),
 		jobs:      jobState{manager: manager},
 		workspace: work.At("/workspace"),
@@ -15278,7 +15867,9 @@ func appWithOneWritableJob(t *testing.T) *App {
 }
 
 func TestAnEndedJobTellsTheModelWhatItPrintedWithoutBeingAsked(t *testing.T) {
-	self := &App{screen: output.New(&bytes.Buffer{}), mode: caps.NewMode(caps.Read)}
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.mode = caps.NewMode(caps.Read)
 
 	self.jobEnded(jobs.Conclusion{
 		Snapshot: jobs.Snapshot{Name: "build", State: jobs.StateFailed, ExitCode: 2},
@@ -15292,10 +15883,12 @@ func TestAnEndedJobTellsTheModelWhatItPrintedWithoutBeingAsked(t *testing.T) {
 	if !strings.Contains(notices[0], "undefined: getWidth") {
 		t.Errorf("got %q, want what the job printed rather than an errand to fetch it", notices[0])
 	}
-	if note := self.takeEndedJobsNote(); note != notices[0] {
+	self.settleAccess()
+
+	if note := self.takeSettledNotes(); note != notices[0] {
 		t.Errorf("told the model %q, want the notice it drew: %q", note, notices[0])
 	}
-	if note := self.takeEndedJobsNote(); note != "" {
+	if note := self.takeSettledNotes(); note != "" {
 		t.Errorf("told the model %q twice, want it taken once", note)
 	}
 }
@@ -15310,7 +15903,10 @@ func TestAnEndedJobWaitsForSomeoneToSpeakWhereNobodyIsListening(t *testing.T) {
 	if self.currentTurn.Running() {
 		t.Error("a printed conversation woke itself, want it waiting until someone speaks")
 	}
-	if note := self.takeEndedJobsNote(); note == "" {
+
+	self.settleAccess()
+
+	if note := self.takeSettledNotes(); note == "" {
 		t.Error("the ended job said nothing, want it kept for whenever the conversation next runs")
 	}
 }
@@ -15331,6 +15927,101 @@ func TestAPendingNoticeIsMarkedSubmittedThoughTheHarnessDrewBesideIt(t *testing.
 	}
 	if !strings.Contains(drawn, "🤖") {
 		t.Errorf("the submitted notice was not marked as the harness speaking:\n%s", drawn)
+	}
+}
+
+func tallTurn(t *testing.T, screenOutput *bytes.Buffer, lines int) (*App, *edit.Input) {
+	t.Helper()
+
+	self := testConversation(t, screenOutput)
+	self.screen = output.NewTerminalOfSize(screenOutput, replayColumns, lines)
+	self.settleAccess()
+
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+	self.inputLine = inputLine
+	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+
+	drawWithoutRepairing := func(event agent.Event) {
+		self.recordedEvents = append(self.recordedEvents, event)
+		self.currentTurn.painter.DrawEvent(event)
+	}
+
+	for i := range 30 {
+		drawWithoutRepairing(agent.Event{
+			Kind:      agent.ToolCallRequestEvent,
+			ID:        "call-" + strconv.Itoa(i),
+			Name:      "read",
+			Arguments: fmt.Sprintf(`{"path":"file-%d.txt"}`, i),
+		})
+	}
+	self.show(inputLine)
+
+	drawWithoutRepairing(agent.Event{
+		Kind:   agent.ToolCallResultEvent,
+		ID:     "call-0",
+		Name:   "read",
+		Status: agent.SuccessStatus,
+		Text:   "one\n",
+	})
+
+	return self, inputLine
+}
+
+func frozenTallTurn(t *testing.T, screenOutput *bytes.Buffer) (*App, *edit.Input) {
+	t.Helper()
+
+	self, inputLine := tallTurn(t, screenOutput, shortLines)
+	if !self.screen.WasRepaintRefused() {
+		t.Fatal("the region drew a change above its top row, want the refusal this covers")
+	}
+
+	return self, inputLine
+}
+
+const roomyLines = 60
+
+func roomyTallTurn(t *testing.T, screenOutput *bytes.Buffer) (*App, *edit.Input) {
+	t.Helper()
+
+	self, inputLine := tallTurn(t, screenOutput, roomyLines)
+	if self.screen.WasRepaintRefused() {
+		t.Fatal("the region refused a repaint it had the room to draw")
+	}
+
+	return self, inputLine
+}
+
+func noticesDrawnBesideAnOpenBlock(self *App) map[string]func() {
+	hostToSandbox, _ := portgrant.HostToSandboxChangeEvent("127.9.9.9", 8080, []uint16{8080})
+
+	return map[string]func(){
+		"an ended job": func() { self.jobEnded(endedJobConclusion()) },
+		"a host command": func() {
+			self.hostCommandRan(hostcommand.RanEvent(hostcommand.Result{Command: "git status", Output: " M a\n"}))
+		},
+		"an exposed port": func() { self.notify(hostToSandbox) },
+	}
+}
+
+func TestEveryHarnessNoticeRepairsARegionFrozenByARefusedRepaint(t *testing.T) {
+	for name := range noticesDrawnBesideAnOpenBlock(nil) {
+		t.Run(name, func(t *testing.T) {
+			var screenOutput bytes.Buffer
+			self, inputLine := frozenTallTurn(t, &screenOutput)
+
+			noticesDrawnBesideAnOpenBlock(self)[name]()
+			self.show(inputLine)
+
+			if self.screen.WasRepaintRefused() {
+				t.Error("the notice left the region frozen rather than redrawing it")
+			}
+
+			drawn := strings.Join(visibleScreen(t, screenOutput.String(), replayColumns), "\n")
+			if !strings.Contains(drawn, "🤖") {
+				t.Errorf("the notice never reached the screen:\n%s", drawn)
+			}
+		})
 	}
 }
 
@@ -15355,7 +16046,7 @@ func TestAnEndedJobWakesTheConversationWithATurnOfItsOwn(t *testing.T) {
 	if len(messages) == 0 || !strings.Contains(messages[len(messages)-1], "build") {
 		t.Errorf("got messages %q, want the ended job named in the turn it woke", messages)
 	}
-	if note := self.takeEndedJobsNote(); note != "" {
+	if note := self.takeSettledNotes(); note != "" {
 		t.Errorf("told the model %q afterwards, want the waking turn to have taken it", note)
 	}
 }
@@ -15365,6 +16056,208 @@ func endedJobConclusion() jobs.Conclusion {
 		Snapshot: jobs.Snapshot{Name: "build", State: jobs.StateFailed, ExitCode: 2},
 		Output:   "undefined: getWidth\nexit status 1\n",
 	}
+}
+
+func TestAHostCommandWakesTheConversationWithATurnOfItsOwn(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	completeTurn(self)
+
+	self.emitCommandEvent(hostCommandRun())
+
+	if !self.currentTurn.Running() {
+		t.Fatal("the command left the conversation asleep, want a turn of its own")
+	}
+
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	messages := submittedTexts(self.recordedEvents)
+	if len(messages) == 0 || !strings.Contains(messages[len(messages)-1], "git status --short") {
+		t.Errorf("got messages %q, want the command named in the turn it woke", messages)
+	}
+	if note := self.takeSettledNotes(); note != "" {
+		t.Errorf("told the model %q afterwards, want the waking turn to have taken it", note)
+	}
+}
+
+func TestAHostCommandRunDuringATurnJoinsItRatherThanStartingAnother(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.currentTurn = Turn{
+		painter: self.newPainter(true),
+		Stream:  testTurnStream(nil, func(error) {}, turn.State{Running: true}),
+	}
+
+	self.emitCommandEvent(hostCommandRun())
+
+	if len(self.pendingNotices.items) != 0 {
+		t.Errorf("got pending notices %+v, want the running turn to have taken it", self.pendingNotices.items)
+	}
+	if queued := self.currentTurn.GetInterjections(); len(queued) != 0 {
+		t.Errorf("got queued messages %q, want a harness note rather than a message of the person's", queued)
+	}
+	note, isNoted := self.currentTurn.TakeNotes()
+	if !isNoted || !strings.Contains(note, "git status --short") {
+		t.Errorf("got note %q and %t, want the command the person ran", note, isNoted)
+	}
+}
+
+func TestAHostCommandsOutputIsCappedTheWayAToolCallIs(t *testing.T) {
+	limitedOutput := truncate.Output(
+		strings.Repeat("every line of a very talkative command\n", 200),
+		truncate.NewLimit(1024),
+	)
+
+	notice, isSaid := hostcommand.Notice(hostcommand.RanEvent(hostcommand.Result{
+		Command: "find /",
+		Output:  limitedOutput,
+	}))
+	if !isSaid {
+		t.Fatal("expected the notice to be said")
+	}
+	if !strings.Contains(notice, "truncated at") {
+		t.Errorf("got %q, want a talkative command capped the way a tool call is", notice)
+	}
+}
+
+func hostCommandRun() agent.Event {
+	return hostcommand.RanEvent(hostcommand.Result{
+		Command: "git status --short",
+		Output:  " M README.md\n?? notes.txt\n",
+	})
+}
+
+func TestGoldenHostCommandNoticesMatchGolden(t *testing.T) {
+	drawnAt := func(build func(*App)) func() string {
+		return func() string {
+			var screenOutput bytes.Buffer
+			self := testConversation(t, &screenOutput)
+			self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+			self.settleAccess()
+			build(self)
+			self.screen.End()
+
+			return screenOutput.String()
+		}
+	}
+
+	passes := map[string]func() string{
+		"pending before the turn it wakes": drawnAt(func(self *App) {
+			self.pendingNotices.add(hostCommandRun())
+			self.refreshPendingMessages()
+		}),
+		"settled into the turn": drawnAt(func(self *App) {
+			self.pendingNotices.add(hostCommandRun())
+			self.refreshPendingMessages()
+			self.settlePendingInput()
+		}),
+		"stopped in the turn it woke": drawnAt(func(self *App) {
+			self.pendingNotices.add(hostCommandRun())
+			self.refreshPendingMessages()
+			self.settlePendingInput()
+			self.currentTurn = Turn{painter: self.newPainter(true)}
+			self.currentTurn.painter.DrawEvent(interrupt.Event(interrupt.ControlD))
+		}),
+		"printed nothing": drawnAt(func(self *App) {
+			self.notify(hostcommand.RanEvent(hostcommand.Result{Command: "touch notes.txt"}))
+		}),
+		"exited with a failure": drawnAt(func(self *App) {
+			self.notify(hostcommand.RanEvent(hostcommand.Result{
+				Command:  "git push",
+				Output:   "error: failed to push some refs\n",
+				ExitCode: 1,
+			}))
+		}),
+		"stopped at its limit": drawnAt(func(self *App) {
+			self.notify(hostcommand.RanEvent(hostcommand.Result{
+				Command:      "sleep 600",
+				StoppedAfter: 30 * time.Second,
+			}))
+		}),
+	}
+
+	compareWithGolden(t, "host-command", ".ansi", passes)
+	compareWithGolden(t, "host-command", ".screen", shownPasses(t, passes))
+}
+
+func TestGoldenADoubleReturnFlushesPendingNoticesWithoutTheContinueMessage(t *testing.T) {
+	drawnAt := func(build func(*App), returns int) func() string {
+		return func() string {
+			var screenOutput bytes.Buffer
+			self := testConversation(t, &screenOutput)
+			self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+			self.continueMessage = "."
+			self.settleAccess()
+
+			history := edit.NewHistory("", historyLimit)
+			inputLine := edit.NewInput(history)
+			self.inputLine = inputLine
+
+			build(self)
+			self.show(inputLine)
+
+			for range returns {
+				self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Enter})
+			}
+
+			if self.currentTurn.Running() {
+				for report := range self.currentTurn.Events() {
+					self.takeTurn(report)
+				}
+				self.finish()
+			}
+
+			self.show(inputLine)
+			self.screen.End()
+
+			return screenOutput.String()
+		}
+	}
+
+	restoreOneJob := func(self *App) {
+		self.jobs = jobState{manager: jobs.New(nil)}
+		self.restoreJobs([]agent.Event{
+			jobrecord.ListingEvent([]jobs.Snapshot{{Name: "docs", Command: "python3 -m http.server", State: jobs.StateRunning}}),
+		})
+		self.refreshPendingMessages()
+	}
+	endOneJob := func(self *App) {
+		self.jobs = jobState{manager: jobs.New(nil)}
+		self.jobEnded(jobs.Conclusion{
+			Snapshot: jobs.Snapshot{Name: "build", Command: "just build", State: jobs.StateFailed},
+		})
+	}
+	withdrawWrites := func(self *App) { self.toggleCap(caps.Write) }
+	stopAJobAndGrantWritesBack := func(self *App) {
+		manager := jobs.New(stoppableRunner{})
+		t.Cleanup(func() { _ = manager.Close() })
+		self.jobs = jobState{manager: manager}
+		self.workspace = work.At("/workspace")
+		policy := sandbox.Policy{Write: []string{"/workspace"}}
+		if _, err := manager.Start(t.Context(), "web", ".", "webd", policy); err != nil {
+			t.Fatal(err)
+		}
+		self.toggleCap(caps.Write)
+		self.toggleCap(caps.Write)
+	}
+
+	passes := map[string]func() string{
+		"1 a restored job standing":       drawnAt(restoreOneJob, 0),
+		"2 a restored job flushed":        drawnAt(restoreOneJob, 2),
+		"3 an ended job standing":         drawnAt(endOneJob, 0),
+		"4 an ended job flushed":          drawnAt(endOneJob, 2),
+		"5 a mode change flushed":         drawnAt(withdrawWrites, 2),
+		"6 nothing standing carries on":   drawnAt(func(*App) {}, 2),
+		"7 a restored job and one return": drawnAt(restoreOneJob, 1),
+		"8 a stopped job standing":        drawnAt(stopAJobAndGrantWritesBack, 0),
+		"9 a stopped job flushed":         drawnAt(stopAJobAndGrantWritesBack, 2),
+	}
+
+	compareWithGolden(t, "pending-notices", ".ansi", passes)
+	compareWithGolden(t, "pending-notices", ".screen", shownPasses(t, passes))
 }
 
 func TestAnEndedJobsOutputIsCappedTheWayAToolCallIs(t *testing.T) {
@@ -15403,8 +16296,105 @@ func TestAWithdrawalIsAnnouncedBeforeTheJobsItStopped(t *testing.T) {
 	if !strings.Contains(notices[0], "workspace is now read-only") {
 		t.Errorf("got %q first, want the change that caused the stop", notices[0])
 	}
-	if !strings.Contains(notices[1], "job web was stopped") {
+	if !strings.Contains(notices[1], "job `web` was stopped") {
 		t.Errorf("got %q second, want the job it stopped", notices[1])
+	}
+}
+
+func TestTheModelIsToldAboutTheJobsAWithdrawalStopped(t *testing.T) {
+	self := appWithOneWritableJob(t)
+
+	self.toggleCap(caps.Write)
+	self.settleAccess()
+
+	note := self.prelude()
+	change := strings.Index(note, "workspace is now read-only")
+	stop := strings.Index(note, "job `web` was stopped")
+	if change < 0 || stop < 0 {
+		t.Fatalf("got note %q, want the change and the job it stopped", note)
+	}
+	if change > stop {
+		t.Errorf("got note %q, want the change announced before the job it stopped", note)
+	}
+}
+
+func TestTheModelIsToldAboutAStoppedJobEvenWhenTheCapabilityComesBack(t *testing.T) {
+	self := appWithOneWritableJob(t)
+
+	self.toggleCap(caps.Write)
+	self.toggleCap(caps.Write)
+	self.settleAccess()
+
+	if note := self.prelude(); !strings.Contains(note, "job `web` was stopped") {
+		t.Errorf("got note %q, want the job the withdrawal stopped", note)
+	}
+	if note := self.prelude(); note != "" {
+		t.Errorf("got note %q, want the stop told once", note)
+	}
+}
+
+func TestTwoReturnsWithAStoppedJobNoticeSubmitItRatherThanTheContinueMessage(t *testing.T) {
+	self := appWithOneWritableJob(t)
+	self.continueMessage = "carry on"
+
+	self.toggleCap(caps.Write)
+	self.toggleCap(caps.Write)
+
+	if !self.hasUntoldPendingNotices() {
+		t.Error("the stopped job would have gone out beside the continue message")
+	}
+}
+
+func TestTheModelIsToldExactlyWhatTheScreenDrew(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.settleAccess()
+	self.jobs = jobState{manager: jobs.New(nil)}
+
+	self.restoreJobs([]agent.Event{
+		jobrecord.ListingEvent([]jobs.Snapshot{{Name: "docs", Command: "python3", State: jobs.StateRunning}}),
+	})
+	self.jobEnded(endedJobConclusion())
+	self.toggleCap(caps.Write)
+
+	drawn := self.pendingNotices.notices()
+	if len(drawn) != 3 {
+		t.Fatalf("got %d notices drawn, want the restored job, the ended job and the change: %q", len(drawn), drawn)
+	}
+
+	self.settleAccess()
+
+	if told := self.prelude(); told != strings.Join(drawn, noticeSeparator) {
+		t.Errorf("the model was told\n%q\nwhile the screen drew\n%q", told, drawn)
+	}
+}
+
+func TestAHostCommandLeavesNothingStandingBecauseItWakesItsOwnTurn(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.settleAccess()
+
+	self.hostCommandRan(hostcommand.RanEvent(hostcommand.Result{Command: "git status", Output: " M README.md\n"}))
+
+	if !self.currentTurn.Running() {
+		t.Fatal("the command left the conversation asleep, want a turn of its own")
+	}
+	if len(self.settledNotes) != 0 || len(self.pendingNotices.items) != 0 {
+		t.Errorf(
+			"got %d notes and %d notices standing, want the turn it woke to have taken both",
+			len(self.settledNotes), len(self.pendingNotices.items),
+		)
+	}
+}
+
+func TestAStoppedJobIsToldWhenThePathItHeldIsRevoked(t *testing.T) {
+	self := appWithOneWritableJob(t)
+
+	self.stopJobsHoldingPath("/workspace")
+	self.settleAccess()
+
+	if note := self.prelude(); !strings.Contains(note, "job `web` was stopped") {
+		t.Errorf("got note %q, want the job the revoked path stopped", note)
 	}
 }
 
@@ -15433,6 +16423,54 @@ func TestAModeChangeThatStoppedAJobIsNotTakenBack(t *testing.T) {
 	}
 	if !strings.Contains(notices[2], "workspace is now read-write") {
 		t.Errorf("got %q last, want the capability being granted again", notices[2])
+	}
+}
+
+func TestAJobStoppedByAnotherCapabilityHoldsNothingBack(t *testing.T) {
+	self := &App{
+		screen: output.New(&bytes.Buffer{}),
+		mode:   caps.NewMode(caps.Read | caps.Write | caps.Shell),
+	}
+
+	self.toggleCap(caps.Write)
+	self.pendingNotices.add(caps.JobStopEvent("web", caps.Shell))
+	self.toggleCap(caps.Write)
+
+	notices := self.pendingNotices.notices()
+	if len(notices) != 1 {
+		t.Fatalf(
+			"got %d notices, want only the job the shell withdrawal stopped: %v",
+			len(notices), notices,
+		)
+	}
+	if !strings.Contains(notices[0], "job `web` was stopped") {
+		t.Errorf("got %q, want the stopped job left standing on its own", notices[0])
+	}
+}
+
+func TestTogglingOnPastAStoppedJobStillSubtracts(t *testing.T) {
+	self := appWithOneWritableJob(t)
+
+	self.toggleCap(caps.Write)
+
+	for step, wantCount := range []int{3, 2, 3, 2, 3, 2} {
+		self.toggleCap(caps.Write)
+
+		notices := self.pendingNotices.notices()
+		if len(notices) != wantCount {
+			t.Fatalf(
+				"after %d further toggles got %d notices, want %d: %v",
+				step+1, len(notices), wantCount, notices,
+			)
+		}
+	}
+
+	notices := self.pendingNotices.notices()
+	if !strings.Contains(notices[0], "workspace is now read-only") {
+		t.Errorf("got %q first, want the change that stopped the job", notices[0])
+	}
+	if !strings.Contains(notices[1], "job `web` was stopped") {
+		t.Errorf("got %q second, want the job it stopped", notices[1])
 	}
 }
 
@@ -15916,16 +16954,38 @@ func pictureWithoutGraphicsStream(t *testing.T) string {
 }
 
 var (
-	pictureIdentifier = regexp.MustCompile(`i=\d+`)
-	pictureColour     = regexp.MustCompile(`\x1b\[38;2;\d+;\d+;\d+m\x{10EEEE}`)
-	picturePath       = regexp.MustCompile(`(t=f,[^;]*;)[A-Za-z0-9+/=]+`)
+	pictureIdentifier   = regexp.MustCompile(`i=\d+`)
+	pictureColour       = regexp.MustCompile(`\x1b\[38;2;\d+;\d+;\d+m\x{10EEEE}`)
+	pictureData         = regexp.MustCompile(`(\x1b_G[^;]*t=d,[^;]*,m=)[01];[A-Za-z0-9+/=]+\x1b\\(?:\x1b_Gm=[01];[A-Za-z0-9+/=]+\x1b\\)*`)
+	picturePath         = regexp.MustCompile(`(\x1b_G[^;]*t=f,[^;]*,m=)[01];[A-Za-z0-9+/=]+\x1b\\(?:\x1b_Gm=[01];[A-Za-z0-9+/=]+\x1b\\)*`)
+	pictureCommandClose = "\x1b\\"
 )
 
 func anonymisePictures(stream string) string {
 	stream = pictureIdentifier.ReplaceAllString(stream, "i=<identifier>")
-	stream = picturePath.ReplaceAllString(stream, "${1}<path>")
+	stream = pictureData.ReplaceAllString(stream, "${1}0;<data>"+pictureCommandClose)
+	stream = picturePath.ReplaceAllString(stream, "${1}0;<path>"+pictureCommandClose)
 
 	return pictureColour.ReplaceAllString(stream, "<picture>\U0010EEEE")
+}
+
+func TestPictureAnonymisationIgnoresPayloadEncodingAndChunking(t *testing.T) {
+	chunked := "\x1b_Ga=T,t=d,i=123,m=1;AAAA\x1b\\" +
+		"\x1b_Gm=1;BBBB\x1b\\" +
+		"\x1b_Gm=0;CCCC\x1b\\" +
+		"\x1b_Ga=T,t=f,i=456,m=0;DDDD\x1b\\"
+	unchunked := "\x1b_Ga=T,t=d,i=789,m=0;EEEE\x1b\\" +
+		"\x1b_Ga=T,t=f,i=987,m=0;FFFF\x1b\\"
+	want := "\x1b_Ga=T,t=d,i=<identifier>,m=0;<data>\x1b\\" +
+		"\x1b_Ga=T,t=f,i=<identifier>,m=0;<path>\x1b\\"
+
+	for name, stream := range map[string]string{"chunked": chunked, "unchunked": unchunked} {
+		t.Run(name, func(t *testing.T) {
+			if got := anonymisePictures(stream); got != want {
+				t.Errorf("got %q, want %q", got, want)
+			}
+		})
+	}
 }
 
 func rebuiltPictureStream(t *testing.T) string {
@@ -16154,5 +17214,17 @@ func TestEveryPermissionRefusesInWordsOfItsOwn(t *testing.T) {
 				t.Errorf("got %q, want it to say %q", err, test.want)
 			}
 		})
+	}
+}
+
+func TestSandboxDenyRulesCannotBeWaivedByYolo(t *testing.T) {
+	if err := requireDenyEnforcement(true, []string{"foo.txt"}); err == nil {
+		t.Fatal("a sandbox deny rule was waived")
+	}
+	if err := requireDenyEnforcement(false, []string{"foo.txt"}); err != nil {
+		t.Errorf("a confined deny rule was refused: %v", err)
+	}
+	if err := requireDenyEnforcement(true, nil); err != nil {
+		t.Errorf("yolo without a deny rule was refused: %v", err)
 	}
 }

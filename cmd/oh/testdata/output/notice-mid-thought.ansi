@@ -1,0 +1,720 @@
+=== narrow ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m think it through while the build       \e[0m\r
+\e[48;2;52;53;65m finishes                               \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[?7l\r\e[K\e[48;2;48;58;67m                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after  \e[0m\r
+\r\e[K\e[48;2;48;58;67m    12s, exit(2).                       \e[0m\r
+\r\e[K\e[48;2;48;58;67m    go build ./...                      \e[0m\r
+\r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined:     \e[0m\r
+\r\e[K\e[48;2;48;58;67m    getWidth                            \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exit status 1                       \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                        \e[0m\r
+\r
+\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150msettle is which of these holds: • the\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mfile was read before it was written •\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mthe file was written before it was read\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mfunc main() { println("one") } So the\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mread has to come first.\e[0m\e[0m\r
+\r
+\r\e[KThe build failed on an undefined\r
+\r\e[K\e[38;2;192;128;80mgetWidth\e[0m, and the read has to come\r
+\r\e[Kfirst.\r
+\e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mk\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mg\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[?7l\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m🤖\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mT\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mh\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mj\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mo\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mb\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80mb\e[0m\e[48;2;48;58;67m\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80mu\e[0m\e[48;2;48;58;67m\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80mi\e[0m\e[48;2;48;58;67m\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80ml\e[0m\e[48;2;48;58;67m\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80md\e[0m\e[48;2;48;58;67m\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mx\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mi\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m:\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mf\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ma\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mi\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ml\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ma\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mf\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mr\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m1\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m2\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m,\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mx\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mi\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m(\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m2\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m)\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m.\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mg\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mo\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mb\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mu\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mi\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ml\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m.\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m/\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m.\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m.\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m.\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mc\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mm\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m/\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mo\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mh\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m/\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mr\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ma\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mw\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m.\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mg\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mo\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m:\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m4\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m1\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m:\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m9\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m:\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mu\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mn\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mf\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mi\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mn\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m:\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mg\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mW\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mi\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mh\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mx\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mi\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ma\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mu\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67m1\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r
+\r\e[K\e[3m\e[38;2;150;152;150mC\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mc\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mk\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mg\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m.\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mg\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mT\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mf\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mg\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ml\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mc\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mf\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ml\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m:\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m•\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mf\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ml\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mb\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mf\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m•\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mf\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ml\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mb\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mf\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mf\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mu\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mc\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mm\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m(\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m)\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m{\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mp\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ml\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m(\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m"\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m"\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m)\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m}\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mS\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mc\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mm\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mf\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m.\e[0m\e[0m\r
+\r
+\r\e[KT\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kb\r
+\r\e[Ku\r
+\r\e[Ki\r
+\r\e[Kl\r
+\r\e[Kd\r
+\r\e[Kf\r
+\r\e[Ka\r
+\r\e[Ki\r
+\r\e[Kl\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Ku\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ke\r
+\r\e[Kf\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[K\e[38;2;192;128;80mg\e[0m\r
+\r\e[K\e[38;2;192;128;80me\e[0m\r
+\r\e[K\e[38;2;192;128;80mt\e[0m\r
+\r\e[K\e[38;2;192;128;80mW\e[0m\r
+\r\e[K\e[38;2;192;128;80mi\e[0m\r
+\r\e[K\e[38;2;192;128;80md\e[0m\r
+\r\e[K\e[38;2;192;128;80mt\e[0m\r
+\r\e[K\e[38;2;192;128;80mh\e[0m\r
+\r\e[K,\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Ko\r
+\r\e[Kc\r
+\r\e[Ko\r
+\r\e[Km\r
+\r\e[Ke\r
+\r\e[Kf\r
+\r\e[Ki\r
+\r\e[Kr\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[K.\r
+\e[?25h\e[?2026l
+=== plain ===
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m think it through while the build finishes\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;48;58;67m\e[0m
+\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
+go build ./...
+cmd/oh/draw.go:41:9: undefined: getWidth
+exit status 1\e[0m
+\e[48;2;48;58;67m\e[0m
+\e[3m\e[38;2;150;152;150mChecking one.go The first thing to settle is which of these holds: • the file was read before it was written • the file was written before it was read func main() { println("one") } So the read has to come first.\e[0m\e[0m
+
+The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.
+
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m think it through while the build finishes                                                          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
+\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
+\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
+\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\r
+\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read before it was\e[0m\r
+\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the read has to\e[0m\r
+\e[3m\e[38;2;150;152;150mcome first.\e[0m\e[0m\r
+\r
+The build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.\r
+
+=== streamed asap ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m think it through while the build finishes                                                          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
+\r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mC\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mCheck\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking `one\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ Th\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The **\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The **firs\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thin\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to set\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is w\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of thes\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these ho\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds:\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was rea\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read be\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read before\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read before it\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read before it was\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read before it was\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mwrit\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • th\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the fi\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file w\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was w\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was writt\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written b\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written befor\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was rea\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read `\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read fun\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func ma\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main()\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() {\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { prin\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println(\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") }\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the rea\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the read ha\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the read has to\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the read has to\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mcom\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mcome fi\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mcome first.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe buil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build fa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined `ge\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined `getWid\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the rea\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to com\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come fi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed line ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m think it through while the build finishes                                                          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
+\r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read before it was\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the read has to\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[3m\e[38;2;150;152;150mcome first.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed paced ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m think it through while the build finishes                                                          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
+\r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mC\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mCheck\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking `one\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ Th\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The **\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The **firs\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thin\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to set\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is w\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of thes\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these ho\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds:\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was rea\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read be\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read before\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read before it\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read before it was\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read before it was\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mwrit\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • th\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the fi\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file w\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was w\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was writt\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written b\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written befor\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was rea\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read `\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read fun\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func ma\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main()\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() {\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { prin\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println(\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") }\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the rea\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the read ha\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the read has to\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the read has to\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mcom\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mcome fi\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mcome first.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe buil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build fa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined `ge\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined `getWid\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the rea\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to com\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come fi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== tiny ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m think it   \e[0m\r
+\e[48;2;52;53;65m through    \e[0m\r
+\e[48;2;52;53;65m while the  \e[0m\r
+\e[48;2;52;53;65m build      \e[0m\r
+\e[48;2;52;53;65m finishes   \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[?7l\r\e[K\e[48;2;48;58;67m            \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 The job \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m   \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exited: \e[0m\r
+\r\e[K\e[48;2;48;58;67m    failed  \e[0m\r
+\r\e[K\e[48;2;48;58;67m    after   \e[0m\r
+\r\e[K\e[48;2;48;58;67m    12s,    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exit(2).\e[0m\r
+\r\e[K\e[48;2;48;58;67m    go build\e[0m\r
+\r\e[K\e[48;2;48;58;67m    ./...   \e[0m\r
+\r\e[K\e[48;2;48;58;67m    cmd/oh/d\e[0m\r
+\r\e[K\e[48;2;48;58;67m    raw.go:4\e[0m\r
+\r\e[K\e[48;2;48;58;67m    1:9:    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    undefine\e[0m\r
+\r\e[K\e[48;2;48;58;67m    d:      \e[0m\r
+\r\e[K\e[48;2;48;58;67m    getWidth\e[0m\r
+\r\e[K\e[48;2;48;58;67m    exit    \e[0m\r
+\r\e[K\e[48;2;48;58;67m    status 1\e[0m\r
+\r\e[K\e[48;2;48;58;67m            \e[0m\r
+\r
+\r\e[K\e[3m\e[38;2;150;152;150mChecking\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m\e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mfirst thing\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mto settle is\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mwhich of\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mthese holds:\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m• the file\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mwas read\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mbefore it\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mwas written\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m• the file\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mwas written\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mbefore it\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mwas read\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mfunc main()\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m{ println(\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m"one") } So\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mthe read has\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mto come\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mfirst.\e[0m\e[0m\r
+\r
+\r\e[KThe build\r
+\r\e[Kfailed on an\r
+\r\e[Kundefined\r
+\r\e[K\e[38;2;192;128;80mgetWidth\e[0m,\r
+\r\e[Kand the read\r
+\r\e[Khas to come\r
+\r\e[Kfirst.\r
+\e[?25h\e[?2026l
+=== unsized ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m think it through while the build finishes\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[?7l\r\e[K\e[48;2;48;58;67m\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).
+go build ./...
+cmd/oh/draw.go:41:9: undefined: getWidth
+exit status 1\e[0m\r
+\r\e[K\e[48;2;48;58;67m\e[0m
+
+\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read before it was written • the file was written before it was read func main() { println("one") } So the read has to come first.\e[0m\e[0m
+
+\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.
+\e[?25h\e[?2026l
+=== wide ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m think it through while the build finishes                                                          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 The job \e[38;2;192;128;80mbuild\e[0m\e[48;2;48;58;67m exited: failed after 12s, exit(2).                                                \e[0m\r
+\r\e[K\e[48;2;48;58;67m    go build ./...                                                                                  \e[0m\r
+\r\e[K\e[48;2;48;58;67m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
+\r\e[K\e[48;2;48;58;67m    exit status 1                                                                                   \e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
+\r
+\r\e[K\e[3m\e[38;2;150;152;150mChecking \e]8;;file:///workspace/one.go\e\\one.go\e]8;;\e\\ The first thing to settle is which of these holds: • the file was read before it was\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mwritten • the file was written before it was read func main() { println("one") } So the read has to\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mcome first.\e[0m\e[0m\r
+\r
+\r\e[KThe build failed on an undefined \e[38;2;192;128;80mgetWidth\e[0m, and the read has to come first.\r
+\e[?25h\e[?2026l

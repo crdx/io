@@ -1,0 +1,632 @@
+=== narrow ===
+
+ think it through while the build
+ finishes
+
+
+
+ 🤖 The job build exited: failed after
+    12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined:
+    getWidth
+    exit status 1
+
+
+Checking one.go The first thing to
+settle is which of these holds: • the
+file was read before it was written •
+the file was written before it was read
+func main() { println("one") } So the
+read has to come first.
+
+The build failed on an undefined
+getWidth, and the read has to come
+first.
+=== one column ===
+
+
+t
+
+h
+
+i
+
+n
+
+k
+
+i
+
+t
+
+t
+
+h
+
+r
+
+o
+
+u
+
+g
+
+h
+
+w
+
+h
+
+i
+
+l
+
+e
+
+t
+
+h
+
+e
+
+b
+
+u
+
+i
+
+l
+
+d
+
+f
+
+i
+
+n
+
+i
+
+s
+
+h
+
+e
+
+s
+
+
+
+
+🤖
+
+T
+
+h
+
+e
+
+j
+
+o
+
+b
+
+b
+
+u
+
+i
+
+l
+
+d
+
+e
+
+x
+
+i
+
+t
+
+e
+
+d
+
+:
+
+f
+
+a
+
+i
+
+l
+
+e
+
+d
+
+a
+
+f
+
+t
+
+e
+
+r
+
+1
+
+2
+
+s
+
+,
+
+e
+
+x
+
+i
+
+t
+
+(
+
+2
+
+)
+
+.
+
+g
+
+o
+
+b
+
+u
+
+i
+
+l
+
+d
+
+.
+
+/
+
+.
+
+.
+
+.
+
+c
+
+m
+
+d
+
+/
+
+o
+
+h
+
+/
+
+d
+
+r
+
+a
+
+w
+
+.
+
+g
+
+o
+
+:
+
+4
+
+1
+
+:
+
+9
+
+:
+
+u
+
+n
+
+d
+
+e
+
+f
+
+i
+
+n
+
+e
+
+d
+
+:
+
+g
+
+e
+
+t
+
+W
+
+i
+
+d
+
+t
+
+h
+
+e
+
+x
+
+i
+
+t
+
+s
+
+t
+
+a
+
+t
+
+u
+
+s
+
+1
+
+
+C
+h
+e
+c
+k
+i
+n
+g
+o
+n
+e
+.
+g
+o
+T
+h
+e
+f
+i
+r
+s
+t
+t
+h
+i
+n
+g
+t
+o
+s
+e
+t
+t
+l
+e
+i
+s
+w
+h
+i
+c
+h
+o
+f
+t
+h
+e
+s
+e
+h
+o
+l
+d
+s
+:
+•
+t
+h
+e
+f
+i
+l
+e
+w
+a
+s
+r
+e
+a
+d
+b
+e
+f
+o
+r
+e
+i
+t
+w
+a
+s
+w
+r
+i
+t
+t
+e
+n
+•
+t
+h
+e
+f
+i
+l
+e
+w
+a
+s
+w
+r
+i
+t
+t
+e
+n
+b
+e
+f
+o
+r
+e
+i
+t
+w
+a
+s
+r
+e
+a
+d
+f
+u
+n
+c
+m
+a
+i
+n
+(
+)
+{
+p
+r
+i
+n
+t
+l
+n
+(
+"
+o
+n
+e
+"
+)
+}
+S
+o
+t
+h
+e
+r
+e
+a
+d
+h
+a
+s
+t
+o
+c
+o
+m
+e
+f
+i
+r
+s
+t
+.
+
+T
+h
+e
+b
+u
+i
+l
+d
+f
+a
+i
+l
+e
+d
+o
+n
+a
+n
+u
+n
+d
+e
+f
+i
+n
+e
+d
+g
+e
+t
+W
+i
+d
+t
+h
+,
+a
+n
+d
+t
+h
+e
+r
+e
+a
+d
+h
+a
+s
+t
+o
+c
+o
+m
+e
+f
+i
+r
+s
+t
+.
+=== printed ===
+
+ think it through while the build finishes
+
+
+
+ 🤖 The job build exited: failed after 12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined: getWidth
+    exit status 1
+
+
+Checking one.go The first thing to settle is which of these holds: • the file was read before it was
+written • the file was written before it was read func main() { println("one") } So the read has to
+come first.
+
+The build failed on an undefined getWidth, and the read has to come first.
+=== tiny ===
+
+ think it
+ through
+ while the
+ build
+ finishes
+
+
+
+ 🤖 The job
+    build
+    exited:
+    failed
+    after
+    12s,
+    exit(2).
+    go build
+    ./...
+    cmd/oh/d
+    raw.go:4
+    1:9:
+    undefine
+    d:
+    getWidth
+    exit
+    status 1
+
+
+Checking
+one.go The
+first thing
+to settle is
+which of
+these holds:
+• the file
+was read
+before it
+was written
+• the file
+was written
+before it
+was read
+func main()
+{ println(
+"one") } So
+the read has
+to come
+first.
+
+The build
+failed on an
+undefined
+getWidth,
+and the read
+has to come
+first.
+=== wide ===
+
+ think it through while the build finishes
+
+
+
+ 🤖 The job build exited: failed after 12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined: getWidth
+    exit status 1
+
+
+Checking one.go The first thing to settle is which of these holds: • the file was read before it was
+written • the file was written before it was read func main() { println("one") } So the read has to
+come first.
+
+The build failed on an undefined getWidth, and the read has to come first.

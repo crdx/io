@@ -16,6 +16,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/conditions"
 	"crdx.org/io/cmd/oh/dynamic"
+	"crdx.org/io/cmd/oh/hostcommand"
 	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/link"
@@ -48,6 +49,7 @@ type Picasso struct {
 	streamingMode         output.StreamingMode
 	reasoningRendering    output.ReasoningRendering
 	resultLinkSessionName string
+	forkModelName         string
 
 	getTool       func(string) (tool.Tool, bool)
 	workspace     *work.Space
@@ -96,6 +98,10 @@ func (self *Picasso) LinkToolResults(sessionName string) {
 	self.resultLinkSessionName = sessionName
 }
 
+func (self *Picasso) SuggestForkingWith(modelName string) {
+	self.forkModelName = modelName
+}
+
 func (self *Picasso) DrawDelta(delta agent.Delta) {
 	self.drawDeltaWithAnswerRendererReset(delta, true)
 }
@@ -106,6 +112,10 @@ func (self *Picasso) DrawRestoredDelta(delta agent.Delta, previous *Picasso) {
 }
 
 func (self *Picasso) DrawEvent(event agent.Event) {
+	if !isJoinableNotice(event) {
+		self.screen.SealOpenPanel()
+	}
+
 	switch {
 	case event.Kind == agent.ModelReasoningEvent && self.previousKind == agent.ModelReasoningEvent && self.reasoning.Len() == 0:
 		self.screen.End()
@@ -175,16 +185,12 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.CacheRebuildEvent:
 		self.screen.Line(style.Change(agent.CacheRebuildNotice(event)))
 
-	case portgrant.HostToSandboxChange:
-		if text, isSaid := HarnessNotice(event); isSaid {
-			self.drawSubmittedBeforeResult(submittedMessage{text: text, kind: sentHarnessSubmission})
-		}
+	case portgrant.HostToSandboxChange, hostcommand.Ran, jobrecord.Ended:
+		self.drawNotices(event, self.drawSubmittedBeforeResult)
 
-	case caps.ModeChange, caps.JobStop, portgrant.SandboxToHostChange, jobrecord.Ended, jobrecord.EndedWithSession,
+	case caps.ModeChange, caps.JobStop, portgrant.SandboxToHostChange, jobrecord.EndedWithSession,
 		conditions.Change, pathgrant.Change, turn.HarnessPoke:
-		if text, isSaid := HarnessNotice(event); isSaid {
-			self.drawSubmitted(submittedMessage{text: text, kind: sentHarnessSubmission})
-		}
+		self.drawNotices(event, self.drawSubmitted)
 
 	case agent.RetryingEvent:
 		self.Close(dynamic.Cancelled)
@@ -193,6 +199,9 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.FailureEvent:
 		self.Close(dynamic.Cancelled)
 		self.screen.Line(style.Failure(RenderFailure(event)))
+		if notice, isSaid := RenderContextExceeded(event, self.forkModelName); isSaid {
+			self.screen.Line(style.StoppedTurn(notice))
+		}
 
 	case agent.InterruptionEvent:
 		if interrupt.IsAnnounced(event) {
@@ -221,8 +230,8 @@ func RenderRetry(event agent.Event) string {
 		notice += "; retrying"
 	}
 
-	if event.Text != "" {
-		notice += ": " + strutil.Capitalise(strutil.Flatten(strutil.FirstLine(event.Text)))
+	if failure := agent.FailureText(event); failure != "" {
+		notice += ": " + strutil.Capitalise(strutil.Flatten(strutil.FirstLine(failure)))
 	}
 
 	if event.Arguments != "" {
@@ -248,7 +257,7 @@ func renderSubmittedMessage(
 ) string {
 	content := submittedContentRows(message, columns, shouldRenderHyperlinks, roots)
 
-	return strings.Join(frameSubmitted(content, columns, message.background()), "\n")
+	return strings.Join(frameSubmitted("", content, columns, message.background()), "\n")
 }
 
 func submittedContentRows(
@@ -293,8 +302,8 @@ func submittedContentRows(
 	return content
 }
 
-func frameSubmitted(content []string, columns int, background style.Style) []string {
-	rows := append([]string{""}, content...)
+func frameSubmitted(head string, content []string, columns int, background style.Style) []string {
+	rows := append([]string{head}, content...)
 	rows = append(rows, "")
 
 	for i, row := range rows {
@@ -387,19 +396,64 @@ func (self *Picasso) Stop() {
 	}
 }
 
+func (self *Picasso) drawNotices(event agent.Event, draw func(submittedMessage)) {
+	notices, areSaid := HarnessNotices(event)
+	if !areSaid {
+		return
+	}
+
+	for _, notice := range notices {
+		draw(submittedMessage{text: notice, kind: sentHarnessSubmission})
+	}
+}
+
+func isJoinableNotice(event agent.Event) bool {
+	switch event.Kind {
+	case caps.ModeChange, caps.JobStop, portgrant.SandboxToHostChange, portgrant.HostToSandboxChange,
+		jobrecord.Ended, jobrecord.EndedWithSession, conditions.Change, pathgrant.Change, turn.HarnessPoke,
+		hostcommand.Ran:
+		return true
+	case agent.StartupEvent, agent.UserMessageEvent, agent.SilentTurnEvent, agent.PrefixRewriteEvent,
+		agent.CacheRebuildEvent, agent.ModelReasoningEvent, agent.ModelMessageEvent, agent.ToolCallRequestEvent,
+		agent.ToolCallResultEvent, agent.StateChangeEvent, agent.InterruptionEvent,
+		agent.RetryingEvent, agent.FailureEvent:
+		return false
+	}
+
+	return false
+}
+
 func (self *Picasso) drawSubmitted(message submittedMessage) {
 	self.Close(dynamic.Cancelled)
+
+	if message.kind == sentHarnessSubmission {
+		self.screen.Blank()
+		self.drawStandalonePanel(message)
+		return
+	}
+
 	self.drawSubmittedLine(message)
 	self.screen.End()
 	self.screen.Blank()
 }
 
 func (self *Picasso) drawSubmittedBeforeResult(message submittedMessage) {
-	self.screen.Panel(submittedRows{
-		render: func(columns int) []string { return self.submittedContent(message, columns) },
-	}, func(content []string, columns int) []string {
-		return frameSubmitted(content, columns, message.background())
-	})
+	block, frame := self.submittedPanel(message)
+	self.screen.Panel(block, frame)
+}
+
+func (self *Picasso) drawStandalonePanel(message submittedMessage) {
+	block, frame := self.submittedPanel(message)
+	self.screen.StandalonePanel(block, frame)
+}
+
+func (self *Picasso) submittedPanel(message submittedMessage) (output.Block, output.Frame) {
+	return submittedRows{
+			render: func(columns int) []string { return self.submittedContent(message, columns) },
+		},
+		func(content []string, columns int) []string {
+			return frameSubmitted("", content, columns, message.background())
+		}
 }
 
 type submittedRows struct {
@@ -686,5 +740,23 @@ func (self *Picasso) render(event agent.Event) string {
 }
 
 func RenderFailure(event agent.Event) string {
-	return strutil.CapitaliseSentence(strutil.PrintableLines(event.Text))
+	return strutil.CapitaliseSentence(strutil.PrintableLines(agent.FailureText(event)))
+}
+
+const (
+	contextExceededNotice = "The conversation no longer fits the context window."
+	forkCommand           = "/fork"
+)
+
+func RenderContextExceeded(event agent.Event, modelName string) (string, bool) {
+	if event.Failure == nil || !event.Failure.IsContextExceeded() {
+		return "", false
+	}
+
+	notice := contextExceededNotice
+	if modelName != "" {
+		notice += " Run " + forkCommand + " " + modelName + " to carry on in a new session."
+	}
+
+	return notice, true
 }

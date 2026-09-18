@@ -27,8 +27,9 @@ func (self *Screen) Open(block Block) {
 type Frame func(rows []string, columns int) []string
 
 type framedBlock struct {
-	blocks []Block
-	frame  Frame
+	blocks       []Block
+	frame        Frame
+	isStandalone bool
 }
 
 func (self *framedBlock) Rows(columns int) []string {
@@ -42,11 +43,41 @@ func (self *framedBlock) Rows(columns int) []string {
 }
 
 func (self *Screen) Panel(block Block, frame Frame) {
+	self.panel(block, frame, false)
+}
+
+func (self *Screen) StandalonePanel(block Block, frame Frame) {
+	self.panel(block, frame, true)
+}
+
+func (self *Screen) panel(block Block, frame Frame, isStandalone bool) {
 	if self.addToOpenPanel(block) {
 		return
 	}
 
-	self.open(&framedBlock{blocks: []Block{block}, frame: frame}, NoticeGroup, nil)
+	self.open(&framedBlock{blocks: []Block{block}, frame: frame, isStandalone: isStandalone}, NoticeGroup, nil)
+}
+
+func (self *Screen) SealOpenPanel() bool {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	if len(self.blocks) != 1 {
+		return false
+	}
+
+	panel, isPanel := self.blocks[0].Block.(*framedBlock)
+	if !isPanel {
+		return false
+	}
+
+	self.seal()
+
+	if panel.isStandalone {
+		self.isBlankOwed = self.hasPrinted
+	}
+
+	return true
 }
 
 func (self *Screen) addToOpenPanel(block Block) bool {
@@ -69,6 +100,8 @@ func (self *Screen) addToOpenPanel(block Block) bool {
 }
 
 func (self *Screen) OpenNotice(block Block) *BlockHandle {
+	self.SealOpenPanel()
+
 	handle := new(BlockHandle)
 	self.open(block, NoticeGroup, handle)
 
@@ -119,6 +152,7 @@ func (self *Screen) RefreshBlock(handle *BlockHandle) bool {
 		return false
 	}
 
+	self.isShrinkOwed = true
 	self.refresh()
 
 	return true
