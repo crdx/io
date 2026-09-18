@@ -1,20 +1,20 @@
 Usage:
-    oh --ctl <command> [<args>...]
-    oh -L [<login-provider>]
-    oh -U [--json]
-    oh -u [--ignored]
     oh [options] [-t <tool>]... [<prompt>...]
+    oh --login [<provider>]
+    oh --usage [--json]
+    oh --update [--ignored]
+    oh --ctl <command> [<args>...]
 
 Options:
-        --ctl     Control stored sessions and formats
     -r, --resume [<session>]    Resume a session
     -m, --model [<model>]       Choose a model
     -c, --caps <flags>          Set capabilities
     -t, --tool <tool>           Replace the toolbox
     -p, --print                 Stream non-interactively
-        --demo    Enter the matrix
-        --yolo    Disable sandbox
-    -l, --list                  List models
+        --ctl                   Run maintenance
+        --demo                  Enter the matrix
+        --yolo                  Disable the sandbox
+    -l, --list                  List available models
     -u, --update                Update model cache
     -L, --login                 Log in to a provider
     -U, --usage                 Show subscription usage

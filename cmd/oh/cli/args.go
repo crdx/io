@@ -20,22 +20,22 @@ const (
 
 var usage = `
 Usage:
-    $0 -L [<login-provider>]
-    $0 -U [--json]
-    $0 -u [--ignored]
     $0 [options] [-t <tool>]... [<prompt>...]
+    $0 --login [<provider>]
+    $0 --usage [--json]
+    $0 --update [--ignored]
     $0 --ctl <command> [<args>...]
 
 Options:
-        --ctl     Control stored sessions and formats
     -r, --resume [<session>]    Resume a session
     -m, --model [<model>]       Choose a model
     -c, --caps <flags>          Set capabilities
     -t, --tool <tool>           Replace the toolbox
     -p, --print                 Stream non-interactively
-        --demo    Enter the matrix
-        --yolo    Disable sandbox
-    -l, --list                  List models
+        --ctl                   Run maintenance
+        --demo                  Enter the matrix
+        --yolo                  Disable the sandbox
+    -l, --list                  List available models
     -u, --update                Update model cache
     -L, --login                 Log in to a provider
     -U, --usage                 Show subscription usage
@@ -51,7 +51,7 @@ type inputFlags struct {
 	ControlArguments []string `docopt:"<args>"`
 	Message          []string `docopt:"<prompt>"`
 	Login            bool     `docopt:"--login"`
-	LoginProvider    string   `docopt:"<login-provider>"`
+	Provider         string   `docopt:"<provider>"`
 	Session          string   `docopt:"--resume"`
 	IsSessionPicker  bool     `docopt:"-r"`
 	Model            string   `docopt:"--model"`

@@ -324,7 +324,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	if inputArgs.Login {
-		err := onboarding.Login(inputArgs.LoginProvider, keyboard, os.Stdout)
+		err := onboarding.Login(inputArgs.Provider, keyboard, os.Stdout)
 		if errors.Is(err, onboarding.ErrCancelled) {
 			return "", nil
 		}

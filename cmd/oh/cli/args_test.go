@@ -71,12 +71,12 @@ func bind(t *testing.T, arguments ...string) Input {
 
 func TestLoginProviderIsOptional(t *testing.T) {
 	withoutProvider := bind(t, "-L")
-	if !withoutProvider.Login || withoutProvider.LoginProvider != "" {
+	if !withoutProvider.Login || withoutProvider.Provider != "" {
 		t.Errorf("got %+v", withoutProvider)
 	}
 
 	withProvider := bind(t, "-L", "anthropic")
-	if !withProvider.Login || withProvider.LoginProvider != "anthropic" {
+	if !withProvider.Login || withProvider.Provider != "anthropic" {
 		t.Errorf("got %+v", withProvider)
 	}
 }
