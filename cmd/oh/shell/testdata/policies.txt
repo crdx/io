@@ -1,0 +1,74 @@
+=== workspace PATH aliases ===
+<root>
+
+=== PATH alias outside workspace ===
+<root>
+
+=== unreadable workspace subtree mode 000 ===
+read:
+.git
+a/.git
+forge/data/ssh
+z/.git
+write:
+<root>
+
+=== unreadable additional subtree mode 000 ===
+read:
+.git
+a/.git
+forge/data/ssh
+z/.git
+write:
+<root>
+
+=== unreadable workspace subtree mode 0300 ===
+read:
+.git
+a/.git
+forge/data/ssh
+z/.git
+write:
+<root>
+
+=== unreadable additional subtree mode 0300 ===
+read:
+.git
+a/.git
+forge/data/ssh
+z/.git
+write:
+<root>
+
+=== live read and execute grant ===
+read: true
+write: false
+execute: true
+optional: true
+
+=== live read and write grant ===
+read: false
+write: true
+execute: false
+optional: true
+
+=== vanished read and execute grant ===
+read: false
+write: false
+execute: false
+optional: false
+
+=== vanished read and write grant ===
+read: false
+write: false
+execute: false
+optional: false
+
+=== configured path with temporary write access ===
+read: false
+write: true
+execute: false
+optional: false
+
+=== missing protection root ===
+error: lstat /missing: no such file or directory

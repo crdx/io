@@ -176,3 +176,21 @@ func TestASearchWithNoPatternIsRefused(t *testing.T) {
 }
 
 func allowAll(string) error { return nil }
+
+func TestDeniedNamesAreAbsentFromSearches(t *testing.T) {
+	root := testRoot(t, "foo.txt", "nested/foo.txt", "visible.txt")
+	root.SetAccessRefusal(func(path string) error {
+		if filepath.Base(path) == "foo.txt" {
+			return os.ErrPermission
+		}
+		return nil
+	})
+
+	output, err := exec(t, root, `{"pattern":"**"}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(output, "foo.txt") || !strings.Contains(output, "visible.txt") {
+		t.Errorf("got %q, want only visible matches", output)
+	}
+}

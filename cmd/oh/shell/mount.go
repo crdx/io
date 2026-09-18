@@ -9,10 +9,12 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"sync"
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/pathutil"
 )
@@ -35,20 +37,46 @@ type PathAccess struct {
 
 	mutex            sync.RWMutex
 	configuredPaths  Paths
+	baselineMounts   map[string]mountedPath
 	configuredMounts map[string]mountedPath
 	temporaryMounts  map[string]mountedPath
 	temporaryAccess  map[string]Access
+	denyPathCache    map[string][]string
+	denials          pathDenials
 	roots            []*os.Root
 }
 
 func NewPathAccess(files *file.Root, mode *caps.Mode, paths Paths) (*PathAccess, error) {
+	denials, err := newPathDenials(paths.Deny)
+	if err != nil {
+		return nil, err
+	}
+	files.SetAccessRefusal(denials.Refuse)
+	files.SetExcludedNames(paths.Deny)
+
 	access := &PathAccess{
 		files:            files,
 		mode:             mode,
 		configuredPaths:  clonePaths(paths),
+		baselineMounts:   make(map[string]mountedPath),
 		configuredMounts: make(map[string]mountedPath),
 		temporaryMounts:  make(map[string]mountedPath),
 		temporaryAccess:  make(map[string]Access),
+		denyPathCache:    make(map[string][]string),
+		denials:          denials,
+	}
+
+	for _, path := range implicitReadablePaths(files.Name(), paths.Write) {
+		baselineMount, err := access.openBaselineMountedPath(path)
+		if errors.Is(err, fs.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			access.Close()
+			return nil, fmt.Errorf("could not mount baseline path %s: %w", path, err)
+		}
+		access.baselineMounts[path] = baselineMount
+		access.install(path, baselineMount)
 	}
 
 	for _, path := range sortedPathModes(paths) {
@@ -65,22 +93,7 @@ func NewPathAccess(files *file.Root, mode *caps.Mode, paths Paths) (*PathAccess,
 }
 
 func (self *PathAccess) GetPaths() Paths {
-	self.mutex.RLock()
-	defer self.mutex.RUnlock()
-
-	paths := clonePaths(self.configuredPaths)
-	for _, path := range slices.Sorted(maps.Keys(self.temporaryAccess)) {
-		access := self.temporaryAccess[path]
-		switch {
-		case access.Has(WriteAccess):
-			paths.Write = append(paths.Write, path)
-		default:
-			paths.Read = append(paths.Read, path)
-		}
-		if access.Has(ExecAccess) {
-			paths.Exec = append(paths.Exec, path)
-		}
-	}
+	paths, _ := self.getPaths()
 	return paths
 }
 
@@ -89,6 +102,9 @@ func (self *PathAccess) Grant(path string, access Access) (bool, error) {
 	defer self.mutex.Unlock()
 
 	path = filepath.Clean(path)
+	if err := self.denials.Refuse(path); err != nil {
+		return false, err
+	}
 	if current, exists := self.temporaryAccess[path]; exists && current == access {
 		return false, nil
 	}
@@ -124,6 +140,61 @@ func (self *PathAccess) Close() {
 	self.roots = nil
 }
 
+func (self *PathAccess) getDenyPaths(policy sandbox.Policy) ([]string, error) {
+	key := denyPolicyKey(policy)
+
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+	if paths, exists := self.denyPathCache[key]; exists {
+		return slices.Clone(paths), nil
+	}
+
+	paths, err := policy.DiscoverDenyPaths()
+	if err != nil {
+		return nil, err
+	}
+	paths = append([]string{}, paths...)
+	self.denyPathCache[key] = paths
+	return slices.Clone(paths), nil
+}
+
+func denyPolicyKey(policy sandbox.Policy) string {
+	patterns := slices.Sorted(slices.Values(policy.Deny))
+	paths := slices.Concat(
+		slices.Clone(policy.Read),
+		slices.Clone(policy.Write),
+		slices.Clone(policy.Exec),
+		[]string{policy.TmpDir},
+	)
+	slices.Sort(paths)
+	paths = slices.Compact(paths)
+	return strings.Join(patterns, "\x00") + "\x01" + strings.Join(paths, "\x00")
+}
+
+func (self *PathAccess) getPaths() (Paths, []string) {
+	self.mutex.RLock()
+	defer self.mutex.RUnlock()
+
+	paths := clonePaths(self.configuredPaths)
+	var temporaryPaths []string
+	for _, path := range slices.Sorted(maps.Keys(self.temporaryAccess)) {
+		access := self.temporaryAccess[path]
+		switch {
+		case access.Has(WriteAccess):
+			paths.Write = append(paths.Write, path)
+		default:
+			paths.Read = append(paths.Read, path)
+		}
+		if access.Has(ExecAccess) {
+			paths.Exec = append(paths.Exec, path)
+		}
+		if !pathsContain(self.configuredPaths, path) {
+			temporaryPaths = append(temporaryPaths, path)
+		}
+	}
+	return paths, temporaryPaths
+}
+
 func (self *PathAccess) releaseTemporaryMount(path string) {
 	temporaryPathMount, exists := self.temporaryMounts[path]
 	if !exists {
@@ -133,6 +204,8 @@ func (self *PathAccess) releaseTemporaryMount(path string) {
 
 	if configuredPathMount, exists := self.configuredMounts[path]; exists {
 		self.install(path, configuredPathMount)
+	} else if baselineMount, exists := self.baselineMounts[path]; exists {
+		self.install(path, baselineMount)
 	} else {
 		self.files.Unmount(path)
 	}
@@ -148,6 +221,41 @@ func (self *PathAccess) openMountedPath(path string, access Access) (mountedPath
 	return mountedPath{mount: &mount, root: newMountedRoot(self.mode, mount, access)}, nil
 }
 
+func (self *PathAccess) openBaselineMountedPath(path string) (mountedPath, error) {
+	pathMount, err := self.openMountedPath(path, ReadAccess)
+	if !errors.Is(err, fs.ErrPermission) {
+		return pathMount, err
+	}
+
+	info, statErr := os.Stat(path)
+	if statErr != nil {
+		return mountedPath{}, statErr
+	}
+	if info.IsDir() {
+		return mountedPath{}, err
+	}
+
+	target, targetErr := filepath.EvalSymlinks(path)
+	if targetErr != nil {
+		return mountedPath{}, targetErr
+	}
+	openedFile, openErr := os.Open(target)
+	if openErr != nil {
+		return mountedPath{}, openErr
+	}
+	if closeErr := openedFile.Close(); closeErr != nil {
+		return mountedPath{}, closeErr
+	}
+
+	mount := configuredMount{
+		target:  target,
+		name:    filepath.Base(target),
+		isExact: true,
+	}
+	root := file.NewExactFile(target, func(string) error { return file.ErrReadOnly })
+	return mountedPath{mount: &mount, root: root}, nil
+}
+
 func (self *PathAccess) install(path string, pathMount mountedPath) {
 	if pathMount.mount.isExact {
 		self.files.MountFile(path, pathMount.root, pathMount.mount.name)
@@ -158,12 +266,21 @@ func (self *PathAccess) install(path string, pathMount mountedPath) {
 
 func clonePaths(paths Paths) Paths {
 	return Paths{
-		HostLoopback: slices.Clone(paths.HostLoopback),
-		Read:         slices.Clone(paths.Read),
-		Write:        slices.Clone(paths.Write),
-		Exec:         slices.Clone(paths.Exec),
-		Home:         slices.Clone(paths.Home),
+		Deny:  slices.Clone(paths.Deny),
+		Read:  slices.Clone(paths.Read),
+		Write: slices.Clone(paths.Write),
+		Exec:  slices.Clone(paths.Exec),
+		Path:  slices.Clone(paths.Path),
+		Home:  slices.Clone(paths.Home),
 	}
+}
+
+func pathsContain(paths Paths, path string) bool {
+	return slices.Contains(paths.Read, path) ||
+		slices.Contains(paths.Write, path) ||
+		slices.Contains(paths.Exec, path) ||
+		slices.Contains(paths.Path, path) ||
+		slices.Contains(paths.Home, path)
 }
 
 func warnAboutCoveredPaths(paths Paths, warnings io.Writer) {
@@ -173,6 +290,7 @@ func warnAboutCoveredPaths(paths Paths, warnings io.Writer) {
 	}{
 		{"sandbox.write", paths.Write},
 		{"sandbox.exec", paths.Exec},
+		{"sandbox.path", paths.Path},
 	}
 
 	for _, path := range paths.Read {
@@ -204,6 +322,7 @@ func warnAboutContainedPaths(paths Paths, warnings io.Writer) {
 	for _, pair := range []containment{
 		{paths.Write, paths.Read, "is writable but holds the read-only", "sandbox.read"},
 		{paths.Exec, paths.Read, "is executable but holds the read-only", "sandbox.read"},
+		{paths.Path, paths.Read, "is executable but holds the read-only", "sandbox.read"},
 	} {
 		reportContainment(warnings, pair)
 	}
@@ -232,7 +351,12 @@ func reportContainment(warnings io.Writer, pair containment) {
 }
 
 func PreparePaths(paths Paths, warnings io.Writer) (Paths, error) {
-	filteredPaths := Paths{HostLoopback: slices.Clone(paths.HostLoopback)}
+	denials, err := newPathDenials(paths.Deny)
+	if err != nil {
+		return Paths{}, err
+	}
+
+	filteredPaths := Paths{Deny: slices.Clone(denials.patterns)}
 	lists := []struct {
 		source  []string
 		target  *[]string
@@ -241,6 +365,7 @@ func PreparePaths(paths Paths, warnings io.Writer) (Paths, error) {
 		{paths.Read, &filteredPaths.Read, true},
 		{paths.Write, &filteredPaths.Write, true},
 		{paths.Exec, &filteredPaths.Exec, true},
+		{paths.Path, &filteredPaths.Path, true},
 		{paths.Home, &filteredPaths.Home, false},
 	}
 
@@ -281,6 +406,26 @@ type pathMode struct {
 	access Access
 }
 
+func implicitReadablePaths(workspaceDir string, writableRoots []string) []string {
+	workspaceRoot := pathutil.Canonicalise(workspaceDir)
+	seen := make(map[string]struct{})
+	var paths []string
+
+	for _, path := range slices.Concat(sandbox.BaselineReadablePaths(), execPaths(workspaceDir, writableRoots...)) {
+		canonicalPath := pathutil.Canonicalise(path)
+		if _, isWorkspacePath := pathutil.RelativeTo(workspaceRoot, canonicalPath); isWorkspacePath {
+			continue
+		}
+		if _, wasSeen := seen[canonicalPath]; wasSeen {
+			continue
+		}
+		seen[canonicalPath] = struct{}{}
+		paths = append(paths, path)
+	}
+
+	return paths
+}
+
 func sortedPathModes(paths Paths) []pathMode {
 	accessByPath := make(map[string]Access, len(paths.Read)+len(paths.Write)+len(paths.Exec))
 	for _, list := range []struct {
@@ -290,6 +435,8 @@ func sortedPathModes(paths Paths) []pathMode {
 		{paths.Read, ReadAccess},
 		{paths.Write, ReadAccess | WriteAccess},
 		{paths.Exec, ReadAccess | ExecAccess},
+		{paths.Path, ReadAccess | ExecAccess},
+		{paths.Home, ReadAccess},
 	} {
 		for _, path := range list.paths {
 			accessByPath[filepath.Clean(path)] |= list.access

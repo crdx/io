@@ -105,6 +105,9 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.ToolCall
 	if args.Glob != "" {
 		arguments = append(arguments, "--glob="+args.Glob)
 	}
+	for _, pattern := range root.ExcludedNames() {
+		arguments = append(arguments, "--glob=!"+pattern)
+	}
 	arguments = append(arguments, "--regexp="+args.Pattern, "--", name)
 
 	searchContext, stopSearch := context.WithCancel(ctx)

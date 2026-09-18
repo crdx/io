@@ -89,3 +89,26 @@ func TestRenderSaysNothingOfTheWorkingDirectory(t *testing.T) {
 }
 
 func allowAll(string) error { return nil }
+
+func TestDeniedNamesAreAbsentFromListings(t *testing.T) {
+	root, directory := testRoot(t)
+	for _, name := range []string{"foo.txt", "visible.txt"} {
+		if err := os.WriteFile(filepath.Join(directory, name), nil, 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	root.SetAccessRefusal(func(path string) error {
+		if filepath.Base(path) == "foo.txt" {
+			return os.ErrPermission
+		}
+		return nil
+	})
+
+	output, err := exec(t, root, `{}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if output != "visible.txt" {
+		t.Errorf("got %q, want only the visible name", output)
+	}
+}

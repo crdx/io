@@ -12,6 +12,7 @@ import (
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/sandbox"
 )
 
 func configuredPathTestRoot(t *testing.T, mode *caps.Mode) *file.Root {
@@ -46,17 +47,13 @@ func TestMissingConfiguredPathsAreCreatedAndKept(t *testing.T) {
 
 	var warnings strings.Builder
 	filtered, err := PreparePaths(Paths{
-		HostLoopback: []uint16{80},
-		Read:         []string{existingRead, missingRead},
-		Write:        []string{existingWrite, missingWrite},
-		Exec:         []string{existingExec, missingExec},
-		Home:         []string{existingHome, missingHome},
+		Read:  []string{existingRead, missingRead},
+		Write: []string{existingWrite, missingWrite},
+		Exec:  []string{existingExec, missingExec},
+		Home:  []string{existingHome, missingHome},
 	}, &warnings)
 	if err != nil {
 		t.Fatal(err)
-	}
-	if !slices.Equal(filtered.HostLoopback, []uint16{80}) {
-		t.Errorf("got host loopback ports %v, want [80]", filtered.HostLoopback)
 	}
 	if !slices.Equal(filtered.Read, []string{existingRead, missingRead}) {
 		t.Errorf("got read paths %v, want %v", filtered.Read, []string{existingRead, missingRead})
@@ -294,6 +291,10 @@ func TestTemporaryAccessOverridesAndThenRestoresConfiguredAccess(t *testing.T) {
 	if hasChanged, err := access.Grant(configuredDirectory, ReadAccess|WriteAccess); err != nil || !hasChanged {
 		t.Fatalf("grant changed=%t: %v", hasChanged, err)
 	}
+	_, temporaryPaths := access.getPaths()
+	if slices.Contains(temporaryPaths, configuredDirectory) {
+		t.Errorf("configured path %s became optional", configuredDirectory)
+	}
 	mountedRoot, name, err = files.Resolve(filepath.Join(configuredDirectory, "proof"))
 	if err != nil {
 		t.Fatal(err)
@@ -332,6 +333,10 @@ func TestRevokingANewTemporaryPathRemovesItFromBothEnforcers(t *testing.T) {
 	}
 	if !slices.Contains(access.GetPaths().Read, temporaryDirectory) {
 		t.Errorf("shell paths do not include %s", temporaryDirectory)
+	}
+	_, temporaryPaths := access.getPaths()
+	if !slices.Contains(temporaryPaths, temporaryDirectory) {
+		t.Errorf("temporary shell paths do not include %s", temporaryDirectory)
 	}
 
 	if !access.Revoke(temporaryDirectory) {
@@ -657,5 +662,206 @@ func TestAWriteGrantIsReachedThroughTheSpellingTheConfigurationUsed(t *testing.T
 	}
 	if err := root.WriteFile(name, []byte("edited"), 0o600); err != nil {
 		t.Errorf("the configured spelling refused a write: %v", err)
+	}
+}
+
+func TestBaselineSystemPathsAreMountedReadOnlyForFileTools(t *testing.T) {
+	mode := caps.NewMode(caps.Read | caps.Write)
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+
+	access, err := NewPathAccess(files, mode, Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+
+	for name, path := range map[string]string{
+		"direct path": "/usr",
+		"workspace symlink": func() string {
+			alias := filepath.Join(workspace, "system")
+			if err := os.Symlink("/usr", alias); err != nil {
+				t.Fatal(err)
+			}
+			return alias
+		}(),
+	} {
+		t.Run(name, func(t *testing.T) {
+			mountedRoot, resolvedName, err := files.Resolve(path)
+			if err != nil {
+				t.Fatalf("baseline path did not resolve through file tools: %v", err)
+			}
+			if _, err := mountedRoot.Stat(resolvedName); err != nil {
+				t.Fatalf("baseline path was not readable: %v", err)
+			}
+			if err := mountedRoot.RefuseWrite(resolvedName); !errors.Is(err, file.ErrReadOnly) {
+				t.Errorf("baseline path write got %v, want read-only", err)
+			}
+		})
+	}
+	aliasFile := filepath.Join(workspace, "system", "lib", "os-release")
+	mountedRoot, resolvedName, err := files.Resolve(aliasFile)
+	if err != nil {
+		t.Fatalf("file beneath workspace symlink did not resolve through its baseline mount: %v", err)
+	}
+	if data, err := mountedRoot.ReadFile(resolvedName); err != nil || len(data) == 0 {
+		t.Errorf("file beneath workspace symlink read %d bytes and %v", len(data), err)
+	}
+
+	for _, path := range []string{"/etc/passwd", "/etc/machine-id"} {
+		exactRoot, exactName, err := files.Resolve(path)
+		if err != nil {
+			t.Fatalf("exact baseline file %s did not resolve: %v", path, err)
+		}
+		if data, err := exactRoot.ReadFile(exactName); err != nil || len(data) == 0 {
+			t.Errorf("exact baseline file %s read %d bytes and %v", path, len(data), err)
+		}
+	}
+
+	for _, path := range sandbox.BaselineReadablePaths() {
+		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+			continue
+		} else if err != nil {
+			t.Errorf("could not inspect existing baseline path %s: %v", path, err)
+			continue
+		}
+
+		mountedRoot, resolvedName, err := files.Resolve(path)
+		if err != nil {
+			t.Errorf("baseline path %s did not resolve through file tools: %v", path, err)
+			continue
+		}
+		if _, err := mountedRoot.Stat(resolvedName); err != nil {
+			t.Errorf("baseline path %s was not readable: %v", path, err)
+		}
+		if err := mountedRoot.RefuseWrite(resolvedName); !errors.Is(err, file.ErrReadOnly) {
+			t.Errorf("baseline path %s write got %v, want read-only", path, err)
+		}
+	}
+
+	if slices.Contains(access.GetPaths().Read, "/usr") {
+		t.Error("implicit baseline path was reported as an explicit sandbox path")
+	}
+}
+
+func TestRevokingTemporaryAccessRestoresBaselineSystemAccess(t *testing.T) {
+	mode := caps.NewMode(caps.Read | caps.Write)
+	files := configuredPathTestRoot(t, mode)
+	access, err := NewPathAccess(files, mode, Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+
+	if changed, err := access.Grant("/usr", ReadAccess|WriteAccess|ExecAccess); err != nil || !changed {
+		t.Fatalf("grant changed=%t: %v", changed, err)
+	}
+	mountedRoot, name, err := files.Resolve("/usr")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := mountedRoot.RefuseWrite(name); err != nil {
+		t.Errorf("temporary write access remained read-only: %v", err)
+	}
+
+	if !access.Revoke("/usr") {
+		t.Fatal("temporary access was not revoked")
+	}
+	mountedRoot, name, err = files.Resolve("/usr")
+	if err != nil {
+		t.Fatalf("revoking temporary access removed baseline access: %v", err)
+	}
+	if err := mountedRoot.RefuseWrite(name); !errors.Is(err, file.ErrReadOnly) {
+		t.Errorf("restored baseline write got %v, want read-only", err)
+	}
+}
+
+func TestInheritedPathDirectoriesAreReadableByFileToolsAndExecutableByShells(t *testing.T) {
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	executableDirectory := t.TempDir()
+	proof := filepath.Join(executableDirectory, "proof")
+	if err := os.WriteFile(proof, []byte("executable"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", executableDirectory)
+
+	mode := caps.NewMode(caps.Read | caps.Shell)
+	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+	access, err := NewPathAccess(files, mode, Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+
+	mountedRoot, name, err := files.Resolve(proof)
+	if err != nil {
+		t.Fatalf("PATH file did not resolve through file tools: %v", err)
+	}
+	if data, err := mountedRoot.ReadFile(name); err != nil || string(data) != "executable" {
+		t.Errorf("PATH file read got %q and %v", data, err)
+	}
+	if err := mountedRoot.RefuseWrite(name); !errors.Is(err, file.ErrReadOnly) {
+		t.Errorf("PATH file write got %v, want read-only", err)
+	}
+
+	policy, err := createTestPolicy(t, workspace, t.TempDir(), t.TempDir(), Paths{}, mode.Current())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Contains(policy.Exec, executableDirectory) {
+		t.Errorf("shell executable paths %v do not include PATH directory %s", policy.Exec, executableDirectory)
+	}
+}
+
+func TestHomeMappingsAreReadableByFileToolsBeforeAShellRuns(t *testing.T) {
+	source := userHomeFile(t, filepath.Join(".config", "git", "ignore"), "*.tmp\n")
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	privateHome := t.TempDir()
+	tmp := t.TempDir()
+	paths := Paths{Home: []string{source}}
+	mode := caps.NewMode(caps.Read)
+	if err := PrepareHomeMappings(workspace, privateHome, tmp, paths, mode.Current()); err != nil {
+		t.Fatal(err)
+	}
+
+	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+	homeRoot, err := MountHomeDirectory(files, privateHome, mode)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = homeRoot.Close() }()
+	access, err := NewPathAccess(files, mode, paths)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+
+	mapped := filepath.Join(privateHome, ".config", "git", "ignore")
+	mountedRoot, name, err := files.Resolve(mapped)
+	if err != nil {
+		t.Fatalf("home mapping did not resolve through file tools: %v", err)
+	}
+	if data, err := mountedRoot.ReadFile(name); err != nil || string(data) != "*.tmp\n" {
+		t.Errorf("home mapping read got %q and %v", data, err)
+	}
+	if err := mountedRoot.RefuseWrite(name); !errors.Is(err, file.ErrReadOnly) {
+		t.Errorf("home mapping write got %v, want read-only", err)
 	}
 }

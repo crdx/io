@@ -47,14 +47,7 @@ func exec(root *file.Root, args Args) (string, error) {
 		return "", err
 	}
 
-	directory, err := root.Open(name)
-	if err != nil {
-		return "", err
-	}
-
-	defer func() { _ = directory.Close() }()
-
-	entries, err := directory.ReadDir(-1)
+	entries, err := root.ReadDir(name)
 	if err != nil {
 		return "", err
 	}

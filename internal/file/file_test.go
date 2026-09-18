@@ -298,3 +298,78 @@ func TestAnExactFileMountResolvesOnlyTheNamedFile(t *testing.T) {
 		}
 	}
 }
+
+func TestAnExactFileRootReadsOnlyItsFile(t *testing.T) {
+	directory := t.TempDir()
+	exactPath := filepath.Join(directory, "exact")
+	siblingPath := filepath.Join(directory, "sibling")
+	if err := os.WriteFile(exactPath, []byte("exact"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(siblingPath, []byte("sibling"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	root := file.NewExactFile(exactPath, func(string) error { return file.ErrReadOnly })
+	if root.Name() != directory {
+		t.Errorf("got root name %q, want %q", root.Name(), directory)
+	}
+	if data, err := root.ReadFile("exact"); err != nil || string(data) != "exact" {
+		t.Errorf("read got %q and %v", data, err)
+	}
+	opened, err := root.Open("exact")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = opened.Close()
+	if info, err := root.Stat("exact"); err != nil || info.Name() != "exact" {
+		t.Errorf("stat got %v and %v", info, err)
+	}
+	openedFS, err := root.FS().Open("exact")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = openedFS.Close()
+	if data, err := fs.ReadFile(root.FS(), "exact"); err != nil || string(data) != "exact" {
+		t.Errorf("filesystem read got %q and %v", data, err)
+	}
+
+	for operation, run := range map[string]func() error{
+		"open":       func() error { _, err := root.Open("sibling"); return err },
+		"read":       func() error { _, err := root.ReadFile("sibling"); return err },
+		"stat":       func() error { _, err := root.Stat("sibling"); return err },
+		"filesystem": func() error { _, err := root.FS().Open("sibling"); return err },
+	} {
+		if err := run(); !errors.Is(err, file.ErrOutsideRoot) {
+			t.Errorf("%s sibling got %v, want outside-root refusal", operation, err)
+		}
+	}
+	if err := root.WriteFile("exact", []byte("changed"), 0o600); !errors.Is(err, file.ErrReadOnly) {
+		t.Errorf("write got %v, want read-only", err)
+	}
+	if err := root.MkdirAll("directory", 0o700); !errors.Is(err, file.ErrReadOnly) {
+		t.Errorf("mkdir got %v, want read-only", err)
+	}
+}
+
+func TestAWritableExactFileRootStillRefusesSiblingsAndDirectories(t *testing.T) {
+	directory := t.TempDir()
+	exactPath := filepath.Join(directory, "exact")
+	if err := os.WriteFile(exactPath, []byte("before"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	root := file.NewExactFile(exactPath, func(string) error { return nil })
+
+	if err := root.WriteFile("exact", []byte("after"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if data, err := root.ReadFile("exact"); err != nil || string(data) != "after" {
+		t.Errorf("written file got %q and %v", data, err)
+	}
+	if err := root.WriteFile("sibling", []byte("blocked"), 0o600); !errors.Is(err, file.ErrOutsideRoot) {
+		t.Errorf("sibling write got %v, want outside-root refusal", err)
+	}
+	if err := root.MkdirAll("exact", 0o700); !errors.Is(err, file.ErrOutsideRoot) {
+		t.Errorf("mkdir got %v, want outside-root refusal", err)
+	}
+}

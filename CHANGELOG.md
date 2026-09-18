@@ -20,6 +20,7 @@
 
 ### Security
 
+- Add cached glob-based `sandbox.deny` names that remain inaccessible inside ordinary grants
 - Refuse workspace config flags: editor, experimental, provider, sandbox, skills
 - Refuse a bar segment option holding text the terminal would obey
 - Refuse a `ports.hostname` that is not a hostname

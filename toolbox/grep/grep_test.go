@@ -310,3 +310,20 @@ func TestASymbolicLinkInsideTheRootIsStillSearched(t *testing.T) {
 }
 
 func allowAll(string) error { return nil }
+
+func TestDeniedNamesAreNotReadBySearches(t *testing.T) {
+	root := testRoot(t, map[string]string{
+		"foo.txt":        "secret\n",
+		"nested/foo.txt": "secret\n",
+		"visible.txt":    "public\n",
+	})
+	root.SetExcludedNames([]string{"foo.txt"})
+
+	output, err := exec(t, root, `{"pattern":"secret"}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if output != "(no matches)" {
+		t.Errorf("got %q, want no matches", output)
+	}
+}

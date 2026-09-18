@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 	"syscall"
 	"time"
@@ -275,6 +274,13 @@ func ensureCurrency(ctx context.Context, output io.Writer, code string, isSimula
 	return money.Load(path, code)
 }
 
+func requireDenyEnforcement(isYolo bool, patterns []string) error {
+	if isYolo && len(patterns) > 0 {
+		return errors.New("sandbox.deny cannot be enforced under --yolo")
+	}
+	return nil
+}
+
 //nolint:gocyclo // lol no
 func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, error) {
 	ctx := context.Background()
@@ -470,6 +476,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	defer func() { _ = workspace.Close() }()
 
+	if err := requireDenyEnforcement(args.Yolo, settings.Sandbox.Deny); err != nil {
+		return "", err
+	}
 	if !args.Yolo {
 		if err := shell.RequireSandbox(ctx); err != nil {
 			return "", err
@@ -509,14 +518,22 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		return "", err
 	}
-	hostLoopback := sessions.OpeningHostLoopback(settings.Sandbox.HostLoopback, resumedSession)
 	pathAccess, err := shell.NewPathAccess(files, mode, settings.Sandbox)
 	if err != nil {
 		return "", err
 	}
 	defer pathAccess.Close()
 
-	globalSkillDirs := append([]string{location.GetConfigDir("skills")}, settings.Skills.Include...)
+	builtinSkillDir := location.GetStateDir(skill.DirectoryName)
+	if err := skill.Materialise(builtinSkillDir); err != nil {
+		util.WriteWarningf(os.Stderr, "%v", err)
+		builtinSkillDir = ""
+	}
+
+	globalSkillDirs := append(
+		[]string{builtinSkillDir, location.GetConfigDir(skill.DirectoryName)},
+		settings.Skills.Include...,
+	)
 	availableSkills, err := skill.Discover(workspace.GetDir(), globalSkillDirs, os.Stderr)
 	if err != nil {
 		return "", err
@@ -573,7 +590,6 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		Provider:     selection.Provider,
 		Effort:       selection.Effort,
 		IsFast:       selection.IsFast,
-		HostLoopback: slices.Clone(hostLoopback),
 		Yolo:         args.Yolo,
 	}
 
@@ -600,6 +616,17 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		return "", err
 	}
+
+	if err := shell.PrepareHomeMappings(
+		workspace.GetDir(), homeDir, tmpDir, settings.Sandbox, mode.Current(),
+	); err != nil {
+		return "", err
+	}
+	cacheRoot, err := shell.MountHomeCache(files, homeDir)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = cacheRoot.Close() }()
 
 	dropKeeper, err := drops.Open(files, sessionInfo.Directory, log.EnsurePersisted)
 	if err != nil {
@@ -629,7 +656,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		args.Message = startup.JoinPrompt(initialFilesMessage, args.Message)
 	}
 
-	sandboxRunner, jobManager, keeperProcess, closeKeeper, keeperRefusal := openRunner(ctx, args.Yolo, hostLoopback)
+	sandboxRunner, jobManager, keeperProcess, closeKeeper, keeperRefusal := openRunner(ctx, args.Yolo)
 	defer closeKeeper()
 
 	if jobManager != nil {
@@ -723,13 +750,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		}
 	}
 
-	hostToSandbox = portgrant.NewHostToSandbox(hostToSandboxExposer, hostToSandboxHostname, hostLoopback)
+	hostToSandbox = portgrant.NewHostToSandbox(hostToSandboxExposer, hostToSandboxHostname)
 	hostToSandbox.SetSandboxToHostPorts(sandboxToHost.GetCurrent)
 	var hostToSandboxRestoreResult portgrant.HostToSandboxRestoreResult
 	if resumedSession != nil {
 		if recordedPorts, found := portgrant.LastRecordedHostToSandbox(resumedSession.Events); found {
 			hostToSandbox, hostToSandboxRestoreResult = portgrant.NewRestoredHostToSandbox(
-				hostToSandboxExposer, hostToSandboxHostname, hostLoopback, recordedPorts,
+				hostToSandboxExposer, hostToSandboxHostname, recordedPorts,
 			)
 			hostToSandbox.SetSandboxToHostPorts(sandboxToHost.GetCurrent)
 		}
@@ -870,7 +897,8 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			Revoke:     sandboxToHost.Revoke,
 			GetCurrent: sandboxToHost.GetCurrent,
 		},
-		Jobs: managedJobs(jobManager),
+		Jobs:        managedJobs(jobManager),
+		LimitOutput: func(output string) string { return app.withinToolOutputLimit(output) },
 		GetInfo: func() (string, error) {
 			return app.display.bar.RenderInfo(segment.Context{})
 		},
@@ -1008,6 +1036,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	app.display.streamingMode = liveConfig.StreamingMode
 	app.display.reasoningRendering = liveConfig.ReasoningRendering
 	app.display.theme = liveConfig.Theme
+	app.display.modelName = selection.Model
 	screen.SetGrouping(liveConfig.Grouping)
 	app.display.bar = bar.NewConfiguration(barRegistry, liveConfig.SegmentLayout)
 
@@ -1093,13 +1122,13 @@ func isSessionLeftToResume(isPersisted bool, isSimulated bool, kind cycle.Transi
 }
 
 func openRunner(
-	ctx context.Context, isYolo bool, hostLoopback []uint16,
+	ctx context.Context, isYolo bool,
 ) (sandbox.Runner, *jobs.Manager, *keeper.Keeper, func(), error) {
 	if isYolo {
 		return sandbox.Direct(), nil, nil, func() {}, nil
 	}
 
-	keeperProcess, err := keeper.Open(ctx, hostLoopback...)
+	keeperProcess, err := keeper.Open(ctx)
 	if err != nil {
 		return sandbox.Direct(), nil, nil, func() {}, err
 	}
