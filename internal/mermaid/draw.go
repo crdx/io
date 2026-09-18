@@ -129,7 +129,7 @@ func drawBox(node *node, graph *graph) *drawing {
 
 	from := drawingCoord{0, 0}
 	to := drawingCoord{width, height}
-	boxDrawing := *(mkDrawing(Max(from.x, to.x), Max(from.y, to.y)))
+	boxDrawing := *mkDrawing(Max(from.x, to.x), Max(from.y, to.y))
 	drawRectangleBorder(&boxDrawing, from, to, graph.useAscii)
 	innerTop := from.y + 1
 	innerHeight := height - 1
@@ -160,7 +160,7 @@ func drawSubgraph(sg *subgraph, graph graph) *drawing {
 
 	from := drawingCoord{0, 0}
 	to := drawingCoord{width, height}
-	subgraphDrawing := *(mkDrawing(width, height))
+	subgraphDrawing := *mkDrawing(width, height)
 
 	drawRectangleBorder(&subgraphDrawing, from, to, graph.useAscii)
 	return &subgraphDrawing
@@ -198,7 +198,7 @@ func drawSubgraphLabel(sg *subgraph) (*drawing, drawingCoord) {
 
 	from := drawingCoord{0, 0}
 	to := drawingCoord{width, height}
-	labelDrawing := *(mkDrawing(width, height))
+	labelDrawing := *mkDrawing(width, height)
 
 	for lineIndex, line := range sg.label.lines {
 		labelY := from.y + 1 + lineIndex*(graphLabelLineGap+1)

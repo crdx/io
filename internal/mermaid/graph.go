@@ -594,7 +594,7 @@ func (self *graph) appendNode(n *node) {
 func (self *graph) getEdgesFromNode(n *node) []edge {
 	edges := []edge{}
 	for _, edge := range self.edges {
-		if (edge.from.name) == (n.name) {
+		if edge.from.name == n.name {
 			edges = append(edges, *edge)
 		}
 	}
