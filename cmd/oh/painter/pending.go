@@ -7,6 +7,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/conditions"
+	"crdx.org/io/cmd/oh/hostcommand"
 	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/markdown"
@@ -22,6 +23,7 @@ const (
 	unsentMark              = "⏳"
 	harnessMark             = "🤖"
 	unwrappedPreviewColumns = 1 << 16
+	sendHint                = "double-enter to send now"
 )
 
 type submissionKind uint8
@@ -134,52 +136,71 @@ func (self *PendingMessages) MarkSent() {
 }
 
 func (self *PendingMessages) Rows(columns int) []string {
-	var rows []string
-
-	for i, message := range self.messages {
-		if i > 0 {
-			rows = append(rows, "")
-		}
-		rows = append(rows, strings.Split(self.render(message, columns), "\n")...)
+	if len(self.messages) == 0 {
+		return nil
 	}
 
-	return rows
+	var content []string
+	for _, message := range self.messages {
+		content = append(content, submittedContentRows(
+			submittedMessage{text: message, kind: self.kind},
+			columns,
+			self.shouldRenderHyperlinks,
+			self.pathRoots,
+		)...)
+	}
+
+	return frameSubmitted(self.sendHintRow(columns), content, columns, style.Harness)
 }
 
-func (self *PendingMessages) render(text string, columns int) string {
-	return renderSubmittedMessage(
-		submittedMessage{text: text, kind: self.kind},
-		columns,
-		self.shouldRenderHyperlinks,
-		self.pathRoots,
-	)
+func (self *PendingMessages) sendHintRow(columns int) string {
+	if self.kind != pendingHarnessSubmission {
+		return ""
+	}
+
+	room := columns - width.Of(sendHint) - 1
+	if room < 1 {
+		return ""
+	}
+
+	return strings.Repeat(" ", room) + style.Subtle(sendHint)
 }
 
-func HarnessNotice(event agent.Event) (string, bool) {
+func HarnessNotices(event agent.Event) ([]string, bool) {
 	switch event.Kind {
 	case caps.ModeChange:
 		return caps.ModeNotice(event)
 	case caps.JobStop:
-		return caps.JobStopNotice(event)
+		return oneNotice(caps.JobStopNotice(event))
 	case jobrecord.Ended:
-		return jobrecord.EndedNotice(event)
+		return oneNotice(jobrecord.EndedNotice(event))
 	case jobrecord.EndedWithSession:
-		return jobrecord.EndedWithSessionNotice(event)
+		return oneNotice(jobrecord.EndedWithSessionNotice(event))
+	case hostcommand.Ran:
+		return oneNotice(hostcommand.Notice(event))
 	case conditions.Change:
 		return conditions.Notice(event)
 	case pathgrant.Change:
-		return pathgrant.Notice(event)
+		return oneNotice(pathgrant.Notice(event))
 	case portgrant.SandboxToHostChange:
-		return portgrant.SandboxToHostNotice(event)
+		return oneNotice(portgrant.SandboxToHostNotice(event))
 	case portgrant.HostToSandboxChange:
-		return portgrant.HostToSandboxNotice(event)
+		return oneNotice(portgrant.HostToSandboxNotice(event))
 	case turn.HarnessPoke:
-		return turn.PokeNotice(event)
+		return oneNotice(turn.PokeNotice(event))
 	case agent.StartupEvent, agent.UserMessageEvent, agent.SilentTurnEvent, agent.CacheRebuildEvent, agent.PrefixRewriteEvent,
 		agent.ModelReasoningEvent, agent.ModelMessageEvent, agent.ToolCallRequestEvent,
 		agent.ToolCallResultEvent, agent.StateChangeEvent, agent.InterruptionEvent,
 		agent.RetryingEvent, agent.FailureEvent:
-		return "", false
+		return nil, false
 	}
-	return "", false
+	return nil, false
+}
+
+func oneNotice(notice string, isSaid bool) ([]string, bool) {
+	if !isSaid {
+		return nil, false
+	}
+
+	return []string{notice}, true
 }

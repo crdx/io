@@ -24,6 +24,7 @@ import (
 	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/experimental"
 	"crdx.org/io/cmd/oh/feedback"
+	"crdx.org/io/cmd/oh/hostcommand"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/interaction"
 	"crdx.org/io/cmd/oh/interrupt"
@@ -77,8 +78,8 @@ func (self *pendingNotices) takeBack(index int) {
 	self.items = slices.Delete(self.items, index, index+1)
 }
 
-func (self *pendingNotices) hasStoppedJobs(whichCaps caps.Set) bool {
-	for _, item := range self.items {
+func (self *pendingNotices) hasStoppedJobsAfter(index int, whichCaps caps.Set) bool {
+	for _, item := range self.items[index+1:] {
 		if item.state.Kind != caps.JobStop {
 			continue
 		}
@@ -94,8 +95,8 @@ func (self *pendingNotices) hasStoppedJobs(whichCaps caps.Set) bool {
 func (self *pendingNotices) notices() []string {
 	var notices []string
 	for _, item := range self.items {
-		if notice, isSaid := painter.HarnessNotice(item.state); isSaid {
-			notices = append(notices, notice)
+		if itemNotices, areSaid := painter.HarnessNotices(item.state); areSaid {
+			notices = append(notices, itemNotices...)
 		}
 	}
 	return notices
@@ -105,8 +106,6 @@ type jobState struct {
 	manager         *jobs.Manager
 	recordedListing string
 	hasRecorded     bool
-	restoredNote    string
-	endedNotes      []string
 	doesWake        bool
 }
 
@@ -116,6 +115,7 @@ type displayState struct {
 	reasoningRendering output.ReasoningRendering
 	theme              style.Theme
 	pictures           pictures.Display
+	modelName          string
 }
 
 type runMode struct {
@@ -150,6 +150,7 @@ type App struct {
 	hostToSandbox   *portgrant.HostToSandbox
 	sandboxToHost   *portgrant.SandboxToHost
 	jobs            jobState
+	settledNotes    []string
 	settledCaps     caps.Set
 	pendingNotices  pendingNotices
 	feedback        feedback.State
@@ -251,7 +252,7 @@ func (self *App) begin(message string) cycle.Transition {
 		Conclusions:           self.jobConclusions(),
 		OnJobEnded:            self.jobEnded,
 		HostToSandboxChanges:  self.hostToSandboxChanges(),
-		OnHostToSandboxChange: self.notify,
+		OnHostToSandboxChange: self.holdHostToSandboxChange,
 		QuestionChanges:       self.questionChanges(),
 		OnQuestionChange:      self.onQuestionChange,
 		OnDraw:                func() { self.show(inputLine) },
@@ -480,6 +481,10 @@ func (self *App) handleCommand(message string) dispatch.Result {
 }
 
 func (self *App) emitCommandEvent(event agent.Event) {
+	if event.Kind == hostcommand.Ran {
+		self.hostCommandRan(event)
+		return
+	}
 	if event.Kind == portgrant.SandboxToHostChange {
 		self.pendingNotices.add(event)
 		if self.currentTurn.Running() {
@@ -502,6 +507,29 @@ func (self *App) emitCommandEvent(event agent.Event) {
 		return
 	}
 	self.refreshPendingMessages()
+}
+
+func (self *App) hostCommandRan(event agent.Event) {
+	if self.holdNotice(event) {
+		self.startTurn()
+	}
+}
+
+func (self *App) holdNotice(event agent.Event) bool {
+	notices, areSaid := painter.HarnessNotices(event)
+	if !areSaid {
+		return false
+	}
+
+	if self.currentTurn.Note(strings.Join(notices, noticeSeparator)) {
+		self.notify(event)
+		return false
+	}
+
+	self.pendingNotices.add(event)
+	self.refreshPendingMessages()
+
+	return true
 }
 
 func (self *App) queuePathGrantChange(event agent.Event) {
@@ -595,7 +623,16 @@ func (self *App) continueOrFlush(inputLine *edit.Input, history *edit.History) {
 		return
 	}
 
+	if !self.currentTurn.Running() && self.hasUntoldPendingNotices() {
+		self.startTurn()
+		return
+	}
+
 	self.sendInput(inputLine, history, self.continueMessage)
+}
+
+func (self *App) hasUntoldPendingNotices() bool {
+	return len(self.pendingNotices.items) > 0
 }
 
 func (self *App) takeBackInterjection(inputLine *edit.Input) bool {
@@ -640,14 +677,12 @@ func (self *App) toggleCap(whichCaps caps.Set) {
 }
 
 func (self *App) pendingModeChange(whichCaps caps.Set) (int, bool) {
-	if self.pendingNotices.hasStoppedJobs(whichCaps) {
-		return 0, false
-	}
-
-	for index, item := range self.pendingNotices.items {
-		if item.state.Kind == caps.ModeChange && item.state.Name == whichCaps.Flag() {
-			return index, true
+	for index, item := range slices.Backward(self.pendingNotices.items) {
+		if item.state.Kind != caps.ModeChange || item.state.Name != whichCaps.Flag() {
+			continue
 		}
+
+		return index, !self.pendingNotices.hasStoppedJobsAfter(index, whichCaps)
 	}
 
 	return 0, false
@@ -727,7 +762,6 @@ func (self *App) initialiseAccess() {
 func (self *App) settleAccess() {
 	if self.settledCaps == 0 {
 		self.initialiseAccess()
-		return
 	}
 
 	self.settlePendingInput()
@@ -735,6 +769,9 @@ func (self *App) settleAccess() {
 }
 
 func (self *App) settlePendingInput() {
+	self.settledNotes = append(self.settledNotes, self.pendingNotices.notices()...)
+	self.markAccessTold()
+
 	wasShown := self.pendingNotices.block != nil
 	for _, item := range self.pendingNotices.items {
 		if item.state.Kind == "" {
@@ -752,6 +789,7 @@ func (self *App) settlePendingInput() {
 		self.pendingNotices.renderer.MarkSent()
 		self.screen.RefreshBlock(self.pendingNotices.block)
 		self.screen.SealBlock(self.pendingNotices.block)
+		self.screen.Blank()
 	}
 	self.pendingNotices = pendingNotices{}
 }
@@ -967,6 +1005,10 @@ func (self *App) hostToSandboxChanges() <-chan agent.Event {
 	return self.hostToSandbox.Changes()
 }
 
+func (self *App) holdHostToSandboxChange(event agent.Event) {
+	self.holdNotice(event)
+}
+
 func (self *App) drainHostToSandboxChanges() {
 	if self.hostToSandbox == nil {
 		return
@@ -975,7 +1017,7 @@ func (self *App) drainHostToSandboxChanges() {
 	for {
 		select {
 		case event := <-self.hostToSandbox.Changes():
-			self.notify(event)
+			self.holdNotice(event)
 		default:
 			return
 		}
@@ -992,24 +1034,8 @@ func (self *App) jobConclusions() <-chan jobs.Conclusion {
 
 func (self *App) jobEnded(conclusion jobs.Conclusion) {
 	conclusion.Output = self.withinToolOutputLimit(conclusion.Output)
-	event := jobrecord.EndedEvent(conclusion)
 
-	notice, isSaid := jobrecord.EndedNotice(event)
-	if !isSaid {
-		return
-	}
-
-	if self.currentTurn.Note(notice) {
-		self.notify(event)
-
-		return
-	}
-
-	self.jobs.endedNotes = append(self.jobs.endedNotes, notice)
-	self.pendingNotices.add(event)
-	self.refreshPendingMessages()
-
-	if self.jobs.doesWake {
+	if self.holdNotice(jobrecord.EndedEvent(conclusion)) && self.jobs.doesWake {
 		self.startTurn()
 	}
 }
@@ -1028,7 +1054,7 @@ func (self *App) stopJobsHoldingPath(path string) {
 	}
 
 	for _, name := range self.jobs.manager.StopHolding(shell.StoppedByPath(path)) {
-		self.pendingNotices.add(caps.JobStoppedForPathEvent(name, path))
+		self.showStoppedJob(caps.JobStoppedForPathEvent(name, path))
 	}
 }
 
@@ -1043,7 +1069,15 @@ func (self *App) stopJobsLosingAccess(withdrawnCaps caps.Set) {
 	}
 
 	for _, name := range self.jobs.manager.StopHolding(holds) {
-		self.pendingNotices.add(caps.JobStopEvent(name, withdrawnCaps))
+		self.showStoppedJob(caps.JobStopEvent(name, withdrawnCaps))
+	}
+}
+
+func (self *App) showStoppedJob(event agent.Event) {
+	self.pendingNotices.add(event)
+
+	if !self.currentTurn.Running() {
+		self.refreshPendingMessages()
 	}
 }
 
@@ -1141,7 +1175,46 @@ func reloadConfirmation(changes []config.SourceChange) string {
 		}
 	}
 
-	return strings.Join(rows, "\n")
+	return strings.Join(append(rows, reachRows(changes)...), "\n")
+}
+
+var reachDescriptions = map[config.Reach]string{
+	config.ReachNextRun:     "when oh next starts",
+	config.ReachNextSession: "in a new session",
+}
+
+func reachRows(changes []config.SourceChange) []string {
+	settingsByReach := map[config.Reach][]string{}
+	isRecorded := map[string]bool{}
+
+	for _, change := range changes {
+		for _, setting := range change.Settings {
+			reach := config.ReachOf(setting)
+			if reach == config.ReachLive || isRecorded[setting] {
+				continue
+			}
+			isRecorded[setting] = true
+			settingsByReach[reach] = append(settingsByReach[reach], setting)
+		}
+	}
+
+	rows := make([]string, 0, len(settingsByReach))
+
+	for _, reach := range []config.Reach{config.ReachNextRun, config.ReachNextSession} {
+		settings := settingsByReach[reach]
+		if len(settings) == 0 {
+			continue
+		}
+
+		verb := "land"
+		if len(settings) == 1 {
+			verb = "lands"
+		}
+
+		rows = append(rows, strings.Join(settings, ", ")+" "+verb+" "+reachDescriptions[reach])
+	}
+
+	return rows
 }
 
 func (self *App) notifyUnknownSettings(reports []string) {
@@ -1349,6 +1422,7 @@ func (self *App) newPainter(isRunning bool) *painter.Picasso {
 	if self.display.pictures.SessionDirectory != "" {
 		picasso.DrawPicturesFrom(self.display.pictures)
 	}
+	picasso.SuggestForkingWith(self.display.modelName)
 	return picasso
 }
 
@@ -1425,9 +1499,7 @@ func (self *App) prelude() string {
 	notes := slices.DeleteFunc(
 		[]string{
 			self.interruptionNote(),
-			self.takeRestoredJobsNote(),
-			self.takeEndedJobsNote(),
-			self.accessMessage(),
+			self.takeSettledNotes(),
 			self.titleNote(),
 		},
 		func(note string) bool { return note == "" },
@@ -1453,12 +1525,8 @@ func (self *App) accessTellers() access.Group {
 	return access.NewGroup(tellers...)
 }
 
-func (self *App) accessMessage() string {
-	return self.accessTellers().Inject()
-}
-
-func (self *App) untoldAccessMessage() string {
-	return self.accessTellers().Peek()
+func (self *App) markAccessTold() {
+	self.accessTellers().Inject()
 }
 
 func (self *App) titleNote() string {
@@ -1482,18 +1550,13 @@ func (self *App) titleNote() string {
 	return "This session has no title yet. Name the task with the " + title.Name + " tool."
 }
 
-func (self *App) takeRestoredJobsNote() string {
-	note := self.jobs.restoredNote
-	self.jobs.restoredNote = ""
+const noticeSeparator = "\n\n"
 
-	return note
-}
+func (self *App) takeSettledNotes() string {
+	notes := self.settledNotes
+	self.settledNotes = nil
 
-func (self *App) takeEndedJobsNote() string {
-	notes := self.jobs.endedNotes
-	self.jobs.endedNotes = nil
-
-	return strings.Join(notes, " ")
+	return strings.Join(notes, noticeSeparator)
 }
 
 func (self *App) recordJobListing() {
@@ -1541,11 +1604,7 @@ func (self *App) restoreJobs(events []agent.Event) {
 		return
 	}
 
-	event := jobrecord.EndedWithSessionEvent(live)
-	if note, isSaid := jobrecord.EndedWithSessionNotice(event); isSaid {
-		self.jobs.restoredNote = note
-	}
-	self.pendingNotices.add(event)
+	self.pendingNotices.add(jobrecord.EndedWithSessionEvent(live))
 }
 
 func (self *App) interruptionNote() string {
@@ -1626,7 +1685,12 @@ func (self *App) notifyFailure(text string) {
 
 func (self *App) notify(event agent.Event) {
 	self.recordedEvents = append(self.recordedEvents, event)
-	self.noticePainter().DrawEvent(event)
+
+	picasso := self.noticePainter()
+	picasso.DrawEvent(event)
+	if picasso.Stale() {
+		self.redraw()
+	}
 
 	_ = self.recorder.Event(event)
 }
@@ -1669,11 +1733,11 @@ func (self *App) finish() {
 	if self.currentTurn.Cancelled() {
 		self.recordEvent(interrupt.Event(self.interruptionCause()))
 	} else if turnError = self.currentTurn.Error(); turnError != nil {
-		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: turnError.Error()})
+		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Failure: agent.FailureFrom(turnError)})
 	}
 
 	if note, isNoted := self.currentTurn.TakeNotes(); isNoted {
-		self.jobs.endedNotes = append(self.jobs.endedNotes, note)
+		self.settledNotes = append(self.settledNotes, note)
 	}
 
 	self.recordJobListing()
@@ -1711,7 +1775,7 @@ func (self *App) finish() {
 		self.refreshPendingMessages()
 		self.start(message)
 	case turn.AccessChange:
-		if self.untoldAccessMessage() != "" {
+		if self.hasUntoldPendingNotices() {
 			self.startTurn()
 		}
 	case turn.AccessNotice:

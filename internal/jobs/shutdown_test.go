@@ -79,3 +79,26 @@ func TestStoppingPatienceDependsOnWhyTheJobEnds(t *testing.T) {
 		})
 	}
 }
+
+func TestAJobAlreadyStoppingIsNotStoppedAgain(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		manager := New(stubbornRunner{})
+		defer func() { _ = manager.Close() }()
+
+		policy := sandbox.Policy{Write: []string{"/workspace"}}
+		if _, err := manager.Start(t.Context(), "web", ".", "webd", policy); err != nil {
+			t.Fatal(err)
+		}
+
+		holdsWorkspace := func(sandbox.Policy) bool { return true }
+
+		first := manager.StopHolding(holdsWorkspace)
+		if len(first) != 1 || first[0] != "web" {
+			t.Fatalf("got %v, want the one job that held the workspace", first)
+		}
+
+		if again := manager.StopHolding(holdsWorkspace); len(again) != 0 {
+			t.Errorf("got %v, want a job already stopping to be reported once", again)
+		}
+	})
+}

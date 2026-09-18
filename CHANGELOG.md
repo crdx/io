@@ -79,6 +79,8 @@
 - Handle pending notices correctly
 - Tell the model exactly what the harness drew
 - Deliver harness notices before turn end
+- Submit pending notices on a double enter
+- Hint above standing notices that a double enter sends them
 - Gather consecutive harness notices into one block
 - Display each capability change as its own notice
 - Display each machine condition change as its own notice

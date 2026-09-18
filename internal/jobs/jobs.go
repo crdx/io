@@ -353,7 +353,7 @@ func (self *Manager) StopHolding(holds func(sandbox.Policy) bool) []string {
 	var stoppingJobs []*job
 	for _, name := range self.order {
 		found := self.jobs[name]
-		if isLive(found.state) && holds(found.policy) {
+		if isStoppable(found.state) && holds(found.policy) {
 			stoppingJobs = append(stoppingJobs, found)
 		}
 	}
@@ -598,7 +598,16 @@ func Report(status string, output string, droppedBytes int) string {
 	}
 
 	if strings.TrimSpace(output) == "" {
-		return strings.Join(append(lines, "the job has printed nothing."), "\n")
+		marker := " (no output)"
+		for _, punctuation := range []string{".", "!", "?"} {
+			withoutPunctuation, found := strings.CutSuffix(lines[0], punctuation)
+			if found {
+				lines[0] = withoutPunctuation + marker + punctuation
+				return strings.Join(lines, "\n")
+			}
+		}
+		lines[0] += marker
+		return strings.Join(lines, "\n")
 	}
 
 	return strings.Join(append(lines, strings.TrimRight(output, "\n")), "\n")
@@ -606,4 +615,8 @@ func Report(status string, output string, droppedBytes int) string {
 
 func isLive(state State) bool {
 	return state == StateStarting || state == StateRunning || state == StateStopping
+}
+
+func isStoppable(state State) bool {
+	return state == StateStarting || state == StateRunning
 }
