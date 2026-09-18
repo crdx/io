@@ -17,6 +17,7 @@ import (
 	"crdx.org/io/cmd/oh/hostcommand"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/slash"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/work"
 )
@@ -273,7 +274,7 @@ func helpCommand(getHelp func() string) slash.Command {
 				return slash.Usage()
 			}
 
-			context.Notice(getHelp())
+			context.PlainNotice(getHelp())
 			return nil
 		},
 	}
@@ -351,10 +352,10 @@ func helpText(commandUsages []string, hiddenCommandUsage string, targetNames []s
 		}
 		usesTargets = usesTargets || strings.Contains(usage, targetPlaceholder)
 	}
-	sections := []string{"Commands:\n" + slash.HelpIndent + strings.Join(visibleCommandUsages, "\n"+slash.HelpIndent)}
+	sections := []string{style.Info("Commands:") + "\n" + slash.HelpIndent + strings.Join(visibleCommandUsages, "\n"+slash.HelpIndent)}
 	if usesTargets {
 		targetRows := column.Rows(targetNames, slash.HelpWidth-len(slash.HelpIndent))
-		sections = append(sections, "Targets:\n"+slash.HelpIndent+strings.Join(targetRows, "\n"+slash.HelpIndent))
+		sections = append(sections, style.Info("Targets:")+"\n"+slash.HelpIndent+strings.Join(targetRows, "\n"+slash.HelpIndent))
 	}
 	return strings.Join(sections, "\n\n")
 }

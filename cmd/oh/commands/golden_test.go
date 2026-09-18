@@ -12,7 +12,9 @@ import (
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/snippets"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/jobs"
+	"crdx.org/io/internal/util/strutil"
 )
 
 func TestGoldenCompletionMatchesGolden(t *testing.T) {
@@ -297,5 +299,6 @@ func TestGoldenHelpMatchesGolden(t *testing.T) {
 	if err := invocation.Command.Run(context, invocation.Arguments); err != nil {
 		t.Fatal(err)
 	}
-	assertGolden(t, "help.txt", context.notice+"\n")
+	assertGolden(t, "help.txt", style.Plain(context.notice)+"\n")
+	assertGolden(t, "help.ansi", strutil.VisibleEscapes(context.notice)+"\n")
 }

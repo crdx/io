@@ -20,6 +20,7 @@
 - Drop warning chevron from approval prompt header
 - Reword the host networking prompt
 - Don't include prompt waiting time in tool call time
+- Highlight `Targets` header in the same blue as `Commands`
 
 ## [0.6.0] - 2026-09-18
 
