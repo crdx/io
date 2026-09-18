@@ -1,7 +1,7 @@
 === narrow ===
 
- read target.txt and
- cmd/oh/line/render.go:12:3; also
+ read target.txt and spaced target.txt
+ and cmd/oh/line/render.go:12:3; also
  /etc/hosts and the target
  (https://example.test).
 === one column ===
@@ -12,6 +12,44 @@ r
 e
 
 a
+
+d
+
+t
+
+a
+
+r
+
+g
+
+e
+
+t
+
+.
+
+t
+
+x
+
+t
+
+a
+
+n
+
+d
+
+s
+
+p
+
+a
+
+c
+
+e
 
 d
 
@@ -196,6 +234,8 @@ t
 
  read
  target.txt
+ and spaced
+ target.txt
  and
  cmd/oh/line
  /render.go:
@@ -208,5 +248,5 @@ t
  .
 === wide ===
 
- read target.txt and cmd/oh/line/render.go:12:3; also /etc/hosts and the target
- (https://example.test).
+ read target.txt and spaced target.txt and cmd/oh/line/render.go:12:3; also /etc/hosts and the
+ target (https://example.test).

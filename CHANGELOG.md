@@ -89,6 +89,7 @@
 - Show whole seconds for durations >= 1s
 - Remove some character-building options
 - Detect environment changes on resume
+- Linkify paths containing spaces
 
 ### Analysis
 

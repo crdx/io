@@ -20,7 +20,10 @@ const (
 
 const pathExpression = `(?:~|\.{1,2})?/(?:[[:alnum:]_.@+%=-]+/)*[[:alnum:]_.@+%=-]+|[[:alnum:]_.@+%=-]+(?:/[[:alnum:]_.@+%=-]+)+|[[:alnum:]_@+%=-]+(?:\.[[:alnum:]_@+%=-]+)+|\.[[:alnum:]_@+%=-]+`
 
-var pathPattern = regexp.MustCompile(`(` + pathExpression + `)(?::([0-9]+)(?::([0-9]+))?)?`)
+var (
+	pathPattern           = regexp.MustCompile(`(` + pathExpression + `)(?::([0-9]+)(?::([0-9]+))?)?`)
+	sourceLocationPattern = regexp.MustCompile(`^(.*?):([0-9]+)(?::([0-9]+))?$`)
+)
 
 func RenderURL(text string, address string) string {
 	return openPrefix + address + terminator + text + closeLink
@@ -100,27 +103,20 @@ func Render(text string, roots Roots) string {
 	sourceAt := 0
 
 	for _, match := range matches {
-		if visible.hasLink(match[0], match[1]) {
+		found, exists := locateAround(visible.text, match[0], match[1], roots)
+		if !exists || visible.hasLink(found.begin, found.end) {
 			continue
 		}
 
-		found, exists := locate(visible.text[match[2]:match[3]], roots)
-		if !exists {
+		begin := visible.starts[found.begin]
+		end := visible.ends[found.end]
+		if begin < sourceAt {
 			continue
 		}
 
-		line := submatch(visible.text, match[4], match[5])
-		column := submatch(visible.text, match[6], match[7])
-		finish := match[1]
-		if found.end < match[3]-match[2] {
-			finish = match[2] + found.end
-			line, column = "", ""
-		}
-		begin := visible.starts[match[2]+found.begin]
-		end := visible.ends[finish]
 		output.WriteString(text[sourceAt:begin])
 		output.WriteString(openPrefix)
-		output.WriteString(linkURL(found.target, line, column))
+		output.WriteString(linkURL(found.target, found.line, found.column))
 		output.WriteString(terminator)
 		output.WriteString(text[begin:end])
 		output.WriteString(closeLink)
@@ -209,33 +205,120 @@ func escapeEnd(text string, start int) int {
 	return len(text)
 }
 
-func submatch(text string, begin int, end int) string {
-	if begin < 0 {
-		return ""
-	}
-
-	return text[begin:end]
-}
-
 type location struct {
 	begin  int
 	end    int
 	target string
+	line   string
+	column string
+}
+
+func locateAround(text string, begin int, end int, roots Roots) (location, bool) {
+	starts, ends := candidateBounds(text, begin, end)
+	best := location{}
+	wasFound := false
+
+	for _, start := range starts {
+		for _, finish := range ends {
+			found, exists := locate(text[start:finish], roots)
+			if !exists {
+				continue
+			}
+
+			found.begin += start
+			found.end += start
+			if !wasFound || found.end-found.begin > best.end-best.begin {
+				best = found
+				wasFound = true
+			}
+		}
+	}
+
+	return best, wasFound
+}
+
+func candidateBounds(text string, begin int, end int) ([]int, []int) {
+	segmentBegin := begin
+	for segmentBegin > 0 && !isPathBoundary(text[segmentBegin-1]) {
+		segmentBegin--
+	}
+	segmentEnd := end
+	for segmentEnd < len(text) && !isPathBoundary(text[segmentEnd]) {
+		segmentEnd++
+	}
+
+	starts := []int{begin}
+	for at := segmentBegin; at < begin; at++ {
+		isWordStart := text[at] != ' ' && (at == segmentBegin || text[at-1] == ' ')
+		if isWordStart && strings.Contains(text[at:begin], " ") {
+			starts = append(starts, at)
+		}
+	}
+
+	ends := []int{end}
+	hasCrossedSpace := false
+	for at := end; at <= segmentEnd; at++ {
+		if at < segmentEnd && text[at] == ' ' {
+			hasCrossedSpace = true
+		}
+		if !hasCrossedSpace || at < segmentEnd && text[at] != ' ' {
+			continue
+		}
+		finish := at
+		for finish > end && text[finish-1] == ' ' {
+			finish--
+		}
+		if finish != end {
+			ends = append(ends, finish)
+		}
+	}
+
+	return starts, ends
+}
+
+func isPathBoundary(character byte) bool {
+	switch character {
+	case '\n', '\r', '\t', '"', '\'', '`', '(', ')', '[', ']', '{', '}', '<', '>', ',', ';', '!', '?', '|':
+		return true
+	default:
+		return false
+	}
 }
 
 func locate(candidate string, roots Roots) (location, bool) {
 	for _, end := range endings(candidate) {
 		path := candidate[:end]
-
-		if target, exists := resolve(path, roots); exists {
-			return location{begin: 0, end: end, target: target}, true
+		if found, exists := locatePath(path, roots); exists {
+			found.end = end
+			return found, true
 		}
 
-		assignedAt := strings.LastIndexByte(path, '=') + 1
-		if assignedAt > 0 && assignedAt < end {
-			if target, exists := resolve(path[assignedAt:], roots); exists {
-				return location{begin: assignedAt, end: end, target: target}, true
+		locationIndexes := sourceLocationPattern.FindStringSubmatchIndex(path)
+		if locationIndexes == nil {
+			continue
+		}
+		if found, exists := locatePath(path[locationIndexes[2]:locationIndexes[3]], roots); exists {
+			found.end = end
+			found.line = path[locationIndexes[4]:locationIndexes[5]]
+			if locationIndexes[6] >= 0 {
+				found.column = path[locationIndexes[6]:locationIndexes[7]]
 			}
+			return found, true
+		}
+	}
+
+	return location{}, false
+}
+
+func locatePath(path string, roots Roots) (location, bool) {
+	if target, exists := resolve(path, roots); exists {
+		return location{target: target}, true
+	}
+
+	assignedAt := strings.LastIndexByte(path, '=') + 1
+	if assignedAt > 0 && assignedAt < len(path) {
+		if target, exists := resolve(path[assignedAt:], roots); exists {
+			return location{begin: assignedAt, target: target}, true
 		}
 	}
 

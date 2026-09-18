@@ -10,11 +10,11 @@ it is at /tmp/zoom-on.png
 === email autolink ===
 person-at-example.test
 === pending message ===
-
+               double-enter to send now
  ⏳ Granted temporary read-only access
     to /reference.
 === pending message with a heading and a list ===
-
+               double-enter to send now
  ⏳ Heading
 
     • first item

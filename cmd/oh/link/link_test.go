@@ -70,6 +70,29 @@ func TestSourceLocationsBecomeFileFragmentsWithoutChangingTheirText(t *testing.T
 	}
 }
 
+func TestPathsWithSpacesBecomeLinks(t *testing.T) {
+	workspace := t.TempDir()
+	relativePath := prepareFile(t, workspace, "reports/final draft.txt")
+	absolutePath := prepareFile(t, t.TempDir(), "screenshots/first frame.png")
+
+	text := "read final draft.txt and " + absolutePath + ":12:3."
+	got := Render(text, Roots{Workspace: filepath.Dir(relativePath)})
+
+	addresses := linkAddresses(t, got)
+	if len(addresses) != 2 {
+		t.Fatalf("got %d links in %q, want two", len(addresses), got)
+	}
+	if addresses[0].Path != filepath.ToSlash(relativePath) || addresses[0].Fragment != "" {
+		t.Errorf("first address is %q", addresses[0])
+	}
+	if addresses[1].Path != filepath.ToSlash(absolutePath) || addresses[1].Fragment != "12:3" {
+		t.Errorf("second address is %q", addresses[1])
+	}
+	if Plain(got) != text {
+		t.Errorf("visible text is %q, want %q", Plain(got), text)
+	}
+}
+
 func TestAPathAlreadyLinkedToTheWebIsNotNestedInAFileLink(t *testing.T) {
 	workspace := t.TempDir()
 	prepareFile(t, workspace, "cmd/oh/draw.go")
@@ -196,22 +219,37 @@ func TestMissingPathsAndOrdinaryDottedWordsStayPlain(t *testing.T) {
 func linkAddress(t *testing.T, rendered string) *url.URL {
 	t.Helper()
 
-	begin := strings.Index(rendered, openPrefix)
-	if begin < 0 {
+	addresses := linkAddresses(t, rendered)
+	if len(addresses) == 0 {
 		t.Fatalf("no hyperlink in %q", rendered)
 	}
 
-	end := strings.Index(rendered[begin+len(openPrefix):], terminator)
-	if end < 0 {
-		t.Fatalf("unterminated hyperlink in %q", rendered)
-	}
-	end += begin + len(openPrefix)
+	return addresses[0]
+}
 
-	address, err := url.Parse(rendered[begin+len(openPrefix) : end])
-	if err != nil {
-		t.Fatalf("parse hyperlink: %v", err)
+func linkAddresses(t *testing.T, rendered string) []*url.URL {
+	t.Helper()
+
+	var addresses []*url.URL
+	for {
+		begin := strings.Index(rendered, openPrefix)
+		if begin < 0 {
+			return addresses
+		}
+		rendered = rendered[begin+len(openPrefix):]
+		end := strings.Index(rendered, terminator)
+		if end < 0 {
+			t.Fatalf("unterminated hyperlink in %q", rendered)
+		}
+		if end > 0 {
+			address, err := url.Parse(rendered[:end])
+			if err != nil {
+				t.Fatalf("parse hyperlink: %v", err)
+			}
+			addresses = append(addresses, address)
+		}
+		rendered = rendered[end+len(terminator):]
 	}
-	return address
 }
 
 func prepareFile(t *testing.T, workspace string, name string) string {
