@@ -24,5 +24,3 @@ This [long linked label crosses narrow rows without leaking into its neighbours]
 Unsupported [script links](javascript:alert(1)), [relative links](docs/page.md), [hostless links](https:path), and FTP ftp://example.test/archive remain visible but inert.
 
 An image remains a fallback: ![diagram](diagram.png).
-
-

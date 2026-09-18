@@ -26,5 +26,3 @@ bash: touch marker [ok, call_5]
 ## Assistant · +11s
 
 Every finished call has a result link, whether or not it returned anything.
-
-

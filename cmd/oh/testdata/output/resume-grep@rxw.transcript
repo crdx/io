@@ -28,5 +28,3 @@ grep: one [ok, 1 line, 16B, call_1]
 ## Assistant · +6s
 
 The matching target is now safely recorded.
-
-

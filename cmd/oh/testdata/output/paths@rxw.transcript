@@ -34,6 +34,3 @@ A wrapped patch path looks like this:
 ```bash
     cmd/oh/line/a-patch-path-that-is-long-enough-to-wrap-after-leading-indentation-and-remain-clickable.patch
 ```
-
-
-

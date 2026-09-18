@@ -342,4 +342,3 @@ Found it. Reading the renderer now.
 read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m
 
 The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
-

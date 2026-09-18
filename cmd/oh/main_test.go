@@ -7074,10 +7074,12 @@ func compareWithGolden(t *testing.T, name string, suffix string, passes map[stri
 		fmt.Fprintf(&drawn, "=== %s ===\n%s\n", pass, strutil.VisibleEscapes(anonymisePictures(passes[pass]())))
 	}
 
+	golden := strings.TrimRight(drawn.String(), "\n") + "\n"
+
 	goldenPath := filepath.Join("testdata", "output", name+suffix)
 
 	if *updateGoldens {
-		if err := os.WriteFile(goldenPath, []byte(drawn.String()), 0o600); err != nil {
+		if err := os.WriteFile(goldenPath, []byte(golden), 0o600); err != nil {
 			t.Fatal(err)
 		}
 
@@ -7089,11 +7091,11 @@ func compareWithGolden(t *testing.T, name string, suffix string, passes map[stri
 		t.Fatalf("%v: write the goldens with `just -f rig.just goldens`", err)
 	}
 
-	if drawn.String() != string(want) {
+	if golden != string(want) {
 		t.Errorf(
 			"%s drew something else; write the goldens again and read the diff\n"+
 				"--- drawn ---\n%s\n--- golden ---\n%s",
-			name, drawn.String(), want,
+			name, golden, want,
 		)
 	}
 }

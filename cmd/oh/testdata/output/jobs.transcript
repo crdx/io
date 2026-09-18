@@ -31,5 +31,3 @@ job: stale plural all rendering [ok, 7 lines, 383B, call_all]
 ## Assistant · +21s
 
 The docs server ran on `localhost:8080` and is stopped now. The `build` job was killed by `SIGXCPU` after exceeding its 2s processor limit.
-
-

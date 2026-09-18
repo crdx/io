@@ -76,7 +76,7 @@ func Open(path string, meta Meta) (*Recorder, error) {
 	if info.Size() == 0 {
 		_, err = fmt.Fprintf(
 			file,
-			"# Conversation\n\n- **Session:** `%s`\n- **Started:** `%s`\n- **Model:** `%s`\n- **Effort:** `%s`\n- **Provider:** `%s`\n- **Workspace:** `%s`\n- **Tool detail:** `jq 'select(.event.id == \"<id>\")' session.jsonl`, for the `[id]` of any call\n\n",
+			"# Conversation\n\n- **Session:** `%s`\n- **Started:** `%s`\n- **Model:** `%s`\n- **Effort:** `%s`\n- **Provider:** `%s`\n- **Workspace:** `%s`\n- **Tool detail:** `jq 'select(.event.id == \"<id>\")' session.jsonl`, for the `[id]` of any call\n",
 			meta.Name, meta.StartedAt.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace,
 		)
 		if err != nil {
@@ -451,12 +451,12 @@ type document struct {
 }
 
 func (self *document) String() string {
-	return self.text.String() + "\n"
+	return "\n" + self.text.String()
 }
 
 func (self *document) paragraph(text string) {
 	self.openBlock()
-	self.text.WriteString(text)
+	self.text.WriteString(strings.TrimRight(text, "\n"))
 	self.text.WriteString("\n")
 }
 
@@ -476,7 +476,7 @@ func (self *document) fence(value string) {
 	length := max(3, longest+1)
 	fence := strings.Repeat("`", length)
 	self.openBlock()
-	fmt.Fprintf(&self.text, "%s\n%s\n%s\n", fence, value, fence)
+	fmt.Fprintf(&self.text, "%s\n%s\n%s\n", fence, strings.TrimRight(value, "\n"), fence)
 }
 
 func (self *document) markdown(value string) {

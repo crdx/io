@@ -25,5 +25,3 @@ exit status 1
 ## Assistant · +3s
 
 The build failed on an undefined `getWidth`, and the read has to come first.
-
-

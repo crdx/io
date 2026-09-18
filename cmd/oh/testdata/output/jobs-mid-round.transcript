@@ -52,5 +52,3 @@ read [ok, 1 line, 4B, call_2]
 ## Assistant · +9s
 
 Both files are read. The build failed on an undefined `getWidth`, and the docs are written.
-
-

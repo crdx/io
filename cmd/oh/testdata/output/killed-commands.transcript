@@ -24,5 +24,3 @@ bash: cp README.md /etc/hosts [error, 6 lines, 289B, 2M peak, call_3]
 ## Assistant · +7s
 
 The linter was killed for its processor time, the write for its size, and the copy refused.
-
-

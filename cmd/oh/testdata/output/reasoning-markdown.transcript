@@ -22,5 +22,3 @@ read: target.txt [ok, 1 line, 4B, call_1]
 ## Assistant · +6s
 
 The read came first, and the file holds `one`.
-
-

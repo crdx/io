@@ -41,6 +41,3 @@ read: notes.md [error, 1 line, 35B, call_7]
 ## Assistant · +16s
 
 The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. Every write was refused because the workspace is read-only, so nothing was there for the reads to find.
-
-
-

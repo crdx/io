@@ -57,7 +57,6 @@ HTML</b> in the middle of it.
 
 The end.
 
-
 ## Assistant · +3s
 
 A script with a bit of everything in it:
@@ -95,6 +94,3 @@ And a pattern with a unicode class in it:
 ```regexp
 ^\\p{Lu}\\w{2,8}(?:-\\d+)?$
 ```
-
-
-

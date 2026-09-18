@@ -41,6 +41,3 @@ read: notes.md [ok, 6 lines, 32B, call_7]
 ## Assistant · +18s
 
 The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.
-
-
-

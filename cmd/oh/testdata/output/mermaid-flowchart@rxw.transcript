@@ -29,6 +29,3 @@ accept --> recorded[📝 Record success]
 reject --> failed[⚠️ Record failure]
 end
 ```
-
-
-

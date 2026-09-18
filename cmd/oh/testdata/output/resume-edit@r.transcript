@@ -28,5 +28,3 @@ edit: target.txt [error, 1 line, 27B, call_1]
 ## Assistant · +5s
 
 The resumed edit was refused because the workspace is read-only.
-
-

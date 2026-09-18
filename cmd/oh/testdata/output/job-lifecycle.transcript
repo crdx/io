@@ -101,5 +101,3 @@ job: stale prune rendering [ok, 1 line, 67B, call_4]
 ## Assistant · +20s
 
 It was stopped when write access was withdrawn.
-
-

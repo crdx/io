@@ -27,5 +27,3 @@ find [error in 1m02s, call_2]
 ## Assistant · +6s
 
 The grep took nine seconds and the find gave up after a minute.
-
-

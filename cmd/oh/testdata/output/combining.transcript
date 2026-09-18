@@ -21,7 +21,6 @@ A family 👨‍👩‍👧 is one glyph joined from several, and a heart ❤️
 
 Combining marks pile up too: á̂̃̄ is one letter under four of them.
 
-
 ## Assistant · +3s
 
 A styled wide rune has nowhere to go in one column: `日本` in code, **中文** in bold.
@@ -30,6 +29,3 @@ And a result that came back with Windows line endings:\r
 one\r
 two\r
 three\r
-
-
-

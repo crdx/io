@@ -829,3 +829,48 @@ func TestTranscriptHoldsTheHeaderApartFromWhatFollowsIt(t *testing.T) {
 		}
 	}
 }
+
+func TestTranscriptEndsWithOneNewlineHoweverMuchWasWritten(t *testing.T) {
+	for name, events := range map[string][]agent.Event{
+		"nothing beyond the header": nil,
+		"a message": {
+			{Kind: agent.ModelMessageEvent, Text: "answer"},
+		},
+		"a message the model padded": {
+			{Kind: agent.ModelMessageEvent, Text: "answer\n\n\n"},
+		},
+		"a fenced message": {
+			{Kind: agent.ModelMessageEvent, Text: "# heading\n\n```\ncode\n```\n"},
+		},
+		"a tool call": {
+			{Kind: agent.ToolCallRequestEvent, ID: "call-1", Name: "read", Text: `{"path":"a.txt"}`},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "transcript.md")
+			recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2)})
+			if err != nil {
+				t.Fatal(err)
+			}
+			for at, event := range events {
+				if err := recorder.Event(time.Unix(int64(3+at), 0), event); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := recorder.Close(); err != nil {
+				t.Fatal(err)
+			}
+
+			stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			written := string(stored)
+			trailing := len(written) - len(strings.TrimRight(written, "\n"))
+			if trailing != 1 {
+				t.Errorf("ended with %d newlines, want exactly one:\n%q", trailing, written)
+			}
+		})
+	}
+}

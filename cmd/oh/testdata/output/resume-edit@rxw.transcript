@@ -28,5 +28,3 @@ edit: target.txt [error, 1 line, 19B, call_1]
 ## Assistant · +5s
 
 The resumed edit was refused because the file has not been read in this session.
-
-

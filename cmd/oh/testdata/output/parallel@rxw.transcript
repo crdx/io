@@ -54,6 +54,3 @@ read: nowhere/at/all.go [error, 1 line, 44B, call_11]
 ## Assistant · +29s
 
 That is the lot: four together, then three together, then a pair where only one of them could be answered.
-
-
-

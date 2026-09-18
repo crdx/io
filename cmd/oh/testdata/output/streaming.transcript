@@ -23,7 +23,6 @@ for NAME in $(ls *.go); do echo "$NAME is quite a long line indeed"; done
 
 That is all.
 
-
 ## Assistant · +3s
 
 And a table, which changes shape as its rows arrive:
@@ -35,7 +34,6 @@ And a table, which changes shape as its rows arrive:
 
 That is the lot.
 
-
 ## Assistant · +4s
 
 And a nested list, whose markers arrive before the items they introduce:
@@ -46,6 +44,3 @@ And a nested list, whose markers arrive before the items they introduce:
 - grep walks the tree for a pattern
 
 That is the lot.
-
-
-

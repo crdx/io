@@ -45,5 +45,3 @@ job: stale restart rendering [ok, 1 line, 20B, call_3]
 ## Assistant · +11s
 
 Restarted `docs` from the command it was remembered with.
-
-

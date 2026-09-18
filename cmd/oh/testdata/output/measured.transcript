@@ -43,9 +43,6 @@ done
 ^\\s*(func|type)\\s+\\w{3,12}\\(
 ```
 
-
 ## Assistant · +15s
 
 That is one call of every kind the harness knows how to measure.
-
-

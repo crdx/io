@@ -32,6 +32,7 @@
 - Render `/jobs` commands like bash tool calls
 - Dismiss feedback with backspace, escape, or ^D
 - List changed models on update
+- Remove trailing new line at the end of `chat.md`
 
 ## [0.6.0] - 2026-09-18
 

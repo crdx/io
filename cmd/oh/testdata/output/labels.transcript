@@ -43,6 +43,3 @@ func count() int {
 \treturn total
 }
 ```
-
-
-

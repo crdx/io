@@ -40,5 +40,3 @@ read: target.txt [ok, 1 line, 4B, call_2]
 ## Assistant · +8s
 
 It holds the word `one`, and nothing else.
-
-

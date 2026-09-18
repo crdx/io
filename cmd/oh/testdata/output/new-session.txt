@@ -126,4 +126,3 @@
 "@high"                      error: model must be written as model or model@effort[+fast], got "@high"
 "nope"                       error: model "nope" does not match any known model
 "nonsense"                   error: model "nonsense" does not match any known model
-
