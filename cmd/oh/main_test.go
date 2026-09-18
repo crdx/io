@@ -843,6 +843,94 @@ func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 	}
 }
 
+var dismissKeys = map[string]key.Key{
+	"backspace": {Code: key.Backspace},
+	"escape":    {Code: key.Escape},
+	"ctrl+d":    {Code: key.Rune, Value: 'd', Mod: key.Ctrl},
+}
+
+var feedbackDismissKeys = map[feedbackScenario]key.Key{
+	feedbackClearedByBackspace: dismissKeys["backspace"],
+	feedbackClearedByEscape:    dismissKeys["escape"],
+	feedbackClearedByControlD:  dismissKeys["ctrl+d"],
+}
+
+func TestADismissKeyTakesDismissableFeedbackAwayAndDoesNothingElse(t *testing.T) {
+	for name, keypress := range dismissKeys {
+		t.Run(name, func(t *testing.T) {
+			cancellations := 0
+			self := &App{
+				screen: output.New(&bytes.Buffer{}),
+				currentTurn: Turn{
+					Stream: testTurnStream(nil, func(error) { cancellations++ }, turn.State{Running: true}),
+				},
+			}
+			self.showFeedback(feedback.Command, feedback.Message{
+				Text:   "Command not found: /unknown",
+				Status: agent.ErrorStatus,
+			})
+
+			if !self.apply(edit.NewInput(nil), nil, keypress) {
+				t.Fatal("the harness stopped instead of taking the feedback away")
+			}
+			if !self.feedback.IsEmpty() {
+				t.Errorf("the feedback stayed: %+v", self.feedback.Message())
+			}
+			if cancellations != 0 {
+				t.Errorf("the turn was cancelled %d times, want the key spent on the feedback", cancellations)
+			}
+		})
+	}
+}
+
+func TestADismissKeyLeavesFeedbackNothingMayDismissAlone(t *testing.T) {
+	for name, keypress := range dismissKeys {
+		t.Run(name, func(t *testing.T) {
+			cancellations := 0
+			self := &App{
+				screen: output.New(&bytes.Buffer{}),
+				currentTurn: Turn{
+					Stream: testTurnStream(nil, func(error) { cancellations++ }, turn.State{Running: true}),
+				},
+			}
+			self.showFeedback(feedback.System, feedback.Message{
+				Text:   "chat.md recording disabled",
+				Status: agent.ErrorStatus,
+			})
+
+			self.apply(edit.NewInput(nil), nil, keypress)
+
+			if self.feedback.IsEmpty() {
+				t.Error("feedback nothing may dismiss was taken away")
+			}
+
+			wantCancellations := 1
+			if keypress.Code == key.Backspace {
+				wantCancellations = 0
+			}
+			if cancellations != wantCancellations {
+				t.Errorf("the turn was cancelled %d times, want %d", cancellations, wantCancellations)
+			}
+		})
+	}
+}
+
+func TestControlDIsTheWayOutAgainOnceTheFeedbackHasGone(t *testing.T) {
+	self := &App{screen: output.New(&bytes.Buffer{})}
+	inputLine := edit.NewInput(nil)
+	keypress := key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}
+
+	self.showFeedback(feedback.Command, feedback.Message{Text: "Copied", Status: agent.SuccessStatus})
+
+	if !self.apply(inputLine, nil, keypress) {
+		t.Fatal("ctrl+d left the harness while feedback was on screen")
+	}
+
+	if self.apply(inputLine, nil, keypress) {
+		t.Error("expected the next ctrl+d at rest to be the way out")
+	}
+}
+
 func TestTwoReturnsOnAnEmptyIdleLineSendTheContinueMessage(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
@@ -8783,6 +8871,10 @@ const (
 	feedbackStartupInfo
 	feedbackSuccess
 	feedbackClearedByEditing
+	feedbackClearedByEscape
+	feedbackClearedByBackspace
+	feedbackClearedByControlD
+	feedbackSurvivingADismissKey
 	feedbackClearedByTurnCompletion
 	feedbackStorageWarnings
 	feedbackUnknownSettings
@@ -8832,6 +8924,10 @@ func TestGoldenFeedbackDrawsEveryVisibleState(t *testing.T) {
 		"startup info":                      feedbackStartupInfo,
 		"success confirmation":              feedbackSuccess,
 		"editing clears feedback":           feedbackClearedByEditing,
+		"escape clears feedback":            feedbackClearedByEscape,
+		"backspace clears feedback":         feedbackClearedByBackspace,
+		"ctrl+d clears feedback":            feedbackClearedByControlD,
+		"a warning survives escape":         feedbackSurvivingADismissKey,
 		"turn completion clears it":         feedbackClearedByTurnCompletion,
 		"combined storage warnings":         feedbackStorageWarnings,
 		"settings nothing reads":            feedbackUnknownSettings,
@@ -8892,7 +8988,11 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 	self.inputLine = inputLine
 
 	switch scenario {
-	case feedbackCommandError, feedbackClearedByEditing, feedbackClearedByTurnCompletion, feedbackTallAnswer:
+	case feedbackCommandError,
+		feedbackClearedByEditing,
+		feedbackClearedByEscape,
+		feedbackClearedByTurnCompletion,
+		feedbackTallAnswer:
 		inputLine.SetText("/unknown")
 	case feedbackHelp:
 		inputLine.SetText("/help")
@@ -8910,7 +9010,12 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		inputLine.SetText("write the note")
 	case feedbackApprovalDuringACall:
 		inputLine.SetText("check what that endpoint says")
-	case feedbackStartupInfo, feedbackStorageWarnings, feedbackUnknownSettings:
+	case feedbackStartupInfo,
+		feedbackStorageWarnings,
+		feedbackUnknownSettings,
+		feedbackClearedByBackspace,
+		feedbackClearedByControlD,
+		feedbackSurvivingADismissKey:
 	}
 	self.show(inputLine)
 
@@ -8930,6 +9035,14 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		self.handleCommand("/unknown")
 		self.show(inputLine)
 		self.handleKeypressAndShowInput(inputLine, nil, key.Key{Code: key.Rune, Value: 'x'})
+	case feedbackClearedByEscape, feedbackClearedByBackspace, feedbackClearedByControlD:
+		self.handleCommand("/unknown")
+		self.show(inputLine)
+		self.handleKeypressAndShowInput(inputLine, nil, feedbackDismissKeys[scenario])
+	case feedbackSurvivingADismissKey:
+		self.notifyFailure("chat.md recording disabled: transcript append failed")
+		self.show(inputLine)
+		self.handleKeypressAndShowInput(inputLine, nil, key.Key{Code: key.Escape})
 	case feedbackClearedByTurnCompletion:
 		self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 		self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "still working"})

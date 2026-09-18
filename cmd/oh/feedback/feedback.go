@@ -20,7 +20,7 @@ const (
 	Confirmation
 )
 
-func (self Source) IsDismissedByTyping() bool {
+func (self Source) CanBeDismissed() bool {
 	switch self {
 	case Command, Confirmation:
 		return true
@@ -57,10 +57,14 @@ func (self *State) Clear(source Source) {
 	}
 }
 
-func (self *State) ClearOnTyping() {
-	if self.source.IsDismissedByTyping() {
-		*self = State{}
+func (self *State) Dismiss() bool {
+	if self.IsEmpty() || !self.source.CanBeDismissed() {
+		return false
 	}
+
+	*self = State{}
+
+	return true
 }
 
 func (self *State) ClearExpired(at time.Time) {

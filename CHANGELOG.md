@@ -30,6 +30,7 @@
 - Truncate a tall footer so it doesn't flicker
 - Mark user messages with OSC 133
 - Render `/jobs` commands like bash tool calls
+- Dismiss feedback with backspace, escape, or ^D
 
 ## [0.6.0] - 2026-09-18
 

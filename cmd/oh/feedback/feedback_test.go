@@ -13,7 +13,7 @@ import (
 
 const testDismissAfter = 4 * time.Second
 
-func TestOnlyCommandAndConfirmationAreDismissedByTyping(t *testing.T) {
+func TestOnlyCommandAndConfirmationCanBeDismissed(t *testing.T) {
 	cases := map[Source]bool{
 		System:       false,
 		Command:      true,
@@ -22,9 +22,33 @@ func TestOnlyCommandAndConfirmationAreDismissedByTyping(t *testing.T) {
 	}
 
 	for source, want := range cases {
-		if got := source.IsDismissedByTyping(); got != want {
-			t.Errorf("%v.IsDismissedByTyping() = %v, want %v", source, got, want)
+		if got := source.CanBeDismissed(); got != want {
+			t.Errorf("%v.CanBeDismissed() = %v, want %v", source, got, want)
 		}
+	}
+}
+
+func TestDismissingReportsWhetherItTookAMessageAway(t *testing.T) {
+	var self State
+
+	if self.Dismiss() {
+		t.Error("an empty state reported a dismissal")
+	}
+
+	self.Show(System, Message{Text: "chat.md recording disabled", Status: agent.ErrorStatus}, time.Now())
+	if self.Dismiss() {
+		t.Error("a message nothing may dismiss reported a dismissal")
+	}
+	if self.IsEmpty() {
+		t.Error("a message nothing may dismiss was taken away")
+	}
+
+	self.Show(Command, Message{Text: "Command not found: /unknown", Status: agent.ErrorStatus}, time.Now())
+	if !self.Dismiss() {
+		t.Error("a dismissable message reported no dismissal")
+	}
+	if !self.IsEmpty() {
+		t.Error("a dismissable message stayed on screen")
 	}
 }
 

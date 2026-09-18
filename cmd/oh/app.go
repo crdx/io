@@ -350,7 +350,9 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 	previousText := inputLine.Text()
 	action := inputLine.Apply(keypress, self.currentTurn.Running())
 	if inputLine.Text() != previousText {
-		self.feedback.ClearOnTyping()
+		self.feedback.Dismiss()
+	} else if dismissesFeedback(keypress) && self.feedback.Dismiss() {
+		action = edit.DrawInput
 	}
 	if action != edit.CompleteCommand {
 		self.slash.completion.Reset()
@@ -408,7 +410,7 @@ func (self *App) receivePaste(inputLine *edit.Input, report *key.ClipboardReport
 		self.screen.WriteEscape(result.Sequence)
 
 	case paste.Text:
-		self.feedback.ClearOnTyping()
+		self.feedback.Dismiss()
 		inputLine.InsertPasted(result.Text)
 
 		return true
@@ -439,7 +441,7 @@ func (self *App) pasteImage(inputLine *edit.Input, result paste.Result) bool {
 		return true
 	}
 
-	self.feedback.ClearOnTyping()
+	self.feedback.Dismiss()
 	inputLine.Insert(path)
 
 	return true
@@ -805,6 +807,14 @@ func (self *App) dropPendingInput() {
 
 func (self *App) recordModeEvent(event agent.Event) {
 	self.storeEvent(event)
+}
+
+func dismissesFeedback(keypress key.Key) bool {
+	if keypress.Code == key.Backspace || keypress.Code == key.Escape {
+		return true
+	}
+
+	return keypress.Code == key.Rune && keypress.Value == 'd' && keypress.Mod.Has(key.Ctrl)
 }
 
 func stopKeyCause(keypress key.Key) interrupt.Cause {
