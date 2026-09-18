@@ -150,6 +150,47 @@ func TestASearchThatFindsNothingSaysSo(t *testing.T) {
 	}
 }
 
+func standInRipgrep(t *testing.T, script string) {
+	t.Helper()
+
+	directory := t.TempDir()
+	path := filepath.Join(directory, "rg")
+
+	if err := os.WriteFile(path, []byte("#!/bin/sh\n"+script), 0o700); err != nil { //nolint:gosec // a stand-in the test must be able to run
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	t.Setenv("PATH", directory+string(os.PathListSeparator)+os.Getenv("PATH"))
+}
+
+func TestASearchThatCouldNotRunIsNotCalledEmpty(t *testing.T) {
+	root := testRoot(t, map[string]string{"main.go": "hello\n"})
+	standInRipgrep(t, "echo 'shim: Permission denied' >&2\nexit 1\n")
+
+	output, err := exec(t, root, `{"pattern":"hello"}`)
+	if err == nil {
+		t.Fatalf("got %q and no error, want a search that could not run to say so", output)
+	}
+
+	if !strings.Contains(err.Error(), "Permission denied") {
+		t.Errorf("got %q, want what the search said for itself", err)
+	}
+}
+
+func TestASearchThatFindsNothingQuietlySaysSo(t *testing.T) {
+	root := testRoot(t, map[string]string{"main.go": "hello\n"})
+	standInRipgrep(t, "exit 1\n")
+
+	output, err := exec(t, root, `{"pattern":"hello"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if output != "(no matches)" {
+		t.Errorf("got %q, want no matches", output)
+	}
+}
+
 func TestMatchCountDoesNotCapSmallResults(t *testing.T) {
 	const matchCount = 150
 	root := testRoot(t, map[string]string{

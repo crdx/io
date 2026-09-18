@@ -147,13 +147,14 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.ToolCall
 		return output, metrics, nil
 	}
 	if waitErr != nil {
+		message := strings.TrimSpace(stderr.String())
+
 		var exitError *exec.ExitError
-		if errors.As(waitErr, &exitError) && exitError.ExitCode() == 1 {
+		if errors.As(waitErr, &exitError) && exitError.ExitCode() == 1 && message == "" {
 			output, metrics := searchReport(nil, false)
 			return output, metrics, nil
 		}
 
-		message := strings.TrimSpace(stderr.String())
 		if strings.HasPrefix(message, "rg: regex parse error:") {
 			return "", tool.ToolCallMetrics{}, fmt.Errorf("invalid pattern: %s", strings.TrimPrefix(message, "rg: "))
 		}
