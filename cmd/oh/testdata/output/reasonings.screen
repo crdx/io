@@ -562,6 +562,84 @@ The read
 came first,
 and the file
 holds one.
+=== markdown under a notice streamed asap ===
+
+ think it through while the build finishes
+
+
+
+ 🤖 The job build exited: failed after 12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined: getWidth
+    exit status 1
+
+
+Checking one.go
+
+The first thing to settle is which of these holds:
+
+• the file was read before it was written
+• the file was written before it was read
+
+func main() {
+    println("one")
+}
+
+So the read has to come first.
+
+The build failed on an undefined getWidth, and the read has to come first.
+=== markdown under a notice streamed line ===
+
+ think it through while the build finishes
+
+
+
+ 🤖 The job build exited: failed after 12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined: getWidth
+    exit status 1
+
+
+Checking one.go
+
+The first thing to settle is which of these holds:
+
+• the file was read before it was written
+• the file was written before it was read
+
+func main() {
+    println("one")
+}
+
+So the read has to come first.
+
+The build failed on an undefined getWidth, and the read has to come first.
+=== markdown under a notice streamed paced ===
+
+ think it through while the build finishes
+
+
+
+ 🤖 The job build exited: failed after 12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined: getWidth
+    exit status 1
+
+
+Checking one.go
+
+The first thing to settle is which of these holds:
+
+• the file was read before it was written
+• the file was written before it was read
+
+func main() {
+    println("one")
+}
+
+So the read has to come first.
+
+The build failed on an undefined getWidth, and the read has to come first.
 === markdown wide ===
 
  think about it in markdown before you answer
@@ -1072,6 +1150,57 @@ The read
 came first,
 and the file
 holds one.
+=== plain under a notice streamed asap ===
+
+ think it through while the build finishes
+
+
+
+ 🤖 The job build exited: failed after 12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined: getWidth
+    exit status 1
+
+
+Checking one.go The first thing to settle is which of these holds: • the file was read before it was
+written • the file was written before it was read func main() { println("one") } So the read has to
+come first.
+
+The build failed on an undefined getWidth, and the read has to come first.
+=== plain under a notice streamed line ===
+
+ think it through while the build finishes
+
+
+
+ 🤖 The job build exited: failed after 12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined: getWidth
+    exit status 1
+
+
+Checking one.go The first thing to settle is which of these holds: • the file was read before it was
+written • the file was written before it was read func main() { println("one") } So the read has to
+come first.
+
+The build failed on an undefined getWidth, and the read has to come first.
+=== plain under a notice streamed paced ===
+
+ think it through while the build finishes
+
+
+
+ 🤖 The job build exited: failed after 12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined: getWidth
+    exit status 1
+
+
+Checking one.go The first thing to settle is which of these holds: • the file was read before it was
+written • the file was written before it was read func main() { println("one") } So the read has to
+come first.
+
+The build failed on an undefined getWidth, and the read has to come first.
 === plain wide ===
 
  think about it in markdown before you answer

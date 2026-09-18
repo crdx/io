@@ -3,7 +3,7 @@
 {"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
 {"kind":"event","event":{"kind":"user_message","text":"start a tool call, then wait beyond the request deadline"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Prepare the tool call."}}
-{"kind":"event","event":{"kind":"turn_failure","text":"context deadline exceeded"}}
+{"kind":"event","event":{"kind":"turn_failure","failure":{"kind":"generic_error","message":"context deadline exceeded"}}}
 {"kind":"item","payload":{"role":"user","content":"start a tool call, then wait beyond the request deadline"}}
 {"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the transport timeout"}}

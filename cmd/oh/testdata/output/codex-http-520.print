@@ -1,0 +1,13 @@
+
+ receive an HTML HTTP 520 from the edge proxy
+
+
+[#1] Request failed; retrying in 1s: Request failed with status 520
+
+Recovered after the edge failure.
+
+
+ continue after the recovered request
+
+
+Resumed.

@@ -1,0 +1,20 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[first]
+prompt = "send more than the context window holds"
+
+[[first.response]]
+status = 400
+body = '''{"error":{"code":400,"message":"request (264481 tokens) exceeds the available context size (262144 tokens), try increasing it","type":"exceed_context_size_error","n_prompt_tokens":264481,"n_ctx":262144}}'''
+
+[resume]
+prompt = "continue after the context window filled"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

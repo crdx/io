@@ -2,7 +2,7 @@
 {"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
 {"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
 {"kind":"event","event":{"kind":"user_message","text":"reach the Codex usage limit"}}
-{"kind":"event","event":{"kind":"turn_failure","text":"The usage limit has been reached"}}
+{"kind":"event","event":{"kind":"turn_failure","failure":{"kind":"http_status","message":"The usage limit has been reached","http_status":429,"code":"usage_limit_reached","media_type":"application/json"}}}
 {"kind":"item","payload":{"role":"user","content":"reach the Codex usage limit"}}
 {"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the early reset"}}

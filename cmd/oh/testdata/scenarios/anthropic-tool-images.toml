@@ -6,12 +6,14 @@ effort = "medium"
 name = "snapshot"
 outputs = ["snapshot.png"]
 image = "2400x1200"
+image-bytes = 57245
 state-key = "snapshot-count"
 
 [[tool]]
 name = "thumbnail"
 outputs = ["thumbnail.png"]
 image = "800x600"
+image-bytes = 8973
 state-key = "thumbnail-count"
 
 [first]

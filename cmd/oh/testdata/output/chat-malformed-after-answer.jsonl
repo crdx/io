@@ -2,7 +2,7 @@
 {"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
 {"kind":"event","event":{"kind":"user_message","text":"send malformed data after an answer fragment"}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"turn_failure","text":"the endpoint sent something unreadable: this is not JSON"}}
+{"kind":"event","event":{"kind":"turn_failure","failure":{"kind":"generic_error","message":"the endpoint sent something unreadable: this is not JSON"}}}
 {"kind":"item","payload":{"role":"user","content":"send malformed data after an answer fragment"}}
 {"kind":"item","payload":{"role":"assistant","content":"Partial answer."}}
 {"kind":"turn_completion","turn":{}}

@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/internal/req"
 )
 
@@ -41,6 +42,39 @@ func TestFailureCarriesTheEndpointsOwnMessage(t *testing.T) {
 	}
 }
 
+func TestANumericCodeStillYieldsTheEndpointsOwnMessage(t *testing.T) {
+	url := refusingServer(t, http.StatusBadRequest, `{"error":{"code":400,`+
+		`"message":"request (264481 tokens) exceeds the available context size (262144 tokens)",`+
+		`"type":"exceed_context_size_error","n_prompt_tokens":264481,"n_ctx":262144}}`)
+
+	_, _, err := req.New(time.Second).Stream(t.Context(), url, map[string]string{}, nil)
+	if err == nil {
+		t.Fatal("expected the refusal to be reported")
+	}
+
+	failure := agent.FailureFrom(err)
+	if failure == nil ||
+		failure.Message != "request (264481 tokens) exceeds the available context size (262144 tokens)" ||
+		failure.Code != "exceed_context_size_error" || failure.Body != "" {
+		t.Errorf("expected the numeric code to be read past, got %+v", failure)
+	}
+}
+
+func TestAQuotedCodeIsPreferredOverTheType(t *testing.T) {
+	url := refusingServer(t, http.StatusTooManyRequests,
+		`{"error":{"code":"rate_limit_exceeded","message":"slow down","type":"requests"}}`)
+
+	_, _, err := req.New(time.Second).Stream(t.Context(), url, map[string]string{}, nil)
+	if err == nil {
+		t.Fatal("expected the refusal to be reported")
+	}
+
+	failure := agent.FailureFrom(err)
+	if failure == nil || failure.Code != "rate_limit_exceeded" {
+		t.Errorf("expected the quoted code, got %+v", failure)
+	}
+}
+
 func TestFailureFallsBackToTheStatus(t *testing.T) {
 	url := refusingServer(t, http.StatusBadGateway, "the gateway is unwell")
 
@@ -52,6 +86,55 @@ func TestFailureFallsBackToTheStatus(t *testing.T) {
 	if !strings.Contains(err.Error(), "502") ||
 		!strings.Contains(err.Error(), "the gateway is unwell") {
 		t.Errorf("expected the status and the body, got %q", err)
+	}
+
+	failure := agent.FailureFrom(err)
+	if failure == nil || failure.HTTPStatus != 502 || failure.Body != "the gateway is unwell" {
+		t.Errorf("expected semantic details for the journal, got %+v", failure)
+	}
+}
+
+func TestAnHTMLFailureDoesNotDumpItsPage(t *testing.T) {
+	body := "<html>private diagnostics</html>"
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "text/html; charset=UTF-8")
+		writer.WriteHeader(520)
+		_, _ = writer.Write([]byte(body))
+	}))
+	t.Cleanup(server.Close)
+
+	_, _, err := req.New(time.Second).Stream(t.Context(), server.URL, map[string]string{}, nil)
+	if err == nil {
+		t.Fatal("expected the refusal to be reported")
+	}
+
+	if err.Error() != "request failed with status 520" {
+		t.Errorf("expected only the status, got %q", err)
+	}
+
+	var refused *req.StatusError
+	if !errors.As(err, &refused) || refused.Body != body {
+		t.Errorf("expected the HTTP client to retain the response for provider logic, got %+v", refused)
+	}
+
+	failure := agent.FailureFrom(err)
+	if failure == nil || failure.HTTPStatus != 520 || failure.MediaType != "text/html" || failure.Body != "" {
+		t.Errorf("expected safe semantic details for the journal, got %+v", failure)
+	}
+}
+
+func TestAnUnknownHTMLStatusIsStillDescribedSafely(t *testing.T) {
+	url := refusingServer(t, 598, "<!doctype html><html>future diagnostics</html>")
+
+	_, _, err := req.New(time.Second).Stream(t.Context(), url, map[string]string{}, nil)
+	if err == nil {
+		t.Fatal("expected the refusal to be reported")
+	}
+
+	failure := agent.FailureFrom(err)
+	if failure == nil || failure.Kind != agent.HTTPStatusFailure ||
+		failure.HTTPStatus != 598 || failure.MediaType != "text/html" || failure.Body != "" {
+		t.Errorf("expected safe semantic details for the unknown status, got %+v", failure)
 	}
 }
 
@@ -93,11 +176,8 @@ func TestFormPostsAndDecodes(t *testing.T) {
 }
 
 func TestARefusalKeepsWhatItWasAsWellAsWhatItSaid(t *testing.T) {
-	url := refusingServer(
-		t,
-		http.StatusTooManyRequests,
-		`{"error":{"message":"slow down","code":"rate_limit_exceeded"}}`,
-	)
+	body := `{"error":{"message":"slow down","code":"rate_limit_exceeded"}}`
+	url := refusingServer(t, http.StatusTooManyRequests, body)
 
 	_, _, err := req.New(time.Second).Stream(t.Context(), url, map[string]string{}, nil)
 
@@ -113,6 +193,8 @@ func TestARefusalKeepsWhatItWasAsWellAsWhatItSaid(t *testing.T) {
 		t.Errorf("expected the endpoint's own code, got %q", refused.Code)
 	case refused.Message != "slow down":
 		t.Errorf("expected what it said, got %q", refused.Message)
+	case refused.Body != body:
+		t.Errorf("expected the complete refusal body to be kept, got %q", refused.Body)
 	case !refused.Retriable():
 		t.Error("expected a rate limit to be worth asking again after")
 	}
@@ -205,16 +287,24 @@ func TestACancelledRequestIsNotWorthAskingAgainAfter(t *testing.T) {
 
 func TestARefusalSaysWhetherAskingAgainIsWorthIt(t *testing.T) {
 	tests := map[int]bool{
-		http.StatusBadRequest:          false,
-		http.StatusUnauthorized:        false,
-		http.StatusNotFound:            false,
-		http.StatusTooManyRequests:     true,
-		http.StatusInternalServerError: true,
-		http.StatusBadGateway:          true,
-		http.StatusServiceUnavailable:  true,
-		http.StatusGatewayTimeout:      true,
-		http.StatusInsufficientStorage: true,
-		529:                            true,
+		http.StatusBadRequest:                    false,
+		http.StatusUnauthorized:                  false,
+		http.StatusNotFound:                      false,
+		http.StatusTooManyRequests:               true,
+		http.StatusInternalServerError:           true,
+		http.StatusBadGateway:                    true,
+		http.StatusServiceUnavailable:            true,
+		http.StatusGatewayTimeout:                true,
+		http.StatusInsufficientStorage:           true,
+		http.StatusNotImplemented:                false,
+		http.StatusHTTPVersionNotSupported:       false,
+		http.StatusVariantAlsoNegotiates:         false,
+		http.StatusLoopDetected:                  false,
+		http.StatusNotExtended:                   false,
+		http.StatusNetworkAuthenticationRequired: false,
+		520:                                      true,
+		529:                                      true,
+		598:                                      true,
 	}
 
 	for status, worthIt := range tests {

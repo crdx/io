@@ -1,0 +1,13 @@
+
+ receive an unknown HTML HTTP status
+
+
+[#1] Request failed; retrying in 1s: Request failed with status 598
+
+Recovered from an unknown future status.
+
+
+ continue after the unknown failure
+
+
+Resumed.

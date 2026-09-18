@@ -37,6 +37,11 @@
 - Notify which config keys changed on auto-reload
 - Remove `sandbox.host_loopback`
 
+### Providers
+
+- Show the endpoint's message when it quotes the error code as a number
+- Handle a full context window with a hint to `/fork <model>`
+
 ### Tools & Skills
 
 - Rename `web_search` to `lookup`, toggled with `l` cap
@@ -60,6 +65,7 @@
 
 ### Interface
 
+- Store request failures in a structured format
 - Show an input frame beneath session previews
 - Support theme colour customisation
 - Theme harness-submitted messages

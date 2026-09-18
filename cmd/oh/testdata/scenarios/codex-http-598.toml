@@ -1,0 +1,28 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[first]
+prompt = "receive an unknown HTML HTTP status"
+
+[[first.response]]
+status = 598
+body = '''<!doctype html><html><body>Future private diagnostics.</body></html>'''
+headers = { Content-Type = "application/octet-stream" }
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Recovered from an unknown future status."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Recovered from an unknown future status."}]}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[resume]
+prompt = "continue after the unknown failure"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Resumed."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}''',
+    '''{"type":"response.completed"}''',
+]

@@ -37,7 +37,8 @@ now read the release notes as plain text
 ## Mode · rxwgl · toggled n · +10s
 
 ```
-The bash tool can no longer request the host network, and the fetch tool is now refused.
+The bash tool can no longer request the host network.
+The fetch tool is now refused.
 ```
 
 ## Tool calls · +11s

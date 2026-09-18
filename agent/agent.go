@@ -362,6 +362,9 @@ func (self *Agent) Stream(ctx context.Context, message string, interjections *In
 				if notice, wasRebuilt := self.readCache(reply.Usage, askedAt); wasRebuilt {
 					yieldEvent(notice, nil)
 				}
+				if self.interjectNotes(ctx, interjections) {
+					continue
+				}
 				if !prose.hasAnswered {
 					yieldEvent(Event{Kind: SilentTurnEvent}, nil)
 				}
@@ -402,6 +405,19 @@ func (self *Agent) Stream(ctx context.Context, message string, interjections *In
 	}
 }
 
+func (self *Agent) interjectNotes(ctx context.Context, interjections *Interjections) bool {
+	if ctx.Err() != nil {
+		return false
+	}
+
+	note, isNoted := interjections.TakeNotes()
+	if isNoted {
+		self.provider.AddUserMessage(note)
+	}
+
+	return isNoted
+}
+
 func (self *Agent) interject(
 	ctx context.Context,
 	interjections *Interjections,
@@ -411,9 +427,7 @@ func (self *Agent) interject(
 		return false
 	}
 
-	if note, isNoted := interjections.TakeNotes(); isNoted {
-		self.provider.AddUserMessage(note)
-	}
+	self.interjectNotes(ctx, interjections)
 
 	text, isQueued := interjections.Take()
 	if !isQueued {
@@ -463,7 +477,7 @@ func (self *Agent) send(
 
 		notice := Event{
 			Kind:    RetryingEvent,
-			Text:    err.Error(),
+			Failure: FailureFrom(err),
 			Attempt: attempt,
 			Took:    wait,
 		}

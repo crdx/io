@@ -15,6 +15,7 @@ type interjectionProvider struct {
 	history       []string
 	interjections *agent.Interjections
 	queueAfter    []string
+	noteAfter     []string
 }
 
 func (self *interjectionProvider) Configure(string, []tool.Definition) {}
@@ -32,6 +33,12 @@ func (self *interjectionProvider) AddToolResults(results []agent.ToolCallResult)
 func (self *interjectionProvider) Send(_ context.Context, _ agent.Yield) (agent.Reply, error) {
 	self.sent++
 	self.history = append(self.history, "send")
+
+	if self.sent == 1 {
+		for _, text := range self.noteAfter {
+			self.interjections.Note(text)
+		}
+	}
 
 	if self.sent > self.rounds {
 		return agent.Reply{}, nil
@@ -255,12 +262,14 @@ func TestAHarnessNoteReachesTheModelWithoutBeingDrawnAsAUserMessage(t *testing.T
 	}
 }
 
-func TestANoteOutlivesATurnThatEndsBeforeTheNextRound(t *testing.T) {
+func TestAHarnessNoteArrivingDuringTheFinalAnswerGetsAnotherRound(t *testing.T) {
 	interjections := &agent.Interjections{}
-	provider := &interjectionProvider{rounds: 0, interjections: interjections}
+	provider := &interjectionProvider{
+		rounds:        0,
+		interjections: interjections,
+		noteAfter:     []string{"the job build has finished"},
+	}
 	assistant := agent.New("", provider, []tool.Tool{noop()})
-
-	interjections.Note("the job build has finished")
 
 	for _, err := range assistant.Stream(t.Context(), "go", interjections) {
 		if err != nil {
@@ -268,9 +277,12 @@ func TestANoteOutlivesATurnThatEndsBeforeTheNextRound(t *testing.T) {
 		}
 	}
 
-	note, isNoted := interjections.TakeNotes()
-	if !isNoted || note != "the job build has finished" {
-		t.Errorf("took %q, want the note kept for the caller", note)
+	want := []string{"user:go", "send", "user:the job build has finished", "send"}
+	if !slices.Equal(provider.history, want) {
+		t.Errorf("history %q, want %q", provider.history, want)
+	}
+	if note, isNoted := interjections.TakeNotes(); isNoted {
+		t.Errorf("left %q queued, want the model to receive it in the same turn", note)
 	}
 }
 

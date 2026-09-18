@@ -122,13 +122,12 @@ Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt cont
 Agent brave-otter 🦦 ready in 2ms with 4
  skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸
 oh.toml: bar.bottom.left, bar.top.center
-, caps.default, editor.command, input.co
-ntinue, model.round_robin, ports.hostnam
-e, provider.ollama.host, sandbox.host_lo
-opback, sandbox.read, sandbox.write, ski
-lls.exclude, skills.include, snippets.re
-view, tool.output, ui.grouping, ui.reaso
-ning, ui.streaming.
+, caps.default, editor.command, model.ro
+und_robin, ports.hostname, provider.olla
+ma.host, sandbox.read, sandbox.write, sk
+ills.exclude, skills.include, snippets.r
+eview, tool.output, ui.currency, ui.grou
+ping, ui.reasoning, ui.streaming.
 === many local settings / ordinary / one column ===
 A
 g
@@ -281,22 +280,6 @@ n
 d
 ,
 
-i
-n
-p
-u
-t
-.
-c
-o
-n
-t
-i
-n
-u
-e
-,
-
 m
 o
 d
@@ -352,29 +335,6 @@ h
 o
 s
 t
-,
-
-s
-a
-n
-d
-b
-o
-x
-.
-h
-o
-s
-t
-_
-l
-o
-o
-p
-b
-a
-c
-k
 ,
 
 s
@@ -466,6 +426,19 @@ t
 p
 u
 t
+,
+
+u
+i
+.
+c
+u
+r
+r
+e
+n
+c
+y
 ,
 
 u
@@ -521,58 +494,54 @@ tom.left, ba
 r.top.center
 , caps.defau
 lt, editor.c
-ommand, inpu
-t.continue,
-model.round_
-robin, ports
-.hostname, p
-rovider.olla
-ma.host, san
-dbox.host_lo
-opback, sand
-box.read, sa
-ndbox.write,
- skills.excl
-ude, skills.
-include, sni
-ppets.review
-, tool.outpu
-t, ui.groupi
-ng, ui.reaso
-ning, ui.str
-eaming.
+ommand, mode
+l.round_robi
+n, ports.hos
+tname, provi
+der.ollama.h
+ost, sandbox
+.read, sandb
+ox.write, sk
+ills.exclude
+, skills.inc
+lude, snippe
+ts.review, t
+ool.output,
+ui.currency,
+ ui.grouping
+, ui.reasoni
+ng, ui.strea
+ming.
 === many local settings / ordinary / wide ===
 Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: bar.bottom.
-left, bar.top.center, caps.default, editor.command, input.continue, model.round_robin, ports.hostnam
-e, provider.ollama.host, sandbox.host_loopback, sandbox.read, sandbox.write, skills.exclude, skills.
-include, snippets.review, tool.output, ui.grouping, ui.reasoning, ui.streaming.
+left, bar.top.center, caps.default, editor.command, model.round_robin, ports.hostname, provider.olla
+ma.host, sandbox.read, sandbox.write, skills.exclude, skills.include, snippets.review, tool.output,
+ui.currency, ui.grouping, ui.reasoning, ui.streaming.
 === many local settings / sized / narrow ===
  🦦    Agent brave-otter ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt
        context ⧸ oh.toml:
        bar.bottom.left, bar.top.center,
        caps.default, editor.command,
-       input.continue,
        model.round_robin,
        ports.hostname,
        provider.ollama.host,
-       sandbox.host_loopback,
        sandbox.read, sandbox.write,
        skills.exclude, skills.include,
        snippets.review, tool.output,
-       ui.grouping, ui.reasoning,
-       ui.streaming
+       ui.currency, ui.grouping,
+       ui.reasoning, ui.streaming
 === many local settings / sized / wide ===
  🦦    Agent brave-otter ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: bar.bottom.left, bar.top.center,
-       caps.default, editor.command, input.continue, model.round_robin, ports.hostname,
-       provider.ollama.host, sandbox.host_loopback, sandbox.read, sandbox.write, skills.exclude,
-       skills.include, snippets.review, tool.output, ui.grouping, ui.reasoning, ui.streaming
+       caps.default, editor.command, model.round_robin, ports.hostname, provider.ollama.host,
+       sandbox.read, sandbox.write, skills.exclude, skills.include, snippets.review, tool.output,
+       ui.currency, ui.grouping, ui.reasoning, ui.streaming
 === mixed global and local settings / ordinary / narrow ===
 Agent brave-otter 🦦 ready in 2ms with 4
  skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸
-oh.toml: input.continue, sandbox.write,
-snippets.review.
+oh.toml: sandbox.write, snippets.review,
+ ui.currency.
 === mixed global and local settings / ordinary / one column ===
 A
 g
@@ -662,22 +631,6 @@ m
 l
 :
 
-i
-n
-p
-u
-t
-.
-c
-o
-n
-t
-i
-n
-u
-e
-,
-
 s
 a
 n
@@ -708,6 +661,19 @@ v
 i
 e
 w
+,
+
+u
+i
+.
+c
+u
+r
+r
+e
+n
+c
+y
 .
 === mixed global and local settings / ordinary / tiny ===
 Agent brave-
@@ -717,24 +683,22 @@ th 4 skills
 ⧸ 2 snippets
  ⧸ ~1.6Kt co
 ntext ⧸ oh.t
-oml: input.c
-ontinue, san
-dbox.write,
-snippets.rev
-iew.
+oml: sandbox
+.write, snip
+pets.review,
+ ui.currency
+.
 === mixed global and local settings / ordinary / wide ===
-Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: input.conti
-nue, sandbox.write, snippets.review.
+Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: sandbox.wri
+te, snippets.review, ui.currency.
 === mixed global and local settings / sized / narrow ===
  🦦    Agent brave-otter ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt
-       context ⧸ oh.toml:
-       input.continue, sandbox.write,
-       snippets.review
+       context ⧸ oh.toml: sandbox.write,
+       snippets.review, ui.currency
 === mixed global and local settings / sized / wide ===
  🦦    Agent brave-otter ready in 2ms
-       4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: input.continue, sandbox.write,
-       snippets.review
+       4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: sandbox.write, snippets.review, ui.currency
 === no local config / ordinary / narrow ===
 Agent brave-otter 🦦 ready in 2ms with 4
  skills ⧸ 2 snippets ⧸ ~1.6Kt context.

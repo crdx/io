@@ -1,0 +1,11 @@
+{"kind":"head","version":13,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
+{"kind":"event","event":{"kind":"user_message","text":"send more than the context window holds"}}
+{"kind":"event","event":{"kind":"turn_failure","failure":{"kind":"http_status","message":"request (264481 tokens) exceeds the available context size (262144 tokens), try increasing it","http_status":400,"code":"exceed_context_size_error","media_type":"text/event-stream"}}}
+{"kind":"item","payload":{"role":"user","content":"send more than the context window holds"}}
+{"kind":"turn_completion","turn":{}}
+{"kind":"event","event":{"kind":"user_message","text":"continue after the context window filled"}}
+{"kind":"event","event":{"kind":"model_message","text":"Resumed."}}
+{"kind":"item","payload":{"role":"user","content":"continue after the context window filled"}}
+{"kind":"item","payload":{"role":"assistant","content":"Resumed."}}
+{"kind":"turn_completion","turn":{}}

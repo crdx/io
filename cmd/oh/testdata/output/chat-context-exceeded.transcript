@@ -1,0 +1,30 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `medium`
+- **Provider:** `chat`
+- **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## Mode · rxwngl · +0s
+
+## User · +0s
+
+send more than the context window holds
+
+## Failure · +0s
+
+```
+request (264481 tokens) exceeds the available context size (262144 tokens), try increasing it
+```
+
+## User · +0s
+
+continue after the context window filled
+
+## Assistant · +0s
+
+Resumed.
+
