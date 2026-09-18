@@ -43,7 +43,6 @@ const (
 	homeLabel     = "home"
 	sweepsPerCPU  = 4
 	minimumSweeps = 32
-	writablePerm  = 0o200
 	ownerPerm     = 0o700
 	blockBytes    = 512
 )
@@ -323,7 +322,7 @@ func unlock(root string) error {
 		if err != nil {
 			return skip(entry)
 		}
-		if info.Mode().Perm()&writablePerm == 0 {
+		if info.Mode().Perm()&ownerPerm != ownerPerm {
 			lockedDirectories = append(lockedDirectories, path)
 		}
 
@@ -379,6 +378,12 @@ func (self *search) gather(path string, entries []os.DirEntry) error {
 
 		childEntries, err := os.ReadDir(child)
 		if err != nil {
+			if entry.Name() == cacheName {
+				if err := self.keep(child, namedCacheKind); err != nil {
+					return err
+				}
+			}
+
 			continue
 		}
 
