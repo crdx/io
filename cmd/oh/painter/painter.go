@@ -366,6 +366,18 @@ func RenderReasoning(thought string, columns int, rendering output.ReasoningRend
 
 func (self *Picasso) Stale() bool { return self.isStale || self.screen.WasRepaintRefused() }
 
+func (self *Picasso) HoldTiming() {
+	if self.toolBlock != nil {
+		self.toolBlock.HoldTiming()
+	}
+}
+
+func (self *Picasso) ResumeTiming() {
+	if self.toolBlock != nil {
+		self.toolBlock.ResumeTiming()
+	}
+}
+
 func (self *Picasso) Close(state dynamic.RowState) {
 	self.discardProvisionalReasoning()
 	self.settleAnswer()

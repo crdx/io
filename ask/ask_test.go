@@ -5,9 +5,11 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"crdx.org/io/ask"
+	"crdx.org/io/internal/waiting"
 )
 
 func TestAQuestionIsUnavailableOutsideInteractiveMode(t *testing.T) {
@@ -175,4 +177,84 @@ func TestARequestWithoutADeadlineReportsNone(t *testing.T) {
 	if _, hasDeadline := broker.Current().Deadline(); hasDeadline {
 		t.Error("a question asked without a deadline reported a deadline")
 	}
+}
+
+func TestAQuestionRecordsHowLongItStoodAgainstWhoeverAskedIt(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		const stood = time.Minute
+
+		broker := ask.New()
+		closeBroker := broker.Open()
+		defer closeBroker()
+
+		ctx, waitedTime := waiting.Track(t.Context())
+
+		answered := make(chan struct{})
+		go func() {
+			defer close(answered)
+			_, _ = broker.Ask(ctx, ask.Confirmation{Label: "Continue?"}.Question())
+		}()
+		<-broker.Changes()
+
+		time.Sleep(stood)
+		broker.Current().Choose(0)
+		<-answered
+
+		if got := waitedTime(); got != stood {
+			t.Errorf("got %s, want the whole time the question stood", got)
+		}
+	})
+}
+
+func TestAQuestionNobodyIsTimingIsAnsweredAllTheSame(t *testing.T) {
+	broker := ask.New()
+	closeBroker := broker.Open()
+	defer closeBroker()
+
+	answer := make(chan int, 1)
+	failure := make(chan error, 1)
+	go func() {
+		index, err := broker.Ask(t.Context(), ask.Confirmation{Label: "Continue?"}.Question())
+		answer <- index
+		failure <- err
+	}()
+	<-broker.Changes()
+
+	broker.Current().Choose(0)
+
+	if err := <-failure; err != nil {
+		t.Fatalf("got %v, want the question answered", err)
+	}
+	if index := <-answer; index != 0 {
+		t.Errorf("got option %d, want the first", index)
+	}
+}
+
+func TestAQuestionCutShortStillRecordsWhatItTook(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		const stood = 30 * time.Second
+
+		broker := ask.New()
+		closeBroker := broker.Open()
+		defer closeBroker()
+
+		ctx, cancel := context.WithCancel(t.Context())
+		defer cancel()
+		ctx, waitedTime := waiting.Track(ctx)
+
+		refused := make(chan error, 1)
+		go func() {
+			_, err := broker.Ask(ctx, ask.Confirmation{Label: "Continue?"}.Question())
+			refused <- err
+		}()
+		<-broker.Changes()
+
+		time.Sleep(stood)
+		cancel()
+		<-refused
+
+		if got := waitedTime(); got != stood {
+			t.Errorf("got %s, want the time it stood before it was cut short", got)
+		}
+	})
 }

@@ -50,6 +50,7 @@ type Block struct {
 	rows         []row
 	spinnerFrame int
 	isSlow       bool
+	heldAt       time.Time
 	stop         chan struct{}
 	stopWait     sync.WaitGroup
 }
@@ -76,6 +77,31 @@ func (self *Block) Add(label Label, timeLimit time.Duration) int {
 	})
 
 	return index
+}
+
+func (self *Block) HoldTiming() {
+	self.change(func() {
+		if self.heldAt.IsZero() {
+			self.heldAt = time.Now()
+		}
+	})
+}
+
+func (self *Block) ResumeTiming() {
+	self.change(func() {
+		if self.heldAt.IsZero() {
+			return
+		}
+
+		waitedTime := time.Since(self.heldAt)
+		self.heldAt = time.Time{}
+
+		for i := range self.rows {
+			if self.rows[i].state == Running {
+				self.rows[i].startedAt = self.rows[i].startedAt.Add(waitedTime)
+			}
+		}
+	})
 }
 
 func (self *Block) Rows(columns int) []string {
@@ -138,7 +164,7 @@ func (self *Block) Close(state RowState) {
 		for i := range self.rows {
 			if self.rows[i].state == Running {
 				self.rows[i].state = state
-				self.rows[i].timeTaken = time.Since(self.rows[i].startedAt)
+				self.rows[i].timeTaken = self.elapsedTime(self.rows[i])
 			}
 		}
 
@@ -196,9 +222,20 @@ func (self *Block) run() {
 		case <-self.stop:
 			return
 		case <-ticker.C:
+			if self.isHeld() {
+				continue
+			}
+
 			self.change(func() { self.spinnerFrame++ })
 		}
 	}
+}
+
+func (self *Block) isHeld() bool {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	return !self.heldAt.IsZero()
 }
 
 const failureShare = 2
@@ -276,10 +313,22 @@ func labelGuard(result string, labelWidth int) int {
 	return resultSpacing(result) + 1
 }
 
+func (self *Block) elapsedTime(item row) time.Duration {
+	if self.heldAt.IsZero() {
+		return time.Since(item.startedAt)
+	}
+
+	return self.heldAt.Sub(item.startedAt)
+}
+
 func (self *Block) getResult(row row) string {
 	if row.state == Running {
-		elapsedTime := time.Since(row.startedAt).Truncate(time.Second)
-		return getResultText(self.getProgressIndicator(row), elapsedTime, row.timeLimit, "")
+		return getResultText(
+			self.getProgressIndicator(row),
+			self.elapsedTime(row).Truncate(time.Second),
+			row.timeLimit,
+			"",
+		)
 	}
 
 	return getResultText(self.getProgressIndicator(row), row.timeTaken, 0, row.metrics)

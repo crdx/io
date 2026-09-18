@@ -123,6 +123,7 @@ import (
 	"crdx.org/io/internal/util/imageutil"
 	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/internal/util/strutil"
+	"crdx.org/io/internal/waiting"
 	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/codex"
 	"crdx.org/io/provider/ollama"
@@ -588,6 +589,60 @@ func TestEveryQuestionSendsOneDesktopNotification(t *testing.T) {
 	}
 }
 
+func TestACallIsNotTimedWhileItsQuestionStands(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		rig := newWideRig(t)
+		rig.chat.currentTurn.Stream = testRunningTurnStream()
+		rig.chat.currentTurn.painter = rig.chat.newPainter(true)
+		rig.chat.currentTurn.painter.DrawEvent(agent.Event{
+			Kind: agent.ToolCallRequestEvent,
+			ID:   "call-1",
+			Name: "bash",
+			Text: `{"command":"curl example.com"}`,
+		})
+
+		broker := ask.New()
+		t.Cleanup(broker.Open())
+
+		result := make(chan error, 1)
+		go func() {
+			result <- ask.Confirm(t.Context(), broker, ask.Confirmation{
+				Label:  "Run this command with host networking?",
+				Detail: "curl example.com",
+			})
+		}()
+		<-broker.Changes()
+
+		rig.chat.question.broker = broker
+		rig.chat.onQuestionChange()
+
+		time.Sleep(time.Minute)
+		synctest.Wait()
+		whileStanding := style.Plain(rig.drawn())
+
+		rig.chat.answerQuestion(key.Key{Code: key.Rune, Value: 'y'})
+		if err := <-result; err != nil {
+			t.Fatalf("the question was answered with %v", err)
+		}
+
+		time.Sleep(8 * time.Second)
+		synctest.Wait()
+		afterAnswering := style.Plain(rig.drawn())
+
+		rig.chat.currentTurn.painter.Close(dynamic.Cancelled)
+
+		if strings.Contains(whileStanding, "1m") {
+			t.Errorf("the call was timed while its question stood: %q", whileStanding)
+		}
+		if !strings.Contains(afterAnswering, "8s") {
+			t.Errorf("expected the call to be timed once it ran, got %q", afterAnswering)
+		}
+		if strings.Contains(afterAnswering, "1m") {
+			t.Errorf("the answered question was counted against the call: %q", afterAnswering)
+		}
+	})
+}
+
 func TestAQuestionMovesItsCursorAndAnswersWhereItRests(t *testing.T) {
 	for name, test := range map[string]struct {
 		keypresses []key.Key
@@ -697,6 +752,31 @@ func TestAnApprovedHostNetworkRunsTheCommand(t *testing.T) {
 	if err := approveHostNetwork(t.Context(), broker, permission.Ask, "curl example.com"); err != nil {
 		t.Errorf("got %v, want the approved command to run", err)
 	}
+}
+
+func TestAnApprovalChargesTheTimeItStoodToTheCallThatAskedForIt(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		const deliberated = 30 * time.Second
+
+		broker := ask.New()
+		t.Cleanup(broker.Open())
+
+		ctx, waitedTime := waiting.Track(t.Context())
+
+		go func() {
+			<-broker.Changes()
+			time.Sleep(deliberated)
+			broker.Current().Choose(0)
+		}()
+
+		if err := approveHostNetwork(ctx, broker, permission.Ask, "curl example.com"); err != nil {
+			t.Fatalf("got %v, want the approved command to run", err)
+		}
+
+		if got := waitedTime(); got != deliberated {
+			t.Errorf("got %s charged to the call, want the %s it stood", got, deliberated)
+		}
+	})
 }
 
 func TestAQuestionCountsDownToItsDeadline(t *testing.T) {
@@ -6653,7 +6733,10 @@ func TestGoldenATurnStillRunningDrawsWhatItDrewBefore(t *testing.T) {
 
 	passes := map[string]func() string{
 		"a call still running": func() string { return replayWhileRunning(t, entries) },
-		"discarded reasoning":  func() string { return drawDiscardedReasoning(t) },
+		"a call carrying on after its question": func() string {
+			return replayAfterAQuestion(t, entries)
+		},
+		"discarded reasoning": func() string { return drawDiscardedReasoning(t) },
 		"unknown command during answer": func() string {
 			return drawAcceptedInputDuringStream(t, "/unknown", agent.ModelMessageEvent)
 		},
@@ -7115,7 +7198,60 @@ func replayWhileRunning(t *testing.T, entries []replayEntry) string {
 	return drawn
 }
 
-const revealAndSomeFrames = 7 * time.Second
+func replayAfterAQuestion(t *testing.T, entries []replayEntry) string {
+	t.Helper()
+
+	var drawn string
+
+	synctest.Test(t, func(t *testing.T) {
+		rig := newReplayRig(t, replayColumns)
+		rig.chat.currentTurn.Stream = testRunningTurnStream()
+		rig.load(entriesUpToFirstCall(entries))
+		rig.chat.replay()
+
+		time.Sleep(revealAndSomeFrames)
+		synctest.Wait()
+
+		broker := ask.New()
+		closeBroker := broker.Open()
+		defer closeBroker()
+
+		result := make(chan error, 1)
+		go func() {
+			result <- ask.Confirm(t.Context(), broker, ask.Confirmation{
+				Label:    "Run this command with host networking?",
+				Detail:   "grep prompt *.go",
+				Language: "bash",
+			})
+		}()
+		<-broker.Changes()
+
+		rig.chat.question.broker = broker
+		rig.chat.onQuestionChange()
+
+		time.Sleep(deliberation)
+		synctest.Wait()
+
+		rig.chat.answerQuestion(key.Key{Code: key.Rune, Value: 'y'})
+		if err := <-result; err != nil {
+			t.Fatal(err)
+		}
+
+		time.Sleep(carryingOn)
+		synctest.Wait()
+
+		drawn = rig.drawn()
+
+		rig.chat.currentTurn.painter.Close(dynamic.Cancelled)
+	})
+
+	return drawn
+}
+
+const (
+	revealAndSomeFrames = 7 * time.Second
+	carryingOn          = 2 * time.Second
+)
 
 func entriesUpToFirstCall(entries []replayEntry) []replayEntry {
 	for at, entry := range entries {
@@ -8499,6 +8635,7 @@ const (
 	feedbackConcurrentApproval
 	feedbackChainedApproval
 	feedbackHeredocApproval
+	feedbackApprovalDuringACall
 )
 
 func TestConfirmationFeedbackSchedulesItsOwnDismissal(t *testing.T) {
@@ -8546,6 +8683,7 @@ func TestGoldenFeedbackDrawsEveryVisibleState(t *testing.T) {
 		"next concurrent approval":    feedbackConcurrentApproval,
 		"chained command approval":    feedbackChainedApproval,
 		"heredoc approval":            feedbackHeredocApproval,
+		"approval during a call":      feedbackApprovalDuringACall,
 	})
 
 	compareWithGolden(t, "feedback", ".ansi", passes)
@@ -8610,6 +8748,8 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		inputLine.SetText("fetch and tidy up")
 	case feedbackHeredocApproval:
 		inputLine.SetText("write the note")
+	case feedbackApprovalDuringACall:
+		inputLine.SetText("check what that endpoint says")
 	case feedbackStartupInfo, feedbackStorageWarnings, feedbackUnknownSettings:
 	}
 	self.show(inputLine)
@@ -8720,9 +8860,78 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: answer})
 		self.handleCommand("/unknown")
 		self.show(inputLine)
+	case feedbackApprovalDuringACall:
+		return drawApprovalDuringACall(t, self, inputLine, &screenOutput)
 	}
 
 	return screenOutput.String()
+}
+
+const deliberation = 20 * time.Second
+
+func drawApprovalDuringACall(
+	t *testing.T,
+	self *App,
+	inputLine *edit.Input,
+	screenOutput *strings.Builder,
+) string {
+	t.Helper()
+
+	var drawn string
+
+	synctest.Test(t, func(t *testing.T) {
+		self.agent = agent.New("", quietProvider{}, []tool.Tool{
+			bash.New(
+				nil,
+				func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
+				func(context.Context, string) error { return nil },
+				sandbox.Direct(),
+				true,
+			),
+		})
+		self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+		self.currentTurn.painter.DrawEvent(agent.Event{
+			Kind:      agent.ToolCallRequestEvent,
+			ID:        "call-1",
+			Name:      "bash",
+			Arguments: `{"command":"curl https://example.com/status","network":"host"}`,
+		})
+
+		time.Sleep(revealAndSomeFrames)
+		synctest.Wait()
+
+		broker := ask.New()
+		closeBroker := broker.Open()
+		defer closeBroker()
+
+		result := make(chan error, 1)
+		go func() {
+			result <- ask.Confirm(t.Context(), broker, ask.Confirmation{
+				Label:    "Run this command with host networking?",
+				Detail:   "curl https://example.com/status",
+				Language: "bash",
+			})
+		}()
+		<-broker.Changes()
+
+		self.question.broker = broker
+		self.onQuestionChange()
+		self.show(inputLine)
+
+		time.Sleep(deliberation)
+		synctest.Wait()
+		self.show(inputLine)
+
+		drawn = screenOutput.String()
+
+		self.answerQuestion(key.Key{Code: key.Rune, Value: 'y'})
+		if err := <-result; err != nil {
+			t.Fatal(err)
+		}
+		self.currentTurn.painter.Close(dynamic.Cancelled)
+	})
+
+	return drawn
 }
 
 type queuedMessagesScenario int

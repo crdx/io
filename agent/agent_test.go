@@ -14,6 +14,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/stop"
+	"crdx.org/io/internal/waiting"
 	"crdx.org/io/tool"
 )
 
@@ -332,6 +333,53 @@ func TestAResultSaysHowLongItsCallTook(t *testing.T) {
 				if update.Event.Took < slept {
 					t.Errorf("expected the call to have taken at least %s, got %s", slept, update.Event.Took)
 				}
+			}
+		}
+
+		if timedResults != 2 {
+			t.Errorf("expected both calls to have been timed, got %d", timedResults)
+		}
+	})
+}
+
+func TestAResultLeavesOutTheTimeItSpentWaitingOnThePerson(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		const asked = time.Minute
+		const worked = 2 * time.Second
+
+		patient := tool.Implement(
+			tool.Definition{
+				Name:        "noop",
+				Description: "",
+				Schema:      tool.Schema{},
+			},
+			func(struct{}) (string, string) { return "", "" },
+		).IsEmbarrassinglyParallel().Plain(func(ctx context.Context, _ struct{}) (string, error) {
+			askedAt := time.Now()
+			time.Sleep(asked)
+			waiting.Record(ctx, time.Since(askedAt))
+			time.Sleep(worked)
+
+			return "done", nil
+		})
+
+		assistant := agent.New("", &callProvider{}, []tool.Tool{patient})
+
+		timedResults := 0
+
+		for update, err := range assistant.Stream(t.Context(), "go", nil) {
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if update.Event == nil || update.Event.Kind != agent.ToolCallResultEvent {
+				continue
+			}
+
+			timedResults++
+
+			if update.Event.Took != worked {
+				t.Errorf("got %s, want the working time of %s alone", update.Event.Took, worked)
 			}
 		}
 

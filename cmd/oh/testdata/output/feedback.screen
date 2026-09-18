@@ -1,3 +1,13 @@
+=== approval during a call ===
+$ curl https://example.com/status ✦· 7s
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+Run this command with host networking?
+
+$ curl https://example.com/status
+
+[Yes]  No
+────────────────────────────────────────────────────────────────────────────────────────────────────
 === chained command approval ===
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 Run this command with host networking?

@@ -19,6 +19,7 @@
 - Send a desktop notification on approval prompt
 - Drop warning chevron from approval prompt header
 - Reword the host networking prompt
+- Don't include prompt waiting time in tool call time
 
 ## [0.6.0] - 2026-09-18
 

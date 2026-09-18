@@ -3,7 +3,9 @@ package dynamic
 import (
 	"regexp"
 	"strings"
+	"sync/atomic"
 	"testing"
+	"testing/synctest"
 	"time"
 	"unicode"
 
@@ -381,6 +383,93 @@ func TestClosingTheBlockMarksWhateverWasStillRunning(t *testing.T) {
 
 	if !strings.Contains(rows[1], "–") {
 		t.Errorf("expected the call still running to be marked cancelled, got %q", rows[1])
+	}
+}
+
+func TestARunningRowStandsStillWhileTimingIsHeld(t *testing.T) {
+	block := testBlock()
+	block.isSlow = true
+
+	block.Add(rowLabel("bash", "curl example.com"), 20*time.Second)
+	block.rows[0].startedAt = time.Now().Add(-70 * time.Second)
+
+	block.HoldTiming()
+	block.heldAt = block.heldAt.Add(-time.Minute)
+
+	if got := style.Plain(block.getResult(block.rows[0])); got != "✦· 10s/20s" {
+		t.Errorf("expected the row to stand still, got %q", got)
+	}
+}
+
+func TestARunningRowLeavesOutTheTimeItWasHeldFor(t *testing.T) {
+	block := testBlock()
+	block.isSlow = true
+
+	block.Add(rowLabel("bash", "curl example.com"), 20*time.Second)
+	block.Add(rowLabel("read", "main.go"), 0)
+	block.FinaliseRow(1, Done, 8*time.Second, "", "")
+	block.rows[0].startedAt = time.Now().Add(-70 * time.Second)
+
+	block.HoldTiming()
+	block.heldAt = block.heldAt.Add(-time.Minute)
+	block.ResumeTiming()
+
+	if got := style.Plain(block.getResult(block.rows[0])); got != "✦· 10s/20s" {
+		t.Errorf("expected the time awaiting an answer to be left out, got %q", got)
+	}
+	if got := style.Plain(block.getResult(block.rows[1])); got != "✓ 8s" {
+		t.Errorf("expected a settled row to keep what it took, got %q", got)
+	}
+}
+
+func TestAHeldBlockStopsSpinning(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		var refreshes atomic.Int64
+
+		block := NewBlock(func() { refreshes.Add(1) })
+		block.Add(rowLabel("bash", "curl example.com"), 0)
+
+		time.Sleep(spinning)
+		synctest.Wait()
+		whileRunning := refreshes.Load()
+		if whileRunning == 0 {
+			t.Fatal("a running block drew nothing")
+		}
+
+		block.HoldTiming()
+		time.Sleep(spinning)
+		synctest.Wait()
+
+		if held := refreshes.Load(); held != whileRunning+1 {
+			t.Errorf("got %d draws while held, want the one that held it", held-whileRunning)
+		}
+
+		block.ResumeTiming()
+		time.Sleep(spinning)
+		synctest.Wait()
+
+		if resumed := refreshes.Load(); resumed <= whileRunning+2 {
+			t.Error("a resumed block stayed still")
+		}
+
+		block.Stop()
+	})
+}
+
+const spinning = 3 * time.Second
+
+func TestAHeldRowThatIsCancelledSaysOnlyWhatItTook(t *testing.T) {
+	block := testBlock()
+
+	block.Add(rowLabel("bash", "curl example.com"), 0)
+	block.rows[0].startedAt = time.Now().Add(-70 * time.Second)
+
+	block.HoldTiming()
+	block.heldAt = block.heldAt.Add(-time.Minute)
+	block.Close(Cancelled)
+
+	if got := block.rows[0].timeTaken.Truncate(time.Second); got != 10*time.Second {
+		t.Errorf("got %s, want the time awaiting an answer left out", got)
 	}
 }
 

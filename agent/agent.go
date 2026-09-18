@@ -12,6 +12,7 @@ import (
 	"crdx.org/io/internal/stop"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/strutil"
+	"crdx.org/io/internal/waiting"
 	"crdx.org/io/tool"
 )
 
@@ -661,10 +662,12 @@ func (self *Agent) runBatch(
 			defer func() { <-availableSlots }()
 			startedAt := time.Now()
 
+			callContext, waitedTime := waiting.Track(ctx)
+
 			executionResult := tool.ToolCallResult{Output: item.err}
 			ok := false
 			if item.parsedToolCall != nil {
-				executionResult, ok = exec(ctx, item.parsedToolCall)
+				executionResult, ok = exec(callContext, item.parsedToolCall)
 			}
 
 			results[i] = ToolCallResult{
@@ -694,7 +697,7 @@ func (self *Agent) runBatch(
 				Name:    item.rawToolCall.Name,
 				Text:    executionResult.Output,
 				Status:  status,
-				Took:    time.Since(startedAt),
+				Took:    max(time.Since(startedAt)-waitedTime(), 0),
 				Metrics: metrics,
 			}}
 			if self.storePicture != nil && len(executionResult.Image.Data) > 0 {

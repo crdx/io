@@ -339,7 +339,7 @@ func (self *App) answerQuestion(keypress key.Key) {
 		return
 	}
 
-	self.question.request = nil
+	self.finishQuestion()
 }
 
 func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress key.Key) bool {
@@ -996,16 +996,38 @@ func (self *App) questionChanges() <-chan struct{} {
 }
 
 func (self *App) onQuestionChange() {
-	previous := self.question.request
-	self.question.request = self.question.broker.Current()
-	if self.question.request == nil || self.question.request == previous {
+	request := self.question.broker.Current()
+	if request == self.question.request {
 		return
 	}
 
-	self.question.cursor = self.question.request.Question.DefaultIndex()
+	self.finishQuestion()
+
+	self.question.request = request
+	if request == nil {
+		return
+	}
+
+	self.question.cursor = request.Question.DefaultIndex()
+
+	if self.currentTurn.painter != nil {
+		self.currentTurn.painter.HoldTiming()
+	}
 
 	if self.onQuestion != nil {
-		self.onQuestion(self.question.request.Question)
+		self.onQuestion(request.Question)
+	}
+}
+
+func (self *App) finishQuestion() {
+	if self.question.request == nil {
+		return
+	}
+
+	self.question.request = nil
+
+	if self.currentTurn.painter != nil {
+		self.currentTurn.painter.ResumeTiming()
 	}
 }
 

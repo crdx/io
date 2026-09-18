@@ -5,6 +5,8 @@ import (
 	"errors"
 	"sync"
 	"time"
+
+	"crdx.org/io/internal/waiting"
 )
 
 var (
@@ -104,6 +106,8 @@ func (self *Broker) Ask(ctx context.Context, question Question) (int, error) {
 	self.mutex.Unlock()
 	self.changed()
 
+	askedAt := time.Now()
+	defer func() { waiting.Record(ctx, time.Since(askedAt)) }()
 	defer request.finishRequest()
 
 	select {
