@@ -186,7 +186,7 @@ A confined shell receives a few runtime grants that do not represent ordinary us
 deny = [".env", "*.pem", ".ssh"]
 read = ["~/src/reference"]
 write = ["~/.config/org.crdx/oh/skills"]
-exec = ["/opt", "~/.local/share/mise"]
+exec = ["/opt", "~/.local/share/toolchains"]
 path = ["~/.local/state/org.crdx/toolbox/bin"]
 home = ["~/.config/git/ignore"]
 ```

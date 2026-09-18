@@ -226,16 +226,13 @@ func TestHostNetworkingRequiresItsCapability(t *testing.T) {
 	}
 }
 
-func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
+func TestCommandsKeepTheirEnvironmentAfterACapabilityChange(t *testing.T) {
 	workspace := reachableDir(t)
 	workspaceRoot, err := os.OpenRoot(workspace)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer func() { _ = workspaceRoot.Close() }()
-
-	miseDataDir := t.TempDir()
-	t.Setenv("MISE_DATA_DIR", miseDataDir)
 
 	home := reachableDir(t)
 	tmp := t.TempDir()
@@ -248,7 +245,7 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 	pathAccess := newTestPathAccess(t, files, mode)
 	shell := New(workspace, home, tmp, pathAccess, mode, files, false, allowNetworking, sandbox.Direct())
 	run := func() {
-		call, parseErr := shell.Parse(`{"command":"printf %s \"$MISE_DATA_DIR\""}`)
+		call, parseErr := shell.Parse(`{"command":"printf %s \"$HOME\""}`)
 		if parseErr != nil {
 			t.Fatal(parseErr)
 		}
@@ -257,8 +254,8 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 		if execErr != nil {
 			t.Fatal(execErr)
 		}
-		if result.Output != miseDataDir {
-			t.Errorf("got %q, want %q", result.Output, miseDataDir)
+		if result.Output != home {
+			t.Errorf("got %q, want %q", result.Output, home)
 		}
 	}
 
@@ -530,8 +527,6 @@ func TestGrantingWriteAccessRemovesExactReadOnlyMounts(t *testing.T) {
 func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 	workspace := t.TempDir()
 	home := t.TempDir()
-	miseDataDir := t.TempDir()
-	t.Setenv("MISE_DATA_DIR", miseDataDir)
 
 	policy, err := createTestPolicy(t, workspace, home, t.TempDir(), Paths{}, caps.Write)
 	if err != nil {
@@ -556,10 +551,6 @@ func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 
 	if policy.SetEnv["HOME"] != home {
 		t.Errorf("got HOME %q, want %q", policy.SetEnv["HOME"], home)
-	}
-
-	if policy.SetEnv["MISE_DATA_DIR"] != miseDataDir {
-		t.Errorf("got MISE_DATA_DIR %q, want %q", policy.SetEnv["MISE_DATA_DIR"], miseDataDir)
 	}
 
 	if policy.SetEnv["TMPDIR"] != sandbox.TmpDir {
@@ -723,7 +714,7 @@ func TestCommandsOnThePathMayBeExecuted(t *testing.T) {
 
 func TestPathEntriesAlreadyExecutableInTheWorkspaceNeedNoGrant(t *testing.T) {
 	workspace := t.TempDir()
-	installDir := filepath.Join(workspace, ".local", "share", "mise", "installs", "codex")
+	installDir := filepath.Join(workspace, ".local", "share", "toolchains", "installs", "codex")
 	versionDir := filepath.Join(installDir, "1.0")
 	if err := os.MkdirAll(versionDir, 0o700); err != nil {
 		t.Fatal(err)
@@ -733,7 +724,7 @@ func TestPathEntriesAlreadyExecutableInTheWorkspaceNeedNoGrant(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, entry := range []string{"", ".", workspace, versionDir, alias, filepath.Join(".local", "share", "mise", "installs", "codex", "latest")} {
+	for _, entry := range []string{"", ".", workspace, versionDir, alias, filepath.Join(".local", "share", "toolchains", "installs", "codex", "latest")} {
 		t.Run(entry, func(t *testing.T) {
 			t.Setenv("PATH", entry)
 			if paths := execPaths(workspace); !slices.Equal(paths, []string{workspace}) {

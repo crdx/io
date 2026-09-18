@@ -269,7 +269,6 @@ func createPolicyWithSupportProbe(
 			"GOLANGCI_LINT_CACHE":     filepath.Join(sandbox.TmpDir, lintCachePath),
 			"GOMODCACHE":              filepath.Join(cacheDir, goModuleCacheDir),
 			"HOME":                    homeDir,
-			"MISE_DATA_DIR":           miseDataDir(),
 			location.StateDirVariable: location.GetStateDir(),
 			"TMPDIR":                  sandbox.TmpDir,
 		},
@@ -448,7 +447,6 @@ func YoloPolicy(homeDir string, tmpDir string) sandbox.Policy {
 		SetEnv: map[string]string{
 			"GIT_CONFIG_NOSYSTEM":     "1",
 			"HOME":                    homeDir,
-			"MISE_DATA_DIR":           miseDataDir(),
 			location.StateDirVariable: location.GetStateDir(),
 			"TMPDIR":                  tmpDir,
 		},
