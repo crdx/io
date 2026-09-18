@@ -12,6 +12,8 @@ import (
 
 	"crdx.org/io/internal/jobs"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/internal/stop"
+	"crdx.org/io/tool"
 )
 
 func TestAWaitReportsTheJobAndItsOutputOnceItHasEnded(t *testing.T) {
@@ -125,16 +127,30 @@ func TestAWaitEndsWhenTheTurnDoes(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		turn, endTurn := context.WithCancel(t.Context())
+		turn, endTurn := context.WithCancelCause(t.Context())
 		go func() {
 			time.Sleep(50 * time.Millisecond)
-			endTurn()
+			endTurn(stop.Because("access changed"))
 		}()
 
-		if _, err := waited(turn, manager, []string{"docs"}, waitForAny, time.Hour); !errors.Is(err, context.Canceled) {
-			t.Errorf("got %v, want the wait to end with the turn that asked for it", err)
+		_, err := waited(turn, manager, []string{"docs"}, waitForAny, time.Hour)
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("got %v, want the wait to end with the turn that asked for it", err)
+		}
+		if got, want := err.Error(), "stopped because access changed"; got != want {
+			t.Errorf("got %q, want %q", got, want)
 		}
 	})
+}
+
+func TestAJobFailureLeavesTheFinalOutputForTheAgentToMeasure(t *testing.T) {
+	_, metrics, err := run(t.Context(), jobs.New(nil), nil, nil, Args{Action: actionStatus, Name: "ghost"})
+	if err == nil {
+		t.Fatal("the unknown job was accepted")
+	}
+	if metrics != (tool.ToolCallMetrics{}) {
+		t.Errorf("got premature metrics %#v, want the agent to measure the final failure", metrics)
+	}
 }
 
 func TestAWaitTakesTheAskedForLimitAndNeverExceedsTheCeiling(t *testing.T) {

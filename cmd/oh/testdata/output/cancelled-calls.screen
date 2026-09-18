@@ -1,10 +1,12 @@
 === narrow ===
 
- read both of those files
+ read both of those files, then wait for
+ check
 
 
 read one.txt ✓ 1L
 read two.txt – the call was cancelled b…
+job check wait – 1L stopped because the…
 
 Turn stopped.
 
@@ -53,8 +55,43 @@ e
 
 s
 
+,
+
+t
+
+h
+
+e
+
+n
+
+w
+
+a
+
+i
+
+t
+
+f
+
+o
+
+r
+
+c
+
+h
+
+e
+
+c
+
+k
+
 
 ✓
+–
 –
 
 T
@@ -105,11 +142,12 @@ e
 d
 === printed ===
 
- read both of those files
+ read both of those files, then wait for check
 
 
 read one.txt ✓ 1L
 read two.txt – the call was cancelled because the user pressed escape
+job check wait – 1L stopped because the user pressed escape
 
 Turn stopped.
 
@@ -119,11 +157,14 @@ Turn stopped.
 
  read both
  of those
- files
+ files, then
+ wait for
+ check
 
 
 read o… ✓ 1L
 read – the …
+job – 1L st…
 
 Turn
 stopped.
@@ -133,11 +174,12 @@ stopped.
  I needed
 === wide ===
 
- read both of those files
+ read both of those files, then wait for check
 
 
 read one.txt ✓ 1L
 read two.txt – the call was cancelled because the user pressed escape
+job check wait – 1L stopped because the user pressed escape
 
 Turn stopped.
 

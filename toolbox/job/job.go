@@ -11,6 +11,7 @@ import (
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/jobs"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/internal/stop"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 	"crdx.org/io/toolbox/bash"
@@ -215,8 +216,11 @@ func run(
 	args Args,
 ) (string, tool.ToolCallMetrics, error) {
 	report, err := act(ctx, manager, root, buildPolicy, args)
+	if err != nil {
+		return report, tool.ToolCallMetrics{}, err
+	}
 
-	return report, tool.GetMetrics(report), err
+	return report, tool.GetMetrics(report), nil
 }
 
 func act(
@@ -314,7 +318,10 @@ func waited(
 		}
 		return getReports(manager, completedNames)
 	}
-	if ctx.Err() != nil || !errors.Is(err, context.DeadlineExceeded) {
+	if ctx.Err() != nil {
+		return "", stop.Error(ctx, "")
+	}
+	if !errors.Is(err, context.DeadlineExceeded) {
 		return "", err
 	}
 	return getTimeoutReport(manager, names, waitFor, limit)

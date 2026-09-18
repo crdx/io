@@ -64,6 +64,19 @@ func TestStoppedWorkIsExplainedInProse(t *testing.T) {
 	}
 }
 
+func TestStoppedWorkNeedsNoSubjectWhenTheCallNamesIt(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	cancel(stop.Because("access changed"))
+
+	err := stop.Error(ctx, "")
+	if got, want := err.Error(), "stopped because access changed"; got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Error("expected the prose to answer as a cancellation")
+	}
+}
+
 func TestUnexplainedStoppedWorkSaysOnlyThat(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()

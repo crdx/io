@@ -4,6 +4,7 @@
 
 - Linkify the session-name bar segment
 - Limit background job name length and format
+- Clarify job wait stopped reason
 - Move session maintenance to `oh --ctl`
 - Regenerate transcripts inside archived sessions
 - Remove the `ohctl` command

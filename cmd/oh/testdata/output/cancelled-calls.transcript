@@ -11,20 +11,21 @@
 
 ## User · +0s
 
-read both of those files
+read both of those files, then wait for check
 
 ## Tool calls · +1s
 
 ```
 read: one.txt [ok, 1 line, 4B, call_1]
 read: two.txt [cancelled, call_2]
+job: check [cancelled, 1 line, 39B, call_3]
 ```
 
-## Interrupted · +5s
+## Interrupted · +7s
 
 Turn stopped.
 
-## User · +6s
+## User · +8s
 
 one was all I needed
 

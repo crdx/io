@@ -34,9 +34,14 @@ func Phrase(ctx context.Context) string {
 }
 
 func Error(ctx context.Context, subject string) error {
-	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-		return stopError{sentence: subject + " ran out of time", cause: context.DeadlineExceeded}
+	prefix := ""
+	if subject != "" {
+		prefix = subject + " "
 	}
 
-	return stopError{sentence: subject + " stopped" + Phrase(ctx), cause: context.Canceled}
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		return stopError{sentence: prefix + "ran out of time", cause: context.DeadlineExceeded}
+	}
+
+	return stopError{sentence: prefix + "stopped" + Phrase(ctx), cause: context.Canceled}
 }
