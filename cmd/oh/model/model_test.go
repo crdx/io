@@ -714,8 +714,15 @@ func TestACacheOlderThanAWeekIsRefreshed(t *testing.T) {
 		t.Fatalf("unexpected error: %v, output %q", err, output.String())
 	}
 
-	if style.Plain(output.String()) != refreshMessage+"\n" {
-		t.Errorf("expected the refresh to say so and nothing more, got %q", output.String())
+	drawn := style.Plain(output.String())
+	if !strings.HasPrefix(drawn, refreshMessage+"\n") {
+		t.Errorf("expected the refresh to say so, got %q", output.String())
+	}
+
+	for _, wanted := range []string{"gpt-5.6-sol  " + addedChange, "stale-model  " + removedChange} {
+		if !strings.Contains(drawn, wanted) {
+			t.Errorf("expected the refresh to name %q, got %q", wanted, output.String())
+		}
 	}
 
 	cached := loadModelCache(modelCachePath()).Providers[codexProvider]
@@ -725,6 +732,33 @@ func TestACacheOlderThanAWeekIsRefreshed(t *testing.T) {
 
 	if !isCacheCurrent(loadModelCache(modelCachePath()), time.Now()) {
 		t.Error("expected the refresh to be stamped")
+	}
+}
+
+func TestARefreshThatFindsTheSameModelsSaysOnlyThatItRefreshed(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	endpoint := serveRegistry(t, oneCodexModel)
+
+	checked := time.Now().Add(-8 * 24 * time.Hour)
+	if err := saveModelCache(modelCachePath(), modelCache{
+		CheckedAt: checked,
+		Providers: map[string]cachedModels{
+			codexProvider: {FetchedAt: checked, Source: sourceRegistry, Models: []agent.Model{
+				{ID: "gpt-5.6-sol", EffortLevels: []string{"low", "high"}, MaxOutputTokens: 128_000},
+			}},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	var output bytes.Buffer
+	if err := ensureModelsWithoutProviderListings(&output, endpoint, modelCachePath()); err != nil {
+		t.Fatalf("unexpected error: %v, output %q", err, output.String())
+	}
+
+	if style.Plain(output.String()) != refreshMessage+"\n" {
+		t.Errorf("expected a refresh finding the same models to say so and nothing more, got %q", output.String())
 	}
 }
 

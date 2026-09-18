@@ -397,6 +397,37 @@ func TestGoldenAStartupRefreshThatRecordsNothingShowsWhatItIgnored(t *testing.T)
 	assertGolden(t, "ensure-refresh-ignoring-every-model.ansi", report(t, output.String()))
 }
 
+func TestGoldenAStartupRefreshNamesWhatChangedAndNothingElse(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	endpoint := serveRegistry(t, oneCodexModel)
+
+	var storingOutput bytes.Buffer
+	if err := Update(&storingOutput, endpoint, modelCachePath(), listingModels(firstListings()), false); err != nil {
+		t.Fatal(err)
+	}
+
+	ageModelCache(t, time.Now().Add(-8*24*time.Hour))
+
+	var output bytes.Buffer
+	if err := Ensure(&output, endpoint, modelCachePath(), listingModels(secondListings())); err != nil {
+		t.Fatalf("expected the refresh to succeed, got %v", err)
+	}
+
+	assertGolden(t, "ensure-refresh-naming-changes.ansi", report(t, output.String()))
+}
+
+func ageModelCache(t *testing.T, checked time.Time) {
+	t.Helper()
+
+	cache := loadModelCache(modelCachePath())
+	cache.CheckedAt = checked
+
+	if err := saveModelCache(modelCachePath(), cache); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func unreachableProviders(_ context.Context, providerName string) ([]agent.Model, error) {
 	switch providerName {
 	case CodexProvider:

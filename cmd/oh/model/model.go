@@ -483,8 +483,9 @@ func Ensure(output io.Writer, endpoint string, path string, listProviderModels P
 
 	var reportedText bytes.Buffer
 
-	err := updateModels(ctx, &reportedText, endpoint, path, listProviderModels, false)
+	reports, err := updateModels(ctx, &reportedText, endpoint, path, listProviderModels, false)
 	if err == nil {
+		writeChangedModels(output, reports)
 		return nil
 	}
 
@@ -519,7 +520,9 @@ func Update(
 	ctx, cancel := context.WithTimeout(context.Background(), updateTimeout)
 	defer cancel()
 
-	return updateModels(ctx, output, endpoint, path, listProviderModels, isShowingIgnored)
+	_, err := updateModels(ctx, output, endpoint, path, listProviderModels, isShowingIgnored)
+
+	return err
 }
 
 func updateModels(
@@ -529,7 +532,7 @@ func updateModels(
 	path string,
 	listProviderModels ProviderLister,
 	isShowingIgnored bool,
-) error {
+) ([]providerReport, error) {
 	registry, err := modelsdev.Fetch(ctx, registryAddress(endpoint), nil)
 	if err != nil {
 		_, _ = fmt.Fprintln(output, style.Failure("models.dev: %s", err))
@@ -589,13 +592,13 @@ func updateModels(
 	}
 
 	if describedCount == 0 {
-		return errors.New("no provider could be described")
+		return reports, errors.New("no provider could be described")
 	}
 
 	cache.CheckedAt = time.Now()
 
 	if err := saveModelCache(path, cache); err != nil {
-		return err
+		return reports, err
 	}
 
 	_, _ = fmt.Fprintln(output)
@@ -605,7 +608,7 @@ func updateModels(
 		writeIgnoredHint(output, reports)
 	}
 
-	return nil
+	return reports, nil
 }
 
 func pickable(models []agent.Model) int {
