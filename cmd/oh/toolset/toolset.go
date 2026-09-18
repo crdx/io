@@ -2,10 +2,15 @@ package toolset
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"crdx.org/io/tool"
 )
+
+func Offers(enabledToolNames []string, name string) bool {
+	return len(enabledToolNames) == 0 || slices.Contains(enabledToolNames, name)
+}
 
 func Names(tools []tool.Tool) []string {
 	names := make([]string, len(tools))

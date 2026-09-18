@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 	"text/template"
 
@@ -15,6 +14,7 @@ import (
 	"crdx.org/io/cmd/oh/conditions"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
+	"crdx.org/io/cmd/oh/toolset"
 	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/internal/util/strutil"
@@ -241,15 +241,15 @@ func harnessContext(config Config) string {
 		HomeDir:           config.HomeDir,
 		ExtraPaths:        config.ExtraPaths,
 		DropsDirectory:    config.DropsDirectory,
-		ShellOffered:      isToolOffered(config.OfferedTools, shellToolName),
-		LookupOffered:     isToolOffered(config.OfferedTools, lookupToolName),
-		FetchOffered:      isToolOffered(config.OfferedTools, fetchToolName),
+		ShellOffered:      toolset.Offers(config.OfferedTools, shellToolName),
+		LookupOffered:     toolset.Offers(config.OfferedTools, lookupToolName),
+		FetchOffered:      toolset.Offers(config.OfferedTools, fetchToolName),
 		Conditions:        config.Conditions,
 		WorkspaceWritable: currentCaps.Has(caps.Write),
 		IsRepository:      pathutil.Exists(filepath.Join(config.Workspace.GetDir(), ".git")),
 		GitWritable:       currentCaps.Has(caps.Git),
 		ShellGranted:      currentCaps.Has(caps.Shell),
-		JobsGranted:       config.JobsGranted && isToolOffered(config.OfferedTools, jobToolName),
+		JobsGranted:       config.JobsGranted && toolset.Offers(config.OfferedTools, jobToolName),
 		NetworkGranted:    config.NetworkGranted,
 		LookupGranted:     currentCaps.Has(caps.Lookup),
 		Yolo:              config.Yolo,
@@ -416,10 +416,6 @@ func sandboxHeader(isYolo bool, isShellOffered bool) string {
 		- Nothing stops a mistake, so read a destructive command back to yourself before running it
 		- The states below still govern the file tools; hold the bash tool to them yourself
 	`) + "\n"
-}
-
-func isToolOffered(offeredTools []string, name string) bool {
-	return len(offeredTools) == 0 || slices.Contains(offeredTools, name)
 }
 
 func networkSection(data harnessContextTemplateData) string {

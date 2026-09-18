@@ -276,10 +276,19 @@ func ensureCurrency(ctx context.Context, output io.Writer, code string, isSimula
 	return money.Load(path, code)
 }
 
-func requireDenyEnforcement(isYolo bool, patterns []string) error {
-	if isYolo && len(patterns) > 0 {
-		return errors.New("sandbox.deny cannot be enforced under --yolo")
+var unsandboxedToolNames = []string{"bash", "job"}
+
+func requireDenyEnforcement(isYolo bool, offeredTools []string, patterns []string) error {
+	if !isYolo || len(patterns) == 0 {
+		return nil
 	}
+
+	for _, name := range unsandboxedToolNames {
+		if toolset.Offers(offeredTools, name) {
+			return errors.New("sandbox.deny cannot be enforced for the " + name + " tool under --yolo")
+		}
+	}
+
 	return nil
 }
 
@@ -442,6 +451,10 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	applyDefaultCaps(&args, settings)
 
+	if isSimulated {
+		applySimulationOptions(&args)
+	}
+
 	if err := sessions.ValidateStoredFormats(sessionsDir); err != nil {
 		return "", err
 	}
@@ -483,12 +496,8 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	defer func() { _ = workspace.Close() }()
 
-	if err := requireDenyEnforcement(args.Yolo, settings.Sandbox.Deny); err != nil {
+	if err := requireDenyEnforcement(args.Yolo, args.Tools, settings.Sandbox.Deny); err != nil {
 		return "", err
-	}
-
-	if isSimulated {
-		applySimulationOptions(&args)
 	}
 
 	if !args.Yolo {

@@ -50,6 +50,7 @@ import (
 	"crdx.org/io/cmd/oh/conditions"
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/cycle"
+	"crdx.org/io/cmd/oh/demo"
 	"crdx.org/io/cmd/oh/dispatch"
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
@@ -18285,14 +18286,32 @@ func TestEveryPermissionRefusesInWordsOfItsOwn(t *testing.T) {
 }
 
 func TestSandboxDenyRulesCannotBeWaivedByYolo(t *testing.T) {
-	if err := requireDenyEnforcement(true, []string{"foo.txt"}); err == nil {
+	denied := []string{"foo.txt"}
+
+	if err := requireDenyEnforcement(true, nil, denied); err == nil {
 		t.Fatal("a sandbox deny rule was waived")
 	}
-	if err := requireDenyEnforcement(false, []string{"foo.txt"}); err != nil {
+	if err := requireDenyEnforcement(false, nil, denied); err != nil {
 		t.Errorf("a confined deny rule was refused: %v", err)
 	}
-	if err := requireDenyEnforcement(true, nil); err != nil {
+	if err := requireDenyEnforcement(true, nil, nil); err != nil {
 		t.Errorf("yolo without a deny rule was refused: %v", err)
+	}
+}
+
+func TestSandboxDenyRulesStandWhenNothingCanRunUnsandboxed(t *testing.T) {
+	denied := []string{"foo.txt"}
+
+	for _, offered := range [][]string{{"bash"}, {"job"}, {"read", "bash"}} {
+		if err := requireDenyEnforcement(true, offered, denied); err == nil {
+			t.Errorf("a deny rule was waived for %v", offered)
+		}
+	}
+
+	for _, offered := range [][]string{{"read", "ls", "grep"}, {"write"}, demo.Tools()} {
+		if err := requireDenyEnforcement(true, offered, denied); err != nil {
+			t.Errorf("a deny rule that still holds for %v was refused: %v", offered, err)
+		}
 	}
 }
 
