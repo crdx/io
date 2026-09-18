@@ -71,7 +71,7 @@ func TestQuestionNotificationNamesTheWorkspaceAndAsksTheQuestion(t *testing.T) {
 	capturePath := fakeNotifySend(t)
 
 	question := ask.Confirmation{
-		Label:  "Run this command on the host network?",
+		Label:  "Run this command with host networking?",
 		Detail: "curl example.com",
 	}.Question()
 
@@ -90,7 +90,7 @@ func TestQuestionNotificationNamesTheWorkspaceAndAsksTheQuestion(t *testing.T) {
 		"--app-name=oh",
 		"--",
 		"oh — io",
-		"Run this command on the host network?",
+		"Run this command with host networking?",
 		"curl example.com",
 	}
 	if !slices.Equal(got, want) {

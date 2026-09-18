@@ -1,6 +1,6 @@
 === chained command approval ===
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-Run this command on the host network?
+Run this command with host networking?
 
 $ cd /tmp &&
   curl -sS https://example.com/a/long/path | jq -r .name &&
@@ -26,7 +26,7 @@ Command not found: /unknown (alt+enter to send)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === heredoc approval ===
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-Run this command on the host network?
+Run this command with host networking?
 
 $ cat <<EOF > /tmp/note.txt
     keep every word
@@ -43,7 +43,7 @@ Commands:
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === network approval ===
 ──────────────────────────────────────── auto-denies in 1m ─────────────────────────────────────────
-Run this command on the host network?
+Run this command with host networking?
 
 $ curl https://example.com/status
 

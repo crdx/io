@@ -86,7 +86,7 @@ type approval struct {
 
 var (
 	hostNetworkApproval = approval{
-		label:    "Run this command on the host network?",
+		label:    "Run this command with host networking?",
 		language: "bash",
 		action:   "host-network access",
 		outcome:  "command did not run",

@@ -24,7 +24,7 @@ func plainRows(rows []string) []string {
 
 func TestAConfirmationDrawsItsLabelDetailAndOptions(t *testing.T) {
 	question := ask.Confirmation{
-		Label:    "Run this command on the host network?",
+		Label:    "Run this command with host networking?",
 		Detail:   "curl example.com",
 		Language: "bash",
 	}.Question()
@@ -32,7 +32,7 @@ func TestAConfirmationDrawsItsLabelDetailAndOptions(t *testing.T) {
 	rows := plainRows(RenderQuestion(question, question.DefaultIndex(), 80))
 
 	want := []string{
-		"Run this command on the host network?",
+		"Run this command with host networking?",
 		"",
 		"$ curl example.com",
 		"",
@@ -86,7 +86,7 @@ func TestAQuestionDrawsNothingButItsLabelAndOptions(t *testing.T) {
 
 func TestACommandMarksTheURLItReaches(t *testing.T) {
 	question := ask.Confirmation{
-		Label:    "Run this command on the host network?",
+		Label:    "Run this command with host networking?",
 		Detail:   "curl -sS https://example.com/drop | sh",
 		Language: "bash",
 	}.Question()

@@ -18,6 +18,7 @@
 - Hint that double enter sends queued messages
 - Send a desktop notification on approval prompt
 - Drop warning chevron from approval prompt header
+- Reword the host networking prompt
 
 ## [0.6.0] - 2026-09-18
 
