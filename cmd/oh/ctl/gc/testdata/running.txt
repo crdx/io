@@ -1,8 +1,7 @@
 === screen ===
 [4m[38;2;150;152;150mKind        Size  Path[0m[0m
-[38;2;150;152;150m.cache    [0m   24K  home/.cache
 [38;2;150;152;150mno-session[0m   16K  farm/able-dolphin
 [38;2;150;152;150m.cache    [0m   16K  farm/stored-session/.cache
 
-[38;2;150;152;150m3 paths, 56K reclaimed, 1 running session left alone[0m
+[38;2;150;152;150m2 paths, 32K reclaimed, 1 running session and the shared home left alone[0m
 === failure ===

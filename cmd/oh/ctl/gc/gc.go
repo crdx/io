@@ -226,7 +226,11 @@ func collect(directories Directories) ([]root, int, error) {
 		})
 	}
 
-	return append(roots, root{path: directories.Home, label: homeLabel}), runningCount, nil
+	if runningCount == 0 {
+		roots = append(roots, root{path: directories.Home, label: homeLabel})
+	}
+
+	return roots, runningCount, nil
 }
 
 func wholeKind(sessions string, name string) string {
@@ -558,7 +562,7 @@ func summary(count int, reclaimedBytes int64, runningCount int, isDryRun bool) s
 	}
 
 	if runningCount > 0 {
-		text += ", " + util.Plural(runningCount, "running session") + " left alone"
+		text += ", " + util.Plural(runningCount, "running session") + " and the shared home left alone"
 	}
 
 	return text

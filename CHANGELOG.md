@@ -27,6 +27,7 @@
     - List nuked caches, largest first
     - Delete dangling farm dirs
     - Delete rebuildable Go binaries when aggressive
+    - Leave the shared home alone while a session is running
 - Render required width for wide Mermaid diagrams
 - Truncate a tall footer so it doesn't flicker
 - Mark user messages with OSC 133

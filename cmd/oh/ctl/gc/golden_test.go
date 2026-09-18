@@ -78,7 +78,7 @@ func TestGoldenADryRunReportsWhatItWouldRemoveAndRemovesNothing(t *testing.T) {
 	}
 }
 
-func TestGoldenARunningSessionKeepsItsCaches(t *testing.T) {
+func TestGoldenARunningSessionKeepsItsCachesAndTheHomeItShares(t *testing.T) {
 	directories := populated(t)
 
 	runningName := storedSession(t, directories.Sessions)
@@ -100,6 +100,11 @@ func TestGoldenARunningSessionKeepsItsCaches(t *testing.T) {
 	kept := filepath.Join(directories.Farm, runningName, ".cache")
 	if _, err := os.Stat(kept); err != nil {
 		t.Errorf("a running session lost %s", kept)
+	}
+
+	shared := filepath.Join(directories.Home, ".cache")
+	if _, err := os.Stat(shared); err != nil {
+		t.Errorf("a running session lost the shared %s", shared)
 	}
 }
 

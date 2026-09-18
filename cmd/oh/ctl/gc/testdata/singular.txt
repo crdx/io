@@ -2,5 +2,5 @@
 [4m[38;2;150;152;150mKind        Size  Path[0m[0m
 [38;2;150;152;150mno-session[0m    8K  farm/able-dolphin
 
-[38;2;150;152;150m1 path, 8K reclaimed, 1 running session left alone[0m
+[38;2;150;152;150m1 path, 8K reclaimed, 1 running session and the shared home left alone[0m
 === failure ===
