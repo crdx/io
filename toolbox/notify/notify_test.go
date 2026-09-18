@@ -296,3 +296,23 @@ func TestATitleThatLooksLikeAnOptionIsPassedAsText(t *testing.T) {
 		t.Errorf("got trailing arguments %q, want %q", arguments, want)
 	}
 }
+
+func TestMarkupCharactersReachTheNotifierUnaltered(t *testing.T) {
+	const (
+		title   = "Patch ready <io> & waiting"
+		message = "Run /fork <model-id> to carry on & finish"
+	)
+
+	for name, kittyWindow := range map[string]string{"kitty": "1", "notify-send": ""} {
+		t.Run(name, func(t *testing.T) {
+			t.Setenv("KITTY_WINDOW_ID", kittyWindow)
+
+			command, _ := notify.Command(t.Context(), title, message, "dialog-information")
+
+			arguments := command.Args[len(command.Args)-2:]
+			if want := []string{title, message}; !slices.Equal(arguments, want) {
+				t.Errorf("got trailing arguments %q, want %q", arguments, want)
+			}
+		})
+	}
+}

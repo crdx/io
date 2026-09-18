@@ -16,11 +16,12 @@ import (
 )
 
 const (
-	searchTimeout      = 2 * time.Minute
-	searchInstructions = "Search the web for current, reliable information. Answer directly and cite sources with Markdown links."
+	searchHeaderTimeout = 2 * time.Minute
+	searchIdleTimeout   = 2 * time.Minute
+	searchInstructions  = "Search the web for current, reliable information. Answer directly and cite sources with Markdown links."
 )
 
-const SearchEffort = "medium"
+const SearchEffort = "high"
 
 type SearchClient struct {
 	URL   string
@@ -37,7 +38,7 @@ func NewSearch(tokens TokenSource, model string) (*SearchClient, error) {
 		Model:    model,
 		tokens:   tokens,
 		session:  newToken(),
-		requests: req.New(searchTimeout),
+		requests: req.NewStreaming(searchHeaderTimeout, searchIdleTimeout),
 	}
 
 	if client.Model == "" {
@@ -45,6 +46,10 @@ func NewSearch(tokens TokenSource, model string) (*SearchClient, error) {
 	}
 
 	return client, nil
+}
+
+func (self *SearchClient) IdleAfter(after time.Duration) {
+	self.requests.IdleAfter(after)
 }
 
 func (self *SearchClient) ObserveHTTP(observer req.Observer) {

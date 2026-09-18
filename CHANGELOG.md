@@ -33,7 +33,7 @@
 - Keep deleted temporary path grants from disabling the shell
 - Report redundant and conflicting paths
 - Let a file tool follow a symlinked path
-- Ensure the max shell timeout is less than the typical prompt cache TTL
+- Ensure maximum shell timeout is less than the typical prompt cache TTL
 - Notify which config keys changed on auto-reload
 - Remove `sandbox.host_loopback`
 
@@ -46,6 +46,8 @@
 
 - Rename `web_search` to `lookup`, toggled with `l` cap
 - Rename `web_fetch` to `fetch`, toggled with `n` cap
+- Search the web at high reasoning effort
+- Bound a lookup by silence rather than by total length
 - Add max job wait time
 - Limit background job cleanup to one second on close
 - Save truncated remains in the session drops directory
@@ -53,6 +55,7 @@
 - Serve a built-in `oh` skill
 - Detail the read-only workflow better
 - Tell the model it can ask for hugh `/grant`
+- Update `notify` to state that its inputs are plain text
 
 ### Usage
 
@@ -74,7 +77,7 @@
 - Gather consecutive mid-round notices into one panel
 - Handle pending notices correctly
 - Repair the region if the terminal is too short
-- Show whole seconds for durations >= 1s, truncated rather than rounded
+- Show whole seconds for durations >= 1s
 - Remove some character-building options
 - Detect environment changes on resume
 

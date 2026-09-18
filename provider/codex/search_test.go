@@ -2,6 +2,7 @@ package codex_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,7 +10,9 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 
+	"crdx.org/io/internal/req"
 	"crdx.org/io/provider/codex"
 )
 
@@ -105,6 +108,71 @@ func TestSearchReportsStreamFailures(t *testing.T) {
 
 	if _, err := client.Search(t.Context(), "weather"); err == nil || !strings.Contains(err.Error(), "quota gone") {
 		t.Errorf("got %v", err)
+	}
+}
+
+func TestSearchOutlastsASlowButTalkativeAnswer(t *testing.T) {
+	const idleAfter = 200 * time.Millisecond
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "text/event-stream")
+
+		for _, word := range []string{"a ", "slow ", "but ", "steady ", "answer"} {
+			_, _ = fmt.Fprint(writer, events(answer(word)))
+			_ = http.NewResponseController(writer).Flush()
+			time.Sleep(idleAfter / 4)
+		}
+
+		_, _ = fmt.Fprint(writer, events(completed))
+	}))
+	defer server.Close()
+
+	client, err := codex.NewSearch(codex.Static("token", "account"), "gpt-5.4-mini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.URL = server.URL
+	client.IdleAfter(idleAfter)
+
+	output, err := client.Search(t.Context(), "weather")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if output != "a slow but steady answer" {
+		t.Errorf("got %q", output)
+	}
+}
+
+func TestSearchEndsAnAnswerThatGoesQuiet(t *testing.T) {
+	const idleAfter = 100 * time.Millisecond
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "text/event-stream")
+		_, _ = fmt.Fprint(writer, events(answer("thinking")))
+		_ = http.NewResponseController(writer).Flush()
+
+		select {
+		case <-time.After(10 * idleAfter):
+		case <-request.Context().Done():
+		}
+	}))
+	defer server.Close()
+
+	client, err := codex.NewSearch(codex.Static("token", "account"), "gpt-5.4-mini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.URL = server.URL
+	client.IdleAfter(idleAfter)
+
+	_, err = client.Search(t.Context(), "weather")
+
+	var wentQuiet *req.IdleError
+	if !errors.As(err, &wentQuiet) {
+		t.Fatalf("got %v", err)
+	}
+	if wentQuiet.After != idleAfter {
+		t.Errorf("the stream reported %s of silence, want %s", wentQuiet.After, idleAfter)
 	}
 }
 

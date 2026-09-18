@@ -64,8 +64,8 @@ func New(writeEscape EscapeWriter) tool.Tool {
 			Name:        "notify",
 			Description: "send a desktop notification to alert the user",
 			Schema: tool.Schema{
-				tool.String("title", "notification title"),
-				tool.String("message", "notification text"),
+				tool.String("title", "notification title, as plain text"),
+				tool.String("message", "notification text, as plain text: write < and & as themselves, never as HTML entities"),
 				tool.String("icon", "notification icon: (one of "+iconChoices+")"),
 			},
 		},

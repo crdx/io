@@ -1,0 +1,5 @@
+=== with output ===
+build: complete
+built successfully
+=== without output ===
+build: complete (no output)

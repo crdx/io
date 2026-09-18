@@ -264,6 +264,21 @@ func TestAJobCallIsRenderedByItsSubject(t *testing.T) {
 	}
 }
 
+func TestTheNameParameterAsksForCompactSingleWordNames(t *testing.T) {
+	var description string
+	for _, parameter := range job.New(nil, nil, nil, false).Schema() {
+		if parameter.Name == "name" {
+			description = parameter.Description
+		}
+	}
+
+	for _, wanted := range []string{"compact single-word", "suffix it with -2, -3"} {
+		if !strings.Contains(description, wanted) {
+			t.Errorf("name description %q does not contain %q", description, wanted)
+		}
+	}
+}
+
 func TestTheToolSaysWhetherAnEndedJobWakesTheConversation(t *testing.T) {
 	waking := job.New(nil, nil, nil, true).Description()
 	if !strings.Contains(waking, "You will be notified automatically when it finishes") {
