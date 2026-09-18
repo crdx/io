@@ -52,15 +52,15 @@ func TestTheHeadOfAQuestionCountsDownWhereThereIsADeadline(t *testing.T) {
 	question := ask.Confirmation{Label: "Continue?"}.Question()
 
 	head := QuestionHead(question, time.Minute)
-	if got := style.Plain(head); got != "⚠ auto-denies in 1m" {
-		t.Errorf("got head %q, want a mark and a countdown", got)
+	if got := style.Plain(head); got != "auto-denies in 1m" {
+		t.Errorf("got head %q, want a countdown", got)
 	}
 
-	if got := style.Plain(QuestionHead(question, 0)); got != "⚠" {
-		t.Errorf("got head %q without a deadline, want the mark alone", got)
+	if got := style.Plain(QuestionHead(question, 0)); got != "" {
+		t.Errorf("got head %q without a deadline, want nothing", got)
 	}
 	choice := ask.Choice{Label: "Which one?", Labels: []string{"first"}}.Question()
-	if got := style.Plain(QuestionHead(choice, time.Minute)); got != "⚠ auto-cancels in 1m" {
+	if got := style.Plain(QuestionHead(choice, time.Minute)); got != "auto-cancels in 1m" {
 		t.Errorf("got head %q for a choice, want it to cancel rather than deny", got)
 	}
 	if head == style.Plain(head) {

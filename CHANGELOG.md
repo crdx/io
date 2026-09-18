@@ -17,6 +17,7 @@
 - Run the demo unsandboxed since it's safe
 - Hint that double enter sends queued messages
 - Send a desktop notification on approval prompt
+- Drop warning chevron from approval prompt header
 
 ## [0.6.0] - 2026-09-18
 

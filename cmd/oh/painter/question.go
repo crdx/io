@@ -15,10 +15,8 @@ import (
 )
 
 const (
-	questionMark  = "⚠"
 	detailGutter  = "❯"
 	optionGap     = " "
-	headGap       = " "
 	lapseFallback = "auto-cancels"
 	shellLanguage = "bash"
 )
@@ -35,13 +33,7 @@ func RenderQuestion(question ask.Question, cursor int, columns int) []string {
 }
 
 func QuestionHead(question ask.Question, remainingTime time.Duration) string {
-	head := NoticeStyle(agent.WarningStatus).Over(questionMark)
-
-	if countdown := renderCountdown(question.Lapse, remainingTime); countdown != "" {
-		head += style.Subtle(headGap) + countdown
-	}
-
-	return head
+	return renderCountdown(question.Lapse, remainingTime)
 }
 
 func renderQuestionLabel(label string, columns int) []string {
