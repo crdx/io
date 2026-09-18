@@ -24,9 +24,6 @@ func (self *Keeper) OpenHostToSandbox(ctx context.Context, host string, port uin
 	if _, isExposed := self.hostToSandbox[port]; isExposed {
 		return fmt.Errorf("port %d is already exposed", port)
 	}
-	if slices.Contains(self.configuredSandboxToHostPorts, port) {
-		return fmt.Errorf("port %d already carries traffic from the sandbox to the host", port)
-	}
 	if _, isExposed := self.sandboxToHost[port]; isExposed {
 		return fmt.Errorf("port %d already carries traffic from the sandbox to the host", port)
 	}

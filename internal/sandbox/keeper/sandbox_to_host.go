@@ -9,7 +9,6 @@ import (
 	"os"
 	"slices"
 	"strconv"
-	"strings"
 	"time"
 
 	"crdx.org/io/internal/sandbox/loopback"
@@ -18,36 +17,6 @@ import (
 )
 
 const sandboxToHostDialTimeout = 5 * time.Second
-
-func encodeSandboxToHostPorts(ports []uint16) string {
-	portTexts := make([]string, len(ports))
-	for i, port := range ports {
-		portTexts[i] = strconv.FormatUint(uint64(port), 10)
-	}
-	return strings.Join(portTexts, ",")
-}
-
-func decodeSandboxToHostPorts(portList string) ([]uint16, error) {
-	if portList == "" {
-		return nil, nil
-	}
-
-	var ports []uint16
-	seen := make(map[uint16]struct{})
-	for portText := range strings.SplitSeq(portList, ",") {
-		portNumber, err := strconv.ParseUint(portText, 10, 16)
-		if err != nil || portNumber == 0 {
-			return nil, fmt.Errorf("invalid host loopback port %q", portText)
-		}
-		port := uint16(portNumber)
-		if _, exists := seen[port]; exists {
-			return nil, fmt.Errorf("host loopback port %d is repeated", port)
-		}
-		seen[port] = struct{}{}
-		ports = append(ports, port)
-	}
-	return ports, nil
-}
 
 func openSandboxToHostListeners(ports []uint16) ([]*os.File, error) {
 	if len(ports) == 0 {
@@ -128,9 +97,6 @@ func (self *Keeper) OpenSandboxToHost(ctx context.Context, port uint16) error {
 	self.portDirectionsMutex.Lock()
 	defer self.portDirectionsMutex.Unlock()
 
-	if slices.Contains(self.configuredSandboxToHostPorts, port) {
-		return fmt.Errorf("host loopback port %d is already forwarded by the session configuration", port)
-	}
 	if _, isForwarded := self.sandboxToHost[port]; isForwarded {
 		return fmt.Errorf("host loopback port %d is already exposed", port)
 	}
