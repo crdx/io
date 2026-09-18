@@ -239,7 +239,7 @@ func TestGoldenTheCompletePreviewLifecycleMatchesTheGolden(t *testing.T) {
 	close(keys)
 
 	var output strings.Builder
-	chosen, err := choose(rows, keys, func() (int, int) { return 46, 6 }, &output, inline)
+	chosen, err := choose(rows, keys, func() (int, int) { return 46, 9 }, &output, inline)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -39,6 +39,7 @@
 
 ### Interface
 
+- Show an input frame beneath session previews
 - Support theme colour customisation
 - Theme harness-submitted messages
 - Gather consecutive mid-round notices into one panel

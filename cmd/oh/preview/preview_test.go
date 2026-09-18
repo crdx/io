@@ -59,6 +59,21 @@ func exposedPorts(t *testing.T) []agent.Event {
 	return events
 }
 
+func contextExceeded() []agent.Event {
+	return []agent.Event{
+		{Kind: agent.UserMessageEvent, Text: "carry on with the refactor"},
+		{
+			Kind: agent.FailureEvent,
+			Failure: &agent.Failure{
+				Kind:       agent.HTTPStatusFailure,
+				HTTPStatus: 400,
+				Code:       "exceed_context_size_error",
+				Message:    "request (264481 tokens) exceeds the available context size (262144 tokens)",
+			},
+		},
+	}
+}
+
 func TestGoldenWhatAConversationLooksLikeBeforeItIsOpenedMatchesTheGolden(t *testing.T) {
 	var drawn strings.Builder
 
@@ -69,6 +84,10 @@ func TestGoldenWhatAConversationLooksLikeBeforeItIsOpenedMatchesTheGolden(t *tes
 		}
 		fmt.Fprintf(&drawn, "=== %d columns, ports exposed in a row ===\n", room)
 		for _, row := range Draw(exposedPorts(t), nil, room) {
+			fmt.Fprintln(&drawn, row)
+		}
+		fmt.Fprintf(&drawn, "=== %d columns, the context window filled ===\n", room)
+		for _, row := range Draw(contextExceeded(), nil, room) {
 			fmt.Fprintln(&drawn, row)
 		}
 	}

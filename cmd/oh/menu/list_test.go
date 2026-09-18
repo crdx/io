@@ -668,7 +668,7 @@ func previewableRows(names ...string) *previewableList {
 func TestAPreviewOpensOnTheLastRowsOfWhatItRead(t *testing.T) {
 	rows := previewableRows("first", "second")
 	self := listState(rows, 1)
-	self.measure = func() (int, int) { return 40, 5 }
+	self.measure = func() (int, int) { return 40, 9 }
 
 	self.apply(key.Key{Code: key.Enter})
 	if !self.preview.isOpen {
@@ -707,7 +707,7 @@ func TestAPreviewIsReadAgainOnlyWhenTheRoomChanges(t *testing.T) {
 func TestAPreviewScrollsWithoutMovingTheCursorBehindIt(t *testing.T) {
 	rows := previewableRows("first", "second")
 	self := listState(rows, 1)
-	self.measure = func() (int, int) { return 40, 5 }
+	self.measure = func() (int, int) { return 40, 9 }
 
 	self.apply(key.Key{Code: key.Enter})
 	self.draw()
