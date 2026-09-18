@@ -8,6 +8,15 @@ $ curl https://example.com/status
 
 [Yes]  No
 ────────────────────────────────────────────────────────────────────────────────────────────────────
+=== approval taller than the terminal ===
+the conversation this question stands over
+⋮ 24 more lines
+  make step-10 &&
+  rm -rf build/step-11 &&
+  make step-11
+
+[Yes]  No
+⋮ 1 more line
 === chained command approval ===
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 Run this command with host networking?

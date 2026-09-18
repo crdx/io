@@ -126,26 +126,33 @@ func (self *Screen) showFooter(input footer) {
 }
 
 func (self *Screen) fitFooter(rows []string, cursorRow int) ([]string, int) {
-	if self.lines <= 0 || len(rows) <= self.lines {
+	if self.lines <= 0 {
 		return rows, cursorRow
 	}
 
-	visibleRows := width.WindowRows(rows, self.lines, cursorRow)
-	notices := 0
-	if visibleRows.HiddenLinesAbove > 0 {
-		notices++
-	}
-	if visibleRows.HiddenLinesBelow > 0 {
-		notices++
+	room := max(1, self.lines-self.leastSeparators())
+	if len(rows) <= room {
+		return rows, cursorRow
 	}
 
-	if notices == 0 || self.lines <= notices {
-		return visibleRows.Rows, visibleRows.Focus
+	visibleRows := width.WindowRows(rows, room, cursorRow)
+	notices := noticesFor(visibleRows)
+
+	for notices > 0 && notices < room {
+		shrunkRows := width.WindowRows(rows, room-notices, cursorRow)
+		if cutEnds := noticesFor(shrunkRows); cutEnds > notices {
+			notices = cutEnds
+			continue
+		}
+
+		return self.withHiddenRowNotices(shrunkRows)
 	}
 
-	visibleRows = width.WindowRows(rows, self.lines-notices, cursorRow)
+	return visibleRows.Rows, visibleRows.Focus
+}
 
-	footerRows := make([]string, 0, len(visibleRows.Rows)+notices)
+func (self *Screen) withHiddenRowNotices(visibleRows width.Window) ([]string, int) {
+	footerRows := make([]string, 0, len(visibleRows.Rows)+2)
 	focus := visibleRows.Focus
 
 	if visibleRows.HiddenLinesAbove > 0 {
@@ -160,6 +167,43 @@ func (self *Screen) fitFooter(rows []string, cursorRow int) ([]string, int) {
 	}
 
 	return footerRows, focus
+}
+
+func noticesFor(visibleRows width.Window) int {
+	notices := 0
+	if visibleRows.HiddenLinesAbove > 0 {
+		notices++
+	}
+	if visibleRows.HiddenLinesBelow > 0 {
+		notices++
+	}
+
+	return notices
+}
+
+func (self *Screen) wantedSeparators() int {
+	if !self.hasPrinted {
+		return 0
+	}
+
+	return max(0, apart-self.trailingNewlines)
+}
+
+func (self *Screen) separatorsAbove(footerRows int) int {
+	separators := self.wantedSeparators()
+	if self.lines <= 0 {
+		return separators
+	}
+
+	return min(separators, max(0, self.lines-footerRows))
+}
+
+func (self *Screen) leastSeparators() int {
+	if !self.hasPrinted || self.trailingNewlines > 0 {
+		return 0
+	}
+
+	return 1
 }
 
 func (self *Screen) hiddenRowsNotice(hiddenLines int) string {
@@ -328,9 +372,7 @@ func (self *Screen) drawInput() string {
 	self.shownFooter = self.input
 	self.shownFooter.column = self.column
 	self.shownFooter.hasContentAbove = self.hasPrinted
-	if self.shownFooter.hasContentAbove {
-		self.shownFooter.separators = max(0, apart-self.trailingNewlines)
-	}
+	self.shownFooter.separators = self.separatorsAbove(len(self.input.rows))
 
 	var out strings.Builder
 

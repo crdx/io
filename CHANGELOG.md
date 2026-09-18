@@ -27,6 +27,7 @@
     - List nuked caches, largest first
     - Delete dangling farm dirs
 - Render required width for wide Mermaid diagrams
+- Truncate a tall footer so it doesn't flicker
 
 ## [0.6.0] - 2026-09-18
 

@@ -100,3 +100,59 @@ func TestATerminalTooShortForANoticeStillFits(t *testing.T) {
 		}
 	}
 }
+
+func TestAFooterFillingTheTerminalStaysOffTheRowAboveIt(t *testing.T) {
+	screen := NewTerminalOfSize(&strings.Builder{}, 40, 10)
+	screen.Line("said before")
+
+	screen.Footer(footerRows(40), 20, 0)
+
+	if got := len(screen.shownFooter.rows); got != 9 {
+		t.Errorf("kept %d rows, want 9 beneath the row said before", got)
+	}
+	if got := screen.shownFooter.separators; got != 1 {
+		t.Errorf("drew %d blanks above the footer, want the one that spares that row", got)
+	}
+}
+
+func TestAFooterShorterThanTheTerminalKeepsTheBlanksAboveIt(t *testing.T) {
+	screen := NewTerminalOfSize(&strings.Builder{}, 40, 10)
+	screen.Line("said before")
+
+	screen.Footer(footerRows(4), 3, 0)
+
+	if got := screen.shownFooter.separators; got != apart {
+		t.Errorf("drew %d blanks above a short footer, want %d", got, apart)
+	}
+}
+
+func TestAFooterAndItsBlanksNeverOutgrowTheTerminal(t *testing.T) {
+	for _, lines := range []int{1, 2, 3, 10, 24} {
+		screenOutput := &strings.Builder{}
+		screen := NewTerminalOfSize(screenOutput, 40, lines)
+		screen.Line("said before")
+		screenOutput.Reset()
+
+		screen.Footer(footerRows(40), 20, 0)
+
+		drawn := len(screen.shownFooter.rows) + screen.shownFooter.separators
+		if drawn > lines {
+			t.Errorf("height %d drew %d rows, which scrolls every repaint", lines, drawn)
+		}
+	}
+}
+
+func TestAWindowedFooterNeverOutgrowsItsRoomWhenBothEndsAreCut(t *testing.T) {
+	for _, lines := range []int{1, 2, 3, 4, 5} {
+		screen := NewTerminalOfSize(&strings.Builder{}, 40, lines)
+
+		rows, cursorRow := screen.fitFooter(footerRows(40), 20)
+
+		if len(rows) > lines {
+			t.Errorf("height %d kept %d rows, more than the terminal holds", lines, len(rows))
+		}
+		if cursorRow < 0 || cursorRow >= len(rows) {
+			t.Errorf("height %d focused at %d, outside the %d rows kept", lines, cursorRow, len(rows))
+		}
+	}
+}

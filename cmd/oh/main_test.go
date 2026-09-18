@@ -6506,7 +6506,7 @@ func TestGoldenEveryScenarioDrawsWhatItDrewBefore(t *testing.T) {
 	}
 }
 
-const shortLines = 3
+const shortLines = 6
 
 func TestGoldenATallRegionOnAShortTerminalIsRepairedRatherThanFrozen(t *testing.T) {
 	scenarios := map[string]string{
@@ -8658,6 +8658,7 @@ const (
 	feedbackConcurrentApproval
 	feedbackChainedApproval
 	feedbackHeredocApproval
+	feedbackTallApproval
 	feedbackApprovalDuringACall
 )
 
@@ -8693,20 +8694,21 @@ func TestCommandFeedbackHasNoAutomaticDismissal(t *testing.T) {
 
 func TestGoldenFeedbackDrawsEveryVisibleState(t *testing.T) {
 	passes := streamPasses(t, feedbackStream, map[string]feedbackScenario{
-		"command error":               feedbackCommandError,
-		"multiline help":              feedbackHelp,
-		"startup info":                feedbackStartupInfo,
-		"success confirmation":        feedbackSuccess,
-		"editing clears feedback":     feedbackClearedByEditing,
-		"turn completion clears it":   feedbackClearedByTurnCompletion,
-		"combined storage warnings":   feedbackStorageWarnings,
-		"settings nothing reads":      feedbackUnknownSettings,
-		"tall answer stays untouched": feedbackTallAnswer,
-		"network approval":            feedbackNetworkApproval,
-		"next concurrent approval":    feedbackConcurrentApproval,
-		"chained command approval":    feedbackChainedApproval,
-		"heredoc approval":            feedbackHeredocApproval,
-		"approval during a call":      feedbackApprovalDuringACall,
+		"command error":                     feedbackCommandError,
+		"multiline help":                    feedbackHelp,
+		"startup info":                      feedbackStartupInfo,
+		"success confirmation":              feedbackSuccess,
+		"editing clears feedback":           feedbackClearedByEditing,
+		"turn completion clears it":         feedbackClearedByTurnCompletion,
+		"combined storage warnings":         feedbackStorageWarnings,
+		"settings nothing reads":            feedbackUnknownSettings,
+		"tall answer stays untouched":       feedbackTallAnswer,
+		"network approval":                  feedbackNetworkApproval,
+		"next concurrent approval":          feedbackConcurrentApproval,
+		"chained command approval":          feedbackChainedApproval,
+		"heredoc approval":                  feedbackHeredocApproval,
+		"approval taller than the terminal": feedbackTallApproval,
+		"approval during a call":            feedbackApprovalDuringACall,
 	})
 
 	compareWithGolden(t, "feedback", ".ansi", passes)
@@ -8723,7 +8725,7 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 	self := slashCommandFixture(t, caps.Read)
 	self.agent = agent.New("", quietProvider{}, nil)
 	terminalLines := replayLines
-	if scenario == feedbackTallAnswer {
+	if scenario == feedbackTallAnswer || scenario == feedbackTallApproval {
 		terminalLines = 8
 	}
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, terminalLines)
@@ -8769,6 +8771,8 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		inputLine.SetText("waiting for approvals")
 	case feedbackChainedApproval:
 		inputLine.SetText("fetch and tidy up")
+	case feedbackTallApproval:
+		inputLine.SetText("tidy the tree")
 	case feedbackHeredocApproval:
 		inputLine.SetText("write the note")
 	case feedbackApprovalDuringACall:
@@ -8877,6 +8881,8 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		}
 		self.onQuestionChange()
 		self.show(inputLine)
+	case feedbackTallApproval:
+		return drawApprovalTallerThanTheTerminal(t, self, inputLine, &screenOutput)
 	case feedbackTallAnswer:
 		const answer = "01 alpha\n\n02 bravo\n\n03 charlie\n\n04 delta\n\n05 echo\n\n06 foxtrot\n\n07 golf"
 		self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
@@ -8886,6 +8892,42 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 	case feedbackApprovalDuringACall:
 		return drawApprovalDuringACall(t, self, inputLine, &screenOutput)
 	}
+
+	return screenOutput.String()
+}
+
+func drawApprovalTallerThanTheTerminal(
+	t *testing.T,
+	self *App,
+	inputLine *edit.Input,
+	screenOutput *strings.Builder,
+) string {
+	t.Helper()
+
+	steps := make([]string, 0, 12)
+	for step := range 12 {
+		steps = append(steps, fmt.Sprintf("rm -rf build/step-%02d && make step-%02d", step, step))
+	}
+	command := strings.Join(steps, " && ")
+
+	self.screen.Line("the conversation this question stands over")
+
+	broker := ask.New()
+	closeBroker := broker.Open()
+	defer closeBroker()
+
+	go func() {
+		_ = ask.Confirm(t.Context(), broker, ask.Confirmation{
+			Label:    "Run this command with host networking?",
+			Detail:   strings.Join(bash.Steps(command), "\n"),
+			Language: "bash",
+		})
+	}()
+	<-broker.Changes()
+
+	self.question.broker = broker
+	self.onQuestionChange()
+	self.show(inputLine)
 
 	return screenOutput.String()
 }
