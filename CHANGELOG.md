@@ -3,9 +3,10 @@
 ## [N.N.N] - XXXX-XX-XX
 
 - Linkify the session-name bar segment
-- Limit background job name length
+- Limit background job name length and format
 - Move session maintenance to `oh --ctl`
 - Regenerate transcripts inside archived sessions
+- Remove the `ohctl` command
 - Shorten and standardise runtime messages
 
 ## [0.6.0] - 2026-09-18
