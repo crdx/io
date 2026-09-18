@@ -78,7 +78,7 @@ func TestSeveralEndedJobsAreNamedInThePlural(t *testing.T) {
 
 func TestAnEndedJobNoticeAgreesWithItsOwnNumber(t *testing.T) {
 	const tail = " stopped when the session closed. " +
-		"Restart `docs` with `job(action=\"start\", name=\"docs\")`."
+		"Restart `docs` with `job(action=\"start\", name=\"docs\")` if it is still needed."
 
 	for _, test := range []struct {
 		names   []string

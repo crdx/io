@@ -10,7 +10,8 @@
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the\e[0m\r
 \r\e[K\e[48;2;48;58;67m    session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with   \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mjob(action="start", name="docs")\e[0m\e[48;2;48;58;67m.   \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mjob(action="start", name="docs")\e[0m\e[48;2;48;58;67m if \e[0m\r
+\r\e[K\e[48;2;48;58;67m    it is still needed.                 \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r
 \e]133;A\e\\\e[48;2;52;53;65m                                        \e[0m\r
@@ -282,6 +283,40 @@
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[38;2;192;128;80m)\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mi\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mf\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mi\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mi\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ms\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mt\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mi\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ml\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67ml\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67mn\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67me\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
+\r\e[K\e[48;2;48;58;67md\e[0m\r
+\r\e[K\e[48;2;48;58;67m \e[0m\r
 \r\e[K\e[48;2;48;58;67m.\e[0m\r
 \r\e[K\e[48;2;48;58;67m \e[0m\r
 \r
@@ -362,7 +397,7 @@
 Both are up.
 
 \e[48;2;48;58;67m\e[0m
-\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start", name="docs")\e[0m\e[48;2;48;58;67m.\e[0m
+\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start", name="docs")\e[0m\e[48;2;48;58;67m if it is still needed.\e[0m
 \e[48;2;48;58;67m\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m carry on\e[0m
@@ -383,7 +418,7 @@ Both are up.\r
 \r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m      \e[0m\r
-\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m.                                                                                   \e[0m\r
+\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m if it is still needed.                                                             \e[0m\r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -406,7 +441,7 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r
 \e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m      \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m.                                                                                   \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m if it is still needed.                                                             \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -429,7 +464,7 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r
 \e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m      \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m.                                                                                   \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m if it is still needed.                                                             \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -452,7 +487,7 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r
 \e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m      \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m.                                                                                   \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m if it is still needed.                                                             \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\r
 \r
 \e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -491,7 +526,10 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mon="star\e[0m\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mt",\e[0m\e[48;2;48;58;67m     \e[0m\r
 \r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="do\e[0m\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mcs")\e[0m\e[48;2;48;58;67m.   \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mcs")\e[0m\e[48;2;48;58;67m if \e[0m\r
+\r\e[K\e[48;2;48;58;67m    it is   \e[0m\r
+\r\e[K\e[48;2;48;58;67m    still   \e[0m\r
+\r\e[K\e[48;2;48;58;67m    needed. \e[0m\r
 \r\e[K\e[48;2;48;58;67m            \e[0m\r
 \r
 \e]133;A\e\\\e[48;2;52;53;65m            \e[0m\r
@@ -517,7 +555,7 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r\e[KBoth are up.
 
 \r\e[K\e[48;2;48;58;67m\e[0m\r
-\r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start", name="docs")\e[0m\e[48;2;48;58;67m.\e[0m\r
+\r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start", name="docs")\e[0m\e[48;2;48;58;67m if it is still needed.\e[0m\r
 \r\e[K\e[48;2;48;58;67m\e[0m
 
 \e]133;A\e\\\e[48;2;52;53;65m\e[0m
@@ -539,7 +577,7 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Jobs \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m and \e[38;2;192;128;80mwatch\e[0m\e[48;2;48;58;67m stopped when the session closed. Restart \e[38;2;192;128;80mdocs\e[0m\e[48;2;48;58;67m with \e[38;2;192;128;80mjob(action="start",\e[0m\e[48;2;48;58;67m      \e[0m\r
-\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m.                                                                                   \e[0m\r
+\r\e[K\e[48;2;48;58;67m    \e[38;2;192;128;80mname="docs")\e[0m\e[48;2;48;58;67m if it is still needed.                                                             \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r
 \e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r

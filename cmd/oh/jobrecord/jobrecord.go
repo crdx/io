@@ -87,5 +87,6 @@ func EndedWithSessionNotice(event agent.Event) (string, bool) {
 	}
 
 	return subject + " stopped when the session closed. " +
-		"Restart " + formattedNames[0] + " with `job(action=\"start\", name=\"" + names[0] + "\")`.", true
+		"Restart " + formattedNames[0] + " with `job(action=\"start\", name=\"" + names[0] + "\")` " +
+		"if it is still needed.", true
 }

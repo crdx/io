@@ -10,7 +10,8 @@ Both are up.
 
  🤖 Jobs docs and watch stopped when the
     session closed. Restart docs with
-    job(action="start", name="docs").
+    job(action="start", name="docs") if
+    it is still needed.
 
 
 
@@ -281,6 +282,40 @@ s
 
 )
 
+i
+
+f
+
+i
+
+t
+
+i
+
+s
+
+s
+
+t
+
+i
+
+l
+
+l
+
+n
+
+e
+
+e
+
+d
+
+e
+
+d
+
 .
 
 
@@ -362,7 +397,7 @@ Both are up.
 
 
  🤖 Jobs docs and watch stopped when the session closed. Restart docs with job(action="start",
-    name="docs").
+    name="docs") if it is still needed.
 
 
 
@@ -400,7 +435,10 @@ Both are up.
     on="star
     t",
     name="do
-    cs").
+    cs") if
+    it is
+    still
+    needed.
 
 
 
@@ -427,7 +465,7 @@ Both are up.
 
 
  🤖 Jobs docs and watch stopped when the session closed. Restart docs with job(action="start",
-    name="docs").
+    name="docs") if it is still needed.
 
 
 

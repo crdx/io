@@ -13056,27 +13056,28 @@ type sessionGoldenTool struct {
 }
 
 type sessionGoldenScenario struct {
-	Name                string              `toml:"-"`
-	Provider            string              `toml:"provider"`
-	Model               string              `toml:"model"`
-	Effort              string              `toml:"effort"`
-	IsFast              bool                `toml:"fast"`
-	IdleAfter           string              `toml:"idle-after"`
-	Grouping            output.Grouping     `toml:"grouping"`
-	Hostname            string              `toml:"hostname"`
-	FirstTokenError     string              `toml:"first-token-error"`
-	CredentialRefresh   string              `toml:"credential-refresh"`
-	ToggleBeforeFirst   string              `toml:"toggle-before-first"`
-	Conditions          string              `toml:"conditions"`
-	ConditionsOnResume  string              `toml:"conditions-on-resume"`
-	EndJobBeforeFirst   string              `toml:"end-job-before-first"`
-	JobHoldingWorkspace string              `toml:"job-holding-workspace"`
-	RunBeforeFirst      string              `toml:"run-before-first"`
-	Tools               []sessionGoldenTool `toml:"tool"`
-	FirstTurn           sessionGoldenTurn   `toml:"first"`
-	ResumeTurn          sessionGoldenTurn   `toml:"resume"`
-	CredentialsPath     string              `toml:"-"`
-	CredentialRecovery  func()              `toml:"-"`
+	Name                  string              `toml:"-"`
+	Provider              string              `toml:"provider"`
+	Model                 string              `toml:"model"`
+	Effort                string              `toml:"effort"`
+	IsFast                bool                `toml:"fast"`
+	IdleAfter             string              `toml:"idle-after"`
+	Grouping              output.Grouping     `toml:"grouping"`
+	Hostname              string              `toml:"hostname"`
+	FirstTokenError       string              `toml:"first-token-error"`
+	CredentialRefresh     string              `toml:"credential-refresh"`
+	ToggleBeforeFirst     string              `toml:"toggle-before-first"`
+	Conditions            string              `toml:"conditions"`
+	ConditionsOnResume    string              `toml:"conditions-on-resume"`
+	EndJobBeforeFirst     string              `toml:"end-job-before-first"`
+	JobHoldingWorkspace   string              `toml:"job-holding-workspace"`
+	JobsRunningIntoResume []string            `toml:"jobs-running-into-resume"`
+	RunBeforeFirst        string              `toml:"run-before-first"`
+	Tools                 []sessionGoldenTool `toml:"tool"`
+	FirstTurn             sessionGoldenTurn   `toml:"first"`
+	ResumeTurn            sessionGoldenTurn   `toml:"resume"`
+	CredentialsPath       string              `toml:"-"`
+	CredentialRecovery    func()              `toml:"-"`
 }
 
 func TestGoldenScenariosProduceCanonicalOutputs(t *testing.T) {
@@ -13963,6 +13964,9 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	if scenario.JobHoldingWorkspace != "" {
 		startSessionGoldenJobHoldingTheWorkspace(t, firstHarness, scenario.JobHoldingWorkspace)
 	}
+	if len(scenario.JobsRunningIntoResume) > 0 {
+		recordSessionGoldenRunningJobs(firstHarness, scenario.JobsRunningIntoResume)
+	}
 	if scenario.ToggleBeforeFirst != "" {
 		toggleSessionGoldenCaps(t, firstHarness, scenario.ToggleBeforeFirst)
 		firstHarness.settleAccess()
@@ -14043,6 +14047,9 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	restoredEvents := restoreSessionGoldenConditions(
 		t, resumedHarness, storedSession, sessionGoldenConditions(t, resumeConditionsOf(scenario)),
 	)
+	if len(scenario.JobsRunningIntoResume) > 0 {
+		restoredEvents = restoreSessionGoldenRunningJobs(t, resumedHarness, storedSession.Events, restoredEvents)
+	}
 	resumedHarness.currentTurn = Turn{Stream: testRunningTurnStream()}
 	resumedHarness.replay()
 	requireSameVisibleScreen(
@@ -14408,6 +14415,52 @@ func startSessionGoldenJobHoldingTheWorkspace(t *testing.T, testHarness *App, na
 	if _, err := manager.Start(t.Context(), name, ".", "just "+name, policy); err != nil {
 		t.Fatalf("the job did not start: %v", err)
 	}
+}
+
+func recordSessionGoldenRunningJobs(testHarness *App, names []string) {
+	startedAt := time.Date(2026, time.August, 23, 14, 32, 9, 0, time.UTC)
+
+	listing := make([]jobs.Snapshot, 0, len(names))
+	for _, name := range names {
+		listing = append(listing, jobs.Snapshot{
+			Name:      name,
+			Command:   "just " + name,
+			State:     jobs.StateRunning,
+			StartedAt: startedAt,
+		})
+	}
+
+	event := jobrecord.ListingEvent(listing)
+	testHarness.recordedEvents = append(testHarness.recordedEvents, event)
+	testHarness.storeEvent(event)
+}
+
+func restoreSessionGoldenRunningJobs(
+	t *testing.T,
+	testHarness *App,
+	storedEvents []agent.Event,
+	restoredEvents []agent.Event,
+) []agent.Event {
+	t.Helper()
+
+	manager := jobs.New(stoppableRunner{})
+	t.Cleanup(func() { _ = manager.Close() })
+
+	testHarness.jobs = jobState{manager: manager}
+
+	heldBefore := len(testHarness.pendingNotices.items)
+	testHarness.restoreJobs(storedEvents)
+
+	held := testHarness.pendingNotices.items[heldBefore:]
+	if len(held) == 0 {
+		t.Fatal("the restored jobs said nothing about the session having closed")
+	}
+
+	for _, item := range held {
+		restoredEvents = append(restoredEvents, item.state)
+	}
+
+	return restoredEvents
 }
 
 func settleSessionGoldenJob(t *testing.T, testHarness *App, name string) {
