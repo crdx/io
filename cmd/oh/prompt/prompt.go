@@ -48,7 +48,7 @@ var (
 		"shellSandbox":             shellSandbox,
 		"sandboxHeader":            sandboxHeader,
 	}).Parse(hereduck.D(`
-		{{ sandboxHeader .Yolo }}# Harness
+		{{ sandboxHeader .Yolo .ShellOffered }}# Harness
 
 		- "oh" is the harness you are running within
 		- Each session dir is under {{ .SessionsDir }}, named after the session
@@ -403,8 +403,8 @@ func lookupAccess(isGranted bool) string {
 	return "refused"
 }
 
-func sandboxHeader(isYolo bool) string {
-	if !isYolo {
+func sandboxHeader(isYolo bool, isShellOffered bool) string {
+	if !isYolo || !isShellOffered {
 		return ""
 	}
 

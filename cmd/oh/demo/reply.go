@@ -8,6 +8,10 @@ import (
 	"crdx.org/io/internal/sim"
 )
 
+func Tools() []string {
+	return []string{readTool, listTool, grepTool}
+}
+
 const (
 	readTool = "read"
 	listTool = "ls"

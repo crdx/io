@@ -2,6 +2,7 @@ package demo
 
 import (
 	"encoding/json"
+	"slices"
 	"strings"
 	"testing"
 
@@ -50,6 +51,22 @@ func TestTheSimulationReachesForTheToolTheWordsName(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestTheSimulationNeverReachesForAToolItIsNotOffered(t *testing.T) {
+	said := []string{
+		"hello", "what can you do", "read cmd/oh/main.go", "what files are here", "search for wizard",
+		"write me a file", "run ls for me", "bash echo hello", "edit main.go", "expose port 8080",
+		"start a job", "delete everything", "show off", "I am unhappy", "",
+	}
+
+	for _, message := range said {
+		for _, call := range answer(userTurn(message)).Calls {
+			if !slices.Contains(Tools(), call.Name) {
+				t.Errorf("%q reached for the %s tool, which the simulation is not offered", message, call.Name)
+			}
+		}
 	}
 }
 

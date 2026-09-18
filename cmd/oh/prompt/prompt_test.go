@@ -669,6 +669,24 @@ func TestAToolThatIsNotOfferedIsNeverMentioned(t *testing.T) {
 	}
 }
 
+func TestASessionWithNoShellIsNeverToldWhatItsShellCouldDo(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/tmp/x",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read | caps.Shell,
+		OfferedTools: []string{"read", "ls", "grep"},
+		Yolo:         true,
+	})
+
+	for _, unwanted := range []string{"# No Sandbox", "bash", "--yolo"} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("harness context mentions %q with no shell offered: %q", unwanted, got)
+		}
+	}
+}
+
 func TestAnOfferedToolIsStillMentioned(t *testing.T) {
 	got := harnessContext(Config{
 		Workspace:    work.At("/workspace"),

@@ -119,9 +119,10 @@ type displayState struct {
 }
 
 type runMode struct {
-	isPrinting bool
-	isPlain    bool
-	isYolo     bool
+	isPrinting  bool
+	isPlain     bool
+	isYolo      bool
+	isSimulated bool
 }
 
 type slashState struct {
@@ -907,7 +908,7 @@ func (self *App) ruleStyle() style.Style {
 	switch {
 	case self.isAwaitingAnswer():
 		return style.Change
-	case self.runMode.isYolo:
+	case self.runMode.isYolo && !self.runMode.isSimulated:
 		return style.Hazard
 	default:
 		return style.Rule

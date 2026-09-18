@@ -283,6 +283,11 @@ func requireDenyEnforcement(isYolo bool, patterns []string) error {
 	return nil
 }
 
+func applySimulationOptions(options *cli.Options) {
+	options.Yolo = true
+	options.Tools = demo.Tools()
+}
+
 //nolint:gocyclo // lol no
 func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, error) {
 	ctx := context.Background()
@@ -481,6 +486,11 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err := requireDenyEnforcement(args.Yolo, settings.Sandbox.Deny); err != nil {
 		return "", err
 	}
+
+	if isSimulated {
+		applySimulationOptions(&args)
+	}
+
 	if !args.Yolo {
 		if err := shell.RequireSandbox(ctx); err != nil {
 			return "", err
@@ -970,7 +980,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			doesWake: doesWake,
 		},
 		configObserver: configObserver,
-		runMode:        runMode{isPrinting: args.IsPrinting, isYolo: args.Yolo},
+		runMode:        runMode{isPrinting: args.IsPrinting, isYolo: args.Yolo, isSimulated: isSimulated},
 		question:       questionState{broker: askBroker},
 		startedAt:      util.WallClock(time.Now()),
 		keyboard:       keyboard,

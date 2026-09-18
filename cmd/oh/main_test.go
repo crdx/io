@@ -7449,14 +7449,14 @@ func TestGoldenTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 	passes := map[string]func() string{}
 	shownPassesAtWidth := map[string]func() string{}
 
-	addPass := func(passName string, frame edit.Frame, width int, isYolo bool) {
+	addPass := func(passName string, frame edit.Frame, width int, mode runMode) {
 		passes[passName] = func() string {
 			return drawnOnAStoppedClock(t, func(t *testing.T) string {
 				t.Helper()
 
 				time.Sleep(spinnerSoFar)
 
-				held := &App{mode: caps.NewMode(caps.All()), runMode: runMode{isYolo: isYolo}}
+				held := &App{mode: caps.NewMode(caps.All()), runMode: mode}
 				held.currentTurn.Stream = testTimedTurnStream(true, time.Now().Add(-turnSoFar), time.Time{})
 
 				built := goldenBarLayout(t, held)
@@ -7496,11 +7496,15 @@ func TestGoldenTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 
 	for _, width := range []int{80, 40, 20} {
 		for name, frame := range frames {
-			addPass(fmt.Sprintf("%s at %d columns", name, width), frame, width, false)
+			addPass(fmt.Sprintf("%s at %d columns", name, width), frame, width, runMode{})
 		}
 	}
 
-	addPass("one row yolo at 80 columns", frames["one row"], 80, true)
+	addPass("one row yolo at 80 columns", frames["one row"], 80, runMode{isYolo: true})
+	addPass(
+		"one row simulated yolo at 80 columns",
+		frames["one row"], 80, runMode{isYolo: true, isSimulated: true},
+	)
 
 	compareWithGolden(t, "inputblock", ".ansi", passes)
 	compareWithGolden(t, "inputblock", ".screen", shownPassesAtWidth)
@@ -17473,5 +17477,35 @@ func TestSandboxDenyRulesCannotBeWaivedByYolo(t *testing.T) {
 	}
 	if err := requireDenyEnforcement(true, nil); err != nil {
 		t.Errorf("yolo without a deny rule was refused: %v", err)
+	}
+}
+
+func TestASimulationRunsWithNoSandboxAndNothingThatCouldUseOne(t *testing.T) {
+	options := cli.Options{Caps: caps.All()}
+	applySimulationOptions(&options)
+
+	if !options.Yolo {
+		t.Error("a simulation asked for a sandbox it does not need")
+	}
+	if want := []string{"read", "ls", "grep"}; !slices.Equal(options.Tools, want) {
+		t.Errorf("a simulation offered %v, want %v", options.Tools, want)
+	}
+
+	for _, refused := range []string{"bash", "job", "write", "edit", "expose"} {
+		if slices.Contains(options.Tools, refused) {
+			t.Errorf("a simulation offered the %s tool with no sandbox around it", refused)
+		}
+	}
+}
+
+func TestASimulationDrawsNoHazard(t *testing.T) {
+	simulated := &App{runMode: runMode{isYolo: true, isSimulated: true}}
+	if got := simulated.ruleStyle()("│"); got != style.Rule("│") {
+		t.Errorf("a simulation drew its rule as %q, want the ordinary rule", got)
+	}
+
+	unconfined := &App{runMode: runMode{isYolo: true}}
+	if got := unconfined.ruleStyle()("│"); got != style.Hazard("│") {
+		t.Errorf("an unconfined conversation drew its rule as %q, want the hazard rule", got)
 	}
 }
