@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Keep queued messages visible at all times
 - Linkify the workspace-dir bar segment
 - Linkify the path-grants bar segment
 - Show model scratch paths with a `<s>/` prefix

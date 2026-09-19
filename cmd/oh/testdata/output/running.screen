@@ -58,6 +58,584 @@ Stream failed
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
+=== queued message as answer starts markdown asap roomy ===
+--- frame 1 ---
+
+ look into it
+
+
+
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+--- frame 2 ---
+
+ look into it
+
+
+
+
+The answer starts here.
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+--- frame 3 ---
+
+ look into it
+
+
+The answer starts here.
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== queued message as answer starts markdown asap terminal-filling ===
+--- frame 1 ---
+
+ look into it
+
+
+
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 2 ---
+
+ look into it
+
+
+
+
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 3 ---
+
+ look into it
+
+
+
+
+The answer starts here.
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 4 ---
+
+ look into it
+
+
+The answer starts here.
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+=== queued message as answer starts markdown line roomy ===
+--- frame 1 ---
+
+ look into it
+
+
+
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+--- frame 2 ---
+
+ look into it
+
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== queued message as answer starts markdown line terminal-filling ===
+--- frame 1 ---
+
+ look into it
+
+
+thinking about the repaint while the queued message stays visible through every intermediate frame
+
+⋮
+15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 2 ---
+
+ look into it
+
+⋮ 14 more lines
+ ⏳ queued message 14
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+=== queued message as answer starts markdown paced roomy ===
+--- frame 1 ---
+
+ look into it
+
+
+
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+--- frame 2 ---
+
+ look into it
+
+
+
+
+The answer starts here.
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+--- frame 3 ---
+
+ look into it
+
+
+The answer starts here.
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== queued message as answer starts markdown paced terminal-filling ===
+--- frame 1 ---
+
+ look into it
+
+
+
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 2 ---
+
+ look into it
+
+
+
+
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 3 ---
+
+ look into it
+
+
+
+
+The answer starts here.
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 4 ---
+
+ look into it
+
+
+The answer starts here.
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+=== queued message as answer starts plain asap roomy ===
+--- frame 1 ---
+
+ look into it
+
+
+
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+--- frame 2 ---
+
+ look into it
+
+
+
+
+The answer starts here.
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+--- frame 3 ---
+
+ look into it
+
+
+The answer starts here.
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== queued message as answer starts plain asap terminal-filling ===
+--- frame 1 ---
+
+ look into it
+
+
+
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 2 ---
+
+ look into it
+
+
+
+
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 3 ---
+
+ look into it
+
+
+
+
+The answer starts here.
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 4 ---
+
+ look into it
+
+
+The answer starts here.
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+=== queued message as answer starts plain line roomy ===
+--- frame 1 ---
+
+ look into it
+
+
+
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+--- frame 2 ---
+
+ look into it
+
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== queued message as answer starts plain line terminal-filling ===
+--- frame 1 ---
+
+ look into it
+
+
+thinking about the repaint while the queued message stays visible through every intermediate frame
+
+⋮
+15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 2 ---
+
+ look into it
+
+⋮ 14 more lines
+ ⏳ queued message 14
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+=== queued message as answer starts plain paced roomy ===
+--- frame 1 ---
+
+ look into it
+
+
+
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+--- frame 2 ---
+
+ look into it
+
+
+
+
+The answer starts here.
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+--- frame 3 ---
+
+ look into it
+
+
+The answer starts here.
+
+                                                                           double-enter to send now
+ ⏳ check the other path too
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== queued message as answer starts plain paced terminal-filling ===
+--- frame 1 ---
+
+ look into it
+
+
+
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 2 ---
+
+ look into it
+
+
+
+
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 3 ---
+
+ look into it
+
+
+
+
+The answer starts here.
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
+--- frame 4 ---
+
+ look into it
+
+
+The answer starts here.
+⋮ 15 more lines
+ ⏳ queued message 15
+ ⏳ queued message 16
+ ⏳ queued message 17
+ ⏳ queued message 18
+ ⏳ queued message 19
+ ⏳ queued message 20
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+⋮ 1 more line
 === unknown command during answer ===
  ╭────────────────────────────────────────────────────────────────────────────────────────────────╮
  │ Command not found: /unknown (alt+enter to send)                                                │

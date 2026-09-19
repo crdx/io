@@ -6987,6 +6987,11 @@ func TestGoldenATurnStillRunningDrawsWhatItDrewBefore(t *testing.T) {
 	screenPasses := shownPasses(t, passes)
 	screenPasses["help during reasoning"] = func() string { return shownHelpDuringReasoningFrames(t) }
 	screenPasses["help on a short running terminal"] = func() string { return shownShortRunningHelpFrames(t) }
+	for name, scenario := range everyAnswerStartScenario() {
+		screenPasses["queued message as answer starts "+name] = func() string {
+			return shownAnswerStartsAfterAcceptedInputFrames(t, scenario)
+		}
+	}
 	compareWithGolden(t, "running", ".screen", screenPasses)
 }
 
@@ -7029,6 +7034,117 @@ func drawAcceptedInputDuringStream(t *testing.T, message string, kind agent.Kind
 	frames := writer.frames[framesBeforeCommand:]
 	self.currentTurn.painter.Close(dynamic.Cancelled)
 	return strings.Join(frames, "")
+}
+
+const (
+	answerStartTerminalLines = 12
+	answerStartReasoning     = "thinking about the repaint while the queued message stays visible " +
+		"through every intermediate frame and every rendering path the answer transition takes " +
+		"before the first complete response reaches the conversation"
+)
+
+type answerStartScenario struct {
+	streamingMode        output.StreamingMode
+	reasoningRendering   output.ReasoningRendering
+	terminalLines        int
+	messages             []string
+	visibleQueuedMessage string
+}
+
+func everyAnswerStartScenario() map[string]answerStartScenario {
+	scenarios := make(map[string]answerStartScenario)
+	for reasoningName, reasoningRendering := range everyReasoningRendering() {
+		for streamingName, streamingMode := range everyStreamingMode() {
+			name := reasoningName + " " + streamingName
+			scenarios[name+" roomy"] = answerStartScenario{
+				streamingMode:        streamingMode,
+				reasoningRendering:   reasoningRendering,
+				terminalLines:        replayLines,
+				messages:             []string{"check the other path too"},
+				visibleQueuedMessage: "⏳ check the other path too",
+			}
+			scenarios[name+" terminal-filling"] = answerStartScenario{
+				streamingMode:        streamingMode,
+				reasoningRendering:   reasoningRendering,
+				terminalLines:        answerStartTerminalLines,
+				messages:             tallQueue(),
+				visibleQueuedMessage: "⏳ queued message 20",
+			}
+		}
+	}
+	return scenarios
+}
+
+func TestAQueuedMessageStaysVisibleAsAnAnswerStarts(t *testing.T) {
+	for name, scenario := range everyAnswerStartScenario() {
+		t.Run(name, func(t *testing.T) {
+			frames := answerStartsAfterAcceptedInputFrames(t, scenario)
+			if len(frames) < 2 {
+				t.Fatalf("answer start drew %d frames, want the live-region change and its repair", len(frames))
+			}
+
+			for i, frame := range frames {
+				visible := strings.Join(visibleScreen(t, frame, replayColumns), "\n")
+				if !strings.Contains(visible, scenario.visibleQueuedMessage) {
+					t.Errorf("frame %d dropped the queued message:\n%s", i+1, visible)
+				}
+			}
+		})
+	}
+}
+
+func answerStartsAfterAcceptedInputFrames(t *testing.T, scenario answerStartScenario) []string {
+	t.Helper()
+
+	writer := &frameRecordingWriter{}
+	self := slashCommandFixture(t, caps.Read)
+	self.agent = agent.New("", quietProvider{}, nil)
+	self.workspace = work.At(t.TempDir())
+	self.screen = output.NewTerminalOfSize(writer, replayColumns, scenario.terminalLines)
+	self.display.streamingMode = scenario.streamingMode
+	self.display.reasoningRendering = scenario.reasoningRendering
+	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+	self.inputLine = inputLine
+
+	self.recordEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "look into it"})
+	self.currentTurn.painter.DrawDelta(agent.Delta{
+		Kind: agent.ModelReasoningEvent,
+		Text: answerStartReasoning,
+	})
+	for _, message := range scenario.messages {
+		typeMessage(t, self, inputLine, history, message)
+	}
+	self.show(inputLine)
+	framesBeforeAnswer := len(writer.frames)
+
+	answer := agent.Delta{Kind: agent.ModelMessageEvent, Text: "The answer starts here."}
+	self.takeTurn(TurnEvent{Update: agent.Update{Delta: &answer}})
+	self.show(inputLine)
+
+	frames := slices.Clone(writer.frames[framesBeforeAnswer:])
+	self.currentTurn.painter.Close(dynamic.Cancelled)
+	return frames
+}
+
+func shownAnswerStartsAfterAcceptedInputFrames(t *testing.T, scenario answerStartScenario) string {
+	t.Helper()
+
+	var shown strings.Builder
+	var previous []string
+	frameNumber := 0
+	for _, frame := range answerStartsAfterAcceptedInputFrames(t, scenario) {
+		visible := visibleScreen(t, frame, replayColumns)
+		if slices.Equal(visible, previous) {
+			continue
+		}
+		frameNumber++
+		fmt.Fprintf(&shown, "--- frame %d ---\n%s\n", frameNumber, strings.Join(visible, "\n"))
+		previous = visible
+	}
+	return strings.TrimSuffix(shown.String(), "\n")
 }
 
 type journal struct {

@@ -1515,6 +1515,9 @@ func (self *App) redraw() {
 		if provisionalPainter.Text != "" {
 			self.currentTurn.painter.DrawRestoredDelta(provisionalPainter, previousPainter)
 		}
+		if self.inputLine != nil {
+			self.show(self.inputLine)
+		}
 	})
 }
 
