@@ -16,7 +16,7 @@ const (
 	openPrefix   = "\x1b]8;;"
 	terminator   = "\x1b\\"
 	closeLink    = escape.HyperlinkClose
-	ScratchAlias = "<scratch>"
+	ScratchAlias = "<s>"
 )
 
 const (

@@ -105,7 +105,7 @@ func TestAReadOfModelScratchShowsAndLinksTheHostScratchAlias(t *testing.T) {
 	label.PathRoots = roots
 	rendered := label.Render()
 
-	if got := link.Plain(rendered); got != "read <scratch>/io/cmd/oh/output/region.go 100-214" {
+	if got := link.Plain(rendered); got != "read <s>/io/cmd/oh/output/region.go 100-214" {
 		t.Errorf("visible call is %q", got)
 	}
 	wantAddress := "file://" + filepath.ToSlash(path) + "#100"

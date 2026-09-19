@@ -19,10 +19,10 @@ func TestModelScratchAliassAreShownThroughTheirHostAlias(t *testing.T) {
 		}},
 	}.WithHostPathAliases(link.Roots{Scratch: "/state/farm/session"})
 
-	if label.Subject != "<scratch>/io/main.go" ||
-		label.Qualifier != "<scratch>/io/detail.go" ||
-		label.Emphasis.Source != "<scratch>/io/main.go" ||
-		label.Continuation[0].Subject != "<scratch>/io/continued.go" {
+	if label.Subject != "<s>/io/main.go" ||
+		label.Qualifier != "<s>/io/detail.go" ||
+		label.Emphasis.Source != "<s>/io/main.go" ||
+		label.Continuation[0].Subject != "<s>/io/continued.go" {
 		t.Errorf("got %#v, want every model scratch path shown through the host alias", label)
 	}
 }

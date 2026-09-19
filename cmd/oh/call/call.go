@@ -198,7 +198,7 @@ func (self Label) renderSubject() string {
 	}
 
 	if len(spans) == 0 {
-		return style.Subject(self.Subject)
+		return renderScratchAlias(self.Subject, style.Subject)
 	}
 
 	slices.SortFunc(spans, func(first span, second span) int {
@@ -211,15 +211,24 @@ func (self Label) renderSubject() string {
 		if markedSpan.start < at {
 			continue
 		}
-		out.WriteString(style.Subtle(self.Subject[at:markedSpan.start]))
-		out.WriteString(markedSpan.style(self.Subject[markedSpan.start:markedSpan.end]))
+		out.WriteString(renderScratchAlias(self.Subject[at:markedSpan.start], style.Subtle))
+		out.WriteString(renderScratchAlias(self.Subject[markedSpan.start:markedSpan.end], markedSpan.style))
 		at = markedSpan.end
 	}
 	if at < len(self.Subject) {
-		out.WriteString(style.Subtle(self.Subject[at:]))
+		out.WriteString(renderScratchAlias(self.Subject[at:], style.Subtle))
 	}
 
 	return out.String()
+}
+
+func renderScratchAlias(text string, textStyle style.Style) string {
+	rest, hasAlias := strings.CutPrefix(text, link.ScratchAlias)
+	if !hasAlias {
+		return textStyle(text)
+	}
+
+	return style.ScratchAlias(link.ScratchAlias) + textStyle(rest)
 }
 
 func (self Label) focus() string {
@@ -233,23 +242,23 @@ func (self Label) focus() string {
 func (self Label) renderQualifier() string {
 	focus := self.focus()
 	if focus == "" || strings.Contains(self.Subject, focus) {
-		return style.Qualifier(self.Qualifier)
+		return renderScratchAlias(self.Qualifier, style.Qualifier)
 	}
 
 	at := strings.LastIndex(self.Qualifier, focus)
 	if at < 0 {
-		return style.Qualifier(self.Qualifier)
+		return renderScratchAlias(self.Qualifier, style.Qualifier)
 	}
 
 	end := at + len(focus)
 
 	var out strings.Builder
 	if at > 0 {
-		out.WriteString(style.Qualifier(self.Qualifier[:at]))
+		out.WriteString(renderScratchAlias(self.Qualifier[:at], style.Qualifier))
 	}
-	out.WriteString(style.Subject(self.Qualifier[at:end]))
+	out.WriteString(renderScratchAlias(self.Qualifier[at:end], style.Subject))
 	if end < len(self.Qualifier) {
-		out.WriteString(style.Qualifier(self.Qualifier[end:]))
+		out.WriteString(renderScratchAlias(self.Qualifier[end:], style.Qualifier))
 	}
 
 	return out.String()

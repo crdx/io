@@ -4,7 +4,7 @@
 
 - Linkify the workspace-dir bar segment
 - Linkify the path-grants bar segment
-- Show model scratch paths as `<scratch>`
+- Show model scratch paths with a `<s>/` prefix
 - Linkify the session-name bar segment
 - Include line range in read tool hyperlinks
 - Limit background job name length and format

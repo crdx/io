@@ -47,11 +47,12 @@ var (
 	Write       Style = warning()
 	StoppedTurn Style = warning()
 
-	Info    Style = information()
-	Shell   Style = information()
-	Network Style = information()
-	Lookup  Style = information()
-	Git     Style = information()
+	Info         Style = information()
+	Shell        Style = information()
+	Network      Style = information()
+	Lookup       Style = information()
+	Git          Style = information()
+	ScratchAlias Style = decorate(col.Italic, Info)
 
 	Failure Style = danger()
 	Hazard  Style = danger()

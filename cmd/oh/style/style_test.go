@@ -93,14 +93,15 @@ func TestEveryStyleFollowsItsOwnPaletteRole(t *testing.T) {
 			"success":           Success,
 		},
 		"38;2;5;5;5": {
-			"function":     Function,
-			"hunk":         Hunk,
-			"information":  Info,
-			"link":         Link,
-			"lookup":       Lookup,
-			"medium price": MediumPrice,
-			"network":      Network,
-			"shell":        Shell,
+			"function":      Function,
+			"hunk":          Hunk,
+			"information":   Info,
+			"link":          Link,
+			"lookup":        Lookup,
+			"medium price":  MediumPrice,
+			"network":       Network,
+			"scratch alias": ScratchAlias,
+			"shell":         Shell,
 		},
 		"38;2;6;6;6": {
 			"change":               Change,
@@ -215,6 +216,7 @@ func TestItalicTextStylesAreItalic(t *testing.T) {
 		"preview running hint": PreviewRunningHint,
 		"reasoning":            Reasoning,
 		"running session":      RunningSession,
+		"scratch alias":        ScratchAlias,
 	} {
 		got := paint("looking %s", "here")
 		if !strings.Contains(got, "\x1b[3m") {
