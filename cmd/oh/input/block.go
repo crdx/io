@@ -9,13 +9,14 @@ import (
 
 const (
 	edgePad                    = 2
-	feedbackFrameWidth         = 4
-	feedbackBorderWidth        = 2
-	minimumFramedFeedbackWidth = feedbackFrameWidth + 1
+	feedbackInset              = 1
+	feedbackBorderWidth        = 2*feedbackInset + 2
+	feedbackFrameWidth         = feedbackBorderWidth + 2
+	MinimumFramedFeedbackWidth = feedbackFrameWidth + 1
 )
 
 func FeedbackContentWidth(width int) int {
-	if width < minimumFramedFeedbackWidth {
+	if width < MinimumFramedFeedbackWidth {
 		return width
 	}
 
@@ -23,7 +24,7 @@ func FeedbackContentWidth(width int) int {
 }
 
 func FeedbackRuleWidth(width int) int {
-	if width < minimumFramedFeedbackWidth {
+	if width < MinimumFramedFeedbackWidth {
 		return width
 	}
 
@@ -74,7 +75,8 @@ func (self Block) Rows(width int) ([]string, int, int) {
 	rows = append(rows, statusRows...)
 	topRule := top.render(topWidth, rule)
 	if topWidth != width {
-		topRule = rule("╰") + topRule + rule("╯")
+		reach := strings.Repeat("─", feedbackInset)
+		topRule = rule(reach+"┴") + topRule + rule("┴"+reach)
 	}
 	rows = append(rows, topRule)
 	rows = append(rows, body...)
@@ -84,16 +86,17 @@ func (self Block) Rows(width int) ([]string, int, int) {
 }
 
 func (self Block) renderStatus(width int, rule style.Style) ([]string, int) {
-	if !self.FrameFeedback || width < minimumFramedFeedbackWidth {
+	if !self.FrameFeedback || width < MinimumFramedFeedbackWidth {
 		return self.Status, width
 	}
 
 	contentWidth := FeedbackContentWidth(width)
+	inset := strings.Repeat(" ", feedbackInset)
 	rows := make([]string, 0, len(self.Status)+1)
-	rows = append(rows, rule("╭"+strings.Repeat("─", width-feedbackBorderWidth)+"╮"))
+	rows = append(rows, inset+rule("╭"+strings.Repeat("─", FeedbackRuleWidth(width))+"╮"))
 	for _, status := range self.Status {
 		padding := strings.Repeat(" ", max(contentWidth-style.Width(status), 0))
-		rows = append(rows, rule("│")+" "+status+padding+" "+rule("│"))
+		rows = append(rows, inset+rule("│")+" "+status+padding+" "+rule("│"))
 	}
 
 	return rows, FeedbackRuleWidth(width)
@@ -149,10 +152,23 @@ func renderCentredSpan(availableWidth int, center string, startColumn int, ruleW
 		return rule(strings.Repeat("─", availableWidth))
 	}
 
-	before := rule(strings.Repeat("─", beforeWidth))
-	after := rule(strings.Repeat("─", availableWidth-centerWidth-beforeWidth))
+	afterWidth := availableWidth - centerWidth - beforeWidth
+	leadingGap := " "
+	trailingGap := " "
 
-	return before + " " + center + " " + after
+	if beforeWidth == 0 && startColumn > 0 {
+		leadingGap = ""
+		afterWidth++
+	}
+	if afterWidth == 0 && startColumn+availableWidth < ruleWidth {
+		trailingGap = ""
+		beforeWidth++
+	}
+
+	before := rule(strings.Repeat("─", beforeWidth))
+	after := rule(strings.Repeat("─", afterWidth))
+
+	return before + leadingGap + center + trailingGap + after
 }
 
 func getWidth(str string, edgePadding int) int {

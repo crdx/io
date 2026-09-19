@@ -175,7 +175,7 @@ func TestFeedbackRowsFormABoxAttachedToTheTopRule(t *testing.T) {
 	plainRows := make([]string, len(rows))
 	for i, row := range rows {
 		plainRows[i] = style.Plain(row)
-		if i != 4 {
+		if i == 3 || i == 5 {
 			if got := style.Width(row); got != columns {
 				t.Errorf("row %d is %d columns wide, want %d: %q", i, got, columns, plainRows[i])
 			}
@@ -183,10 +183,10 @@ func TestFeedbackRowsFormABoxAttachedToTheTopRule(t *testing.T) {
 	}
 
 	want := []string{
-		"╭──────────────────╮",
-		"│ first            │",
-		"│ second           │",
-		"╰──────────────────╯",
+		" ╭────────────────╮",
+		" │ first          │",
+		" │ second         │",
+		"─┴────────────────┴─",
 		"input",
 		"────────────────────",
 	}
@@ -201,8 +201,36 @@ func TestFeedbackRowsFormABoxAttachedToTheTopRule(t *testing.T) {
 	}
 }
 
+func TestTheFeedbackFrameStandsInsideTheEndsOfTheRule(t *testing.T) {
+	const columns = 20
+	block := Block{
+		Input:         edit.Frame{Rows: []string{""}},
+		Status:        []string{"note"},
+		FrameFeedback: true,
+	}
+
+	rows, _, _ := block.Rows(columns)
+	box := []rune(style.Plain(rows[0]))
+	join := []rune(style.Plain(rows[2]))
+
+	if len(join) != columns {
+		t.Fatalf("the joined rule is %d columns wide, want %d", len(join), columns)
+	}
+	for i := range feedbackInset {
+		if join[i] != '─' || join[columns-1-i] != '─' {
+			t.Errorf("the rule stops short of the edge: %q", string(join))
+		}
+	}
+	if join[feedbackInset] != '┴' || join[columns-1-feedbackInset] != '┴' {
+		t.Errorf("the frame does not stand on the rule: %q", string(join))
+	}
+	if box[feedbackInset] != '╭' || box[columns-1-feedbackInset] != '╮' {
+		t.Errorf("the frame corners do not sit above the junctions: %q", string(box))
+	}
+}
+
 func TestFeedbackFrameIsDroppedWhenItCannotHoldContent(t *testing.T) {
-	for columns := range minimumFramedFeedbackWidth {
+	for columns := range MinimumFramedFeedbackWidth {
 		block := Block{
 			Input:         edit.Frame{Rows: []string{""}},
 			Status:        []string{"x"},
@@ -210,7 +238,7 @@ func TestFeedbackFrameIsDroppedWhenItCannotHoldContent(t *testing.T) {
 		}
 
 		rows, _, _ := block.Rows(columns)
-		if strings.ContainsAny(style.Plain(strings.Join(rows, "")), "╭╮│╰╯") {
+		if strings.ContainsAny(style.Plain(strings.Join(rows, "")), "╭╮│┴") {
 			t.Errorf("feedback was framed in %d columns: %q", columns, rows)
 		}
 		if got := FeedbackContentWidth(columns); got != columns {
@@ -238,6 +266,28 @@ func TestACentredLabelIsPositionedRelativeToTheRuleEdges(t *testing.T) {
 	beforeCenter, _, _ := strings.Cut(got, " io ")
 	if want := (40 - len(" io ")) / 2; style.Width(beforeCenter) != want {
 		t.Errorf("expected the centred label to start at column %d, got %q", want, got)
+	}
+}
+
+func TestACentredLabelMeetingAnotherKeepsOneSpaceBetweenThem(t *testing.T) {
+	rule := Ruler{Left: "left", Center: "mid", Right: "right"}
+
+	if want, got := "── left mid ─ right ──", style.Plain(rule.render(22, style.Rule)); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestACentredLabelIsNeverSetOffByAnUnevenGap(t *testing.T) {
+	for width := range 121 {
+		rule := Ruler{Left: "left", Center: "mid", Right: "right"}
+
+		got := style.Plain(rule.render(width, style.Rule))
+		if strings.Contains(got, "  mid") || strings.Contains(got, "mid  ") {
+			t.Errorf("at %d columns the centred label has an uneven gap: %q", width, got)
+		}
+		if style.Width(got) != width {
+			t.Errorf("at %d columns the rule is %d columns wide: %q", width, style.Width(got), got)
+		}
 	}
 }
 

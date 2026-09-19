@@ -1,20 +1,20 @@
 === below frame threshold ===
 ab
-────
+──────
 
-────
+──────
 === minimum frame ===
-╭───╮
-│ a │
-│ b │
-╰───╯
+ ╭───╮
+ │ a │
+ │ b │
+─┴───┴─
 
-─────
+───────
 === narrow wrapping ===
-╭──────────────────────────────────────╮
-│ A feedback message long enough to    │
-│ wrap inside its frame.               │
-╰──────────────────────────────────────╯
+ ╭────────────────────────────────────╮
+ │ A feedback message long enough to  │
+ │ wrap inside its frame.             │
+─┴────────────────────────────────────┴─
 
 ────────────────────────────────────────
 === one column ===
@@ -24,10 +24,10 @@ x
 ─
 === taller than terminal ===
 ⋮ 5 more lines
-│ five                                 │
-│ six                                  │
-│ seven                                │
-│ eight                                │
-╰──────────────────────────────────────╯
+ │ five                               │
+ │ six                                │
+ │ seven                              │
+ │ eight                              │
+─┴────────────────────────────────────┴─
 
 ⋮ 1 more line

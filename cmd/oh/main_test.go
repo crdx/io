@@ -7858,6 +7858,13 @@ func TestGoldenLocalConfigsDrawMegathoroughly(t *testing.T) {
 	compareWithGolden(t, "startup-local-config", ".screen", screenPasses)
 }
 
+type inputBlockPass struct {
+	frame  edit.Frame
+	width  int
+	mode   runMode
+	status []string
+}
+
 func TestGoldenTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 	frames := map[string]edit.Frame{
 		"one row": {
@@ -7876,14 +7883,15 @@ func TestGoldenTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 	passes := map[string]func() string{}
 	shownPassesAtWidth := map[string]func() string{}
 
-	addPass := func(passName string, frame edit.Frame, width int, mode runMode) {
+	addPass := func(passName string, pass inputBlockPass) {
+		frame, width := pass.frame, pass.width
 		passes[passName] = func() string {
 			return drawnOnAStoppedClock(t, func(t *testing.T) string {
 				t.Helper()
 
 				time.Sleep(spinnerSoFar)
 
-				held := &App{mode: caps.NewMode(caps.All()), runMode: mode}
+				held := &App{mode: caps.NewMode(caps.All()), runMode: pass.mode}
 				held.currentTurn.Stream = testTimedTurnStream(true, time.Now().Add(-turnSoFar), time.Time{})
 
 				built := goldenBarLayout(t, held)
@@ -7902,7 +7910,9 @@ func TestGoldenTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 						Center: held.renderBar(segment.BottomCenter, frame),
 						Right:  held.renderBar(segment.BottomRight, frame),
 					},
-					Rule: held.ruleStyle(),
+					Status:        pass.status,
+					FrameFeedback: len(pass.status) > 0,
+					Rule:          held.ruleStyle(),
 				}
 
 				rows, cursorRow, cursorColumn := block.Rows(width)
@@ -7923,15 +7933,27 @@ func TestGoldenTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 
 	for _, width := range []int{80, 40, 20} {
 		for name, frame := range frames {
-			addPass(fmt.Sprintf("%s at %d columns", name, width), frame, width, runMode{})
+			addPass(
+				fmt.Sprintf("%s at %d columns", name, width),
+				inputBlockPass{frame: frame, width: width},
+			)
 		}
 	}
 
-	addPass("one row yolo at 80 columns", frames["one row"], 80, runMode{isYolo: true})
-	addPass(
-		"one row simulated yolo at 80 columns",
-		frames["one row"], 80, runMode{isYolo: true, isSimulated: true},
-	)
+	addPass("one row yolo at 80 columns", inputBlockPass{
+		frame: frames["one row"], width: 80, mode: runMode{isYolo: true},
+	})
+	addPass("one row simulated yolo at 80 columns", inputBlockPass{
+		frame: frames["one row"], width: 80, mode: runMode{isYolo: true, isSimulated: true},
+	})
+
+	for _, width := range []int{80, 60, 50, 40} {
+		addPass(fmt.Sprintf("framed feedback at %d columns", width), inputBlockPass{
+			frame:  frames["one row"],
+			width:  width,
+			status: []string{"Command not found: /unknown"},
+		})
+	}
 
 	compareWithGolden(t, "inputblock", ".ansi", passes)
 	compareWithGolden(t, "inputblock", ".screen", shownPassesAtWidth)
@@ -8971,12 +8993,12 @@ func TestGoldenFeedbackFrameDrawsAtEverySize(t *testing.T) {
 			text:    "A feedback message long enough to wrap inside its frame.",
 		},
 		"minimum frame": {
-			columns: 5,
+			columns: input.MinimumFramedFeedbackWidth,
 			lines:   replayLines,
 			text:    "ab",
 		},
 		"below frame threshold": {
-			columns: 4,
+			columns: input.MinimumFramedFeedbackWidth - 1,
 			lines:   replayLines,
 			text:    "ab",
 		},
@@ -10597,8 +10619,8 @@ func goldenBarLayout(t *testing.T, harness *App) segment.Layout {
 
 	config := configFrom(t, `
 		[bar.top]
-		left = []
-		center = []
+		left = [{ segment = "workspace-dir" }]
+		center = [{ segment = "active-model" }]
 		right = [{ segment = "scroll-overflow", direction = "up" }]
 
 		[bar.bottom]
@@ -15840,7 +15862,7 @@ func TestHelpDuringReasoningIsDrawnInOneFrame(t *testing.T) {
 	}
 
 	visible := strings.Join(visibleScreen(t, frames[0], replayColumns), "\n")
-	for _, want := range []string{"╭", "│ Commands:", "│   /conf", "│   /copy", "╰"} {
+	for _, want := range []string{"╭", "│ Commands:", "│   /conf", "│   /copy", "┴"} {
 		if !strings.Contains(visible, want) {
 			t.Errorf("help did not settle in its frame:\n%s", visible)
 		}
