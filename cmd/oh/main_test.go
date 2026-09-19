@@ -10842,7 +10842,7 @@ func TestGoldenTheRedrawScheduleRunsWhenItRanBefore(t *testing.T) {
 }
 
 func TestGoldenEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
-	t.Setenv("HOME", "/home/tester")
+	t.Setenv("HOME", "/user/tester")
 
 	at := time.Date(2026, time.August, 23, 14, 32, 9, 0, time.UTC)
 	isPersisted := func() bool { return true }
@@ -11476,7 +11476,7 @@ func TestGoldenEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"workspace-dir / short below home": goldenSegmentPass(
 			t,
-			workspaceDir.New(work.At("/home/tester/florp/project")),
+			workspaceDir.New(work.At("/user/tester/florp/project")),
 			`type = "short"`,
 			segment.Context{},
 		),

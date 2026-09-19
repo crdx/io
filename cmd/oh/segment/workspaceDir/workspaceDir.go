@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/work"
@@ -19,7 +20,8 @@ const (
 )
 
 type state struct {
-	value string
+	value   string
+	address string
 }
 
 func New(workspace *work.Space) segment.Factory {
@@ -51,18 +53,28 @@ func New(workspace *work.Space) segment.Factory {
 			)
 		}
 
-		return state{value: value}, nil
+		address := ""
+		if directory := workspace.GetDir(); directory != "" {
+			address = link.PathURL(directory)
+		}
+
+		return state{value: value, address: address}, nil
 	}
 }
 
 func (self state) Render(segment.Context) string {
 	leadingPath, name := splitLeadingPath(self.value)
 
-	if leadingPath == "" {
-		return style.Normal(name)
+	text := style.Normal(name)
+	if leadingPath != "" {
+		text = style.Subtle(leadingPath) + text
 	}
 
-	return style.Subtle(leadingPath) + style.Normal(name)
+	if self.address == "" {
+		return text
+	}
+
+	return link.RenderURL(text, self.address)
 }
 
 func splitLeadingPath(path string) (string, string) {

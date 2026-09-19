@@ -143,7 +143,7 @@ The right side is drawn whole and the left is then fitted into what remains, so 
 | `subscription-usage` | a gauge per subscription window, with its freshness and any limit     | `rate`, default `5m`                        |
 | `turn-count`         | `#n`, and nothing before the first turn                               | none                                        |
 | `turn-timer`         | minutes waited then minutes worked, the running one of the two lit    | none                                        |
-| `workspace-dir`      | the workspace directory                                               | `type`: `base`, `short`, or `full`          |
+| `workspace-dir`      | the workspace directory, linked to it                                 | `type`: `base`, `short`, or `full`          |
 
 A `rate` or a duration takes Go's form, as `125ms`, `10s`, or `5m`. A segment refusing an option says which position it sits in and what the option wanted instead, and startup stops there.
 

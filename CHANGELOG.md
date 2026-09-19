@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Linkify the workspace-dir bar segment
 - Linkify the path-grants bar segment
 - Show model scratch paths as `<scratch>`
 - Linkify the session-name bar segment
