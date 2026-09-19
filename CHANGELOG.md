@@ -21,14 +21,7 @@
 - Drop warning chevron from approval prompt header
 - Reword the host networking prompt
 - Don't include prompt waiting time in tool call time
-- Highlight `Targets` header in the same blue as `Commands`
-- `oh --ctl gc`:
-    - Report real space on disk
-    - Find caches by their contents
-    - List nuked caches, largest first
-    - Delete dangling farm dirs
-    - Delete rebuildable Go binaries when aggressive
-    - Leave the shared home alone while a session is running
+- Highlight `Targets` header in the same colour as `Commands`
 - Render required width for wide Mermaid diagrams
 - Truncate a tall footer so it doesn't flicker
 - Mark user messages with OSC 133
@@ -39,6 +32,15 @@
 - Fence piped input when there is also a prompt
 - Draw feedback in an input frame box
 - List changed models after a startup refresh
+
+## `oh --ctl gc`
+
+- Report real space on disk
+- Find caches by their contents
+- List nuked caches, largest first
+- Delete dangling farm dirs
+- Delete rebuildable Go binaries when aggressive
+- Leave the shared home alone while a session is running
 
 ## [0.6.0] - 2026-09-18
 
