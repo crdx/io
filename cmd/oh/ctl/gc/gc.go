@@ -598,7 +598,7 @@ func size(root string) (int64, error) {
 
 func occupiedBytes(info fs.FileInfo) int64 {
 	stat, isSystem := info.Sys().(*syscall.Stat_t)
-	if !isSystem {
+	if !isSystem || !info.Mode().IsRegular() {
 		return 0
 	}
 

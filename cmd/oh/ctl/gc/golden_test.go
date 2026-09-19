@@ -18,6 +18,7 @@ const (
 	goldenName         = "stored-session"
 	homePlaceholder    = "<home>"
 	binaryFixtureBytes = 32 << 20
+	measuredBytes      = 4096
 )
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
@@ -192,6 +193,30 @@ func TestAReadOnlyModuleCacheIsStillRemoved(t *testing.T) {
 	}
 
 	assertGone(t, filepath.Join(directories.Farm, goldenName, ".cache"))
+}
+
+func TestTheDirectoriesHoldingACacheAreNotCountedAgainstIt(t *testing.T) {
+	flat := t.TempDir()
+	write(t, filepath.Join(flat, "one"), measuredBytes)
+
+	nested := t.TempDir()
+	write(t, filepath.Join(nested, "first", "second", "third", "one"), measuredBytes)
+
+	flatBytes, err := size(flat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	nestedBytes, err := size(nested)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if flatBytes != nestedBytes {
+		t.Errorf("a cache measured %d bytes flat and %d bytes nested", flatBytes, nestedBytes)
+	}
+	if flatBytes < measuredBytes {
+		t.Errorf("a cache holding %d bytes measured %d bytes", measuredBytes, flatBytes)
+	}
 }
 
 func TestAnUnlistableCacheIsStillRemoved(t *testing.T) {
