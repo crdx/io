@@ -1,9 +1,6 @@
 package sessionName
 
 import (
-	"net/url"
-	"path/filepath"
-
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
@@ -34,7 +31,7 @@ func New(name string, directory string, isPersisted func() bool) segment.Factory
 
 		address := ""
 		if directory != "" {
-			address = (&url.URL{Scheme: "file", Path: filepath.ToSlash(directory)}).String()
+			address = link.PathURL(directory)
 		}
 
 		return state{name: name, emoji: emoji, address: address, isPersisted: isPersisted}, nil
