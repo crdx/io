@@ -1626,3 +1626,42 @@ func TestAConfigThatIsNotAnOrdinaryFileIsRefusedWithoutWaiting(t *testing.T) {
 		t.Fatal("reading a named pipe as a config never finished")
 	}
 }
+
+func TestAVersionInAnOverrideIsIgnoredBecauseAWorkspaceHasNoFormatOfItsOwn(t *testing.T) {
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "config.toml")
+	if err := writeConfigFile(globalPath, "[ui]\ncurrency = \"GBP\"\n"); err != nil {
+		t.Fatal(err)
+	}
+	overridePath := filepath.Join(directory, "oh.toml")
+	body := fmt.Sprintf("version = %d\n[ui]\ncurrency = \"EUR\"\n", InitialFormat)
+	if err := os.WriteFile(overridePath, []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := LoadSources(
+		Source{Path: globalPath},
+		Source{Path: overridePath, IsOverride: true},
+	)
+	if err != nil {
+		t.Fatalf("an override naming a version was refused: %v", err)
+	}
+	if settings.Ui.Currency != "EUR" {
+		t.Errorf("got currency %q, want the override to have been applied", settings.Ui.Currency)
+	}
+	if settings.Version != Format {
+		t.Errorf("got version %d, want the override to have left it at %d", settings.Version, Format)
+	}
+}
+
+func TestAVersionFromANewerOhInAnOverrideIsIgnoredToo(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "oh.toml")
+	body := fmt.Sprintf("version = %d\n", Format+1)
+	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := LoadSources(Source{Path: path, IsOverride: true}); err != nil {
+		t.Fatalf("an override naming a newer version was refused: %v", err)
+	}
+}

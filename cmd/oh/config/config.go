@@ -450,14 +450,15 @@ func (self Config) getSourcePath(keys ...string) string {
 }
 
 func readConfigVersion(data []byte, isOverride bool) (int, error) {
+	if isOverride {
+		return Format, nil
+	}
+
 	version, err := format.ReadTOML(data)
 	if err != nil {
 		return 0, err
 	}
 	if version == 0 {
-		if isOverride {
-			return Format, nil
-		}
 		return InitialFormat, nil
 	}
 
@@ -530,6 +531,7 @@ func applySnapshot(config *Config, source sourceSnapshot) error {
 		return fmt.Errorf("%s: config %w: upgrade oh", displayPath, err)
 	}
 
+	previousVersion := config.Version
 	previousSnippets := maps.Clone(config.Snippets)
 	meta, err := toml.Decode(string(source.snapshot.data), config)
 	if err != nil {
@@ -537,6 +539,7 @@ func applySnapshot(config *Config, source sourceSnapshot) error {
 	}
 
 	if source.source.IsOverride {
+		config.Version = previousVersion
 		if err := refuseWorkspaceSettings(meta); err != nil {
 			return fmt.Errorf("%s: %w", displayPath, err)
 		}
