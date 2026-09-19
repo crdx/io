@@ -60,7 +60,7 @@ func textNodesContain(t *testing.T, source string, want string) bool {
 
 func TestTranscriptOmitsReasoningEntirely(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +90,7 @@ func TestTranscriptOmitsReasoningEntirely(t *testing.T) {
 func TestTranscriptRoundsShortElapsedTimesToTenths(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
 	startedAt := time.Unix(1, 0)
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: startedAt, Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: startedAt, Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestTranscriptRoundsShortElapsedTimesToTenths(t *testing.T) {
 
 func TestTranscriptLogsACallAndItsResultOnOneLine(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,7 +163,7 @@ func TestTranscriptLogsACallAndItsResultOnOneLine(t *testing.T) {
 
 func TestTranscriptDoesNotAttributeToolCallsToTheUser(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -198,7 +198,7 @@ func TestTranscriptDoesNotAttributeToolCallsToTheUser(t *testing.T) {
 
 func TestTranscriptLogsSeveralCallsInOneFencedBlock(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -239,7 +239,7 @@ func TestTranscriptLogsSeveralCallsInOneFencedBlock(t *testing.T) {
 
 func TestTranscriptFallsBackToTheArgumentsOfAnUnrenderedCall(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -270,7 +270,7 @@ func TestTranscriptFallsBackToTheArgumentsOfAnUnrenderedCall(t *testing.T) {
 
 func TestTranscriptCollapsesAndTruncatesALongSubject(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -301,7 +301,7 @@ func TestTranscriptCollapsesAndTruncatesALongSubject(t *testing.T) {
 
 func TestTranscriptLogsACallWithNoSubject(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -328,7 +328,7 @@ func TestTranscriptLogsACallWithNoSubject(t *testing.T) {
 
 func TestTranscriptLogsAResultWithoutAMatchingCallInTheSameRun(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -352,7 +352,7 @@ func TestTranscriptLogsAResultWithoutAMatchingCallInTheSameRun(t *testing.T) {
 
 func TestTranscriptWritesMessagesAsMarkdownRatherThanFencingThem(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -400,7 +400,7 @@ func TestTranscriptLetsUserTextCollideWithMarkdownSyntax(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "transcript.md")
-			recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+			recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -440,7 +440,7 @@ func TestTranscriptFencesAWholeMessageThatWouldOtherwiseSwallowWhatFollows(t *te
 	} {
 		t.Run(name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "transcript.md")
-			recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+			recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -468,7 +468,7 @@ func TestTranscriptFencesAWholeMessageThatWouldOtherwiseSwallowWhatFollows(t *te
 
 func TestTranscriptFencesAWholeUserMessageThatWouldOtherwiseSwallowWhatFollows(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -508,7 +508,7 @@ func TestTranscriptLeavesASelfContainedMessageAlone(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "transcript.md")
-			recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+			recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -556,7 +556,7 @@ func FuzzTranscriptMessageNeverSwallowsWhatFollows(f *testing.F) {
 
 	f.Fuzz(func(t *testing.T, text string) {
 		path := filepath.Join(t.TempDir(), "transcript.md")
-		recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+		recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -582,7 +582,7 @@ func FuzzTranscriptMessageNeverSwallowsWhatFollows(f *testing.F) {
 
 func TestTranscriptUsesAFenceLongerThanItsContent(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -609,7 +609,7 @@ func TestTranscriptUsesAFenceLongerThanItsContent(t *testing.T) {
 
 func TestTranscriptRetainsTurnFailures(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2)})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -639,7 +639,7 @@ func transcriptOfOneEvent(t *testing.T, event agent.Event) string {
 	t.Helper()
 
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2)})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -686,7 +686,7 @@ func TestTranscriptNamesWhyATurnWasInterrupted(t *testing.T) {
 
 func TestTranscriptOmitsDurableState(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2)})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -727,7 +727,7 @@ func TestTranscriptRecordsWhatASilentTurnSaid(t *testing.T) {
 
 func TestTranscriptRendersPathGrantEventsFromStructuredState(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2)})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -796,7 +796,7 @@ func TestTranscriptRecordsBothPortDirections(t *testing.T) {
 
 func TestTranscriptHoldsTheHeaderApartFromWhatFollowsIt(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Workspace: "/workspace"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2), Workspace: "/workspace"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -848,7 +848,7 @@ func TestTranscriptEndsWithOneNewlineHoweverMuchWasWritten(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "transcript.md")
-			recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2)})
+			recorder, err := transcript.Open(path, transcript.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 2)})
 			if err != nil {
 				t.Fatal(err)
 			}

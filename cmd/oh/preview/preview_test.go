@@ -122,7 +122,7 @@ func TestAStoredConversationIsReadFromItsJournal(t *testing.T) {
 }
 
 func TestAConversationThatWasNeverStoredIsReported(t *testing.T) {
-	if _, err := Read(t.TempDir(), "brave-otter", nil, 100); err == nil {
+	if _, err := Read(t.TempDir(), "tame-impala", nil, 100); err == nil {
 		t.Error("expected a missing session to be reported")
 	}
 }

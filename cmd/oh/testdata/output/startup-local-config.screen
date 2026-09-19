@@ -1,5 +1,5 @@
 === empty local config / ordinary / narrow ===
-Agent brave-otter 🦦 ready in 2ms with 4
+Agent tame-impala 🦌 ready in 2ms with 4
  skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸
 oh.toml: (empty).
 === empty local config / ordinary / one column ===
@@ -9,19 +9,19 @@ e
 n
 t
 
-b
-r
+t
 a
-v
+m
 e
 -
-o
-t
-t
-e
-r
+i
+m
+p
+a
+l
+a
 
-🦦
+🦌
 
 r
 e
@@ -100,8 +100,8 @@ y
 )
 .
 === empty local config / ordinary / tiny ===
-Agent brave-
-otter 🦦 rea
+Agent tame-i
+mpala 🦌 rea
 dy in 2ms wi
 th 4 skills
 ⧸ 2 snippets
@@ -110,16 +110,16 @@ ntext ⧸ oh.t
 oml: (empty)
 .
 === empty local config / ordinary / wide ===
-Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: (empty).
+Agent tame-impala 🦌 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: (empty).
 === empty local config / sized / narrow ===
- 🦦    Agent brave-otter ready in 2ms
+ 🦌    Agent tame-impala ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt
        context ⧸ oh.toml: (empty)
 === empty local config / sized / wide ===
- 🦦    Agent brave-otter ready in 2ms
+ 🦌    Agent tame-impala ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: (empty)
 === many local settings / ordinary / narrow ===
-Agent brave-otter 🦦 ready in 2ms with 4
+Agent tame-impala 🦌 ready in 2ms with 4
  skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸
 oh.toml: bar.bottom.left, bar.top.center
 , caps.default, editor.command, model.ro
@@ -135,19 +135,19 @@ e
 n
 t
 
-b
-r
+t
 a
-v
+m
 e
 -
-o
-t
-t
-e
-r
+i
+m
+p
+a
+l
+a
 
-🦦
+🦌
 
 r
 e
@@ -482,8 +482,8 @@ n
 g
 .
 === many local settings / ordinary / tiny ===
-Agent brave-
-otter 🦦 rea
+Agent tame-i
+mpala 🦌 rea
 dy in 2ms wi
 th 4 skills
 ⧸ 2 snippets
@@ -513,12 +513,12 @@ ui.currency,
 ng, ui.strea
 ming.
 === many local settings / ordinary / wide ===
-Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: bar.bottom.
+Agent tame-impala 🦌 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: bar.bottom.
 left, bar.top.center, caps.default, editor.command, model.round_robin, ports.hostname, provider.olla
 ma.host, sandbox.read, sandbox.write, skills.exclude, skills.include, snippets.review, tool.output,
 ui.currency, ui.grouping, ui.reasoning, ui.streaming.
 === many local settings / sized / narrow ===
- 🦦    Agent brave-otter ready in 2ms
+ 🦌    Agent tame-impala ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt
        context ⧸ oh.toml:
        bar.bottom.left, bar.top.center,
@@ -532,13 +532,13 @@ ui.currency, ui.grouping, ui.reasoning, ui.streaming.
        ui.currency, ui.grouping,
        ui.reasoning, ui.streaming
 === many local settings / sized / wide ===
- 🦦    Agent brave-otter ready in 2ms
+ 🦌    Agent tame-impala ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: bar.bottom.left, bar.top.center,
        caps.default, editor.command, model.round_robin, ports.hostname, provider.ollama.host,
        sandbox.read, sandbox.write, skills.exclude, skills.include, snippets.review, tool.output,
        ui.currency, ui.grouping, ui.reasoning, ui.streaming
 === mixed global and local settings / ordinary / narrow ===
-Agent brave-otter 🦦 ready in 2ms with 4
+Agent tame-impala 🦌 ready in 2ms with 4
  skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸
 oh.toml: sandbox.write, snippets.review,
  ui.currency.
@@ -549,19 +549,19 @@ e
 n
 t
 
-b
-r
+t
 a
-v
+m
 e
 -
-o
-t
-t
-e
-r
+i
+m
+p
+a
+l
+a
 
-🦦
+🦌
 
 r
 e
@@ -676,8 +676,8 @@ c
 y
 .
 === mixed global and local settings / ordinary / tiny ===
-Agent brave-
-otter 🦦 rea
+Agent tame-i
+mpala 🦌 rea
 dy in 2ms wi
 th 4 skills
 ⧸ 2 snippets
@@ -689,18 +689,18 @@ pets.review,
  ui.currency
 .
 === mixed global and local settings / ordinary / wide ===
-Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: sandbox.wri
+Agent tame-impala 🦌 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: sandbox.wri
 te, snippets.review, ui.currency.
 === mixed global and local settings / sized / narrow ===
- 🦦    Agent brave-otter ready in 2ms
+ 🦌    Agent tame-impala ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt
        context ⧸ oh.toml: sandbox.write,
        snippets.review, ui.currency
 === mixed global and local settings / sized / wide ===
- 🦦    Agent brave-otter ready in 2ms
+ 🦌    Agent tame-impala ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: sandbox.write, snippets.review, ui.currency
 === no local config / ordinary / narrow ===
-Agent brave-otter 🦦 ready in 2ms with 4
+Agent tame-impala 🦌 ready in 2ms with 4
  skills ⧸ 2 snippets ⧸ ~1.6Kt context.
 === no local config / ordinary / one column ===
 A
@@ -709,19 +709,19 @@ e
 n
 t
 
-b
-r
+t
 a
-v
+m
 e
 -
-o
-t
-t
-e
-r
+i
+m
+p
+a
+l
+a
 
-🦦
+🦌
 
 r
 e
@@ -781,24 +781,24 @@ x
 t
 .
 === no local config / ordinary / tiny ===
-Agent brave-
-otter 🦦 rea
+Agent tame-i
+mpala 🦌 rea
 dy in 2ms wi
 th 4 skills
 ⧸ 2 snippets
  ⧸ ~1.6Kt co
 ntext.
 === no local config / ordinary / wide ===
-Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context.
+Agent tame-impala 🦌 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context.
 === no local config / sized / narrow ===
- 🦦    Agent brave-otter ready in 2ms
+ 🦌    Agent tame-impala ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt
        context
 === no local config / sized / wide ===
- 🦦    Agent brave-otter ready in 2ms
+ 🦌    Agent tame-impala ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt context
 === one local setting / ordinary / narrow ===
-Agent brave-otter 🦦 ready in 2ms with 4
+Agent tame-impala 🦌 ready in 2ms with 4
  skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸
 oh.toml: caps.default.
 === one local setting / ordinary / one column ===
@@ -808,19 +808,19 @@ e
 n
 t
 
-b
-r
+t
 a
-v
+m
 e
 -
-o
-t
-t
-e
-r
+i
+m
+p
+a
+l
+a
 
-🦦
+🦌
 
 r
 e
@@ -904,8 +904,8 @@ l
 t
 .
 === one local setting / ordinary / tiny ===
-Agent brave-
-otter 🦦 rea
+Agent tame-i
+mpala 🦌 rea
 dy in 2ms wi
 th 4 skills
 ⧸ 2 snippets
@@ -914,12 +914,12 @@ ntext ⧸ oh.t
 oml: caps.de
 fault.
 === one local setting / ordinary / wide ===
-Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: caps.defaul
+Agent tame-impala 🦌 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: caps.defaul
 t.
 === one local setting / sized / narrow ===
- 🦦    Agent brave-otter ready in 2ms
+ 🦌    Agent tame-impala ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt
        context ⧸ oh.toml: caps.default
 === one local setting / sized / wide ===
- 🦦    Agent brave-otter ready in 2ms
+ 🦌    Agent tame-impala ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: caps.default

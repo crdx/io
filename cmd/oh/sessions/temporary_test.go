@@ -13,11 +13,11 @@ func TestPrepareTemporaryDirectoryCreatesTheSessionDirectoryPrivately(t *testing
 	stateDirectory := t.TempDir()
 	t.Setenv(location.StateDirVariable, stateDirectory)
 
-	temporaryDirectory, err := PrepareTemporaryDirectory("brave-otter")
+	temporaryDirectory, err := PrepareTemporaryDirectory("tame-impala")
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := filepath.Join(stateDirectory, "farm", "brave-otter")
+	want := filepath.Join(stateDirectory, "farm", "tame-impala")
 	if temporaryDirectory != want {
 		t.Errorf("got %q, want %q", temporaryDirectory, want)
 	}
@@ -35,7 +35,7 @@ func TestPrepareTemporaryDirectoryKeepsAnExistingDirectory(t *testing.T) {
 	stateDirectory := t.TempDir()
 	t.Setenv(location.StateDirVariable, stateDirectory)
 
-	temporaryDirectory, err := PrepareTemporaryDirectory("brave-otter")
+	temporaryDirectory, err := PrepareTemporaryDirectory("tame-impala")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +44,7 @@ func TestPrepareTemporaryDirectoryKeepsAnExistingDirectory(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := PrepareTemporaryDirectory("brave-otter"); err != nil {
+	if _, err := PrepareTemporaryDirectory("tame-impala"); err != nil {
 		t.Fatal(err)
 	}
 	if marker, err := os.ReadFile(markerPath); err != nil || string(marker) != "kept" { //nolint:gosec // the test's own path
@@ -61,7 +61,7 @@ func TestPrepareTemporaryDirectoryReportsCreationFailure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	temporaryDirectory, err := PrepareTemporaryDirectory("brave-otter")
+	temporaryDirectory, err := PrepareTemporaryDirectory("tame-impala")
 	if err == nil || !strings.Contains(err.Error(), "could not prepare the tmp dir:") {
 		t.Fatalf("got %v, want the preparation error", err)
 	}

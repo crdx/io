@@ -22,7 +22,7 @@ func paintedRows() *fakeList {
 			"thick-poodle    add support for reasoning traces",
 			"funny-badger    the cancelled turn leaves a tool call unanswered",
 			"able-dolphin    (untitled)",
-			"brave-otter     rename the harness to oh",
+			"tame-impala     rename the harness to oh",
 		},
 		unrunnable: []bool{true, false, false, false, false},
 	}
@@ -166,7 +166,7 @@ func TestGoldenTheCompleteSwitchingLifecycleMatchesTheGolden(t *testing.T) {
 				},
 			},
 		},
-		other: []string{"brave-otter     rename the harness to oh"},
+		other: []string{"tame-impala     rename the harness to oh"},
 	}
 
 	keypresses := []key.Key{
@@ -191,7 +191,7 @@ func TestGoldenTheCompleteSwitchingLifecycleMatchesTheGolden(t *testing.T) {
 	if chosen != 0 {
 		t.Errorf("chose row %d, want 0", chosen)
 	}
-	if !slices.Equal(rows.removed, []string{"brave-otter     rename the harness to oh"}) {
+	if !slices.Equal(rows.removed, []string{"tame-impala     rename the harness to oh"}) {
 		t.Errorf("got the rows removed as %v", rows.removed)
 	}
 

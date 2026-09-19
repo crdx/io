@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	goldenName      = "brave-otter"
+	goldenName      = "tame-impala"
 	goldenStateDir  = "/state"
 	goldenConfigDir = "/config"
 )

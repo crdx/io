@@ -63,7 +63,7 @@ func storedSessions() []*Session {
 			TouchedAt:    now.Add(-73 * time.Hour),
 		},
 		{
-			Name:         "brave-otter",
+			Name:         "tame-impala",
 			Title:        "rename the harness to oh",
 			Model:        "Codex 5.3",
 			ModelID:      "gpt-5.3-codex",
@@ -79,7 +79,7 @@ func archivedSessions() []*Session {
 
 	return []*Session{
 		{
-			Name:         "brave-otter",
+			Name:         "tame-impala",
 			Title:        "rename the harness to oh",
 			Model:        "Codex 5.3",
 			ModelID:      "gpt-5.3-codex",

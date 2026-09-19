@@ -247,7 +247,7 @@ func TestAPortIsParsedOnlyWhenItIsOne(t *testing.T) {
 }
 
 func TestAnAddressIsDerivedFromTheSessionNameAndIsAlwaysLoopback(t *testing.T) {
-	for _, sessionName := range []string{"brave-otter", "ornate-grouse", "", "a"} {
+	for _, sessionName := range []string{"tame-impala", "ornate-grouse", "", "a"} {
 		address, err := netip.ParseAddr(AddressFor(sessionName))
 		if err != nil {
 			t.Fatalf("%q gave %v", sessionName, err)
@@ -266,7 +266,7 @@ func TestAnAddressIsDerivedFromTheSessionNameAndIsAlwaysLoopback(t *testing.T) {
 		}
 	}
 
-	if AddressFor("brave-otter") == AddressFor("ornate-grouse") {
+	if AddressFor("tame-impala") == AddressFor("ornate-grouse") {
 		t.Error("two sessions were given the same address")
 	}
 }

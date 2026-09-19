@@ -1,8 +1,8 @@
 === screen ===
 [4m[38;2;150;152;150mKind        Size  Path[0m[0m
-[38;2;150;152;150m.cache    [0m   24K  home/.cache
-[38;2;150;152;150mno-session[0m   16K  farm/able-dolphin
-[38;2;150;152;150m.cache    [0m   16K  farm/stored-session/.cache
+[38;2;150;152;150m.cache    [0m   16K  home/.cache
+[38;2;150;152;150mno-session[0m    8K  farm/able-dolphin
+[38;2;150;152;150m.cache    [0m    8K  farm/stored-session/.cache
 
-[38;2;150;152;150m3 paths, 56K to reclaim[0m
+[38;2;150;152;150m3 paths, 32K to reclaim[0m
 === failure ===

@@ -1,8 +1,8 @@
 === record split across lines ===
-session brave-otter: malformed journal line 4: unexpected end of JSON input
+session tame-impala: malformed journal line 4: unexpected end of JSON input
 
 === records joined on one line ===
-session brave-otter: malformed journal line 4: invalid character '{' after top-level value
+session tame-impala: malformed journal line 4: invalid character '{' after top-level value
 
 === terminated malformed record ===
-session brave-otter: malformed journal line 4: invalid character 'o' in literal null (expecting 'u')
+session tame-impala: malformed journal line 4: invalid character 'o' in literal null (expecting 'u')

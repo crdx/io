@@ -168,7 +168,7 @@ func TestRecorderIgnoresAReadMarkerWhenNumberingTheNextExchange(t *testing.T) {
 
 func TestEachStreamingReadIsTimestampedSoBurstsAreVisible(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "wire.http")
-	recorder, err := wire.Open(path, wire.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 0)}, func(err error) {
+	recorder, err := wire.Open(path, wire.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 0)}, func(err error) {
 		t.Errorf("unexpected recorder failure: %v", err)
 	})
 	if err != nil {
@@ -222,7 +222,7 @@ func TestEachStreamingReadIsTimestampedSoBurstsAreVisible(t *testing.T) {
 
 func TestRecorderCensorsHeadersJSONFormsSSEAndBearerText(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "wire.http")
-	recorder, err := wire.Open(path, wire.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 0)}, func(err error) {
+	recorder, err := wire.Open(path, wire.Meta{Name: "tame-impala", StartedAt: time.Unix(1, 0)}, func(err error) {
 		t.Errorf("unexpected recorder failure: %v", err)
 	})
 	if err != nil {

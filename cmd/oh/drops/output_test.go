@@ -10,7 +10,7 @@ import (
 )
 
 func TestSavedOutputIsWrittenIntoTheDropsDirectory(t *testing.T) {
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 	whole := strings.Repeat("a line of text\n", 4000)
 
 	path, err := drops.SaveOutput(sessionDirectory, persisted(sessionDirectory), whole)
@@ -35,7 +35,7 @@ func TestSavedOutputIsWrittenIntoTheDropsDirectory(t *testing.T) {
 }
 
 func TestTheSameOutputSavedTwiceIsKeptOnce(t *testing.T) {
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 
 	first, err := drops.SaveOutput(sessionDirectory, persisted(sessionDirectory), "the whole of it\n")
 	if err != nil {
@@ -60,7 +60,7 @@ func TestTheSameOutputSavedTwiceIsKeptOnce(t *testing.T) {
 }
 
 func TestOutputThatDiffersTakesItsOwnFile(t *testing.T) {
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 
 	first, err := drops.SaveOutput(sessionDirectory, persisted(sessionDirectory), "one\n")
 	if err != nil {

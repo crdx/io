@@ -28,7 +28,7 @@ func TestStartupDrawingUsesTheScreensTextSizingSupport(t *testing.T) {
 			screen := output.NewTerminalOfSize(&screenOutput, 80, 24)
 			screen.SetTextSizingSupported(isSupported)
 			paint := New(screen, false, nil, nil, output.StreamingModeLine)
-			paint.DrawEvent(startup.NewEvent(time.Millisecond, startup.Info{Session: "brave-otter"}))
+			paint.DrawEvent(startup.NewEvent(time.Millisecond, startup.Info{Session: "tame-impala"}))
 
 			got := strings.Contains(screenOutput.String(), "\x1b]66;")
 			if got != isSupported {
@@ -325,8 +325,8 @@ func TestToolResultLinksAreOptIn(t *testing.T) {
 		resultText  string
 		shouldLink  bool
 	}{
-		"linked":             {sessionName: "brave-otter", resultText: "output", shouldLink: true},
-		"empty result":       {sessionName: "brave-otter", shouldLink: true},
+		"linked":             {sessionName: "tame-impala", resultText: "output", shouldLink: true},
+		"empty result":       {sessionName: "tame-impala", shouldLink: true},
 		"plain":              {resultText: "output"},
 		"plain empty result": {},
 	} {

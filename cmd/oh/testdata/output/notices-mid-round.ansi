@@ -4,11 +4,11 @@
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mExposing each port in turn.\e[0m\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_5&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at        \e[0m\r
@@ -679,11 +679,11 @@ All five previews are up.
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[3m\e[38;2;150;152;150mExposing each port in turn.\e[0m\e[0m\r
-\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\e]8;;oh://tool-result?call=call_3&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\e]8;;oh://tool-result?call=call_4&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\e]8;;oh://tool-result?call=call_5&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \e[48;2;48;58;67m                                                                                                    \e[0m\r
 \e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
@@ -709,7 +709,7 @@ All five previews are up.\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8002\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8003\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
@@ -718,7 +718,7 @@ All five previews are up.\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8003\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
@@ -727,7 +727,7 @@ All five previews are up.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_3&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
@@ -736,7 +736,7 @@ All five previews are up.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_4&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
@@ -745,7 +745,7 @@ All five previews are up.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_5&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
@@ -771,7 +771,7 @@ All five previews are up.\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8002\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8003\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
@@ -780,7 +780,7 @@ All five previews are up.\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8003\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
@@ -789,7 +789,7 @@ All five previews are up.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_3&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
@@ -798,7 +798,7 @@ All five previews are up.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_4&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
@@ -807,7 +807,7 @@ All five previews are up.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_5&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
@@ -833,7 +833,7 @@ All five previews are up.\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8002\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8003\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
@@ -842,7 +842,7 @@ All five previews are up.\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8003\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
@@ -851,7 +851,7 @@ All five previews are up.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_3&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8004\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
@@ -860,7 +860,7 @@ All five previews are up.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8002 exposed at http://127.27.192.223:8002.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_4&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;207;173;0mexpose\e[0m \e[38;2;192;128;80m8005\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
@@ -869,7 +869,7 @@ All five previews are up.\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8003 exposed at http://127.27.192.223:8003.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8004 exposed at http://127.27.192.223:8004.                                        \e[0m\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8005 exposed at http://127.27.192.223:8005.                                        \e[0m\r
-\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e]8;;oh://tool-result?call=call_5&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r
@@ -892,11 +892,11 @@ All five previews are up.\r
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mExposing\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150meach port in\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mturn.\e[0m\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m80…\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m80…\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m80…\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m80…\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m80…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m80…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m80…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m80…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m80…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_5&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m80…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m            \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox \e[0m\r
@@ -955,11 +955,11 @@ All five previews are up.\r
 \e[48;2;52;53;65m expose the five preview ports\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mExposing each port in turn.\e[0m\e[0m
-\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_5&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m\e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.\e[0m\r
@@ -977,11 +977,11 @@ All five previews are up.\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mExposing each port in turn.\e[0m\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8001\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8002\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8003\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8004\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_5&session=tame-impala\e\\\e[38;2;207;173;0mexpose\e[0m\e]8;;\e\\ \e[38;2;192;128;80m8005\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\r
 \r\e[K\e[48;2;48;58;67m                                                                                                    \e[0m\r
 \r\e[K\e[48;2;48;58;67m 🤖 Sandbox port 8001 exposed at http://127.27.192.223:8001.                                        \e[0m\r

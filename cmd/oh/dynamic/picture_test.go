@@ -108,7 +108,7 @@ func TestAPictureIsSentAgainOnlyWhenTheWidthChanges(t *testing.T) {
 
 func TestAPictureOnDiskIsDrawnByPathWhenTheTerminalIsLocal(t *testing.T) {
 	picture := drawnPicture()
-	picture.Path = "/state/sessions/brave-otter/images/abc-w800.png"
+	picture.Path = "/state/sessions/tame-impala/images/abc-w800.png"
 	picture.IsLocal = true
 
 	block := blockWithPicture(t, picture)

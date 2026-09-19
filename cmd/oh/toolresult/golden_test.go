@@ -164,25 +164,25 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 		{
 			name: "fetch markdown",
 			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/article", Type: "markdown"}, agent.SuccessStatus,
-				"[raw HTML saved to /state/sessions/brave-otter/drops/fetch-0123456789abcdef.html]\n\n"+
+				"[raw HTML saved to /state/sessions/tame-impala/drops/fetch-0123456789abcdef.html]\n\n"+
 					"# Article\n\n- first\n- second\n"),
 		},
 		{
 			name: "fetch html",
 			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/raw", Type: "raw"}, agent.SuccessStatus,
-				"[raw HTML saved to /state/sessions/brave-otter/drops/fetch-fedcba9876543210.html]\n\n"+
+				"[raw HTML saved to /state/sessions/tame-impala/drops/fetch-fedcba9876543210.html]\n\n"+
 					"<!DOCTYPE html>\n<title>Hello</title>\n"),
 		},
 		{
 			name: "fetch clean HTML",
 			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/clean", Type: "clean_html"}, agent.SuccessStatus,
-				"[raw HTML saved to /state/sessions/brave-otter/drops/fetch-clean.html]\n\n"+
+				"[raw HTML saved to /state/sessions/tame-impala/drops/fetch-clean.html]\n\n"+
 					"<h1>Hello</h1>\n<p>Clean page.</p>\n"),
 		},
 		{
 			name: "fetch text",
 			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/plain", Type: "text"}, agent.SuccessStatus,
-				"[raw HTML saved to /state/sessions/brave-otter/drops/fetch-text.html]\n\n"+
+				"[raw HTML saved to /state/sessions/tame-impala/drops/fetch-text.html]\n\n"+
 					"Hello\n\nPlain page.\n"),
 		},
 		{
@@ -193,12 +193,12 @@ func TestGoldenToolResultsRenderForTheUser(t *testing.T) {
 		{
 			name: "fetch HTTP failure",
 			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/teapot", Type: "text"}, agent.ErrorStatus,
-				"fetch returned HTTP 418: not today (raw HTML saved to /state/sessions/brave-otter/drops/fetch-error.html)"),
+				"fetch returned HTTP 418: not today (raw HTML saved to /state/sessions/tame-impala/drops/fetch-error.html)"),
 		},
 		{
 			name: "fetch empty page",
 			exchange: resultExchange("fetch", fetch.Args{URL: "https://example.test/empty", Type: "text"}, agent.ErrorStatus,
-				"fetch returned no content (raw HTML saved to /state/sessions/brave-otter/drops/fetch-empty.html)"),
+				"fetch returned no content (raw HTML saved to /state/sessions/tame-impala/drops/fetch-empty.html)"),
 		},
 		{
 			name: "fetch save failure",

@@ -26,7 +26,7 @@ func TestARunningSessionIsColouredWithoutAMarker(t *testing.T) {
 func TestEveryConversationIsDrawnAlikeWhateverItHolds(t *testing.T) {
 	self := &sessionList{store: Store{Sessions: []*Session{
 		{Name: "able-dolphin", MessageCount: 1},
-		{Name: "brave-otter", MessageCount: 40},
+		{Name: "tame-impala", MessageCount: 40},
 		{Name: "chewy-sardine", MessageCount: 1, IsRunning: true},
 	}}}
 
@@ -125,7 +125,7 @@ func archivingStore() (*sessionList, *[]string) {
 
 	return &sessionList{store: Store{
 		Sessions:         []*Session{{Name: "thick-poodle"}},
-		ArchivedSessions: []*Session{{Name: "brave-otter", IsArchived: true}},
+		ArchivedSessions: []*Session{{Name: "tame-impala", IsArchived: true}},
 		Archive:          record,
 		Restore:          record,
 	}}, &moved
@@ -144,13 +144,13 @@ func TestTheViewSwitchesBetweenTheStoredSessionsAndTheArchivedOnes(t *testing.T)
 	if !self.Switch(1) {
 		t.Fatal("expected the view to switch")
 	}
-	if got := self.at(0).Name; got != "brave-otter" {
+	if got := self.at(0).Name; got != "tame-impala" {
 		t.Errorf("expected the archived sessions, got %q", got)
 	}
 	if got := self.ColumnHeader(120); !strings.Contains(got, "Agent (archived)") {
 		t.Errorf("expected the archived header, got %q", got)
 	}
-	if got, _ := self.Removal(0, archiveKeypress()); got.Prompt != "Press ctrl+a again to restore brave-otter" {
+	if got, _ := self.Removal(0, archiveKeypress()); got.Prompt != "Press ctrl+a again to restore tame-impala" {
 		t.Errorf("unexpected prompt: %q", got.Prompt)
 	}
 
@@ -169,7 +169,7 @@ func TestARestoredSessionMovesBackIntoTheStoredView(t *testing.T) {
 		t.Fatal(err)
 	}
 	removal.Apply()
-	if len(*moved) != 1 || (*moved)[0] != "brave-otter" {
+	if len(*moved) != 1 || (*moved)[0] != "tame-impala" {
 		t.Fatalf("got the sessions moved as %v", *moved)
 	}
 	if self.Len() != 0 {
@@ -195,7 +195,7 @@ func TestAnArchivedSessionIsRestoredWhenItIsChosen(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if chosenSession.Name != "brave-otter" || chosenSession.IsArchived {
+	if chosenSession.Name != "tame-impala" || chosenSession.IsArchived {
 		t.Errorf("expected a restored session, got %+v", chosenSession)
 	}
 	if len(*moved) != 1 {
@@ -213,7 +213,7 @@ func TestAnArchivedSessionIsRestoredWhenItIsChosen(t *testing.T) {
 
 func TestAnArchivedSessionThatCannotBeRestoredIsNotChosen(t *testing.T) {
 	self := &sessionList{store: Store{
-		ArchivedSessions: []*Session{{Name: "brave-otter", IsArchived: true}},
+		ArchivedSessions: []*Session{{Name: "tame-impala", IsArchived: true}},
 		Restore:          func(*Session) error { return errors.New("the archive is unreadable") },
 	}}
 	self.Switch(1)
@@ -227,7 +227,7 @@ func TestDeletingTakesTheSessionOutOfWhicheverViewItIsIn(t *testing.T) {
 	var deleted []string
 	self := &sessionList{store: Store{
 		Sessions:         []*Session{{Name: "thick-poodle"}, {Name: "funny-badger"}},
-		ArchivedSessions: []*Session{{Name: "brave-otter", IsArchived: true}},
+		ArchivedSessions: []*Session{{Name: "tame-impala", IsArchived: true}},
 		Delete: func(storedSession *Session) error {
 			deleted = append(deleted, storedSession.Name)
 			return nil
@@ -263,7 +263,7 @@ func TestDeletingTakesTheSessionOutOfWhicheverViewItIsIn(t *testing.T) {
 	if self.Len() != 0 {
 		t.Errorf("expected the archive to be empty, got %d rows", self.Len())
 	}
-	if !slices.Equal(deleted, []string{"thick-poodle", "brave-otter"}) {
+	if !slices.Equal(deleted, []string{"thick-poodle", "tame-impala"}) {
 		t.Errorf("got the sessions deleted as %v", deleted)
 	}
 
@@ -336,7 +336,7 @@ func TestASessionCannotBeReadWithoutSomethingToReadItWith(t *testing.T) {
 func TestAnArchivedSessionIsOpenedRatherThanRead(t *testing.T) {
 	self := &sessionList{
 		store: Store{
-			ArchivedSessions: []*Session{{Name: "brave-otter", IsArchived: true}},
+			ArchivedSessions: []*Session{{Name: "tame-impala", IsArchived: true}},
 			Read:             func(*Session, int) ([]string, error) { return []string{"a line"}, nil },
 		},
 		isArchivedView: true,

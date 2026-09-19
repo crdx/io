@@ -59,7 +59,7 @@ func TestGoldenWhatCannotBeWrittenAgainMatchesTheGolden(t *testing.T) {
 	name := storedSession(t, directory)
 
 	var screen, failure strings.Builder
-	err := run(directory, []string{name, "brave-otter"}, console.Output{Screen: &screen, Failure: &failure})
+	err := run(directory, []string{name, "tame-impala"}, console.Output{Screen: &screen, Failure: &failure})
 	if err == nil {
 		t.Fatal("expected the missing session to be reported as a failure")
 	}

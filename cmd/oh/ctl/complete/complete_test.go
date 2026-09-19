@@ -60,10 +60,10 @@ func TestGoldenWhatEachKindOffersMatchesTheGolden(t *testing.T) {
 	t.Setenv(location.StateDirVariable, directory)
 
 	sessionsDir := location.GetSessionsDir()
-	for _, name := range []string{"able-dolphin", "chewy-sardine", "brave-otter"} {
+	for _, name := range []string{"able-dolphin", "chewy-sardine", "tame-impala"} {
 		writeStoredJournal(t, sessionsDir, name)
 	}
-	if err := session.Archive(sessionsDir, "brave-otter"); err != nil {
+	if err := session.Archive(sessionsDir, "tame-impala"); err != nil {
 		t.Fatal(err)
 	}
 

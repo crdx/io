@@ -12,7 +12,7 @@ import (
 
 func TestAStartupEventKeepsItsFactsForReplay(t *testing.T) {
 	info := Info{
-		Session:       "brave-otter",
+		Session:       "tame-impala",
 		PromptBytes:   32_697,
 		ProjectSkills: 2,
 		GlobalSkills:  3,
@@ -29,7 +29,7 @@ func TestAStartupEventKeepsItsFactsForReplay(t *testing.T) {
 		t.Errorf("local config facts were not grouped in %s", facts)
 	}
 	got := style.Plain(RenderEvent(event, 80, false))
-	want := "Agent brave-otter 🦦 ready in 12ms with 5 skills ⧸ 4 snippets ⧸ ~13Kt context ⧸ oh.toml: ui.currency, sandbox.write."
+	want := "Agent tame-impala 🦌 ready in 12ms with 5 skills ⧸ 4 snippets ⧸ ~13Kt context ⧸ oh.toml: ui.currency, sandbox.write."
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
@@ -140,19 +140,19 @@ func TestAResumedConversationHasNoStartupLine(t *testing.T) {
 }
 
 func TestKittyGetsATwoRowStartupBannerWithASizedEmoji(t *testing.T) {
-	line := RenderBanner(time.Millisecond, false, Info{Session: "brave-otter"}, 80, true)
+	line := RenderBanner(time.Millisecond, false, Info{Session: "tame-impala"}, 80, true)
 
-	if !strings.HasPrefix(line, " \x1b]66;s=2:w=2;🦦\x1b\\") {
-		t.Errorf("expected a sized otter, got %q", line)
+	if !strings.HasPrefix(line, " \x1b]66;s=2:w=2;🦌\x1b\\") {
+		t.Errorf("expected a sized impala, got %q", line)
 	}
-	want := " 🦦  Agent brave-otter ready in 1ms\n  0 skills ⧸ 0 snippets ⧸ 0t context"
+	want := " 🦌  Agent tame-impala ready in 1ms\n  0 skills ⧸ 0 snippets ⧸ 0t context"
 	if got := style.Plain(line); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
 
 func TestAHeadingThatDoesNotFitBesideTheEmojiGetsTheOrdinaryStartupSentence(t *testing.T) {
-	info := Info{Session: "brave-otter"}
+	info := Info{Session: "tame-impala"}
 	headingWidth := style.Width(renderHeading(time.Millisecond, info, false))
 	columns := bannerLeftPadding + sizedEmojiCells + bannerGap + headingWidth - 1
 	line := RenderBanner(time.Millisecond, false, info, columns, true)

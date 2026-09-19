@@ -26,7 +26,7 @@ func storedJournal(t *testing.T, lines ...string) (string, string) {
 	t.Helper()
 
 	directory := t.TempDir()
-	name := "brave-otter"
+	name := "tame-impala"
 
 	if err := os.MkdirAll(filepath.Join(directory, name), 0o750); err != nil {
 		t.Fatal(err)
@@ -75,7 +75,7 @@ func journalLines(t *testing.T, directory string, name string) []map[string]json
 
 func TestAJournalWithoutAVersionIsMigratedFromTheFirstFormat(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter","meta":{"workspaceDir":"/workspace"}}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"tame-impala","meta":{"workspaceDir":"/workspace"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"tool_call_request","name":"read","highlight":{"kind":"focus","value":"draw.go"}}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"user_message","text":"first question"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"model_message","text":"first answer"}}`,
@@ -117,7 +117,7 @@ func TestAJournalWithoutAVersionIsMigratedFromTheFirstFormat(t *testing.T) {
 }
 
 func TestAJournalAlreadyCurrentIsLeftAlone(t *testing.T) {
-	head := fmt.Sprintf(`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":"one","name":"brave-otter"}`, session.JournalFormat)
+	head := fmt.Sprintf(`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":"one","name":"tame-impala"}`, session.JournalFormat)
 	directory, name := storedJournal(t, head)
 
 	from, err := migrate.Session(options(directory), name)
@@ -136,7 +136,7 @@ func TestAJournalAlreadyCurrentIsLeftAlone(t *testing.T) {
 
 func TestFormatThreeMigrationMarksOnlyTurnsWithDurableProviderState(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":3,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":3,"id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"user_message","text":"complete"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"model_message","text":"done"}}`,
 		`{"kind":"item","time":"2026-08-01T00:00:03Z","payload":{"role":"assistant"}}`,
@@ -177,7 +177,7 @@ func TestFormatThreeMigrationMarksOnlyTurnsWithDurableProviderState(t *testing.T
 
 func TestFormatThreeMigrationDoesNotCompleteAPartialProviderStateWrite(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":3,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":3,"id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"user_message","text":"crashed"}}`,
 		`{"kind":"item","time":"2026-08-01T00:00:02Z","payload":{"type":"partial"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"harness_message","text":"the conversation state could not be stored: disk full","failed":true}}`,
@@ -197,7 +197,7 @@ func TestFormatThreeMigrationDoesNotCompleteAPartialProviderStateWrite(t *testin
 
 func TestFormatFourMigrationRecoversTheLastKnownMode(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":4,"id":"one","name":"brave-otter","meta":{"system_prompt":"# State\n\n- The workspace (/workspace) is read-only\n- The .git directory within it (/workspace/.git) is read-only\n- Background processes are killed when their shell command ends\n- The bash tool is granted"}}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":4,"id":"one","name":"tame-impala","meta":{"system_prompt":"# State\n\n- The workspace (/workspace) is read-only\n- The .git directory within it (/workspace/.git) is read-only\n- Background processes are killed when their shell command ends\n- The bash tool is granted"}}`,
 		`{"kind":"item","time":"2026-08-01T00:00:01Z","payload":{"role":"user","content":"The workspace is now read-write."}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"mode_change","text":"rxw"}}`,
 		`{"kind":"item","time":"2026-08-01T00:00:03Z","payload":{"role":"user","content":[{"type":"text","text":"The workspace is now read-only."}]}}`,
@@ -232,7 +232,7 @@ func TestFormatFourMigrationRecoversTheLastKnownMode(t *testing.T) {
 
 func TestFormatFourMigrationPreservesARealModeChange(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":4,"id":"one","name":"brave-otter","meta":{"system_prompt":"# State\n\n- The workspace (/workspace) is read-only\n- The .git directory within it (/workspace/.git) is read-only\n- Background processes are killed when their shell command ends\n- The bash tool is granted"}}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":4,"id":"one","name":"tame-impala","meta":{"system_prompt":"# State\n\n- The workspace (/workspace) is read-only\n- The .git directory within it (/workspace/.git) is read-only\n- Background processes are killed when their shell command ends\n- The bash tool is granted"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rxw"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"mode_change","name":"g","text":"rxg"}}`,
 	)
@@ -251,7 +251,7 @@ func TestFormatFourMigrationPreservesARealModeChange(t *testing.T) {
 
 func TestADryRunWritesNothing(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"tool_call_request","highlight":{"kind":"focus"}}}`,
 	)
 
@@ -273,7 +273,7 @@ func TestADryRunWritesNothing(t *testing.T) {
 
 func TestAnInUseJournalIsNotMigrated(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"tame-impala"}`,
 	)
 
 	heldLock, err := session.AcquireLock(directory, name)
@@ -297,7 +297,7 @@ func TestAnInUseJournalIsNotMigrated(t *testing.T) {
 
 func TestAJournalFromANewerBuildIsRefused(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":99,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":99,"id":"one","name":"tame-impala"}`,
 	)
 
 	_, err := migrate.Session(options(directory), name)
@@ -312,7 +312,7 @@ func TestAJournalFromANewerBuildIsRefused(t *testing.T) {
 
 func TestAnEmptyJournalIsRefused(t *testing.T) {
 	directory := t.TempDir()
-	name := "brave-otter"
+	name := "tame-impala"
 
 	if err := os.MkdirAll(filepath.Join(directory, name), 0o750); err != nil {
 		t.Fatal(err)
@@ -328,7 +328,7 @@ func TestAnEmptyJournalIsRefused(t *testing.T) {
 
 func TestACopyOfTheBundleIsKeptBeforeItIsWritten(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"tool_call_request","highlight":{"kind":"focus"}}}`,
 	)
 
@@ -350,7 +350,7 @@ func TestACopyOfTheBundleIsKeptBeforeItIsWritten(t *testing.T) {
 
 func TestACopyIsNotWrittenOver(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"tame-impala"}`,
 	)
 
 	held := options(directory)
@@ -370,7 +370,7 @@ func TestACopyIsNotWrittenOver(t *testing.T) {
 
 func TestADryRunKeepsNoCopy(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"tame-impala"}`,
 	)
 
 	held := dryRun(directory)
@@ -385,7 +385,7 @@ func TestADryRunKeepsNoCopy(t *testing.T) {
 
 func TestTheTranscriptIsWrittenAgainFromTheCarriedJournal(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"tool_call_request","name":"read","render":"draw.go","highlight":{"kind":"focus","value":"draw.go"}}}`,
 	)
 
@@ -416,7 +416,7 @@ func TestTheTranscriptIsWrittenAgainFromTheCarriedJournal(t *testing.T) {
 
 func TestFormatFiveMigrationAddsEventStatuses(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":5,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":5,"id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"harness_message","text":"stopped"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"harness_message","text":"broken","failed":true}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"tool_call_result","text":"failed","failed":true}}`,
@@ -458,10 +458,10 @@ func TestFormatSevenMigrationCountsTheWholeSystemPrompt(t *testing.T) {
 	systemPrompt := strings.Repeat("x", 3000)
 	directory, name := storedJournal(t,
 		fmt.Sprintf(
-			`{"kind":"head","time":"2026-08-01T00:00:00Z","version":7,"id":"one","name":"brave-otter","meta":{"system_prompt":%q}}`,
+			`{"kind":"head","time":"2026-08-01T00:00:00Z","version":7,"id":"one","name":"tame-impala","meta":{"system_prompt":%q}}`,
 			systemPrompt,
 		),
-		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"startup","state":{"session":"brave-otter","context":[{"name":"SYSTEM.md","bytes":740}],"tools":614}}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"startup","state":{"session":"tame-impala","context":[{"name":"SYSTEM.md","bytes":740}],"tools":614}}}`,
 	)
 
 	from, err := migrate.Session(options(directory), name)
@@ -486,7 +486,7 @@ func TestFormatSevenMigrationCountsTheWholeSystemPrompt(t *testing.T) {
 
 func TestFormatSevenMigrationFallsBackToTheContextFilesItHas(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":7,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":7,"id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"startup","state":{"context":[{"name":"SYSTEM.md","bytes":740},{"name":"AGENTS.md","bytes":260}]}}}`,
 	)
 
@@ -501,7 +501,7 @@ func TestFormatSevenMigrationFallsBackToTheContextFilesItHas(t *testing.T) {
 
 func TestAnOlderJournalNamingTheBackgroundCapabilityMigratesAllTheWay(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":4,"id":"one","name":"brave-otter","meta":{"system_prompt":"# State\n\n- Background processes are allowed to outlive shell commands\n- The bash tool is granted"}}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":4,"id":"one","name":"tame-impala","meta":{"system_prompt":"# State\n\n- Background processes are allowed to outlive shell commands\n- The bash tool is granted"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","name":"b","text":"rxb"}}`,
 	)
 
@@ -520,7 +520,7 @@ func TestAnOlderJournalNamingTheBackgroundCapabilityMigratesAllTheWay(t *testing
 
 func TestFormatEightMigrationForgetsTheBackgroundCapability(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":8,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":8,"id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rxwb"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"mode_change","name":"b","text":"rxw"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"mode_change","name":"g","text":"rxwbg"}}`,
@@ -557,7 +557,7 @@ func TestFormatEightMigrationForgetsTheBackgroundCapability(t *testing.T) {
 
 func TestFormatNineMigrationForgetsTheModeASessionWasClosedOn(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":9,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":9,"id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rxwgs"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"user_message","text":"begin"}}`,
 		`{"kind":"item","time":"2026-08-01T00:00:03Z","payload":{"role":"user","content":"begin"}}`,
@@ -588,7 +588,7 @@ func TestFormatNineMigrationForgetsTheModeASessionWasClosedOn(t *testing.T) {
 
 func TestFormatNineMigrationKeepsAMessageTheModeChangeDoesNotAnnounce(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":9,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":9,"id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rxwgs"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"user_message","text":"begin"}}`,
 		`{"kind":"item","time":"2026-08-01T00:00:03Z","payload":{"role":"user","content":"begin"}}`,
@@ -612,7 +612,7 @@ func TestFormatNineMigrationKeepsAMessageTheModeChangeDoesNotAnnounce(t *testing
 
 func TestFormatNineMigrationKeepsTheMessagesOfACrashedTurn(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":9,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":9,"id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rxwgs"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"user_message","text":"begin"}}`,
 		`{"kind":"item","time":"2026-08-01T00:00:03Z","payload":{"role":"user","content":"begin"}}`,
@@ -640,7 +640,7 @@ func TestFormatNineMigrationKeepsTheMessagesOfACrashedTurn(t *testing.T) {
 
 func TestFormatTenMigrationSpellsPathGrantsWithFlags(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":10,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":10,"id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rxwgs"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"path_grant_change","state":`+
 			`{"grants":[{"path":"/one","access":"read"},{"path":"/two","access":"write"},`+
@@ -688,7 +688,7 @@ func startupState(t *testing.T, line map[string]json.RawMessage) map[string]json
 
 func TestFormatElevenMigrationKeepsTheFactAndDropsTheProse(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":11,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":11,"id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"startup","took":1000000}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"mode_change","text":"rxwgs"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"user_message","text":"begin"}}`,
@@ -750,7 +750,7 @@ func TestFormatElevenMigrationKeepsTheFactAndDropsTheProse(t *testing.T) {
 
 func TestFormatTwelveMigrationRenamesTheWebFlagToLookup(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":12,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":12,"id":"one","name":"tame-impala"}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"session_startup","took":1000000}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"mode_change","state":"rxws"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"user_message","text":"begin"}}`,
@@ -803,7 +803,7 @@ func TestFormatTwelveMigrationRenamesTheWebFlagToLookup(t *testing.T) {
 
 func firstFormatJournal() []string {
 	return []string{
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter",` +
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"tame-impala",` +
 			`"meta":{"provider":"codex","model":"gpt-5.6-sol","workspaceDir":"/workspace",` +
 			`"system_prompt":"# State\n\n- Background processes are allowed to outlive shell commands\n- The bash tool is granted"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","name":"b","text":"rxb"}}`,

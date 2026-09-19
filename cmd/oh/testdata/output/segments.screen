@@ -121,21 +121,21 @@ r:reference, rw:output
 === scroll-overflow / up ===
 ↑ 3
 === session-emoji ===
-🦦
+🦌
 === session-emoji / retired animal ===
 🦅
 === session-emoji / unknown animal ===
 
 === session-name ===
-brave-otter
+tame-impala
 === session-name / emoji ===
-brave-otter 🦦
+tame-impala 🦌
 === session-name / retired animal ===
 brave-vulture 🦅
 === session-name / unpersisted ===
-brave-otter
+tame-impala
 === session-name / unpersisted / emoji ===
-brave-otter 🦦
+tame-impala 🦌
 === session-spend / a currency without a symbol ===
 HUF 3564.00
 === session-spend / a fraction of a cent ===
@@ -203,10 +203,10 @@ usage failed
 === turn-timer / user turn ===
 12m 3m
 === workspace-dir ===
-project
+currents
 === workspace-dir / full ===
-/workspace/project
+/workspace/currents
 === workspace-dir / short below home ===
-~/florp/project
+~/modular/currents
 === workspace-dir / short outside home ===
-/workspace/project
+/workspace/currents

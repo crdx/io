@@ -39,7 +39,7 @@ func TestALabelThatFitsIsLeftAlone(t *testing.T) {
 }
 
 func TestAResultLinkWrapsOnlyTheCallName(t *testing.T) {
-	resultURI := "oh://tool-result?call=one&session=brave-otter"
+	resultURI := "oh://tool-result?call=one&session=tame-impala"
 	rendered := call.Label{Name: "read", Subject: "main.go", ResultURI: resultURI}.Render()
 	if !strings.Contains(rendered, "\x1b]8;;"+resultURI+"\x1b\\") {
 		t.Errorf("result URI is missing from %q", rendered)

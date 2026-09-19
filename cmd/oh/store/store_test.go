@@ -771,7 +771,7 @@ func TestRebuildLeavesTheJournalAlone(t *testing.T) {
 }
 
 func TestRebuildRefusesASessionThatIsNotThere(t *testing.T) {
-	if err := store.Rebuild(t.TempDir(), "brave-otter"); err == nil {
+	if err := store.Rebuild(t.TempDir(), "tame-impala"); err == nil {
 		t.Error("expected a rebuild of an unstored session to be refused")
 	}
 }

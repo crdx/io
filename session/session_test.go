@@ -642,14 +642,14 @@ func TestAJournalSaysWhichFormatItWasWrittenIn(t *testing.T) {
 
 func TestAJournalFromANewerOhIsNamedAndNotReplayed(t *testing.T) {
 	directory := t.TempDir()
-	name := "brave-otter"
+	name := "tame-impala"
 
 	if err := os.MkdirAll(filepath.Join(directory, name), 0o750); err != nil {
 		t.Fatal(err)
 	}
 
 	head := fmt.Sprintf(
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":"one","name":"tame-impala"}`,
 		session.JournalFormat+1,
 	) + "\n"
 	if err := os.WriteFile(filepath.Join(directory, name, "session.jsonl"), []byte(head), 0o600); err != nil {
@@ -679,13 +679,13 @@ func TestAJournalFromANewerOhIsNamedAndNotReplayed(t *testing.T) {
 
 func TestAJournalWithoutAVersionCountsAsTheFirstFormat(t *testing.T) {
 	directory := t.TempDir()
-	name := "brave-otter"
+	name := "tame-impala"
 
 	if err := os.MkdirAll(filepath.Join(directory, name), 0o750); err != nil {
 		t.Fatal(err)
 	}
 
-	head := `{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter"}` + "\n"
+	head := `{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"tame-impala"}` + "\n"
 	if err := os.WriteFile(filepath.Join(directory, name, "session.jsonl"), []byte(head), 0o600); err != nil {
 		t.Fatal(err)
 	}

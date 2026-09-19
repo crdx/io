@@ -10,7 +10,7 @@ import (
 )
 
 func TestDropsUseADirectoryInsideTheSession(t *testing.T) {
-	sessionDirectory := filepath.Join("state", "sessions", "brave-otter")
+	sessionDirectory := filepath.Join("state", "sessions", "tame-impala")
 	want := filepath.Join(sessionDirectory, "drops")
 	if got := GetDirectory(sessionDirectory); got != want {
 		t.Errorf("drops directory is %q, want %q", got, want)
@@ -56,7 +56,7 @@ func TestAFileIsCopiedPrivatelyIntoDrops(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 	path, err := CopyFile(sessionDirectory, func() error {
 		return os.Mkdir(sessionDirectory, 0o700)
 	}, sourcePath, "oaken-elephant.chat.md")

@@ -112,7 +112,7 @@ func TestConfiguredHostnameNamesTheSession(t *testing.T) {
 		hostname = "  preview-{session}.agent  "
 	`)
 
-	if got := settings.Ports.GetHostname("brave-otter", "127.27.192.223"); got != "preview-brave-otter.agent" {
+	if got := settings.Ports.GetHostname("tame-impala", "127.27.192.223"); got != "preview-tame-impala.agent" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -120,7 +120,7 @@ func TestConfiguredHostnameNamesTheSession(t *testing.T) {
 func TestTheDefaultHostnameIsTheSessionAddress(t *testing.T) {
 	settings := configFrom(t, "")
 
-	if got := settings.Ports.GetHostname("brave-otter", "127.27.192.223"); got != "127.27.192.223" {
+	if got := settings.Ports.GetHostname("tame-impala", "127.27.192.223"); got != "127.27.192.223" {
 		t.Errorf("got %q", got)
 	}
 }

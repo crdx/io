@@ -10,7 +10,7 @@ import (
 )
 
 func TestSavedHTMLIsWrittenUnchangedIntoTheDropsDirectory(t *testing.T) {
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 	contents := []byte("<!DOCTYPE html>\n<title>A &amp; B</title>\n")
 
 	path, err := drops.SaveHTML(sessionDirectory, persisted(sessionDirectory), contents)

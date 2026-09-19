@@ -196,7 +196,7 @@ Go has a new release. \e[38;2;129;162;190mSource\e[0m\e[38;2;150;152;150m (https
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/article\e[0m · \e[38;2;150;152;150mmarkdown\e[0m
 
 [raw HTML saved to
-/state/sessions/brave-otter/drops/fetch-0123456789abcdef.htm
+/state/sessions/tame-impala/drops/fetch-0123456789abcdef.htm
 l]
 
 \e[1m\e[38;2;207;173;0mArticle\e[0m\e[0m
@@ -207,7 +207,7 @@ l]
 === fetch html ===
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/raw\e[0m · \e[38;2;150;152;150mraw\e[0m
 
-\e[38;2;150;152;150m[raw HTML saved to /state/sessions/brave-otter/drops/fetch-fedcba9876543210.html]\e[0m
+\e[38;2;150;152;150m[raw HTML saved to /state/sessions/tame-impala/drops/fetch-fedcba9876543210.html]\e[0m
 
 \e[38;2;150;152;150m<!DOCTYPE html>\e[0m
 <title>\e[38;2;150;152;150mHello\e[0m</title>
@@ -216,7 +216,7 @@ l]
 === fetch clean HTML ===
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/clean\e[0m · \e[38;2;150;152;150mclean_html\e[0m
 
-\e[38;2;150;152;150m[raw HTML saved to /state/sessions/brave-otter/drops/fetch-clean.html]\e[0m
+\e[38;2;150;152;150m[raw HTML saved to /state/sessions/tame-impala/drops/fetch-clean.html]\e[0m
 
 <h1>\e[38;2;150;152;150mHello\e[0m</h1>
 <p>\e[38;2;150;152;150mClean page.\e[0m</p>
@@ -225,7 +225,7 @@ l]
 === fetch text ===
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/plain\e[0m · \e[38;2;150;152;150mtext\e[0m
 
-[raw HTML saved to /state/sessions/brave-otter/drops/fetch-text.html]
+[raw HTML saved to /state/sessions/tame-impala/drops/fetch-text.html]
 
 Hello
 
@@ -246,7 +246,7 @@ Plain page.
 
 
 \e[38;2;204;102;102mError\e[0m
-\e[38;2;204;102;102mfetch returned HTTP 418: not today (raw HTML saved to /state/sessions/brave-otter/drops/fetch-error.html)\e[0m
+\e[38;2;204;102;102mfetch returned HTTP 418: not today (raw HTML saved to /state/sessions/tame-impala/drops/fetch-error.html)\e[0m
 
 === fetch empty page ===
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/empty\e[0m · \e[38;2;150;152;150mtext\e[0m
@@ -254,7 +254,7 @@ Plain page.
 
 
 \e[38;2;204;102;102mError\e[0m
-\e[38;2;204;102;102mfetch returned no content (raw HTML saved to /state/sessions/brave-otter/drops/fetch-empty.html)\e[0m
+\e[38;2;204;102;102mfetch returned no content (raw HTML saved to /state/sessions/tame-impala/drops/fetch-empty.html)\e[0m
 
 === fetch save failure ===
 \e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/article\e[0m · \e[38;2;150;152;150mmarkdown\e[0m

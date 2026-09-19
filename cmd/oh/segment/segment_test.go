@@ -411,13 +411,13 @@ func offeringSegment(t *testing.T, text string) segment.Segment {
 }
 
 func TestTheSessionEmojiSegmentStandsForTheAnimal(t *testing.T) {
-	built, err := sessionEmoji.New("brave-otter")(tomlOptions(""))
+	built, err := sessionEmoji.New("tame-impala")(tomlOptions(""))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if got := style.Plain(built.Render(segment.Context{})); got != "🦦" {
-		t.Errorf("expected the otter emoji, got %q", got)
+	if got := style.Plain(built.Render(segment.Context{})); got != "🦌" {
+		t.Errorf("expected the impala emoji, got %q", got)
 	}
 }
 
@@ -437,47 +437,47 @@ func persistedSessionName(name string, directory string) segment.Factory {
 }
 
 func TestTheSessionNameSegmentCanOmitTheAnimalEmoji(t *testing.T) {
-	built, err := persistedSessionName("brave-otter", "/state/sessions/brave-otter")(tomlOptions("emoji = false\n"))
+	built, err := persistedSessionName("tame-impala", "/state/sessions/tame-impala")(tomlOptions("emoji = false\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if got := style.Plain(built.Render(segment.Context{})); got != "brave-otter" {
+	if got := style.Plain(built.Render(segment.Context{})); got != "tame-impala" {
 		t.Errorf("expected the session name, got %q", got)
 	}
 }
 
 func TestTheSessionNameSegmentCanAppendTheAnimalEmoji(t *testing.T) {
-	built, err := persistedSessionName("brave-otter", "/state/sessions/brave-otter")(tomlOptions("emoji = true\n"))
+	built, err := persistedSessionName("tame-impala", "/state/sessions/tame-impala")(tomlOptions("emoji = true\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if got := style.Plain(built.Render(segment.Context{})); got != "brave-otter 🦦" {
-		t.Errorf("expected the session name and otter emoji, got %q", got)
+	if got := style.Plain(built.Render(segment.Context{})); got != "tame-impala 🦌" {
+		t.Errorf("expected the session name and impala emoji, got %q", got)
 	}
 }
 
 func TestTheSessionNameSegmentLinksOnlyTheNameOnceTheSessionIsPersisted(t *testing.T) {
 	isPersisted := false
 	built, err := sessionName.New(
-		"brave-otter",
-		"/state/sessions/brave otter",
+		"tame-impala",
+		"/state/sessions/tame impala",
 		func() bool { return isPersisted },
 	)(tomlOptions("emoji = true\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	plain := style.Subtle("brave-otter") + " 🦦"
+	plain := style.Subtle("tame-impala") + " 🦌"
 	if got := built.Render(segment.Context{}); got != plain {
 		t.Errorf("got %q before persistence, want %q", got, plain)
 	}
 
 	isPersisted = true
-	opening := "\x1b]8;;file:///state/sessions/brave%20otter\x1b\\"
+	opening := "\x1b]8;;file:///state/sessions/tame%20impala\x1b\\"
 	closing := "\x1b]8;;\x1b\\"
-	want := opening + style.Subtle("brave-otter") + closing + " 🦦"
+	want := opening + style.Subtle("tame-impala") + closing + " 🦌"
 	if got := built.Render(segment.Context{}); got != want {
 		t.Errorf("got %q after persistence, want only the session name linked as %q", got, want)
 	}

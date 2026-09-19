@@ -351,7 +351,7 @@ func TestAnArchivedSessionIsListedOnlyWhenTheArchiveIsAskedFor(t *testing.T) {
 func TestOnlyARunningSessionIsDrawnApartInTheListing(t *testing.T) {
 	listings := []Listing{
 		{Name: "able-dolphin", Status: endedStatus, Messages: 1},
-		{Name: "brave-otter", Status: endedStatus, Messages: 40},
+		{Name: "tame-impala", Status: endedStatus, Messages: 40},
 		{Name: "wild-scorpion", Status: runningStatus, IsRunning: true, Messages: 1},
 	}
 

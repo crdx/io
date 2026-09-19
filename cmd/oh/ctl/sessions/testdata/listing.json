@@ -32,15 +32,15 @@
         "touched": "2026-08-28T13:45:25Z"
     },
     {
-        "name": "brave-otter",
+        "name": "tame-impala",
         "status": "archived",
         "isRunning": false,
         "isArchived": true,
         "isFast": false,
         "title": "rename the harness to oh",
         "workspaceDir": "/home/agent/florp/io",
-        "scratchDir": "/state/farm/brave-otter",
-        "sessionDir": "/state/sessions/brave-otter.tgz",
+        "scratchDir": "/state/farm/tame-impala",
+        "sessionDir": "/state/sessions/tame-impala.tgz",
         "model": "gpt-5.3-codex",
         "effort": "medium",
         "messages": 26,

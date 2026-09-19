@@ -9,7 +9,7 @@
 
 - "oh" is the harness you are running within
 - Each session dir is under /state/sessions, named after the session
-- This session's directory is /state/sessions/brave-otter
+- This session's directory is /state/sessions/tame-impala
 - "session.jsonl" is the journal, the single source of truth, as JSONL
 - "meta.json" is the listing entry: name, title, timestamps, and message count
 - "chat.md" is the readable transcript of the conversation
@@ -20,7 +20,7 @@
 # Scope
 
 - Your workspace is the current directory, /workspace
-- Your session is named brave-otter
+- Your session is named tame-impala
 - Tools that accept a path can access the workspace, private home, /tmp, read-only system and executable search paths, and the configured paths listed here.
 - The configured path /reference is read-only.
 - The configured path /output is read-write and follows the workspace write state.
@@ -43,7 +43,7 @@
 # /tmp
 
 - /tmp is the machine's own /tmp, shared with everything else running on it
-- Your persistent scratch space is /state/farm/brave-otter, which you can always read and write to
+- Your persistent scratch space is /state/farm/tame-impala, which you can always read and write to
 - Give the user that path exactly as it is written here
 
 # Home

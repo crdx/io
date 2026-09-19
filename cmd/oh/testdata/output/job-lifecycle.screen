@@ -19,7 +19,7 @@ The docs server is up.
 
     [truncated at 2K of 58.6K; full
     output in
-    /state/sessions/brave-otter/drops/ou
+    /state/sessions/tame-impala/drops/ou
     tput-3f2a1c8d4b5e6f70.txt]
  🤖 Job empty exited: complete after 15s
     (no output).
@@ -537,27 +537,27 @@ s
 
 /
 
-b
-
-r
+t
 
 a
 
-v
+m
 
 e
 
 -
 
-o
+i
 
-t
+m
 
-t
+p
 
-e
+a
 
-r
+l
+
+a
 
 /
 
@@ -1371,7 +1371,7 @@ The docs server is up.
     seeding the database
 
     [truncated at 2K of 58.6K; full output in
-    /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]
+    /state/sessions/tame-impala/drops/output-3f2a1c8d4b5e6f70.txt]
  🤖 Job empty exited: complete after 15s (no output).
  🤖 Job build`fast exited: complete after 16s.
     done
@@ -1445,8 +1445,8 @@ up.
     in
     /state/s
     essions/
-    brave-ot
-    ter/drop
+    tame-imp
+    ala/drop
     s/output
     -3f2a1c8
     d4b5e6f7
@@ -1546,7 +1546,7 @@ The docs server is up.
     seeding the database
 
     [truncated at 2K of 58.6K; full output in
-    /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]
+    /state/sessions/tame-impala/drops/output-3f2a1c8d4b5e6f70.txt]
  🤖 Job empty exited: complete after 15s (no output).
  🤖 Job build`fast exited: complete after 16s.
     done

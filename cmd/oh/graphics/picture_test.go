@@ -60,7 +60,7 @@ func TestAPNGIsSentAsItIsRatherThanDecodedFirst(t *testing.T) {
 }
 
 func TestAPictureOnDiskIsSentAsItsPathRatherThanItsBytes(t *testing.T) {
-	const path = "/state/sessions/brave-otter/images/abc.png"
+	const path = "/state/sessions/tame-impala/images/abc.png"
 
 	rows, isPlaced := PlaceFile(path, Box{Cells: 4, Rows: 1})
 	if !isPlaced {

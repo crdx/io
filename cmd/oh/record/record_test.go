@@ -81,11 +81,11 @@ func TestRecorderRejectsReplacedProviderHistory(t *testing.T) {
 
 func TestRecorderForwardsSessionIdentityEventsAndWarnings(t *testing.T) {
 	warning := errors.New("transcript disabled")
-	session := &testSession{name: "brave-otter", isPersisted: true, failAt: -1, warnings: []error{warning}}
+	session := &testSession{name: "tame-impala", isPersisted: true, failAt: -1, warnings: []error{warning}}
 	recorder := New(session)
 	event := agent.Event{Kind: agent.UserMessageEvent, Text: "hello"}
 
-	if !recorder.IsPersisted() || recorder.Name() != "brave-otter" {
+	if !recorder.IsPersisted() || recorder.Name() != "tame-impala" {
 		t.Errorf("lost session identity")
 	}
 	if err := recorder.Event(event); err != nil {

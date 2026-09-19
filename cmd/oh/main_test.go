@@ -226,7 +226,7 @@ func drawScratchPath(t *testing.T, event agent.Event, isAppendOnly bool) string 
 	paint.DrawEvent(event)
 	screen.Seal()
 
-	return strings.ReplaceAll(screenOutput.String(), scratch, "/state/farm/brave-otter")
+	return strings.ReplaceAll(screenOutput.String(), scratch, "/state/farm/tame-impala")
 }
 
 func drawScratchPathLink(t *testing.T) string {
@@ -4484,7 +4484,7 @@ func modeMessagesStream(t *testing.T, toggleCount int, isSent bool, laterLine st
 	self, _ := modeFixture(t)
 	var screenOutput strings.Builder
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
-	self.screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "brave-otter"}, replayColumns, false))
+	self.screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "tame-impala"}, replayColumns, false))
 
 	if toggleCount > 0 {
 		self.toggleCap(caps.Write)
@@ -4505,7 +4505,7 @@ func modeMessagesStream(t *testing.T, toggleCount int, isSent bool, laterLine st
 func submittedModeMessagesStream() string {
 	var screenOutput strings.Builder
 	screen := output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
-	screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "brave-otter"}, replayColumns, false))
+	screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "tame-impala"}, replayColumns, false))
 	picasso := painter.New(screen, false, nil, nil, defaultStreamingMode)
 	picasso.DrawEvent(caps.ModeToggleEvent(caps.Write, caps.Read|caps.Shell|caps.Git))
 	picasso.DrawEvent(caps.ModeToggleEvent(caps.Git, caps.Read|caps.Shell|caps.Git))
@@ -5318,7 +5318,7 @@ func corruptedSessionFailure(t *testing.T, binary string, suffix string) string 
 		t.Fatalf("corrupted session unexpectedly opened: %s", output)
 	}
 
-	return strings.ReplaceAll(string(output), writer.Name(), "brave-otter")
+	return strings.ReplaceAll(string(output), writer.Name(), "tame-impala")
 }
 
 func TestVersionDispatchRunsThroughTheBinary(t *testing.T) {
@@ -6116,7 +6116,7 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 
 	dropsDirectory := ""
 	if shape.hasClipboardDrops {
-		dropsDirectory = "/state/sessions/brave-otter/drops"
+		dropsDirectory = "/state/sessions/tame-impala/drops"
 	}
 
 	readPaths := []string{"/reference"}
@@ -6144,11 +6144,11 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 	got, _, err := prompt.Load(prompt.Config{
 		GlobalPath:     globalPath,
 		Workspace:      workspace,
-		SessionName:    "brave-otter",
+		SessionName:    "tame-impala",
 		SessionsDir:    "/state/sessions",
-		SessionDir:     "/state/sessions/brave-otter",
+		SessionDir:     "/state/sessions/tame-impala",
 		ConfigFile:     "/config/config.toml",
-		TmpDir:         "/state/farm/brave-otter",
+		TmpDir:         "/state/farm/tame-impala",
 		HomeDir:        "/state/home",
 		CurrentCaps:    currentCaps,
 		ExtraPaths:     extraPaths,
@@ -6813,7 +6813,7 @@ func writeTranscript(t *testing.T, entries []replayEntry) string {
 	path := filepath.Join(t.TempDir(), "chat.md")
 
 	recorder, err := transcript.Open(path, transcript.Meta{
-		Name:      "brave-otter",
+		Name:      "tame-impala",
 		Model:     "gpt-5.6-sol",
 		Effort:    "high",
 		Provider:  "codex",
@@ -7254,7 +7254,7 @@ func (self *replayRig) load(entries []replayEntry) {
 
 func (self *replayRig) drawn() string {
 	drawn := strings.ReplaceAll(self.written.String(), self.workspace.GetDir(), workspaceMarker)
-	return strings.ReplaceAll(drawn, self.sessionName, "brave-otter")
+	return strings.ReplaceAll(drawn, self.sessionName, "tame-impala")
 }
 
 func replayAtWidth(t *testing.T, entries []replayEntry, columns int) string {
@@ -7647,7 +7647,7 @@ func TestGoldenTheBarConfiguredByDefaultDrawsWhatItDrewBefore(t *testing.T) {
 					)
 
 					layout, err := configFrom(t, "").BuildLayout(
-						availableSegments(work.At(workspaceMarker), "brave-otter", "gpt-5.6-sol", "high", held),
+						availableSegments(work.At(workspaceMarker), "tame-impala", "gpt-5.6-sol", "high", held),
 					)
 					if err != nil {
 						t.Fatal(err)
@@ -7682,7 +7682,7 @@ func TestGoldenTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 	}
 
 	compareWithGolden(t, "startup", ".ansi", map[string]func() string{
-		"styled": func() string { return line("brave-otter", replayColumns, false) },
+		"styled": func() string { return line("tame-impala", replayColumns, false) },
 	})
 
 	passes := map[string]func() string{}
@@ -7692,13 +7692,13 @@ func TestGoldenTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 		"tiny":       tinyColumns,
 		"one column": oneColumn,
 	} {
-		passes[name] = func() string { return shown(t, line("brave-otter", columns, false), columns) }
+		passes[name] = func() string { return shown(t, line("tame-impala", columns, false), columns) }
 	}
 	compareWithGolden(t, "startup", ".screen", passes)
 
 	minimumColumns := 0
 	for columns := 1; columns <= replayColumns; columns++ {
-		if strings.Contains(line("brave-otter", columns, true), "\x1b]66;") {
+		if strings.Contains(line("tame-impala", columns, true), "\x1b]66;") {
 			minimumColumns = columns
 			break
 		}
@@ -7708,30 +7708,30 @@ func TestGoldenTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 	}
 
 	compareWithGolden(t, "startup-sized", ".ansi", map[string]func() string{
-		"wide with emoji":          func() string { return line("brave-otter", replayColumns, true) },
-		"minimum width with emoji": func() string { return line("brave-otter", minimumColumns, true) },
-		"below minimum width":      func() string { return line("brave-otter", minimumColumns-1, true) },
+		"wide with emoji":          func() string { return line("tame-impala", replayColumns, true) },
+		"minimum width with emoji": func() string { return line("tame-impala", minimumColumns, true) },
+		"below minimum width":      func() string { return line("tame-impala", minimumColumns-1, true) },
 		"unknown animal":           func() string { return line("brave-tester", replayColumns, true) },
 		"retired animal":           func() string { return line(retiredAnimalSession, replayColumns, true) },
 		"no session":               func() string { return line("", replayColumns, true) },
-		"unsupported protocol":     func() string { return line("brave-otter", replayColumns, false) },
+		"unsupported protocol":     func() string { return line("tame-impala", replayColumns, false) },
 	})
 	compareWithGolden(t, "startup-sized", ".screen", map[string]func() string{
 		"wide with emoji": func() string {
-			return shown(t, line("brave-otter", replayColumns, true), replayColumns)
+			return shown(t, line("tame-impala", replayColumns, true), replayColumns)
 		},
 		"minimum width with emoji": func() string {
-			return shown(t, line("brave-otter", minimumColumns, true), minimumColumns)
+			return shown(t, line("tame-impala", minimumColumns, true), minimumColumns)
 		},
 		"below minimum width": func() string {
-			return shown(t, line("brave-otter", minimumColumns-1, true), minimumColumns-1)
+			return shown(t, line("tame-impala", minimumColumns-1, true), minimumColumns-1)
 		},
 	})
 
 	terminalStream := func(columns int, localConfig *startup.LocalConfig) string {
 		var stream strings.Builder
 		screen := output.NewTerminalOfSize(&stream, columns, replayLines)
-		event := startup.NewEvent(1500*time.Microsecond, bannerInfo("brave-otter", localConfig))
+		event := startup.NewEvent(1500*time.Microsecond, bannerInfo("tame-impala", localConfig))
 		screen.Line(startup.RenderEvent(event, columns, true))
 		screen.Line("Following output.")
 		screen.End()
@@ -7813,7 +7813,7 @@ func TestGoldenLocalConfigsDrawMegathoroughly(t *testing.T) {
 	}
 
 	render := func(info startup.Info, columns int, isTextSizingSupported bool) string {
-		info.Session = "brave-otter"
+		info.Session = "tame-impala"
 		info.PromptBytes = 740 + 3*1024
 		info.ProjectSkills = 3
 		info.GlobalSkills = 1
@@ -8192,7 +8192,7 @@ func prepareLiveConfigSources(t *testing.T, self *App, sources ...config.Source)
 	}
 	self.configObserver = observer
 	t.Cleanup(observer.Close)
-	registry := availableSegments(work.At(workspaceMarker), "brave-otter", "gpt-5.6-sol", "high", self)
+	registry := availableSegments(work.At(workspaceMarker), "tame-impala", "gpt-5.6-sol", "high", self)
 	live, err := settings.BuildLive(registry)
 	if err != nil {
 		t.Fatal(err)
@@ -10643,7 +10643,7 @@ func goldenBarLayout(t *testing.T, harness *App) segment.Layout {
 	`)
 
 	layout, err := config.BuildLayout(
-		availableSegments(work.At(workspaceMarker), "brave-otter", "gpt-5.6-sol", "high", harness),
+		availableSegments(work.At(workspaceMarker), "tame-impala", "gpt-5.6-sol", "high", harness),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -10842,7 +10842,7 @@ func TestGoldenTheRedrawScheduleRunsWhenItRanBefore(t *testing.T) {
 }
 
 func TestGoldenEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
-	t.Setenv("HOME", "/user/tester")
+	t.Setenv("HOME", "/user/kevin")
 
 	at := time.Date(2026, time.August, 23, 14, 32, 9, 0, time.UTC)
 	isPersisted := func() bool { return true }
@@ -10958,25 +10958,25 @@ func TestGoldenEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"session-name": goldenSegmentPass(
 			t,
-			sessionName.New("brave-otter", "/state/sessions/brave-otter", isPersisted),
+			sessionName.New("tame-impala", "/state/sessions/tame-impala", isPersisted),
 			"",
 			segment.Context{},
 		),
 		"session-name / unpersisted": goldenSegmentPass(
 			t,
-			sessionName.New("brave-otter", "/state/sessions/brave-otter", isNotPersisted),
+			sessionName.New("tame-impala", "/state/sessions/tame-impala", isNotPersisted),
 			"",
 			segment.Context{},
 		),
 		"session-name / unpersisted / emoji": goldenSegmentPass(
 			t,
-			sessionName.New("brave-otter", "/state/sessions/brave-otter", isNotPersisted),
+			sessionName.New("tame-impala", "/state/sessions/tame-impala", isNotPersisted),
 			"emoji = true",
 			segment.Context{},
 		),
 		"session-name / emoji": goldenSegmentPass(
 			t,
-			sessionName.New("brave-otter", "/state/sessions/brave-otter", isPersisted),
+			sessionName.New("tame-impala", "/state/sessions/tame-impala", isPersisted),
 			"emoji = true",
 			segment.Context{},
 		),
@@ -11024,7 +11024,7 @@ func TestGoldenEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"session-emoji": goldenSegmentPass(
 			t,
-			sessionEmoji.New("brave-otter"),
+			sessionEmoji.New("tame-impala"),
 			"",
 			segment.Context{},
 		),
@@ -11464,25 +11464,25 @@ func TestGoldenEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"workspace-dir": goldenSegmentPass(
 			t,
-			workspaceDir.New(work.At("/workspace/project")),
+			workspaceDir.New(work.At("/workspace/currents")),
 			"",
 			segment.Context{},
 		),
 		"workspace-dir / full": goldenSegmentPass(
 			t,
-			workspaceDir.New(work.At("/workspace/project")),
+			workspaceDir.New(work.At("/workspace/currents")),
 			`type = "full"`,
 			segment.Context{},
 		),
 		"workspace-dir / short below home": goldenSegmentPass(
 			t,
-			workspaceDir.New(work.At("/user/tester/florp/project")),
+			workspaceDir.New(work.At("/user/kevin/modular/currents")),
 			`type = "short"`,
 			segment.Context{},
 		),
 		"workspace-dir / short outside home": goldenSegmentPass(
 			t,
-			workspaceDir.New(work.At("/workspace/project")),
+			workspaceDir.New(work.At("/workspace/currents")),
 			`type = "short"`,
 			segment.Context{},
 		),
@@ -12162,7 +12162,7 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 	workspace := openTestWorkspace(t, t.TempDir())
 	preparePathGrantCommands(t, self, workspace)
 	self.settleAccess()
-	registry := availableSegments(workspace, "brave-otter", "gpt-5.6-sol", "high", self)
+	registry := availableSegments(workspace, "tame-impala", "gpt-5.6-sol", "high", self)
 	live, err := configFrom(t, `
 		[bar.top]
 		left = [
@@ -13387,7 +13387,7 @@ func newSessionGoldenProvider(
 	}
 }
 
-const goldenSessionName = "brave-otter"
+const goldenSessionName = "tame-impala"
 
 func goldenExposedPorts(ports ...uint16) exposedPorts.Routes {
 	return exposedPorts.Routes{
@@ -13630,7 +13630,7 @@ func newSessionGoldenShell(t *testing.T, grantedCaps caps.Set, isYolo bool) tool
 func allowApproval(context.Context, string) error { return nil }
 
 func saveTestHTML([]byte) (string, error) {
-	return "/state/sessions/brave-otter/drops/fetch-test.html", nil
+	return "/state/sessions/tame-impala/drops/fetch-test.html", nil
 }
 
 func newRefusingAskBroker(t *testing.T) *ask.Broker {
@@ -14258,9 +14258,9 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	}
 
 	for extension, drawn := range outputs {
-		drawn = strings.ReplaceAll(drawn, sessionName, "brave-otter")
+		drawn = strings.ReplaceAll(drawn, sessionName, "tame-impala")
 		if scenario.ScratchDirectory != "" {
-			drawn = strings.ReplaceAll(drawn, scenario.ScratchDirectory, "/state/farm/brave-otter")
+			drawn = strings.ReplaceAll(drawn, scenario.ScratchDirectory, "/state/farm/tame-impala")
 		}
 		if scenario.CredentialsPath != "" {
 			pendingCredentialsPattern := regexp.MustCompile(regexp.QuoteMeta(scenario.CredentialsPath) + `\.[0-9]+`)
@@ -14896,7 +14896,7 @@ func canonicalSessionMeta(t *testing.T, directory string, name string) string {
 	if err := json.Unmarshal(encoded, &meta); err != nil {
 		t.Fatal(err)
 	}
-	canonicalName, err := json.Marshal("brave-otter")
+	canonicalName, err := json.Marshal("tame-impala")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -14974,7 +14974,7 @@ var (
 )
 
 func canonicalSessionTranscript(transcript string, sessionName string) string {
-	canonical := strings.ReplaceAll(transcript, sessionName, "brave-otter")
+	canonical := strings.ReplaceAll(transcript, sessionName, "tame-impala")
 	canonical = transcriptStartedPattern.ReplaceAllString(
 		canonical,
 		"- **Started:** `"+transcriptTime.Format(time.RFC3339Nano)+"`",
@@ -15519,7 +15519,7 @@ func TestAPastedImageIsSavedAndItsPathInsertedAtTheCursor(t *testing.T) {
 	var savedData []byte
 	self.savePastedImage = func(mediaType string, data []byte) (string, error) {
 		savedType, savedData = mediaType, data
-		return "/state/sessions/brave-otter/drops/image-123.png", nil
+		return "/state/sessions/tame-impala/drops/image-123.png", nil
 	}
 
 	inputLine := edit.NewInput(nil)
@@ -15535,7 +15535,7 @@ func TestAPastedImageIsSavedAndItsPathInsertedAtTheCursor(t *testing.T) {
 		self.handleKeypressAndShowInput(inputLine, nil, keypress)
 	}
 
-	want := "look /state/sessions/brave-otter/drops/image-123.png now"
+	want := "look /state/sessions/tame-impala/drops/image-123.png now"
 	if inputLine.Text() != want {
 		t.Errorf("pasted input is %q, want %q", inputLine.Text(), want)
 	}
@@ -15699,7 +15699,7 @@ func savedAs(path string) func(string, []byte) (string, error) {
 func pastedImageStream(t *testing.T) string {
 	t.Helper()
 
-	return pasteEventStream(t, "review ", savedAs("/state/sessions/brave-otter/drops/image-123.png"),
+	return pasteEventStream(t, "review ", savedAs("/state/sessions/tame-impala/drops/image-123.png"),
 		slices.Concat(
 			pasteEvent("image/png"),
 			pasteContent("image/png", []byte("\x89PNG")),
@@ -15715,7 +15715,7 @@ func chunkedImagePasteStream(t *testing.T) string {
 	}
 	chunks = append(chunks, pasteReport(key.ClipboardClosed, "", nil))
 
-	return pasteEventStream(t, "review ", savedAs("/state/sessions/brave-otter/drops/image-456.png"),
+	return pasteEventStream(t, "review ", savedAs("/state/sessions/tame-impala/drops/image-456.png"),
 		slices.Concat(pasteEvent("image/png"), chunks))
 }
 
@@ -17682,7 +17682,7 @@ func drawnPNGFor(t *testing.T, width int, height int) []byte {
 func storedPictureFor(t *testing.T, width int, height int) (string, *agent.Picture) {
 	t.Helper()
 
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 
 	reference, err := pictures.Store(
 		sessionDirectory,

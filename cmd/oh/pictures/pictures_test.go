@@ -36,7 +36,7 @@ func drawnPNG(t *testing.T, width int, height int) []byte {
 func session(t *testing.T) (string, func() error) {
 	t.Helper()
 
-	directory := filepath.Join(t.TempDir(), "brave-otter")
+	directory := filepath.Join(t.TempDir(), "tame-impala")
 
 	return directory, func() error { return os.MkdirAll(directory, 0o700) }
 }

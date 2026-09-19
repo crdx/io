@@ -211,10 +211,10 @@ func TestAPathCanBeAskedForEvenWhenNobodyIsListening(t *testing.T) {
 }
 
 func TestClipboardDropsAreDisclosedInTheHarnessContext(t *testing.T) {
-	dropsDirectory := "/state/sessions/brave-otter/drops"
+	dropsDirectory := "/state/sessions/tame-impala/drops"
 	got := harnessContext(Config{
 		Workspace:      work.At("/workspace"),
-		SessionName:    "brave-otter",
+		SessionName:    "tame-impala",
 		TmpDir:         "/state/farm/session",
 		HomeDir:        "/state/home",
 		CurrentCaps:    caps.Read,
@@ -228,7 +228,7 @@ func TestClipboardDropsAreDisclosedInTheHarnessContext(t *testing.T) {
 }
 
 func TestAStoredPromptLearnsAboutClipboardDropsOnce(t *testing.T) {
-	dropsDirectory := "/state/sessions/brave-otter/drops"
+	dropsDirectory := "/state/sessions/tame-impala/drops"
 	got := WithDropsDirectory("stored prompt", dropsDirectory)
 	want := "stored prompt\n\n# Clipboard Drops\n\n- " + dropsRule(dropsDirectory)
 	if got != want {
@@ -242,14 +242,14 @@ func TestAStoredPromptLearnsAboutClipboardDropsOnce(t *testing.T) {
 func TestTheHarnessDisclosesTheSessionName(t *testing.T) {
 	got := harnessContext(Config{
 		Workspace:   work.At("/workspace"),
-		SessionName: "brave-otter",
+		SessionName: "tame-impala",
 		TmpDir:      "/tmp/x",
 		HomeDir:     "/state/home",
 		CurrentCaps: caps.Read,
 		ExtraPaths:  shell.Paths{},
 	})
 
-	if !strings.Contains(got, "Your session is named brave-otter") {
+	if !strings.Contains(got, "Your session is named tame-impala") {
 		t.Errorf("harness context does not contain the session name: %q", got)
 	}
 }
@@ -257,7 +257,7 @@ func TestTheHarnessDisclosesTheSessionName(t *testing.T) {
 func TestTheHarnessGivesTheSessionItsAnimalPersonality(t *testing.T) {
 	got := harnessContext(Config{
 		Workspace:   work.At("/workspace"),
-		SessionName: "brave-otter",
+		SessionName: "tame-impala",
 		TmpDir:      "/tmp/x",
 		HomeDir:     "/state/home",
 		CurrentCaps: caps.Read,
@@ -762,8 +762,8 @@ func TestAWorkspaceWithNoRepositorySaysSoInsteadOfNamingAGitDirectory(t *testing
 func TestAReadOnlyPathHoldingTheScratchReportsTheScratchAsWritable(t *testing.T) {
 	got := harnessContext(Config{
 		Workspace:   work.At("/workspace"),
-		SessionName: "brave-otter",
-		TmpDir:      "/state/farm/brave-otter",
+		SessionName: "tame-impala",
+		TmpDir:      "/state/farm/tame-impala",
 		HomeDir:     "/state/home",
 		CurrentCaps: caps.Read,
 		ExtraPaths:  shell.Paths{Read: []string{"/state/farm", "/state/sessions"}},
@@ -771,7 +771,7 @@ func TestAReadOnlyPathHoldingTheScratchReportsTheScratchAsWritable(t *testing.T)
 
 	for _, want := range []string{
 		"The configured path /state/farm is read-only, apart from your scratch space at " +
-			"/state/farm/brave-otter, which is writable.",
+			"/state/farm/tame-impala, which is writable.",
 		"The configured path /state/sessions is read-only.",
 	} {
 		if !strings.Contains(got, want) {

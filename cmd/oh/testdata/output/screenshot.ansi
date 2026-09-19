@@ -3,11 +3,11 @@
 \e[48;2;52;53;65m what is in this screenshot?            \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\r
 \r\e[K\e_Ga=T,U=1,q=2,f=100,t=d,i=<identifier>,c=12,r=3,m=0;<data>\e\\<picture>􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̍̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̎̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KIt is a gradient, and the notes beside\r
 \r\e[Kit are short.\r
@@ -123,11 +123,11 @@ It is a gradient, and the notes beside it are short.
 \e[48;2;52;53;65m what is in this screenshot?                                                                        \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\r
+\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\r
 \e_Ga=T,U=1,q=2,f=100,t=d,i=<identifier>,c=12,r=3,m=0;<data>\e\\<picture>􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 <picture>􎻮̍̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 <picture>􎻮̎̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
-\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 It is a gradient, and the notes beside it are short.\r
 
@@ -136,11 +136,11 @@ It is a gradient, and the notes beside it are short.\r
 \e[48;2;52;53;65m what is in this screenshot?                                                                        \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?2026h\e[?25l\e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\e[?2026h\e[?25l\e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e_Ga=T,U=1,q=2,f=100,t=d,i=<identifier>,c=12,r=3,m=0;<data>\e\\<picture>􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̍̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̎̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KIt i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a grad\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes besi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it ar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it are sh\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it are short.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -149,11 +149,11 @@ It is a gradient, and the notes beside it are short.\r
 \e[48;2;52;53;65m what is in this screenshot?                                                                        \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?2026h\e[?25l\e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\e[?2026h\e[?25l\e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e_Ga=T,U=1,q=2,f=100,t=d,i=<identifier>,c=12,r=3,m=0;<data>\e\\<picture>􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̍̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̎̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it are short.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -162,11 +162,11 @@ It is a gradient, and the notes beside it are short.\r
 \e[48;2;52;53;65m what is in this screenshot?                                                                        \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?2026h\e[?25l\e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\e[?2026h\e[?25l\e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e_Ga=T,U=1,q=2,f=100,t=d,i=<identifier>,c=12,r=3,m=0;<data>\e\\<picture>􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̍̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̎̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KIt i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a grad\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes besi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it ar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it are sh\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt is a gradient, and the notes beside it are short.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -177,11 +177,11 @@ It is a gradient, and the notes beside it are short.\r
 \e[48;2;52;53;65m screenshot?\e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80ms…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;192;128;80ms…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\r
 \r\e[K\e_Ga=T,U=1,q=2,f=100,t=d,i=<identifier>,c=12,r=3,m=0;<data>\e\\<picture>􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̍̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̎̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mnote…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;192;128;80mnote…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KIt is a\r
 \r\e[Kgradient,\r
@@ -194,8 +194,8 @@ It is a gradient, and the notes beside it are short.\r
 \e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m what is in this screenshot?\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m
 
 \r\e[KIt is a gradient, and the notes beside it are short.
 \e[?25h\e[?2026l
@@ -204,11 +204,11 @@ It is a gradient, and the notes beside it are short.\r
 \e[48;2;52;53;65m what is in this screenshot?                                                                        \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreenshot.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0t\e[0m\r
 \r\e[K\e_Ga=T,U=1,q=2,f=100,t=d,i=<identifier>,c=12,r=3,m=0;<data>\e\\<picture>􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̍̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
 \r\e[K<picture>􎻮̎̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮􎻮\e[39m\r
-\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KIt is a gradient, and the notes beside it are short.\r
 \e[?25h\e[?2026l

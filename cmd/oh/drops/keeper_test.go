@@ -24,7 +24,7 @@ func newFiles(t *testing.T) *file.Root {
 func openKeeper(t *testing.T) (*Keeper, string) {
 	t.Helper()
 
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 	keeper, err := Open(newFiles(t), sessionDirectory, func() error {
 		return os.MkdirAll(sessionDirectory, 0o700)
 	})

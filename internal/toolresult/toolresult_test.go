@@ -10,12 +10,12 @@ import (
 )
 
 func TestURLRoundTripsOpaqueValues(t *testing.T) {
-	address := toolresult.URL("brave-otter", "call/a?b&c")
+	address := toolresult.URL("tame-impala", "call/a?b&c")
 	reference, err := toolresult.Parse(address)
 	if err != nil {
 		t.Fatalf("unexpected parse error: %v", err)
 	}
-	if reference.SessionName != "brave-otter" || reference.CallID != "call/a?b&c" {
+	if reference.SessionName != "tame-impala" || reference.CallID != "call/a?b&c" {
 		t.Errorf("got reference %#v", reference)
 	}
 }
@@ -23,9 +23,9 @@ func TestURLRoundTripsOpaqueValues(t *testing.T) {
 func TestParseRefusesOtherAddresses(t *testing.T) {
 	for _, address := range []string{
 		"https://example.test/",
-		"oh://tool-result/elsewhere?session=brave-otter&call=one",
-		"oh://tool-result?session=brave-otter",
-		"oh://tool-result?session=brave-otter&call=one&extra=two",
+		"oh://tool-result/elsewhere?session=tame-impala&call=one",
+		"oh://tool-result?session=tame-impala",
+		"oh://tool-result?session=tame-impala&call=one&extra=two",
 	} {
 		if _, err := toolresult.Parse(address); err == nil {
 			t.Errorf("expected %q to be refused", address)

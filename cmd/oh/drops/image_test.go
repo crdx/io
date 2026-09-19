@@ -17,7 +17,7 @@ func persisted(directory string) func() error {
 }
 
 func TestAPastedImageIsWrittenIntoTheDropsDirectory(t *testing.T) {
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 
 	path, err := drops.SaveImage(
 		sessionDirectory,
@@ -53,7 +53,7 @@ func TestEachSupportedImageTypeTakesItsOwnExtension(t *testing.T) {
 		"image/gif":  ".gif",
 	} {
 		t.Run(mediaType, func(t *testing.T) {
-			sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+			sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 
 			path, err := drops.SaveImage(
 				sessionDirectory,
@@ -73,7 +73,7 @@ func TestEachSupportedImageTypeTakesItsOwnExtension(t *testing.T) {
 }
 
 func TestAnUnsupportedImageTypeIsRefusedWithoutPreparingAnything(t *testing.T) {
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 
 	_, err := drops.SaveImage(
 		sessionDirectory,
@@ -93,7 +93,7 @@ func TestAnUnsupportedImageTypeIsRefusedWithoutPreparingAnything(t *testing.T) {
 }
 
 func TestTheSameImagePastedTwiceIsDroppedOnce(t *testing.T) {
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 	data := []byte("\x89PNG\r\n the very same bytes")
 
 	first, err := drops.SaveImage(sessionDirectory, persisted(sessionDirectory), "image/png", data)
@@ -119,7 +119,7 @@ func TestTheSameImagePastedTwiceIsDroppedOnce(t *testing.T) {
 }
 
 func TestTwoDifferentImagesAreDroppedSeparately(t *testing.T) {
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 
 	first, err := drops.SaveImage(sessionDirectory, persisted(sessionDirectory), "image/png", []byte("one"))
 	if err != nil {
@@ -136,7 +136,7 @@ func TestTwoDifferentImagesAreDroppedSeparately(t *testing.T) {
 }
 
 func TestAnImageIsNamedAfterItsContentsSoAPasteIsRecognisedAgain(t *testing.T) {
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 	data := []byte("\x89PNG named by what it holds")
 
 	path, err := drops.SaveImage(sessionDirectory, persisted(sessionDirectory), "image/png", data)
@@ -153,7 +153,7 @@ func TestAnImageIsNamedAfterItsContentsSoAPasteIsRecognisedAgain(t *testing.T) {
 }
 
 func TestAnImageWhoseNameIsTakenByOtherContentsIsDroppedBeside(t *testing.T) {
-	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "tame-impala")
 	data := []byte("\x89PNG the real image")
 
 	digest := sha256.Sum256(data)

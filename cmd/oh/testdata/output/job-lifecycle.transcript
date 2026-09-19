@@ -1,7 +1,7 @@
 === written down ===
 # Conversation
 
-- **Session:** `brave-otter`
+- **Session:** `tame-impala`
 - **Started:** `2001-01-01T00:00:00Z`
 - **Model:** `gpt-5.6-sol`
 - **Effort:** `high`
@@ -40,7 +40,7 @@ exit status 1
 Job `seed` exited: complete after 14s.
 seeding the database
 
-[truncated at 2K of 58.6K; full output in /state/sessions/brave-otter/drops/output-3f2a1c8d4b5e6f70.txt]
+[truncated at 2K of 58.6K; full output in /state/sessions/tame-impala/drops/output-3f2a1c8d4b5e6f70.txt]
 ```
 
 ## job_ended · +7s

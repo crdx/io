@@ -97,7 +97,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	if err := os.Mkdir(snippetsDirectory, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	sessionDirectory := filepath.Join(t.TempDir(), "sessions", "brave-otter")
+	sessionDirectory := filepath.Join(t.TempDir(), "sessions", "tame-impala")
 	if err := os.MkdirAll(sessionDirectory, 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		homeDir:          homeDirectory,
 		skillDirs:        skillDirectories,
 		session: commandSession{
-			name:           "brave-otter",
+			name:           "tame-impala",
 			id:             "session-id",
 			directory:      sessionDirectory,
 			isPersisted:    func() bool { return true },
@@ -157,8 +157,8 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		"/open snippets-dir":       "open:" + snippetsDirectory,
 		"/new":                     "new:",
 		"/new sonnet":              "new:sonnet",
-		"/fork":                    "fork:brave-otter:",
-		"/fork sonnet":             "fork:brave-otter:sonnet",
+		"/fork":                    "fork:tame-impala:",
+		"/fork sonnet":             "fork:tame-impala:sonnet",
 		"/open config-dir":         "open:" + configDirectory,
 		"/open workspace-dir":      "open:" + workspaceDirectory,
 		"/open scratch-dir":        "open:" + scratchDirectory,
@@ -166,7 +166,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		"/open session-dir":        "open:" + sessionDirectory,
 		"/copy last-message":       "copy:The latest answer.",
 		"/copy session-chat":       "copy:" + chatContents,
-		"/copy session-name":       "copy:brave-otter",
+		"/copy session-name":       "copy:tame-impala",
 		"/copy session-id":         "copy:session-id",
 		"/copy session-dir":        "copy:" + sessionDirectory,
 		"/copy config-file":        "copy:" + configPath,
@@ -184,7 +184,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	wantConfirmations := map[string]string{
 		"/copy last-message": "Copied last message to clipboard",
 		"/copy session-chat": "Copied session chat to clipboard",
-		"/copy session-name": "Copied session name to clipboard: brave-otter",
+		"/copy session-name": "Copied session name to clipboard: tame-impala",
 		"/copy session-id":   "Copied session id to clipboard: session-id",
 		"/copy session-dir":  "Copied session dir to clipboard: " + sessionDirectory,
 		"/copy config-file":  "Copied config file to clipboard: " + configPath,
@@ -272,7 +272,7 @@ func TestForkRequiresAPersistedSession(t *testing.T) {
 	didStartRun := false
 	commands := newCommandRegistry(t, commandEnvironment{
 		session: commandSession{
-			name:        "brave-otter",
+			name:        "tame-impala",
 			isPersisted: func() bool { return isPersisted },
 		},
 		startSession: func(SessionStart) error {
