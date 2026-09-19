@@ -2,45 +2,59 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+## [0.7.0] - 2026-09-19
+
+### Interface
+
 - Format command-line errors
-- Keep queued messages visible at all times
-- Tell the model how to use title and notify
-- Linkify the workspace-dir bar segment
-- Linkify the path-grants bar segment
-- Show model scratch paths with a `<s>/` prefix
-- Linkify the session-name bar segment
-- Include line range in read tool hyperlinks
-- Limit background job name length and format
-- Clarify job wait stopped reason
-- Move session maintenance to `oh --ctl`
-- Regenerate transcripts inside archived sessions
-- Remove the `ohctl` command
-- Remove the built-in mise support
 - Shorten and standardise runtime messages
-- Highlight URLs in red in host networking prompt
-- Tell forks to follow the chain of forks
-- Preserve raw fetch result in a session drop
-- Run the demo unsandboxed since it's safe
-- Hint that double enter sends queued messages
-- Send a desktop notification on approval prompt
-- Drop warning chevron from approval prompt header
-- Reword the host networking prompt
-- Don't include prompt waiting time in tool call time
 - Highlight `Targets` header in the same colour as `Commands`
 - Render required width for wide Mermaid diagrams
 - Truncate a tall footer so it doesn't flicker
-- Mark user messages with OSC 133
-- Render `/jobs` commands like bash tool calls
-- Dismiss feedback with backspace, escape, or ^D
-- List changed models on update
-- Remove trailing new line at the end of `chat.md`
-- Fence piped input when there is also a prompt
-- Draw feedback in an input frame box
-- List changed models after a startup refresh
-- Refuse invalid config files
-- Ensure post-onboarding config is valid
+- Mark user messages with OSC 133 magic markers
 
-## `oh --ctl gc`
+### Input
+
+- Keep queued messages visible at all times
+- Hint that double enter sends queued messages now
+- Dismiss feedback with backspace, escape, or ^D
+- Draw feedback in an input frame box
+- Fence piped input when there is also a prompt
+
+### Approvals
+
+- Highlight URLs in red in host networking prompt
+- Reword the host networking prompt
+- Drop warning chevron from approval prompt header
+- Send a desktop notification on approval prompt
+- Don't include prompt waiting time in tool call time
+
+### Hyperlinks
+
+- Linkify the workspace-dir bar segment
+- Linkify the path-grants bar segment
+- Linkify the session-name bar segment
+- Shorten model scratch paths with `<s>` prefix
+- Include line range in read tool hyperlinks
+
+### Jobs
+
+- Limit background job name length and format
+- Clarify job wait stopped reason to all parties
+- Render `/jobs` commands like bash tool calls
+
+### Sessions
+
+- Regenerate transcripts inside archived sessions
+- Tell forks to follow the chain of forks
+- Remove trailing new line at the end of chat transcript
+
+### Maintenance
+
+- Move session maintenance to `oh --ctl`
+- Remove the `ohctl` command
+
+### Garbage Collection
 
 - Report real space on disk
 - Find caches by their contents
@@ -48,6 +62,26 @@
 - Delete dangling farm dirs
 - Delete rebuildable Go binaries when aggressive
 - Leave the shared home alone while a session is running
+
+### Models
+
+- List changed models on update
+- List changed models after a startup refresh
+
+### Configuration
+
+- Refuse invalid config files
+- Ensure post-onboarding config is valid
+
+### Tools
+
+- Tell the model how to use title and notify
+- Preserve raw fetch result in a session drop
+- Remove the built-in mise support
+
+### Sandbox
+
+- Run the demo unsandboxed since it's safe
 
 ## [0.6.0] - 2026-09-18
 
