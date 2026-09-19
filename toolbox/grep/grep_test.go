@@ -56,7 +56,7 @@ func execWithMetrics(
 ) (string, tool.ToolCallMetrics, error) {
 	t.Helper()
 
-	call, err := grep.New(root, file.NewSnapshots()).Parse(arguments)
+	call, err := grep.New(root, file.NewSnapshots(), func() bool { return true }).Parse(arguments)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -244,7 +244,7 @@ func TestACancelledContextStopsTheSearch(t *testing.T) {
 	}
 	t.Setenv("PATH", bin)
 
-	call, err := grep.New(root, file.NewSnapshots()).Parse(`{"pattern":"hello"}`)
+	call, err := grep.New(root, file.NewSnapshots(), func() bool { return true }).Parse(`{"pattern":"hello"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -267,7 +267,7 @@ func TestACancelledContextStopsTheSearch(t *testing.T) {
 
 func TestCallHighlightsItsPatternAsRegexpSyntax(t *testing.T) {
 	root := testRoot(t, nil)
-	call, err := grep.New(root, file.NewSnapshots()).Parse(`{"pattern":"foo|bar","path":"internal/file.go"}`)
+	call, err := grep.New(root, file.NewSnapshots(), func() bool { return true }).Parse(`{"pattern":"foo|bar","path":"internal/file.go"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

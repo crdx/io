@@ -11,7 +11,7 @@ func TestAStoredReadSnapshotAllowsTheSameEditAfterResume(t *testing.T) {
 	root := testRoot(t, true)
 	writeTestFile(t, root, "one\n")
 
-	initialTools := Rummage(root, file.NewSnapshots())
+	initialTools := Rummage(root, file.NewSnapshots(), func() bool { return true })
 	readCall, err := toolNamed(t, initialTools, "read").Parse(`{"path":"a.txt"}`)
 	if err != nil {
 		t.Fatal(err)
@@ -24,7 +24,7 @@ func TestAStoredReadSnapshotAllowsTheSameEditAfterResume(t *testing.T) {
 		t.Fatal("expected the read to return durable state")
 	}
 
-	resumedTools := Rummage(root, file.NewSnapshots())
+	resumedTools := Rummage(root, file.NewSnapshots(), func() bool { return true })
 	if err := toolNamed(t, resumedTools, "read").Restore(readResult.State); err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestAStoredReadSnapshotAllowsTheSameOverwriteAfterResume(t *testing.T) {
 	root := testRoot(t, true)
 	writeTestFile(t, root, "one\n")
 
-	initialTools := Rummage(root, file.NewSnapshots())
+	initialTools := Rummage(root, file.NewSnapshots(), func() bool { return true })
 	readCall, err := toolNamed(t, initialTools, "read").Parse(`{"path":"a.txt"}`)
 	if err != nil {
 		t.Fatal(err)
@@ -51,7 +51,7 @@ func TestAStoredReadSnapshotAllowsTheSameOverwriteAfterResume(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resumedTools := Rummage(root, file.NewSnapshots())
+	resumedTools := Rummage(root, file.NewSnapshots(), func() bool { return true })
 	if err := toolNamed(t, resumedTools, "read").Restore(readResult.State); err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func TestAStoredReadSnapshotStillRefusesAFileChangedWhileStopped(t *testing.T) {
 	root := testRoot(t, true)
 	writeTestFile(t, root, "one\n")
 
-	initialTools := Rummage(root, file.NewSnapshots())
+	initialTools := Rummage(root, file.NewSnapshots(), func() bool { return true })
 	readCall, err := toolNamed(t, initialTools, "read").Parse(`{"path":"a.txt"}`)
 	if err != nil {
 		t.Fatal(err)
@@ -79,7 +79,7 @@ func TestAStoredReadSnapshotStillRefusesAFileChangedWhileStopped(t *testing.T) {
 	}
 
 	writeTestFile(t, root, "changed\n")
-	resumedTools := Rummage(root, file.NewSnapshots())
+	resumedTools := Rummage(root, file.NewSnapshots(), func() bool { return true })
 	if err := toolNamed(t, resumedTools, "read").Restore(readResult.State); err != nil {
 		t.Fatal(err)
 	}

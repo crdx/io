@@ -28,7 +28,9 @@ type Args struct {
 
 var matchPathPattern = regexp.MustCompile(`^(.+):[0-9]+:`)
 
-func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
+var ErrWithheld = errors.New("read access unavailable; ctrl+x r grants it")
+
+func New(root *file.Root, snapshots *file.Snapshots, isAllowed func() bool) tool.Tool {
 	restoreReadState := func(payload json.RawMessage) error {
 		return snapshots.RestoreReadState(root, payload)
 	}
@@ -50,6 +52,7 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 		Syntax("regexp").
 		IsEmbarrassinglyParallel().
 		ChangesNothing().
+		Requires(isAllowed, ErrWithheld).
 		Run(func(ctx context.Context, args Args) (tool.ToolCallResult, error) {
 			output, metrics, err := run(ctx, root, args)
 			return tool.ToolCallResult{

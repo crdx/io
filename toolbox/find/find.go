@@ -16,7 +16,9 @@ type Args struct {
 	Path    string `json:"path"`
 }
 
-func New(root *file.Root) tool.Tool {
+var ErrWithheld = errors.New("read access unavailable; ctrl+x r grants it")
+
+func New(root *file.Root, isAllowed func() bool) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
 			Name:        "find",
@@ -34,6 +36,7 @@ func New(root *file.Root) tool.Tool {
 		Focuses(util.SearchPath).
 		IsEmbarrassinglyParallel().
 		ChangesNothing().
+		Requires(isAllowed, ErrWithheld).
 		Exec(func(_ context.Context, args Args) (string, tool.ToolCallMetrics, error) {
 			return exec(root, args)
 		})

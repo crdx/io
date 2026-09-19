@@ -132,6 +132,7 @@ import (
 	"crdx.org/io/provider/opencodego"
 	"crdx.org/io/session"
 	"crdx.org/io/tool"
+	"crdx.org/io/tool/command"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/bash"
@@ -3909,6 +3910,9 @@ func TestGoldenFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"context-print":          {".prompt"},
 		"context-file-tools":     {".prompt"},
 		"context-no-telling":     {".prompt"},
+		"context-no-file-tools":  {".prompt"},
+		"context-declared-only":  {".prompt"},
+		"context-environment":    {".prompt"},
 		"context-no-sockets":     {".prompt"},
 		"context-no-paths":       {".prompt"},
 		"context-path-kinds":     {".prompt"},
@@ -5121,6 +5125,7 @@ var optionsThatOpenASession = []string{
 	"--model",
 	"--caps",
 	"--tool",
+	"--env",
 	"--print",
 	"--demo",
 	"--yolo",
@@ -6059,6 +6064,7 @@ type promptGolden struct {
 	readsTheScratchRoot bool
 	hasNoExtraPaths     bool
 	hasEveryPathKind    bool
+	environment         string
 }
 
 func TestGoldenTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
@@ -6072,6 +6078,9 @@ func TestGoldenTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 		"context-print":         {isPrinting: true},
 		"context-file-tools":    {offeredTools: []string{"read", "ls", "grep"}},
 		"context-no-telling":    {offeredTools: []string{"read", "bash"}},
+		"context-no-file-tools": {offeredTools: []string{"bash"}},
+		"context-declared-only": {offeredTools: []string{"sysinfo"}, hasClipboardDrops: true},
+		"context-environment":   {offeredTools: []string{"sysinfo"}, environment: "You are the cook, and this kitchen is your world."},
 		"context-no-sockets":    {hasNoSockets: true},
 		"context-no-paths":      {hasNoExtraPaths: true},
 		"context-path-kinds":    {hasEveryPathKind: true},
@@ -6161,6 +6170,7 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 			Location:    "/skills/golden/SKILL.md",
 		}},
 		OfferedTools: shape.offeredTools,
+		Environment:  shape.environment,
 		Conditions: conditions.Conditions{
 			UnixSockets: !shape.hasNoSockets,
 			IPv6:        !shape.hasNoSockets,
@@ -7300,7 +7310,7 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 
 	screen := openScreen(&written, workspace.GetDir())
 
-	tools := toolbox.Rummage(files, file.NewSnapshots())
+	tools := toolbox.Rummage(files, file.NewSnapshots(), func() bool { return true })
 	tools = append(
 		tools,
 		bash.New(
@@ -7671,7 +7681,7 @@ func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
 func TestGoldenTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	passes := map[string]func() string{}
 
-	for _, flags := range []string{"", "r", "rw", "rx", "rxw", "rxwn", "rxwng", "rxwngl", "rn", "rg", "rl"} {
+	for _, flags := range []string{"", "r", "x", "xw", "wngl", "rw", "rx", "rxw", "rxwn", "rxwng", "rxwngl", "rn", "rg", "rl"} {
 		grantedCaps, err := caps.Parse(flags)
 		if err != nil {
 			t.Fatal(err)
@@ -9035,6 +9045,7 @@ const (
 	feedbackHeredocApproval
 	feedbackTallApproval
 	feedbackApprovalDuringACall
+	feedbackDeclaredToolApproval
 )
 
 func TestConfirmationFeedbackSchedulesItsOwnDismissal(t *testing.T) {
@@ -9088,6 +9099,7 @@ func TestGoldenFeedbackDrawsEveryVisibleState(t *testing.T) {
 		"heredoc approval":                  feedbackHeredocApproval,
 		"approval taller than the terminal": feedbackTallApproval,
 		"approval during a call":            feedbackApprovalDuringACall,
+		"declared tool approval":            feedbackDeclaredToolApproval,
 	})
 
 	compareWithGolden(t, "feedback", ".ansi", passes)
@@ -9157,6 +9169,45 @@ func feedbackFrameStream(t *testing.T, scenario feedbackFrameScenario) string {
 	return screenOutput.String()
 }
 
+func typedForFeedback(scenario feedbackScenario) string {
+	return map[feedbackScenario]string{
+		feedbackCommandError:            "/unknown",
+		feedbackClearedByEditing:        "/unknown",
+		feedbackClearedByEscape:         "/unknown",
+		feedbackClearedByTurnCompletion: "/unknown",
+		feedbackTallAnswer:              "/unknown",
+		feedbackHelp:                    "/help",
+		feedbackSuccess:                 "/copy",
+		feedbackNetworkApproval:         "what is out there?",
+		feedbackConcurrentApproval:      "waiting for approvals",
+		feedbackChainedApproval:         "fetch and tidy up",
+		feedbackTallApproval:            "tidy the tree",
+		feedbackHeredocApproval:         "write the note",
+		feedbackApprovalDuringACall:     "check what that endpoint says",
+		feedbackDeclaredToolApproval:    "leave me a note about the host",
+	}[scenario]
+}
+
+func showDeclaredToolApproval(t *testing.T, self *App, inputLine *edit.Input) {
+	t.Helper()
+
+	broker := ask.New()
+	closeBroker := broker.Open()
+	defer closeBroker()
+
+	go func() {
+		_ = ask.Confirm(t.Context(), broker, ask.Confirmation{
+			Label:    "Run the note tool?",
+			Detail:   "/opt/toolbox/notes.py --action add --text 'the toolbox works' --tag oh --tag test",
+			Language: "bash",
+		})
+	}()
+	<-broker.Changes()
+	self.question.broker = broker
+	self.onQuestionChange()
+	self.show(inputLine)
+}
+
 func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 	t.Helper()
 
@@ -9197,35 +9248,8 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 	inputLine := edit.NewInput(nil)
 	self.inputLine = inputLine
 
-	switch scenario {
-	case feedbackCommandError,
-		feedbackClearedByEditing,
-		feedbackClearedByEscape,
-		feedbackClearedByTurnCompletion,
-		feedbackTallAnswer:
-		inputLine.SetText("/unknown")
-	case feedbackHelp:
-		inputLine.SetText("/help")
-	case feedbackSuccess:
-		inputLine.SetText("/copy")
-	case feedbackNetworkApproval:
-		inputLine.SetText("what is out there?")
-	case feedbackConcurrentApproval:
-		inputLine.SetText("waiting for approvals")
-	case feedbackChainedApproval:
-		inputLine.SetText("fetch and tidy up")
-	case feedbackTallApproval:
-		inputLine.SetText("tidy the tree")
-	case feedbackHeredocApproval:
-		inputLine.SetText("write the note")
-	case feedbackApprovalDuringACall:
-		inputLine.SetText("check what that endpoint says")
-	case feedbackStartupInfo,
-		feedbackStorageWarnings,
-		feedbackUnknownSettings,
-		feedbackClearedByBackspace,
-		feedbackClearedByControlD,
-		feedbackSurvivingADismissKey:
+	if typed := typedForFeedback(scenario); typed != "" {
+		inputLine.SetText(typed)
 	}
 	self.show(inputLine)
 
@@ -9290,6 +9314,8 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		self.question.broker = broker
 		self.onQuestionChange()
 		self.show(inputLine)
+	case feedbackDeclaredToolApproval:
+		showDeclaredToolApproval(t, self, inputLine)
 	case feedbackNetworkApproval:
 		broker := ask.New()
 		closeBroker := broker.Open()
@@ -13261,6 +13287,8 @@ type sessionGoldenTool struct {
 	Blocks                bool     `toml:"blocks"`
 	StoppedOutput         string   `toml:"stopped-output"`
 	IsLargeRead           bool     `toml:"large-read"`
+	ReadWithheld          bool     `toml:"read-withheld"`
+	Declared              string   `toml:"declared"`
 }
 
 type sessionGoldenScenario struct {
@@ -13601,6 +13629,16 @@ func newSessionGoldenTools(
 			continue
 		}
 
+		if specification.ReadWithheld {
+			tools = append(tools, newSessionGoldenWithheldRead(t))
+			continue
+		}
+
+		if specification.Declared != "" {
+			tools = append(tools, newSessionGoldenDeclaredTool(t, specification))
+			continue
+		}
+
 		if specification.Blocks {
 			tools = append(tools, newSessionGoldenBlockingTool(specification))
 			continue
@@ -13666,7 +13704,7 @@ func newSessionGoldenLargeReadTool(t *testing.T, scratchDirectory string) tool.T
 
 	root := file.New(rootHandle, func(string) error { return nil })
 	root.Mount(sandbox.TmpDir, root)
-	return read.New(root, file.NewSnapshots())
+	return read.New(root, file.NewSnapshots(), func() bool { return true })
 }
 
 func sessionGoldenImage(t *testing.T, size string, byteCount int64) (tool.Image, tool.ToolCallMetrics) {
@@ -13702,6 +13740,63 @@ func sessionGoldenImage(t *testing.T, size string, byteCount int64) (tool.Image,
 }
 
 var errSessionGoldenToolStopped = errors.New("the tool was stopped")
+
+func newSessionGoldenWithheldRead(t *testing.T) tool.Tool {
+	t.Helper()
+
+	rootHandle, err := os.OpenRoot(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = rootHandle.Close() })
+
+	root := file.New(rootHandle, func(string) error { return nil })
+	root.Mount(sandbox.TmpDir, root)
+
+	return read.New(root, file.NewSnapshots(), func() bool { return false })
+}
+
+func newSessionGoldenDeclaredTool(t *testing.T, specification sessionGoldenTool) tool.Tool {
+	t.Helper()
+
+	script := filepath.Join(t.TempDir(), "declared")
+	//nolint:gosec // a tool the scenario declares has to be runnable
+	if err := os.WriteFile(script, []byte("#!/bin/bash\n"+specification.Declared+"\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	declared, err := command.New(command.Declaration{
+		Name:        specification.Name,
+		Description: "A deterministic scenario tool of the user's own.",
+		Command:     []string{script},
+		Subject:     "dish",
+		Parameters: []command.Parameter{
+			{
+				Name:        "dish",
+				Kind:        command.KindString,
+				Description: "what the dish is called",
+			},
+			{
+				Name:        "fact",
+				Kind:        command.KindEnum,
+				Values:      []string{"uptime", "kernel"},
+				Description: "which fact to report",
+				IsOptional:  true,
+			},
+			{
+				Name:        "verbose",
+				Kind:        command.KindBoolean,
+				Description: "whether to say more about it",
+				IsOptional:  true,
+			},
+		},
+	}, command.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return declared
+}
 
 func newSessionGoldenBlockingTool(specification sessionGoldenTool) tool.Tool {
 	return tool.Implement(
@@ -18507,5 +18602,642 @@ func TestASimulationDrawsNoHazard(t *testing.T) {
 	unconfined := &App{runMode: runMode{isYolo: true}}
 	if got := unconfined.ruleStyle()("│"); got != style.Hazard("│") {
 		t.Errorf("an unconfined conversation drew its rule as %q, want the hazard rule", got)
+	}
+}
+
+func writeDeclaredToolConfig(t *testing.T, environment []string, body string) {
+	t.Helper()
+
+	var configHome string
+	for _, entry := range environment {
+		if value, isConfigHome := strings.CutPrefix(entry, "XDG_CONFIG_HOME="); isConfigHome {
+			configHome = value
+		}
+	}
+	if configHome == "" {
+		t.Fatal("the test environment names no config home")
+	}
+
+	directory := filepath.Join(configHome, "org.crdx", "oh")
+	if err := os.MkdirAll(directory, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	contents := fmt.Sprintf("version = %d\n\n%s", config.Format, body)
+	if err := os.WriteFile(filepath.Join(directory, "config.toml"), []byte(contents), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func declaredToolScript(t *testing.T) string {
+	t.Helper()
+
+	path := filepath.Join(reachableWorkspaceDir(t), "forecast")
+	//nolint:gosec // a tool the test declares has to be runnable
+	if err := os.WriteFile(path, []byte("#!/bin/bash\necho \"forecast for $*\"\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	return path
+}
+
+func TestADeclaredToolRunsItsOwnCommandAndReportsWhatItSaid(t *testing.T) {
+	binary := buildTestBinary(t)
+	script := declaredToolScript(t)
+	endpoint := sim.New(&sim.Scenario{
+		Model: "fake",
+		Turns: []sim.Turn{
+			{Calls: []sim.Call{{Name: "weather", Arguments: `{"city":"London","days":2}`}}},
+			{Say: "Rain, then."},
+		},
+	})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+	environment := append(testBinaryEnvironment(t, t.TempDir()), backend.EndpointVariable+"="+address)
+	writeDeclaredToolConfig(t, environment, `[tools.weather]
+description = "report the weather for a city"
+command = ["`+script+`"]
+permission = "allow"
+parameters = [
+    { name = "city", kind = "string", description = "the city to report on" },
+    { name = "days", kind = "integer", description = "how many days ahead to look", optional = true },
+]
+`)
+
+	output := runTestBinary(
+		t, binary, reachableWorkspaceDir(t), environment, "-p", "--yolo", "-m", "anthropic/fake", "what is the weather",
+	)
+
+	if !strings.Contains(output, "weather London 2") {
+		t.Errorf("the declared call was not drawn: %q", output)
+	}
+	if !strings.Contains(output, "Rain, then.") {
+		t.Errorf("the answer did not follow the tool: %q", output)
+	}
+
+	requests := endpoint.Requests()
+	if len(requests) < 2 {
+		t.Fatalf("the endpoint saw %d requests", len(requests))
+	}
+	if !slices.Contains(requests[0].Tools, "weather") {
+		t.Errorf("the declared tool was not offered: %q", requests[0].Tools)
+	}
+
+	var reported string
+	for _, entry := range requests[1].Input {
+		if entry.Type == sim.CallOutput {
+			reported = entry.Output
+		}
+	}
+	if reported != "forecast for --city London --days 2" {
+		t.Errorf("the model was told %q", reported)
+	}
+}
+
+func TestADeclaredToolNobodyCanBeAskedAboutDoesNotRun(t *testing.T) {
+	binary := buildTestBinary(t)
+	script := declaredToolScript(t)
+	endpoint := sim.New(&sim.Scenario{
+		Model: "fake",
+		Turns: []sim.Turn{
+			{Calls: []sim.Call{{Name: "weather", Arguments: `{"city":"London"}`}}},
+			{Say: "No matter."},
+		},
+	})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+	environment := append(testBinaryEnvironment(t, t.TempDir()), backend.EndpointVariable+"="+address)
+	writeDeclaredToolConfig(t, environment, `[tools.weather]
+description = "report the weather for a city"
+command = ["`+script+`"]
+parameters = [
+    { name = "city", kind = "string", description = "the city to report on" },
+]
+`)
+
+	output := runTestBinary(
+		t, binary, reachableWorkspaceDir(t), environment, "-p", "--yolo", "-m", "anthropic/fake", "what is the weather",
+	)
+
+	if strings.Contains(output, "forecast for") {
+		t.Errorf("the declared tool ran with nobody to ask: %q", output)
+	}
+}
+
+func TestAWorkspaceCannotDeclareAToolOfItsOwn(t *testing.T) {
+	binary := buildTestBinary(t)
+	workspaceDir := reachableWorkspaceDir(t)
+	overridePath := filepath.Join(workspaceDir, "oh.toml")
+	if err := os.WriteFile(overridePath, []byte("[tools.weather]\ndescription = \"x\"\ncommand = [\"echo\"]\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	command := exec.CommandContext(t.Context(), binary, "-p", "hello") //nolint:gosec // running the binary under test
+	command.Env = testBinaryEnvironment(t, t.TempDir())
+	command.Dir = workspaceDir
+	output, err := command.CombinedOutput()
+	if err == nil {
+		t.Fatalf("the workspace declared a tool: %q", output)
+	}
+	if !strings.Contains(string(output), "cannot be overridden in oh.toml") {
+		t.Errorf("got %q", output)
+	}
+}
+
+func TestAToolThatIsNoDefaultIsOfferedOnlyWhenItIsNamed(t *testing.T) {
+	binary := buildTestBinary(t)
+	script := declaredToolScript(t)
+	declaration := `[tools.weather]
+description = "report the weather for a city"
+command = ["` + script + `"]
+default = false
+permission = "allow"
+parameters = [
+    { name = "city", kind = "string", description = "the city to report on" },
+]
+
+[tools.lookup]
+default = false
+`
+
+	for _, test := range []struct {
+		name      string
+		arguments []string
+		wanted    []string
+		unwanted  []string
+	}{
+		{
+			name:      "nothing named",
+			arguments: nil,
+			wanted:    []string{"read", "grep"},
+			unwanted:  []string{"weather", "lookup"},
+		},
+		{
+			name:      "named alongside a built-in",
+			arguments: []string{"-t", "read", "-t", "weather"},
+			wanted:    []string{"read", "weather"},
+			unwanted:  []string{"grep", "lookup"},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			endpoint := sim.New(&sim.Scenario{Model: "fake", Turns: []sim.Turn{{Say: "Noted."}}})
+			server := httptest.NewServer(endpoint)
+			t.Cleanup(server.Close)
+
+			address := endpoint.Addresses(server.URL)[sim.Messages]
+			environment := append(testBinaryEnvironment(t, t.TempDir()), backend.EndpointVariable+"="+address)
+			writeDeclaredToolConfig(t, environment, declaration)
+
+			arguments := append([]string{"-p", "--yolo", "-m", "anthropic/fake"}, test.arguments...)
+			runTestBinary(t, binary, reachableWorkspaceDir(t), environment, append(arguments, "hello")...)
+
+			requests := endpoint.Requests()
+			if len(requests) == 0 {
+				t.Fatal("the endpoint saw no request")
+			}
+			var offered []string
+			for _, name := range requests[0].Tools {
+				offered = append(offered, strings.ToLower(name))
+			}
+			for _, name := range test.wanted {
+				if !slices.Contains(offered, name) {
+					t.Errorf("%s was not offered: %q", name, offered)
+				}
+			}
+			for _, name := range test.unwanted {
+				if slices.Contains(offered, name) {
+					t.Errorf("%s was offered: %q", name, offered)
+				}
+			}
+		})
+	}
+}
+
+func TestAConfigNamingAToolNobodyOffersSaysSo(t *testing.T) {
+	binary := buildTestBinary(t)
+	endpoint := sim.New(&sim.Scenario{Model: "fake", Turns: []sim.Turn{{Say: "Noted."}}})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+	environment := append(testBinaryEnvironment(t, t.TempDir()), backend.EndpointVariable+"="+address)
+	writeDeclaredToolConfig(t, environment, "[tools.raed]\ndefault = false\n")
+
+	output := runTestBinary(
+		t, binary, reachableWorkspaceDir(t), environment, "-p", "--yolo", "-m", "anthropic/fake", "hello",
+	)
+
+	if !strings.Contains(output, "the config names tools this harness does not offer: raed") {
+		t.Errorf("got %q", output)
+	}
+}
+
+func TestAToolboxGivenOnTheCommandLineSuppliesTheToolbox(t *testing.T) {
+	binary := buildTestBinary(t)
+	script := declaredToolScript(t)
+	toolboxDirectory := t.TempDir()
+	toolboxPath := filepath.Join(toolboxDirectory, "weather.toml")
+	contents := `[tools.weather]
+description = "report the weather for a city"
+command = ["` + script + `"]
+permission = "allow"
+parameters = [
+    { name = "city", kind = "string", description = "the city to report on" },
+]
+
+[tools.lookup]
+default = false
+`
+	if err := os.WriteFile(toolboxPath, []byte(contents), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	endpoint := sim.New(&sim.Scenario{
+		Model: "fake",
+		Turns: []sim.Turn{
+			{Calls: []sim.Call{{Name: "weather", Arguments: `{"city":"London"}`}}},
+			{Say: "Rain, then."},
+		},
+	})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+	stateDirectory := t.TempDir()
+	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
+	writeDeclaredToolConfig(t, environment, "")
+
+	output := runTestBinary(
+		t, binary, reachableWorkspaceDir(t), environment,
+		"-p", "--yolo", "-m", "anthropic/fake", "-t", toolboxPath, "what is the weather",
+	)
+
+	if !strings.Contains(output, "toolbox read from") {
+		t.Errorf("the toolbox was not named at startup: %q", output)
+	}
+	if !strings.Contains(output, "weather London") {
+		t.Errorf("the declared call was not drawn: %q", output)
+	}
+
+	requests := endpoint.Requests()
+	if len(requests) == 0 {
+		t.Fatal("the endpoint saw no request")
+	}
+
+	var offered []string
+	for _, name := range requests[0].Tools {
+		offered = append(offered, strings.ToLower(name))
+	}
+	if !slices.Contains(offered, "weather") {
+		t.Errorf("the toolbox tool was not offered: %q", offered)
+	}
+	if slices.Contains(offered, "lookup") {
+		t.Errorf("the toolbox did not withhold lookup: %q", offered)
+	}
+
+	storedSessions, err := store.List(filepath.Join(stateDirectory, "org.crdx", "oh", "sessions"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(storedSessions) != 1 {
+		t.Fatalf("got %d stored sessions", len(storedSessions))
+	}
+	if !slices.Contains(storedSessions[0].Meta.Toolboxes, toolboxPath) {
+		t.Errorf("the session did not record its toolbox: %q", storedSessions[0].Meta.Toolboxes)
+	}
+}
+
+func TestAResumedConversationReadsTheToolboxItWasGiven(t *testing.T) {
+	binary := buildTestBinary(t)
+	script := declaredToolScript(t)
+	toolboxPath := filepath.Join(t.TempDir(), "weather.toml")
+	contents := `[tools.weather]
+description = "report the weather for a city"
+command = ["` + script + `"]
+permission = "allow"
+parameters = [
+    { name = "city", kind = "string", description = "the city to report on" },
+]
+`
+	if err := os.WriteFile(toolboxPath, []byte(contents), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	endpoint := sim.New(&sim.Scenario{
+		Model: "fake",
+		Turns: []sim.Turn{{Say: "First."}, {Say: "Second."}},
+	})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+	stateDirectory := t.TempDir()
+	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
+	writeDeclaredToolConfig(t, environment, "")
+	workspaceDir := reachableWorkspaceDir(t)
+
+	runTestBinary(
+		t, binary, workspaceDir, environment,
+		"-p", "--yolo", "-m", "anthropic/fake", "-t", toolboxPath, "hello",
+	)
+
+	storedSessions, err := store.List(filepath.Join(stateDirectory, "org.crdx", "oh", "sessions"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(storedSessions) != 1 {
+		t.Fatalf("got %d stored sessions", len(storedSessions))
+	}
+
+	runTestBinary(t, binary, workspaceDir, environment, "-p", "-r", storedSessions[0].Name, "again")
+
+	requests := endpoint.Requests()
+	if len(requests) < 2 {
+		t.Fatalf("the endpoint saw %d requests", len(requests))
+	}
+	if !slices.Contains(requests[len(requests)-1].Tools, "weather") {
+		t.Errorf("the resumed conversation lost its toolbox: %q", requests[len(requests)-1].Tools)
+	}
+}
+
+func TestAToolboxThatHasGoneIsReportedRatherThanRefusedOnResume(t *testing.T) {
+	binary := buildTestBinary(t)
+	script := declaredToolScript(t)
+	toolboxPath := filepath.Join(t.TempDir(), "weather.toml")
+	contents := `[tools.weather]
+description = "report the weather for a city"
+command = ["` + script + `"]
+permission = "allow"
+`
+	if err := os.WriteFile(toolboxPath, []byte(contents), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	endpoint := sim.New(&sim.Scenario{
+		Model: "fake",
+		Turns: []sim.Turn{{Say: "First."}, {Say: "Second."}},
+	})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+	stateDirectory := t.TempDir()
+	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
+	writeDeclaredToolConfig(t, environment, "")
+	workspaceDir := reachableWorkspaceDir(t)
+
+	runTestBinary(
+		t, binary, workspaceDir, environment,
+		"-p", "--yolo", "-m", "anthropic/fake", "-t", toolboxPath, "hello",
+	)
+
+	storedSessions, err := store.List(filepath.Join(stateDirectory, "org.crdx", "oh", "sessions"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(toolboxPath); err != nil {
+		t.Fatal(err)
+	}
+
+	output := runTestBinary(t, binary, workspaceDir, environment, "-p", "-r", storedSessions[0].Name, "again")
+
+	if !strings.Contains(output, "could no longer be read") {
+		t.Errorf("the missing toolbox was not reported: %q", output)
+	}
+}
+
+func TestNamingAToolboxLeavesNoToolThatWasNotNamed(t *testing.T) {
+	binary := buildTestBinary(t)
+	script := declaredToolScript(t)
+	directory := t.TempDir()
+
+	write := func(name string, toolName string) string {
+		path := filepath.Join(directory, name)
+		contents := "[tools." + toolName + `]
+description = "report the weather for a city"
+command = ["` + script + `"]
+permission = "allow"
+`
+		if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+			t.Fatal(err)
+		}
+
+		return path
+	}
+
+	first := write("first.toml", "weather")
+	second := write("second.toml", "tides")
+
+	for _, test := range []struct {
+		name      string
+		arguments []string
+		wanted    []string
+	}{
+		{"one toolbox", []string{"-t", first}, []string{"weather"}},
+		{"two toolboxes", []string{"-t", first, "-t", second}, []string{"weather", "tides"}},
+		{
+			"names beside a toolbox",
+			[]string{"-t", "read", "-t", "write", "-t", first},
+			[]string{"read", "write", "weather"},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			endpoint := sim.New(&sim.Scenario{Model: "fake", Turns: []sim.Turn{{Say: "Noted."}}})
+			server := httptest.NewServer(endpoint)
+			t.Cleanup(server.Close)
+
+			address := endpoint.Addresses(server.URL)[sim.Messages]
+			environment := append(testBinaryEnvironment(t, t.TempDir()), backend.EndpointVariable+"="+address)
+			writeDeclaredToolConfig(t, environment, "")
+
+			arguments := append([]string{"-p", "--yolo", "-m", "anthropic/fake"}, test.arguments...)
+			runTestBinary(t, binary, reachableWorkspaceDir(t), environment, append(arguments, "hello")...)
+
+			var offered []string
+			for _, name := range endpoint.Requests()[0].Tools {
+				offered = append(offered, strings.ToLower(name))
+			}
+
+			slices.Sort(offered)
+			slices.Sort(test.wanted)
+			if !slices.Equal(offered, test.wanted) {
+				t.Errorf("got %q, wanted %q", offered, test.wanted)
+			}
+		})
+	}
+}
+
+func TestAToolboxOfferingNothingIsRefusedRatherThanFallingBackToEverything(t *testing.T) {
+	binary := buildTestBinary(t)
+	toolboxPath := filepath.Join(t.TempDir(), "empty.toml")
+	if err := os.WriteFile(toolboxPath, []byte("[tools.read]\ndefault = false\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	endpoint := sim.New(&sim.Scenario{Model: "fake", Turns: []sim.Turn{{Say: "Noted."}}})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+	environment := append(testBinaryEnvironment(t, t.TempDir()), backend.EndpointVariable+"="+address)
+	writeDeclaredToolConfig(t, environment, "")
+
+	//nolint:gosec // running the binary under test
+	command := exec.CommandContext(t.Context(), binary, "-p", "--yolo", "-m", "anthropic/fake", "-t", toolboxPath, "hello")
+	command.Env = environment
+	command.Dir = reachableWorkspaceDir(t)
+	output, err := command.CombinedOutput()
+
+	if err == nil {
+		t.Fatalf("an empty toolbox was accepted: %q", output)
+	}
+	if !strings.Contains(string(output), "holds no tool that is offered by default") {
+		t.Errorf("got %q", output)
+	}
+}
+
+func writeEnvironment(t *testing.T, script string, prompt string) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), "kitchen.toml")
+	contents := "prompt = " + strconv.Quote(prompt) + `
+
+[tools.weather]
+description = "report the weather for a city"
+command = ["` + script + `"]
+permission = "allow"
+parameters = [
+    { name = "city", kind = "string", description = "the city to report on" },
+]
+`
+	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	return path
+}
+
+func TestAnEnvironmentSuppliesBothTheToolboxAndThePrompt(t *testing.T) {
+	binary := buildTestBinary(t)
+	environmentPath := writeEnvironment(t, declaredToolScript(t), "You are the cook, and this kitchen is your world.")
+
+	endpoint := sim.NewResponder(&sim.Scenario{Model: "fake"}, func(request sim.Request) sim.Turn {
+		return sim.Turn{Say: request.Instructions}
+	})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+	environment := append(testBinaryEnvironment(t, t.TempDir()), backend.EndpointVariable+"="+address)
+	writeDeclaredToolConfig(t, environment, "")
+
+	output := runTestBinary(
+		t, binary, reachableWorkspaceDir(t), environment,
+		"-p", "--yolo", "-m", "anthropic/fake", "-e", environmentPath, "hello",
+	)
+
+	if !strings.Contains(output, "You are the cook, and this kitchen is your world.") {
+		t.Errorf("the environment prompt was not used: %q", output)
+	}
+	for _, unwanted := range []string{"Personality", "Tools that accept a path", "persistent scratch space"} {
+		if strings.Contains(output, unwanted) {
+			t.Errorf("the environment kept %q from the ordinary prompt: %q", unwanted, output)
+		}
+	}
+
+	var offered []string
+	for _, name := range endpoint.Requests()[0].Tools {
+		offered = append(offered, strings.ToLower(name))
+	}
+	if !slices.Equal(offered, []string{"weather"}) {
+		t.Errorf("got %q, wanted the environment's toolbox alone", offered)
+	}
+}
+
+func TestAToolboxCarryingAPromptSaysToPassItAsAnEnvironment(t *testing.T) {
+	binary := buildTestBinary(t)
+	environmentPath := writeEnvironment(t, declaredToolScript(t), "You are the cook.")
+
+	endpoint := sim.New(&sim.Scenario{Model: "fake", Turns: []sim.Turn{{Say: "Noted."}}})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+	environment := append(testBinaryEnvironment(t, t.TempDir()), backend.EndpointVariable+"="+address)
+	writeDeclaredToolConfig(t, environment, "")
+
+	//nolint:gosec // running the binary under test
+	command := exec.CommandContext(t.Context(), binary, "-p", "--yolo", "-m", "anthropic/fake", "-t", environmentPath, "hello")
+	command.Env = environment
+	command.Dir = reachableWorkspaceDir(t)
+	output, err := command.CombinedOutput()
+
+	if err == nil {
+		t.Fatalf("a toolbox supplying a prompt was accepted by -t: %q", output)
+	}
+	if !strings.Contains(string(output), "pass it with -e rather than -t") {
+		t.Errorf("got %q", output)
+	}
+}
+
+func TestAnEnvironmentIsReadAgainWhenItsConversationResumes(t *testing.T) {
+	binary := buildTestBinary(t)
+	environmentPath := writeEnvironment(t, declaredToolScript(t), "You are the cook.")
+
+	endpoint := sim.New(&sim.Scenario{
+		Model: "fake",
+		Turns: []sim.Turn{{Say: "First."}, {Say: "Second."}},
+	})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+	stateDirectory := t.TempDir()
+	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
+	writeDeclaredToolConfig(t, environment, "")
+	workspaceDir := reachableWorkspaceDir(t)
+
+	runTestBinary(
+		t, binary, workspaceDir, environment,
+		"-p", "--yolo", "-m", "anthropic/fake", "-e", environmentPath, "hello",
+	)
+
+	storedSessions, err := store.List(filepath.Join(stateDirectory, "org.crdx", "oh", "sessions"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(storedSessions) != 1 {
+		t.Fatalf("got %d stored sessions", len(storedSessions))
+	}
+	if !slices.Contains(storedSessions[0].Meta.Environments, environmentPath) {
+		t.Errorf("the session did not record its environment: %q", storedSessions[0].Meta.Environments)
+	}
+
+	runTestBinary(t, binary, workspaceDir, environment, "-p", "-r", storedSessions[0].Name, "again")
+
+	requests := endpoint.Requests()
+	if !slices.Contains(requests[len(requests)-1].Tools, "weather") {
+		t.Errorf("the resumed conversation lost its environment: %q", requests[len(requests)-1].Tools)
+	}
+}
+
+func TestAnEnvironmentCannotBeChosenWhileResuming(t *testing.T) {
+	binary := buildTestBinary(t)
+	environment := testBinaryEnvironment(t, t.TempDir())
+
+	//nolint:gosec // running the binary under test
+	command := exec.CommandContext(t.Context(), binary, "-p", "-r", "some-session", "-e", "kitchen.toml", "hello")
+	command.Env = environment
+	command.Dir = reachableWorkspaceDir(t)
+	output, err := command.CombinedOutput()
+
+	if err == nil {
+		t.Fatalf("an environment was accepted while resuming: %q", output)
+	}
+	if !strings.Contains(string(output), "preserves its toolbox") {
+		t.Errorf("got %q", output)
 	}
 }

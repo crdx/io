@@ -11,12 +11,14 @@ import (
 	"crdx.org/io/toolbox/write"
 )
 
-func Rummage(root *file.Root, snapshots *file.Snapshots) []tool.Tool {
+var PathToolNames = []string{"read", "ls", "find", "grep", "write", "edit"}
+
+func Rummage(root *file.Root, snapshots *file.Snapshots, isReadable func() bool) []tool.Tool {
 	return []tool.Tool{
-		read.New(root, snapshots),
-		ls.New(root),
-		find.New(root),
-		grep.New(root, snapshots),
+		read.New(root, snapshots, isReadable),
+		ls.New(root, isReadable),
+		find.New(root, isReadable),
+		grep.New(root, snapshots, isReadable),
 		write.New(root, snapshots),
 		edit.New(root, snapshots),
 	}

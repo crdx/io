@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"syscall"
 	"time"
@@ -18,7 +20,9 @@ import (
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/sandbox/keeper"
 	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/tool"
+	"crdx.org/io/tool/command"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/bash"
@@ -105,6 +109,16 @@ var (
 		advice:  "choose another approach",
 	}
 )
+
+func declaredToolApproval(name string) approval {
+	return approval{
+		label:    "Run the " + name + " tool?",
+		language: "bash",
+		action:   name,
+		outcome:  name + " did not run",
+		advice:   "choose another approach",
+	}
+}
 
 func (self approval) ask(
 	ctx context.Context,
@@ -703,35 +717,6 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	var systemPrompt string
-	if resumedSession != nil && resumedSession.Meta.SystemPrompt != "" {
-		systemPrompt = resumedSession.Meta.SystemPrompt
-	} else {
-		systemPrompt, _, err = prompt.Load(prompt.Config{
-			GlobalPath:     location.GetGlobalContextPath(),
-			Workspace:      workspace,
-			SessionName:    log.Name(),
-			SessionsDir:    sessionsDir,
-			SessionDir:     filepath.Join(sessionsDir, log.Name()),
-			ConfigFile:     location.GetConfigFile(),
-			TmpDir:         tmpDir,
-			HomeDir:        homeDir,
-			CurrentCaps:    args.Caps,
-			ExtraPaths:     settings.Sandbox,
-			DropsDirectory: dropKeeper.GetDirectory(),
-			Skills:         availableSkills,
-			OfferedTools:   args.Tools,
-			Conditions:     currentConditions,
-			JobsGranted:    jobManager != nil,
-			NetworkGranted: args.Caps.Has(caps.Network),
-			Yolo:           args.Yolo,
-		})
-		if err != nil {
-			return "", err
-		}
-	}
-	systemPrompt = prompt.WithDropsDirectory(systemPrompt, dropKeeper.GetDirectory())
-
 	tmpRoot, err := shell.MountTemporaryDirectory(files, tmpDir)
 	if err != nil {
 		return "", err
@@ -796,7 +781,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	snapshots := file.NewSnapshots()
-	toolboxTools := toolbox.Rummage(files, snapshots)
+	toolboxTools := toolbox.Rummage(files, snapshots, func() bool { return mode.Current().Has(caps.Read) })
 	askBroker := ask.New()
 	permissionSet, err := settings.BuildPermissions()
 	if err != nil {
@@ -851,10 +836,74 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			dropKeeper.SaveHTML,
 		),
 	)
+
+	configuredReferenceNames := settings.ToolReferenceNames()
+
+	toolboxes, environments := args.Toolboxes, args.Environments
+	if resumedSession != nil {
+		toolboxes, environments = resumedSession.Meta.Toolboxes, resumedSession.Meta.Environments
+	}
+	toolboxDeclarations := map[string]config.DeclaredTool{}
+	var readToolboxes []string
+	var environmentPrompts []string
+	for _, path := range append(slices.Clone(toolboxes), environments...) {
+		isEnvironment := slices.Contains(environments, path)
+		contents, err := config.LoadToolbox(path)
+		if err != nil {
+			if resumedSession == nil {
+				return "", fmt.Errorf("%s: %w", pathutil.Shorten(path), err)
+			}
+
+			_, _ = fmt.Fprintln(notices, style.Change(fmt.Sprintf(
+				"a toolbox this conversation was given could no longer be read, so its prompt cache "+
+					"will be rebuilt: %s: %v", pathutil.Shorten(path), err,
+			)))
+
+			continue
+		}
+		if contents.Prompt.Text != "" && !isEnvironment {
+			return "", fmt.Errorf(
+				"%s: this toolbox supplies a prompt, so pass it with -e rather than -t", pathutil.Shorten(path),
+			)
+		}
+
+		maps.Copy(toolboxDeclarations, contents.Tools)
+		readToolboxes = append(readToolboxes, pathutil.Shorten(path))
+		if contents.Prompt.Text != "" {
+			environmentPrompts = append(environmentPrompts, contents.Prompt.Text)
+		}
+	}
+	settings = settings.WithTools(toolboxDeclarations)
+	if len(readToolboxes) > 0 && resumedSession == nil {
+		_, _ = fmt.Fprintln(notices, style.Change(
+			"toolbox read from "+strings.Join(readToolboxes, ", "),
+		))
+	}
+
+	declaredTools, err := settings.BuildDeclaredTools(command.Options{
+		Directory: workspace.GetDir(),
+		Approve: func(ctx context.Context, name string, line string) error {
+			return declaredToolApproval(name).confirm(ctx, askBroker, line)
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+	if toolboxTools, err = toolset.Combine(toolboxTools, declaredTools); err != nil {
+		return "", err
+	}
+
+	if _, unknownToolNames := toolset.Partition(toolboxTools, configuredReferenceNames); len(unknownToolNames) > 0 {
+		_, _ = fmt.Fprintln(notices, style.Change(
+			"the config names tools this harness does not offer: "+strings.Join(unknownToolNames, ", "),
+		))
+	}
+
 	toolboxTools = truncate.Tools(toolboxTools, toolOutputLimit)
 
 	enabledToolNames := args.Tools
-	if resumedSession != nil && len(resumedSession.Meta.Tools) > 0 {
+	switch {
+	case resumedSession != nil && len(resumedSession.Meta.Tools) > 0:
 		var absentToolNames []string
 		enabledToolNames, absentToolNames = toolset.Partition(toolboxTools, resumedSession.Meta.Tools)
 		if len(absentToolNames) > 0 {
@@ -863,6 +912,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 					"rebuilt: "+strings.Join(absentToolNames, ", "),
 			))
 		}
+	case len(args.Tools) > 0 || len(toolboxDeclarations) > 0:
+		enabledToolNames = config.OfferedNames(args.Tools, toolboxDeclarations)
+		if len(enabledToolNames) == 0 {
+			return "", errors.New("the toolbox you named holds no tool that is offered by default")
+		}
+	default:
+		toolboxTools = toolset.Withhold(toolboxTools, settings.NonDefaultToolNames())
 	}
 
 	enabledTools, err := toolset.Reduce(toolboxTools, enabledToolNames)
@@ -870,9 +926,43 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
+	var systemPrompt string
+	if resumedSession != nil && resumedSession.Meta.SystemPrompt != "" {
+		systemPrompt = resumedSession.Meta.SystemPrompt
+	} else {
+		systemPrompt, _, err = prompt.Load(prompt.Config{
+			GlobalPath:     location.GetGlobalContextPath(),
+			Workspace:      workspace,
+			SessionName:    log.Name(),
+			SessionsDir:    sessionsDir,
+			SessionDir:     filepath.Join(sessionsDir, log.Name()),
+			ConfigFile:     location.GetConfigFile(),
+			TmpDir:         tmpDir,
+			HomeDir:        homeDir,
+			CurrentCaps:    args.Caps,
+			ExtraPaths:     settings.Sandbox,
+			DropsDirectory: dropKeeper.GetDirectory(),
+			Skills:         availableSkills,
+			OfferedTools:   toolset.Names(enabledTools),
+			Environment:    strings.Join(environmentPrompts, "\n\n"),
+			Conditions:     currentConditions,
+			JobsGranted:    jobManager != nil,
+			NetworkGranted: args.Caps.Has(caps.Network),
+			Yolo:           args.Yolo,
+		})
+		if err != nil {
+			return "", err
+		}
+	}
+	systemPrompt = prompt.WithDropsDirectory(
+		systemPrompt, dropKeeper.GetDirectory(), prompt.OffersAnyPathTool(toolset.Names(enabledTools)),
+	)
+
 	if resumedSession == nil {
 		meta.SystemPrompt = systemPrompt
 		meta.Tools = toolset.Names(enabledTools)
+		meta.Toolboxes = slices.Clone(toolboxes)
+		meta.Environments = slices.Clone(environments)
 		meta.Conditions = &currentConditions
 		if err := log.SetMeta(meta); err != nil {
 			return "", err

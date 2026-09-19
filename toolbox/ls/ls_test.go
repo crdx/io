@@ -27,7 +27,7 @@ func testRoot(t *testing.T) (*file.Root, string) {
 func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 	t.Helper()
 
-	call, err := ls.New(root).Parse(arguments)
+	call, err := ls.New(root, func() bool { return true }).Parse(arguments)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

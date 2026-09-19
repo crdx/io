@@ -11,6 +11,8 @@ import (
 )
 
 var (
+	filesUnreadable = pathToolNotice(false)
+	filesReadable   = pathToolNotice(true)
 	nowReadOnly     = workspaceNotice(false)
 	nowReadWrite    = workspaceNotice(true)
 	gitReadOnly     = repositoryNotice(false)
@@ -25,6 +27,7 @@ var (
 
 func TestEveryClauseSaysSomethingAndSaysItBothWays(t *testing.T) {
 	for name, clauses := range map[string][2]string{
+		"files":     {filesUnreadable, filesReadable},
 		"workspace": {nowReadOnly, nowReadWrite},
 		"history":   {gitReadOnly, gitWritable},
 		"shell":     {shellWithheld, shellGranted},
@@ -256,8 +259,8 @@ func TestAFlagNamesOneCapabilityWhileParsingItReadsAWholeMode(t *testing.T) {
 			t.Fatalf("%s: unexpected error: %v", flag, err)
 		}
 
-		if !parsedCaps.Has(Read) {
-			t.Errorf("%s: expected a parsed mode to allow reading, got %q", flag, parsedCaps.Flags())
+		if parsedCaps != namedCaps {
+			t.Errorf("%s: expected a parsed mode to grant that flag alone, got %q", flag, parsedCaps.Flags())
 		}
 	}
 
@@ -356,5 +359,40 @@ func TestTheModeIsSafeToSwapWhileItIsBeingRead(t *testing.T) {
 
 	if currentCaps := self.Current(); !currentCaps.Has(Write) || currentCaps.Has(Git) {
 		t.Error("expected an even number of swaps to leave the mode where it started")
+	}
+}
+
+func TestReadingIsGrantedOnlyWhenItIsAskedFor(t *testing.T) {
+	for flags, wantsReading := range map[string]bool{
+		"":       false,
+		"x":      false,
+		"wx":     false,
+		"r":      true,
+		"rx":     true,
+		"rxwngl": true,
+	} {
+		grantedCaps, err := Parse(flags)
+		if err != nil {
+			t.Fatalf("%q: unexpected error: %v", flags, err)
+		}
+
+		if grantedCaps.Has(Read) != wantsReading {
+			t.Errorf("%q: got reading %v", flags, grantedCaps.Has(Read))
+		}
+	}
+}
+
+func TestTakingReadingAwayIsAnnouncedLikeEveryOtherSwap(t *testing.T) {
+	self := NewMode(Read | Shell)
+	self.Toggle(Read)
+
+	if got := self.Inject(); got != filesUnreadable {
+		t.Errorf("expected %q, got %q", filesUnreadable, got)
+	}
+
+	self.Toggle(Read)
+
+	if got := self.Inject(); got != filesReadable {
+		t.Errorf("expected %q, got %q", filesReadable, got)
 	}
 }

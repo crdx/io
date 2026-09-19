@@ -89,14 +89,12 @@ type Emphasis struct {
 	Source string       `json:"-"`
 }
 
-type Describer[T any] func(args T) (string, string)
-
-type Validator[T any] func(args T) error
-
-type ResultExecutor[T any] func(ctx context.Context, args T) (ToolCallResult, error)
-
-type Restorer func(state json.RawMessage) error
-
-type Executor[T any] func(ctx context.Context, args T) (string, error)
-
-type MetricsExecutor[T any] func(ctx context.Context, args T) (string, ToolCallMetrics, error)
+type (
+	Describer[T any]       func(args T) (string, string)
+	Validator[T any]       func(args T) error
+	Decoder[T any]         func(arguments string) (T, error)
+	ResultExecutor[T any]  func(ctx context.Context, args T) (ToolCallResult, error)
+	Restorer               func(state json.RawMessage) error
+	Executor[T any]        func(ctx context.Context, args T) (string, error)
+	MetricsExecutor[T any] func(ctx context.Context, args T) (string, ToolCallMetrics, error)
+)

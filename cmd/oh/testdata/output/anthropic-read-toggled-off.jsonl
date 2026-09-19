@@ -1,0 +1,14 @@
+{"kind":"head","version":13,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwngl"}}
+{"kind":"event","event":{"kind":"mode_change","name":"r","state":"xwngl"}}
+{"kind":"event","event":{"kind":"user_message","text":"carry on without reading"}}
+{"kind":"event","event":{"kind":"model_message","text":"Noted, the file tools are refused."}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"The file tools are now refused."}]}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"carry on without reading"}]}}
+{"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Noted, the file tools are refused."}]}}
+{"kind":"turn_completion","turn":{}}
+{"kind":"event","event":{"kind":"user_message","text":"carry on"}}
+{"kind":"event","event":{"kind":"model_message","text":"Carrying on."}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"carry on"}]}}
+{"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Carrying on."}]}}
+{"kind":"turn_completion","turn":{}}

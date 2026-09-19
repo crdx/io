@@ -51,7 +51,7 @@ func writeTestFile(t *testing.T, root *file.Root, content string) {
 func TestEditRequiresTheCurrentFileToHaveBeenRead(t *testing.T) {
 	root := testRoot(t, true)
 	writeTestFile(t, root, "one\n")
-	tools := Rummage(root, file.NewSnapshots())
+	tools := Rummage(root, file.NewSnapshots(), func() bool { return true })
 	readTool := toolNamed(t, tools, "read")
 	editTool := toolNamed(t, tools, "edit")
 	arguments := `{"path":"a.txt","old_text":"one","new_text":"two"}`
@@ -79,7 +79,7 @@ func TestEditRequiresTheCurrentFileToHaveBeenRead(t *testing.T) {
 func TestGrepRecordsTheFilesWhoseContentsItExposes(t *testing.T) {
 	root := testRoot(t, true)
 	writeTestFile(t, root, "one\n")
-	tools := Rummage(root, file.NewSnapshots())
+	tools := Rummage(root, file.NewSnapshots(), func() bool { return true })
 
 	if err := runTool(t, toolNamed(t, tools, "grep"), `{"pattern":"one","path":"a.txt"}`); err != nil {
 		t.Fatalf("unexpected grep error: %v", err)
@@ -96,7 +96,7 @@ func TestGrepRecordsTheFilesWhoseContentsItExposes(t *testing.T) {
 func TestWriteRequiresTheCurrentFileToHaveBeenReadBeforeOverwriting(t *testing.T) {
 	root := testRoot(t, true)
 	writeTestFile(t, root, "one\n")
-	tools := Rummage(root, file.NewSnapshots())
+	tools := Rummage(root, file.NewSnapshots(), func() bool { return true })
 	readTool := toolNamed(t, tools, "read")
 	writeTool := toolNamed(t, tools, "write")
 	arguments := `{"path":"a.txt","content":"two\n"}`
@@ -124,7 +124,7 @@ func TestWriteRequiresTheCurrentFileToHaveBeenReadBeforeOverwriting(t *testing.T
 
 func TestWriteCanCreateAFileThatDoesNotExist(t *testing.T) {
 	root := testRoot(t, true)
-	writeTool := toolNamed(t, Rummage(root, file.NewSnapshots()), "write")
+	writeTool := toolNamed(t, Rummage(root, file.NewSnapshots(), func() bool { return true }), "write")
 
 	if err := runTool(t, writeTool, `{"path":"new.txt","content":"new\n"}`); err != nil {
 		t.Fatalf("unexpected write error: %v", err)
@@ -134,7 +134,7 @@ func TestWriteCanCreateAFileThatDoesNotExist(t *testing.T) {
 func TestAnEditUpdatesTheReadSnapshot(t *testing.T) {
 	root := testRoot(t, true)
 	writeTestFile(t, root, "one\n")
-	tools := Rummage(root, file.NewSnapshots())
+	tools := Rummage(root, file.NewSnapshots(), func() bool { return true })
 	readTool := toolNamed(t, tools, "read")
 	editTool := toolNamed(t, tools, "edit")
 
@@ -152,7 +152,7 @@ func TestAnEditUpdatesTheReadSnapshot(t *testing.T) {
 func TestAWriteUpdatesTheReadSnapshot(t *testing.T) {
 	root := testRoot(t, true)
 	writeTestFile(t, root, "one\n")
-	tools := Rummage(root, file.NewSnapshots())
+	tools := Rummage(root, file.NewSnapshots(), func() bool { return true })
 	readTool := toolNamed(t, tools, "read")
 	writeTool := toolNamed(t, tools, "write")
 

@@ -305,7 +305,7 @@ func TestTheDefaultCapabilitiesAreReadingAndTheShell(t *testing.T) {
 }
 
 func TestCapabilitiesAreReadAsTheLettersTheyAreSpelledWith(t *testing.T) {
-	for _, capString := range []string{"rxwngl", "lgnwxr", "wxngl"} {
+	for _, capString := range []string{"rxwngl", "lgnwxr", "xwrngl"} {
 		currentCaps, err := caps.Parse(capString)
 		if err != nil {
 			t.Fatalf("%s: unexpected error: %v", capString, err)
@@ -321,14 +321,25 @@ func TestCapabilitiesAreReadAsTheLettersTheyAreSpelledWith(t *testing.T) {
 	}
 }
 
-func TestReadingIsAlwaysGranted(t *testing.T) {
+func TestNoCapabilityIsGrantedWithoutItsLetter(t *testing.T) {
 	grantedCaps, err := caps.Parse("")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	if got := grantedCaps.Flags(); got != "r" {
-		t.Errorf("expected r, got %q", got)
+	if got := grantedCaps.Flags(); got != "" {
+		t.Errorf("expected nothing, got %q", got)
+	}
+}
+
+func TestReadingIsGrantedWhenNoCapabilitiesAreChosen(t *testing.T) {
+	parsedOptions, err := Input{}.Parse(modelCachePath(), model.Defaults{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !parsedOptions.Caps.Has(caps.Read) {
+		t.Errorf("expected a fresh agent to read, got %q", parsedOptions.Caps.Flags())
 	}
 }
 

@@ -229,12 +229,12 @@ func TestClipboardDropsAreDisclosedInTheHarnessContext(t *testing.T) {
 
 func TestAStoredPromptLearnsAboutClipboardDropsOnce(t *testing.T) {
 	dropsDirectory := "/state/sessions/tame-impala/drops"
-	got := WithDropsDirectory("stored prompt", dropsDirectory)
+	got := WithDropsDirectory("stored prompt", dropsDirectory, true)
 	want := "stored prompt\n\n# Clipboard Drops\n\n- " + dropsRule(dropsDirectory)
 	if got != want {
 		t.Errorf("updated prompt is %q, want %q", got, want)
 	}
-	if repeated := WithDropsDirectory(got, dropsDirectory); repeated != got {
+	if repeated := WithDropsDirectory(got, dropsDirectory, true); repeated != got {
 		t.Errorf("drops rule was repeated: %q", repeated)
 	}
 }
@@ -804,7 +804,7 @@ func TestTheShellAndPathToolsReportSystemReadAccess(t *testing.T) {
 		TmpDir:       "/state/farm/session",
 		HomeDir:      "/state/home",
 		CurrentCaps:  caps.Read | caps.Shell,
-		OfferedTools: []string{"bash"},
+		OfferedTools: []string{"bash", "read"},
 	})
 
 	for _, want := range []string{
@@ -1074,5 +1074,144 @@ func TestTitlesAndNotificationsFollowTheirOwnTools(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestAToolboxWithNoPathToolIsToldNothingAboutPaths(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:      work.At("/workspace"),
+		SessionName:    "session-id",
+		TmpDir:         "/state/farm/session",
+		HomeDir:        "/state/home",
+		DropsDirectory: "/state/sessions/session-id/drops",
+		CurrentCaps:    caps.Read,
+		OfferedTools:   []string{"sysinfo"},
+	})
+
+	for _, unwanted := range []string{
+		"Tools that accept a path",
+		"where path tools can read it",
+	} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("harness context claims %q with no path tool offered: %q", unwanted, got)
+		}
+	}
+}
+
+func TestAToolboxHoldingOnePathToolIsToldWherePathsReach(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read,
+		OfferedTools: []string{"grep"},
+	})
+
+	if !strings.Contains(got, "Tools that accept a path") {
+		t.Errorf("harness context says nothing about paths: %q", got)
+	}
+}
+
+func TestSkillsAreListedOnlyWhenSomethingCanReadThem(t *testing.T) {
+	for name, offeredTools := range map[string][]string{
+		"read offered": {"read"},
+		"shell alone":  {"bash"},
+		"neither":      {"sysinfo"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			got := harnessContext(Config{
+				Workspace:    work.At("/workspace"),
+				SessionName:  "session-id",
+				CurrentCaps:  caps.Read,
+				OfferedTools: offeredTools,
+			})
+
+			if strings.Contains(got, "use the read tool to read its SKILL.md") &&
+				!slices.Contains(offeredTools, "read") {
+				t.Errorf("skills were listed with no read tool: %q", got)
+			}
+		})
+	}
+}
+
+func TestNothingThatReachesTheFilesystemIsDescribedWhenNothingCan(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read,
+		OfferedTools: []string{"sysinfo"},
+	})
+
+	for _, unwanted := range []string{
+		"# /tmp",
+		"# Home",
+		"Tools that accept a path",
+		"The user can grant access to paths",
+	} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("harness context still describes %q: %q", unwanted, got)
+		}
+	}
+}
+
+func TestTheShellAloneStillDescribesWhereItMayReach(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Shell,
+		OfferedTools: []string{"bash"},
+	})
+
+	for _, want := range []string{"# /tmp", "# Home", "The user can grant access to paths"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("harness context omits %q with a shell offered: %q", want, got)
+		}
+	}
+}
+
+func TestAnEnvironmentIsToldNothingAboutTheHarnessItself(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		SessionsDir:  "/state/sessions",
+		ConfigFile:   "/config/config.toml",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read,
+		Environment:  "You are the cook.",
+		OfferedTools: []string{"pantry"},
+	})
+
+	if strings.TrimSpace(got) != "" {
+		t.Errorf("an environment was given harness context of its own: %q", got)
+	}
+}
+
+func TestAnEnvironmentWithAShellIsStillToldWhereItMayReach(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:    work.At("/workspace"),
+		SessionName:  "session-id",
+		SessionsDir:  "/state/sessions",
+		TmpDir:       "/state/farm/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Shell,
+		Environment:  "You are the cook.",
+		OfferedTools: []string{"pantry", "bash"},
+	})
+
+	for _, want := range []string{"# Scope", "# Home", "# State", "The shell can only access"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("an environment with a shell was not told %q: %q", want, got)
+		}
+	}
+	for _, unwanted := range []string{"# Harness", "is the harness you are running within", "Your session is named"} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("an environment was told %q about the harness: %q", unwanted, got)
+		}
 	}
 }

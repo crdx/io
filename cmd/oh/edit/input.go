@@ -17,6 +17,7 @@ const (
 	ContinueTurn
 	CancelTurn
 	QuitSession
+	ToggleRead
 	ToggleWrite
 	ToggleShell
 	ToggleGit
@@ -401,6 +402,9 @@ func (self *Input) toggleMode(button key.Key) Action {
 	}
 
 	switch button.Value {
+	case 'r':
+		return ToggleRead
+
 	case 'w':
 		return ToggleWrite
 

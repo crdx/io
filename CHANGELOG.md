@@ -2,6 +2,10 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Set the environment from an env .toml file with `-e`
+- Set the toolbox from a .toml file with `-t`
+- Add custom tool definitions
+
 ## [0.7.0] - 2026-09-19
 
 ### Interface

@@ -376,3 +376,57 @@ func TestFormatDuration(t *testing.T) {
 		}
 	}
 }
+
+func TestSyntaxIsPaintedFromTheSubjectUnlessTheSourceBeginsWithIt(t *testing.T) {
+	for name, test := range map[string]struct {
+		subject string
+		source  string
+		wanted  string
+	}{
+		"a source the subject opens": {
+			subject: "echo one",
+			source:  "echo one\necho two",
+			wanted:  "echo one\necho two",
+		},
+		"a source of its own": {
+			subject: "slow-roasted onions",
+			source:  "deno run --allow-read=/state /bin/kitchen.ts --dish 'slow-roasted onions'",
+			wanted:  "slow-roasted onions",
+		},
+		"no source at all": {
+			subject: "slow-roasted onions",
+			source:  "",
+			wanted:  "slow-roasted onions",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			label := Label{
+				Subject:  test.subject,
+				Emphasis: tool.Emphasis{Kind: tool.EmphasisSyntax, Value: "bash", Source: test.source},
+			}
+
+			if got := label.getSource(); got != test.wanted {
+				t.Errorf("got %q, wanted %q", got, test.wanted)
+			}
+		})
+	}
+}
+
+func TestASubjectIsNeverPaintedAtOffsetsFromAnotherString(t *testing.T) {
+	label := Label{
+		Name:    "cook",
+		Subject: "slow-roasted onions",
+		Emphasis: tool.Emphasis{
+			Kind:   tool.EmphasisSyntax,
+			Value:  "bash",
+			Source: "deno run --allow-read=/state /bin/kitchen.ts --dish 'slow-roasted onions'",
+		},
+	}
+
+	rendered := label.Render()
+	for _, word := range []string{"slow-roasted", "onions"} {
+		if !strings.Contains(rendered, word) {
+			t.Errorf("%s was broken apart by styling: %q", word, rendered)
+		}
+	}
+}

@@ -18,6 +18,7 @@ import (
 	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/internal/util/strutil"
+	"crdx.org/io/toolbox"
 )
 
 const (
@@ -27,6 +28,7 @@ const (
 	fetchToolName  = "fetch"
 	titleToolName  = "title"
 	notifyToolName = "notify"
+	readToolName   = "read"
 
 	clipboardDropsHeading = "# Clipboard Drops"
 	defaultGlobalContext  = "You are a helpful coding assistant."
@@ -42,7 +44,7 @@ var (
 		"shellAccess":              shellAccess,
 		"lookupAccess":             lookupAccess,
 		"networkSection":           networkSection,
-		"stateRules":               stateRules,
+		"stateSection":             stateSection,
 		"scratchRules":             scratchRules,
 		"waitingForUserSection":    waitingForUserSection,
 		"readOnlyWorkspaceSection": readOnlyWorkspaceSection,
@@ -51,31 +53,15 @@ var (
 		"sandboxHeader":            sandboxHeader,
 		"titleSection":             titleSection,
 		"notifySection":            notifySection,
+		"harnessSection":           harnessSection,
+		"scopeSection":             scopeSection,
 	}).Parse(hereduck.D(`
-		{{ sandboxHeader .Yolo .ShellOffered }}# Harness
-
-		- "oh" is the harness you are running within
-		- Each session dir is under {{ .SessionsDir }}, named after the session
-		- This session's directory is {{ .SessionDir }}
-		- "session.jsonl" is the journal, the single source of truth, as JSONL
-		- "meta.json" is the listing entry: name, title, timestamps, and message count
-		- "chat.md" is the readable transcript of the conversation
-		- "wire.http" is the raw traffic between the harness and the model endpoint
-		- The user's settings are in {{ .ConfigFile }}, and their instructions in {{ .GlobalPath }}
-		- A session name said with no other context is a hint to read that session's files
-
-		# Scope
-
-		- Your workspace is the current directory, {{ .WorkspaceDir }}
-		- Your session is named {{ .SessionName }}
-		{{ scopeRules . }}
-
-		# Personality
+		{{ sandboxHeader .Yolo .ShellOffered }}{{ harnessSection . }}{{ scopeSection . }}{{ if not .HasEnvironment }}# Personality
 
 		- Use casual lowercase when chatting with the user, but write normally everywhere else
 		- Adopt the personality of the animal in your session name, and use its emoji
 
-		{{ networkSection . }}# /tmp
+		{{ end }}{{ networkSection . }}{{ if .FilesystemReachable }}# /tmp
 
 		{{ scratchRules . }}
 
@@ -87,42 +73,38 @@ var (
 		- Every path on the user's machine, including the ones above, is written here in full
 		- Write them the same way back, and never abbreviate one to a tilde
 
-		# State
-
-		{{ stateRules . }}
-
-		These states can change at any time. You will be told what changed when it does.
-		When a state blocks the work and no workflow below covers it, ask the user to change that state.
-
-		{{ titleSection . }}{{ notifySection . }}{{ waitingForUserSection . }}{{ readOnlyWorkspaceSection . }}
+		{{ end }}{{ stateSection . }}{{ titleSection . }}{{ notifySection . }}{{ waitingForUserSection . }}{{ readOnlyWorkspaceSection . }}
 	`)))
 )
 
 type harnessContextTemplateData struct {
-	WorkspaceDir      string
-	SessionName       string
-	SessionsDir       string
-	SessionDir        string
-	ConfigFile        string
-	GlobalPath        string
-	TmpDir            string
-	HomeDir           string
-	ExtraPaths        shell.Paths
-	DropsDirectory    string
-	ShellOffered      bool
-	TitleOffered      bool
-	NotifyOffered     bool
-	LookupOffered     bool
-	FetchOffered      bool
-	Conditions        conditions.Conditions
-	WorkspaceWritable bool
-	IsRepository      bool
-	GitWritable       bool
-	ShellGranted      bool
-	LookupGranted     bool
-	JobsGranted       bool
-	NetworkGranted    bool
-	Yolo              bool
+	WorkspaceDir        string
+	SessionName         string
+	SessionsDir         string
+	SessionDir          string
+	ConfigFile          string
+	GlobalPath          string
+	TmpDir              string
+	HomeDir             string
+	ExtraPaths          shell.Paths
+	DropsDirectory      string
+	ShellOffered        bool
+	TitleOffered        bool
+	NotifyOffered       bool
+	PathToolsOffered    bool
+	FilesystemReachable bool
+	HasEnvironment      bool
+	LookupOffered       bool
+	FetchOffered        bool
+	Conditions          conditions.Conditions
+	WorkspaceWritable   bool
+	IsRepository        bool
+	GitWritable         bool
+	ShellGranted        bool
+	LookupGranted       bool
+	JobsGranted         bool
+	NetworkGranted      bool
+	Yolo                bool
 }
 
 func ProjectContextPaths(workspace *work.Space) []string {
@@ -150,6 +132,7 @@ type Config struct {
 	CurrentCaps    caps.Set
 	ExtraPaths     shell.Paths
 	DropsDirectory string
+	Environment    string
 	OfferedTools   []string
 	Skills         []skill.Skill
 	Conditions     conditions.Conditions
@@ -159,6 +142,14 @@ type Config struct {
 }
 
 func Load(config Config) (string, []File, error) {
+	if config.Environment != "" {
+		return mergeContexts(
+			harnessContext(config),
+			config.Environment,
+			skillContext(config),
+		), nil, nil
+	}
+
 	globalFile, err := readGlobalContext(config.GlobalPath)
 	if err != nil {
 		return "", nil, err
@@ -178,8 +169,16 @@ func Load(config Config) (string, []File, error) {
 		harnessContext(config),
 		globalContext(globalFile),
 		projectContext(projectFiles),
-		skill.Context(config.Skills),
+		skillContext(config),
 	), files, nil
+}
+
+func skillContext(config Config) string {
+	if !toolset.Offers(config.OfferedTools, readToolName) {
+		return ""
+	}
+
+	return skill.Context(config.Skills)
 }
 
 func readContextFile(name string, read func() ([]byte, error)) (*File, error) {
@@ -237,19 +236,23 @@ func globalContext(file *File) string {
 func harnessContext(config Config) string {
 	currentCaps := config.CurrentCaps
 	data := harnessContextTemplateData{
-		WorkspaceDir:      config.Workspace.GetDir(),
-		SessionName:       config.SessionName,
-		SessionsDir:       config.SessionsDir,
-		SessionDir:        config.SessionDir,
-		ConfigFile:        config.ConfigFile,
-		GlobalPath:        config.GlobalPath,
-		TmpDir:            config.TmpDir,
-		HomeDir:           config.HomeDir,
-		ExtraPaths:        config.ExtraPaths,
-		DropsDirectory:    config.DropsDirectory,
-		ShellOffered:      toolset.Offers(config.OfferedTools, shellToolName),
-		TitleOffered:      toolset.Offers(config.OfferedTools, titleToolName),
-		NotifyOffered:     toolset.Offers(config.OfferedTools, notifyToolName),
+		WorkspaceDir:     config.Workspace.GetDir(),
+		SessionName:      config.SessionName,
+		SessionsDir:      config.SessionsDir,
+		SessionDir:       config.SessionDir,
+		ConfigFile:       config.ConfigFile,
+		GlobalPath:       config.GlobalPath,
+		TmpDir:           config.TmpDir,
+		HomeDir:          config.HomeDir,
+		ExtraPaths:       config.ExtraPaths,
+		DropsDirectory:   config.DropsDirectory,
+		ShellOffered:     toolset.Offers(config.OfferedTools, shellToolName),
+		TitleOffered:     toolset.Offers(config.OfferedTools, titleToolName),
+		NotifyOffered:    toolset.Offers(config.OfferedTools, notifyToolName),
+		PathToolsOffered: OffersAnyPathTool(config.OfferedTools),
+		HasEnvironment:   config.Environment != "",
+		FilesystemReachable: OffersAnyPathTool(config.OfferedTools) ||
+			toolset.Offers(config.OfferedTools, shellToolName),
 		LookupOffered:     toolset.Offers(config.OfferedTools, lookupToolName),
 		FetchOffered:      toolset.Offers(config.OfferedTools, fetchToolName),
 		Conditions:        config.Conditions,
@@ -270,8 +273,8 @@ func harnessContext(config Config) string {
 	return strings.TrimSpace(renderedText.String())
 }
 
-func WithDropsDirectory(systemPrompt string, dropsDirectory string) string {
-	if dropsDirectory == "" {
+func WithDropsDirectory(systemPrompt string, dropsDirectory string, arePathToolsOffered bool) string {
+	if dropsDirectory == "" || !arePathToolsOffered {
 		return systemPrompt
 	}
 	rule := dropsRule(dropsDirectory)
@@ -312,24 +315,88 @@ func notifySection(data harnessContextTemplateData) string {
 	}, "\n") + "\n\n"
 }
 
+func OffersAnyPathTool(offeredTools []string) bool {
+	for _, name := range toolbox.PathToolNames {
+		if toolset.Offers(offeredTools, name) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func pathReach(arePathToolsOffered bool) string {
+	if arePathToolsOffered {
+		return "Tools that accept a path"
+	}
+
+	return "The shell"
+}
+
+func harnessSection(data harnessContextTemplateData) string {
+	if data.HasEnvironment {
+		return ""
+	}
+
+	lines := []string{"- \"oh\" is the harness you are running within"}
+
+	if data.FilesystemReachable {
+		lines = append(lines,
+			"- Each session dir is under "+data.SessionsDir+", named after the session",
+			"- This session's directory is "+data.SessionDir,
+			"- \"session.jsonl\" is the journal, the single source of truth, as JSONL",
+			"- \"meta.json\" is the listing entry: name, title, timestamps, and message count",
+			"- \"chat.md\" is the readable transcript of the conversation",
+			"- \"wire.http\" is the raw traffic between the harness and the model endpoint",
+			"- The user's settings are in "+data.ConfigFile+", and their instructions in "+data.GlobalPath,
+			"- A session name said with no other context is a hint to read that session's files",
+		)
+	}
+
+	return "# Harness\n\n" + strings.Join(lines, "\n") + "\n\n"
+}
+
+func scopeSection(data harnessContextTemplateData) string {
+	var lines []string
+
+	if data.FilesystemReachable {
+		lines = append(lines, "- Your workspace is the current directory, "+data.WorkspaceDir)
+	}
+	if !data.HasEnvironment {
+		lines = append(lines, "- Your session is named "+data.SessionName)
+	}
+
+	body := strings.Join(lines, "\n") + scopeRules(data)
+	if strings.TrimSpace(body) == "" {
+		return ""
+	}
+
+	return "# Scope\n\n" + strings.TrimSpace(body) + "\n\n"
+}
+
 func scopeRules(data harnessContextTemplateData) string {
 	extraPaths := data.ExtraPaths
 	dropsDirectory := data.DropsDirectory
 
-	var lines []string
+	if !data.FilesystemReachable {
+		return ""
+	}
+
+	lines := []string{""}
 
 	configuredPathCount := len(extraPaths.Read) + len(extraPaths.Write) + len(extraPaths.Exec) +
 		len(extraPaths.Path) + len(extraPaths.Home)
+	reach := pathReach(data.PathToolsOffered)
 	switch {
 	case dropsDirectory != "":
-		lines = append(lines, "- Tools that accept a path can access the workspace, private home, /tmp, read-only system and executable search paths, and the paths listed here.")
+		lines = append(lines, "- "+reach+" can access the workspace, private home, /tmp, read-only system and executable search paths, and the paths listed here.")
 	case configuredPathCount > 0:
-		lines = append(lines, "- Tools that accept a path can access the workspace, private home, /tmp, read-only system and executable search paths, and the configured paths listed here.")
+		lines = append(lines, "- "+reach+" can access the workspace, private home, /tmp, read-only system and executable search paths, and the configured paths listed here.")
 	default:
-		lines = append(lines, "- Tools that accept a path can only access the workspace, private home, /tmp, and read-only system and executable search paths.")
+		lines = append(lines, "- "+reach+" can only access the workspace, private home, /tmp, and read-only system and executable search paths.")
 	}
 
-	if dropsDirectory != "" {
+	if dropsDirectory != "" && data.PathToolsOffered {
 		lines = append(lines, "- "+dropsRule(dropsDirectory))
 	}
 	for _, pattern := range extraPaths.Deny {
@@ -462,16 +529,29 @@ func networkSection(data harnessContextTemplateData) string {
 	return "# Network\n\n" + rules + "\n\n"
 }
 
-func stateRules(data harnessContextTemplateData) string {
-	lines := []string{
-		"- The workspace (" + data.WorkspaceDir + ") is " + filesystem(data.WorkspaceWritable),
+func stateSection(data harnessContextTemplateData) string {
+	rules := stateRules(data)
+	if rules == "" {
+		return ""
 	}
 
-	if data.IsRepository {
-		lines = append(lines, "- The .git directory within it ("+
-			filepath.Join(data.WorkspaceDir, ".git")+") is "+filesystem(data.GitWritable))
-	} else {
-		lines = append(lines, "- The workspace is not a git repository")
+	return "# State\n\n" + rules + "\n\n" +
+		"These states can change at any time. You will be told what changed when it does.\n" +
+		"When a state blocks the work and no workflow below covers it, ask the user to change that state.\n\n"
+}
+
+func stateRules(data harnessContextTemplateData) string {
+	var lines []string
+
+	if data.FilesystemReachable {
+		lines = append(lines, "- The workspace ("+data.WorkspaceDir+") is "+filesystem(data.WorkspaceWritable))
+
+		if data.IsRepository {
+			lines = append(lines, "- The .git directory within it ("+
+				filepath.Join(data.WorkspaceDir, ".git")+") is "+filesystem(data.GitWritable))
+		} else {
+			lines = append(lines, "- The workspace is not a git repository")
+		}
 	}
 
 	if data.ShellOffered {

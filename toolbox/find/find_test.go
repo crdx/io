@@ -53,7 +53,7 @@ func execWithMetrics(
 ) (string, tool.ToolCallMetrics, error) {
 	t.Helper()
 
-	call, err := find.New(root).Parse(arguments)
+	call, err := find.New(root, func() bool { return true }).Parse(arguments)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

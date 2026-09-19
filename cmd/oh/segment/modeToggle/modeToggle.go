@@ -26,7 +26,7 @@ func (self state) Render(segment.Context) string {
 	grantedCaps := self.getGrantedCaps()
 	isPrefixPending := self.isPrefixPending()
 
-	return self.letter(caps.Read, true, style.Read, isPrefixPending) +
+	return self.letter(caps.Read, grantedCaps.Has(caps.Read), style.Read, isPrefixPending) +
 		self.letter(
 			caps.Shell,
 			grantedCaps.Has(caps.Shell),

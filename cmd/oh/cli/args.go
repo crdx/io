@@ -2,7 +2,9 @@ package cli
 
 import (
 	"errors"
+	"fmt"
 	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -16,11 +18,12 @@ import (
 const (
 	stdinMarker     = "-"
 	defaultCapFlags = "rx"
+	toolboxSuffix   = ".toml"
 )
 
 var usage = `
 Usage:
-    $0 [options] [-t <tool>]... [<prompt>...]
+    $0 [options] [-t <tool>]... [-e <env>]... [<prompt>...]
     $0 --login [<provider>]
     $0 --usage [--json]
     $0 --update [--ignored]
@@ -30,7 +33,8 @@ Options:
     -r, --resume [<session>]    Resume a session
     -m, --model [<model>]       Choose a model
     -c, --caps <flags>          Set capabilities
-    -t, --tool <tool>           Replace the toolbox
+    -t, --tool <tool>           Replace the toolbox (name or .toml)
+    -e, --env <env>             Replace the toolbox and prompt from a .toml
     -p, --print                 Stream non-interactively
         --ctl                   Run maintenance
         --demo                  Enter the matrix
@@ -58,6 +62,7 @@ type inputFlags struct {
 	IsModelPicker    bool     `docopt:"-m"`
 	Caps             string   `docopt:"--caps"`
 	Tools            []string `docopt:"--tool"`
+	Environments     []string `docopt:"--env"`
 	IsPrinting       bool     `docopt:"--print"`
 	IsDemoing        bool     `docopt:"--demo"`
 	Usage            bool     `docopt:"--usage"`
@@ -83,6 +88,8 @@ type Options struct {
 	Caps           caps.Set
 	WereCapsChosen bool
 	Tools          []string
+	Toolboxes      []string
+	Environments   []string
 	AddedFiles     []startup.InitialFile
 	Yolo           bool
 	IsPrinting     bool
@@ -123,6 +130,44 @@ func Bind() *Input {
 	return &Input{inputFlags: *parsedFlags, SourceSession: sourceSession}
 }
 
+func partitionToolValues(values []string) ([]string, []string, error) {
+	var names, toolboxValues []string
+
+	for _, value := range values {
+		if strings.HasSuffix(value, toolboxSuffix) {
+			toolboxValues = append(toolboxValues, value)
+			continue
+		}
+
+		names = append(names, value)
+	}
+
+	paths, err := absoluteTomlPaths(toolboxValues)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return names, paths, nil
+}
+
+func absoluteTomlPaths(values []string) ([]string, error) {
+	var paths []string
+
+	for _, value := range values {
+		if !strings.HasSuffix(value, toolboxSuffix) {
+			return nil, fmt.Errorf("%s is not a %s file", value, toolboxSuffix)
+		}
+
+		path, err := filepath.Abs(value)
+		if err != nil {
+			return nil, fmt.Errorf("could not resolve %s: %w", value, err)
+		}
+		paths = append(paths, path)
+	}
+
+	return paths, nil
+}
+
 func promptAfterStdinMarker(words []string) []string {
 	if len(words) > 0 && words[0] == stdinMarker {
 		return words[1:]
@@ -140,11 +185,23 @@ func (self Options) StartingFromSession() bool {
 }
 
 func (self Input) Parse(modelCachePath string, defaults model.Defaults) (Options, error) {
+	toolNames, toolboxes, err := partitionToolValues(self.Tools)
+	if err != nil {
+		return Options{}, err
+	}
+
+	environments, err := absoluteTomlPaths(self.Environments)
+	if err != nil {
+		return Options{}, err
+	}
+
 	options := Options{
 		Message:       strings.Join(self.Message, " "),
 		Session:       self.Session,
 		SourceSession: self.SourceSession,
-		Tools:         self.Tools,
+		Tools:         toolNames,
+		Toolboxes:     toolboxes,
+		Environments:  environments,
 		Yolo:          self.Yolo,
 		IsPrinting:    self.IsPrinting,
 	}
@@ -183,7 +240,7 @@ func (self Input) Check(isPromptPiped bool) error {
 		)
 	}
 
-	if self.isResuming() && len(self.Tools) > 0 {
+	if self.isResuming() && (len(self.Tools) > 0 || len(self.Environments) > 0) {
 		return errors.New(
 			"a resumed conversation preserves its toolbox; start a new session to change them",
 		)

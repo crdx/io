@@ -167,7 +167,7 @@ func (self Label) elide(room int) Label {
 }
 
 func (self Label) getSource() string {
-	if self.Emphasis.Source != "" {
+	if strings.HasPrefix(self.Emphasis.Source, self.Subject) {
 		return self.Emphasis.Source
 	}
 

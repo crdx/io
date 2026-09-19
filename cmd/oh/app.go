@@ -381,6 +381,9 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 			inputLine.SetText(completion)
 		}
 
+	case edit.ToggleRead:
+		self.toggleCap(caps.Read)
+
 	case edit.ToggleWrite:
 		self.toggleCap(caps.Write)
 

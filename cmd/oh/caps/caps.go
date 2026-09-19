@@ -80,7 +80,7 @@ func Named(flag string) (Set, bool) {
 }
 
 func Parse(flags string) (Set, error) {
-	grantedCaps := Read
+	var grantedCaps Set
 
 	for _, flag := range flags {
 		knownCap, found := Named(string(flag))
@@ -154,6 +154,9 @@ func (self *Mode) Inject() string {
 func changeNotices(changedCaps Set, currentCaps Set) []string {
 	var notices []string
 
+	if changedCaps.Has(Read) {
+		notices = append(notices, pathToolNotice(currentCaps.Has(Read)))
+	}
 	if changedCaps.Has(Write) {
 		notices = append(notices, workspaceNotice(currentCaps.Has(Write)))
 	}
@@ -184,6 +187,14 @@ func withdrawal(withdrawnCaps Set) string {
 	default:
 		return ""
 	}
+}
+
+func pathToolNotice(isGranted bool) string {
+	if isGranted {
+		return "The file tools can now read the workspace."
+	}
+
+	return "The file tools are now refused."
 }
 
 func workspaceNotice(isWritable bool) string {

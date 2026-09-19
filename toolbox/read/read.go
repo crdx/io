@@ -47,7 +47,9 @@ type Args struct {
 	Limit  int    `json:"limit"`
 }
 
-func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
+var ErrWithheld = errors.New("read access unavailable; ctrl+x r grants it")
+
+func New(root *file.Root, snapshots *file.Snapshots, isAllowed func() bool) tool.Tool {
 	restoreReadState := func(payload json.RawMessage) error {
 		return snapshots.RestoreReadState(root, payload)
 	}
@@ -68,6 +70,7 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 		FocusPath().
 		IsEmbarrassinglyParallel().
 		ChangesNothing().
+		Requires(isAllowed, ErrWithheld).
 		Run(func(ctx context.Context, args Args) (tool.ToolCallResult, error) {
 			return exec(ctx, root, args)
 		})

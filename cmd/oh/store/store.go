@@ -28,6 +28,8 @@ type Meta struct {
 	IsFast       bool                   `json:"fast,omitempty"`
 	SystemPrompt string                 `json:"system_prompt,omitempty"`
 	Tools        []string               `json:"tools,omitempty"`
+	Toolboxes    []string               `json:"toolboxes,omitempty"`
+	Environments []string               `json:"environments,omitempty"`
 	Conditions   *conditions.Conditions `json:"conditions,omitempty"`
 	Yolo         bool                   `json:"yolo,omitempty"`
 }

@@ -1019,7 +1019,7 @@ func TestTheBuiltInDefaultsSetEverySettingThereIs(t *testing.T) {
 	}
 
 	for _, key := range []string{
-		"version", "caps", "editor", "input", "model", "snippets", "skills", "sandbox", "bar",
+		"version", "caps", "editor", "input", "model", "snippets", "tools", "skills", "sandbox", "bar",
 	} {
 		if _, ok := written[key]; !ok {
 			t.Errorf("expected the defaults to say what %q is", key)

@@ -1,5 +1,5 @@
 Usage:
-    oh [options] [-t <tool>]... [<prompt>...]
+    oh [options] [-t <tool>]... [-e <env>]... [<prompt>...]
     oh --login [<provider>]
     oh --usage [--json]
     oh --update [--ignored]
@@ -9,7 +9,8 @@ Options:
     -r, --resume [<session>]    Resume a session
     -m, --model [<model>]       Choose a model
     -c, --caps <flags>          Set capabilities
-    -t, --tool <tool>           Replace the toolbox
+    -t, --tool <tool>           Replace the toolbox (name or .toml)
+    -e, --env <env>             Replace the toolbox and prompt from a .toml
     -p, --print                 Stream non-interactively
         --ctl                   Run maintenance
         --demo                  Enter the matrix

@@ -1,0 +1,13 @@
+\e[?2026h\e[?25l\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m read the notes while reading is withheld                                                           \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=toolu_1&session=tame-impala\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mread access unavailable; ctrl+x r grants it\e[0m\r
+\r
+\r\e[KReading is unavailable.\e[?25h\e[?2026l\r
+\r
+\e]133;A\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m carry on                                                                                           \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KCarrying on.\e[?25h\e[?2026l\r
