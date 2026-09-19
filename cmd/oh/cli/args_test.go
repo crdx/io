@@ -132,6 +132,9 @@ func TestEveryOptionIsRead(t *testing.T) {
 	if !slices.Equal(parsedOptions.Tools, []string{"read", "grep"}) {
 		t.Errorf("expected read and grep, got %v", parsedOptions.Tools)
 	}
+	if !parsedOptions.IsPersistenceDisabled {
+		t.Error("expected a custom toolbox to disable the session")
+	}
 	if parsedOptions.Message != "Use the brief." {
 		t.Errorf("expected the caller's opening message, got %q", parsedOptions.Message)
 	}
@@ -140,6 +143,31 @@ func TestEveryOptionIsRead(t *testing.T) {
 
 	if parsedOptions := parseOptions(t, "-r", id); parsedOptions.Session != id || !parsedOptions.Resuming() {
 		t.Errorf("expected the session, got %q", parsedOptions.Session)
+	}
+}
+
+func TestNoSessionDisablesTheSession(t *testing.T) {
+	for _, arguments := range [][]string{
+		{"-n"},
+		{"--no-session"},
+		{"-t", "read"},
+		{"-e", "kitchen.toml"},
+	} {
+		if parsedOptions := parseOptions(t, arguments...); !parsedOptions.IsPersistenceDisabled {
+			t.Errorf("expected %v to disable the session", arguments)
+		}
+	}
+
+	if parsedOptions := parseOptions(t); parsedOptions.IsPersistenceDisabled {
+		t.Error("expected an ordinary conversation to keep its session")
+	}
+}
+
+func TestNoSessionIsRefusedWhenResuming(t *testing.T) {
+	for _, argument := range []string{"-n", "--no-session"} {
+		if err := bind(t, "-r", "chosen-lobster", argument).Check(false); err == nil {
+			t.Errorf("expected %s to be refused while resuming", argument)
+		}
 	}
 }
 
@@ -383,16 +411,29 @@ func TestTheYoloFlagWaivesTheSandbox(t *testing.T) {
 	}
 }
 
-func TestOnlyANewSessionInheritsAWaivedSandbox(t *testing.T) {
-	if got := InheritedOptions([]string{"--yolo", "hello"}, cycle.NewSession); !slices.Equal(got, []string{"--yolo"}) {
-		t.Errorf("got %v, want --yolo handed on to a new session", got)
+func TestOnlyANewSessionInheritsProcessOptions(t *testing.T) {
+	for _, test := range []struct {
+		arguments []string
+		want      []string
+	}{
+		{arguments: []string{"--yolo", "hello"}, want: []string{"--yolo"}},
+		{arguments: []string{"-n", "hello"}, want: []string{"--no-session"}},
+		{arguments: []string{"--no-session", "hello"}, want: []string{"--no-session"}},
+		{
+			arguments: []string{"--yolo", "--no-session", "hello"},
+			want:      []string{"--yolo", "--no-session"},
+		},
+	} {
+		if got := InheritedOptions(test.arguments, cycle.NewSession); !slices.Equal(got, test.want) {
+			t.Errorf("InheritedOptions(%v) got %v, want %v", test.arguments, got, test.want)
+		}
 	}
 
-	if got := InheritedOptions([]string{"--yolo"}, cycle.ResumeSession); got != nil {
-		t.Errorf("got %v, want a resumed session to take its confinement from its own journal", got)
+	if got := InheritedOptions([]string{"--yolo", "--no-session"}, cycle.ResumeSession); got != nil {
+		t.Errorf("got %v, want a resumed session to take its options from its own journal", got)
 	}
 
 	if got := InheritedOptions([]string{"hello"}, cycle.NewSession); got != nil {
-		t.Errorf("got %v, want nothing handed on by a sandboxed session", got)
+		t.Errorf("got %v, want nothing handed on by an ordinary session", got)
 	}
 }

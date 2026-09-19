@@ -52,6 +52,51 @@ func TestPrepareTemporaryDirectoryKeepsAnExistingDirectory(t *testing.T) {
 	}
 }
 
+func TestPrepareEphemeralDirectoryCreatesANewPrivateDirectory(t *testing.T) {
+	root := t.TempDir()
+	t.Setenv("TMPDIR", root)
+
+	first, err := PrepareEphemeralDirectory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := PrepareEphemeralDirectory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first == second {
+		t.Errorf("got the same temporary directory twice: %s", first)
+	}
+	for _, directory := range []string{first, second} {
+		if parent := filepath.Dir(directory); parent != root {
+			t.Errorf("got parent %q, want %q", parent, root)
+		}
+		info, err := os.Stat(directory)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := info.Mode().Perm(); got != 0o700 {
+			t.Errorf("got permissions %04o, want 0700", got)
+		}
+	}
+}
+
+func TestPrepareEphemeralDirectoryReportsCreationFailure(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "not-a-directory")
+	if err := os.WriteFile(root, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("TMPDIR", root)
+
+	directory, err := PrepareEphemeralDirectory()
+	if err == nil || !strings.Contains(err.Error(), "could not prepare the temporary scratch:") {
+		t.Fatalf("got %v, want the preparation error", err)
+	}
+	if directory != "" {
+		t.Errorf("got path %q after failure", directory)
+	}
+}
+
 func TestPrepareTemporaryDirectoryReportsCreationFailure(t *testing.T) {
 	stateDirectory := t.TempDir()
 	t.Setenv(location.StateDirVariable, stateDirectory)

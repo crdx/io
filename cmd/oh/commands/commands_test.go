@@ -362,7 +362,9 @@ func TestAModelThatCannotBeResolvedLeavesTheCommandToBeCorrected(t *testing.T) {
 }
 
 func TestTargetCommandsExposeTheirArgumentsForCompletion(t *testing.T) {
-	commands := newCommandRegistry(t, commandEnvironment{})
+	commands := newCommandRegistry(t, commandEnvironment{
+		session: commandSession{directory: "/sessions/tame-impala"},
+	})
 
 	for prefix, want := range map[string]string{
 		"/open c":         "/open config-dir",
@@ -417,6 +419,26 @@ func TestCommandsReportTargetsThatDoNotExistYet(t *testing.T) {
 				t.Error("action ran for a missing target")
 			}
 		})
+	}
+}
+
+func TestAConversationWithoutASessionOffersNoSessionFileTargets(t *testing.T) {
+	environment := commandEnvironment{}
+	targets := locationTargets(environment)
+	copiedTargets := copyTargets(environment, targets)
+
+	for _, name := range []string{"session-dir", "session-log-file", "session-chat-file"} {
+		if _, isFound := targets[name]; isFound {
+			t.Errorf("temporary conversation offers target %q", name)
+		}
+	}
+	if _, isFound := copiedTargets["session-chat"]; isFound {
+		t.Error("temporary conversation offers its absent chat")
+	}
+	for _, name := range []string{"session-name", "session-id"} {
+		if _, isFound := copiedTargets[name]; !isFound {
+			t.Errorf("temporary conversation lost its live %s", name)
+		}
 	}
 }
 

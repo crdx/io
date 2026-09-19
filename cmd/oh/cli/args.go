@@ -33,8 +33,9 @@ Options:
     -r, --resume [<session>]    Resume a session
     -m, --model [<model>]       Choose a model
     -c, --caps <flags>          Set capabilities
-    -t, --tool <tool>           Replace the toolbox (name or .toml)
-    -e, --env <env>             Replace the toolbox and prompt from a .toml
+    -t, --tool <tool>           Use a toolbox without saving (name or .toml)
+    -e, --env <env>             Use a toolbox and prompt without saving (.toml)
+    -n, --no-session            Do not save the conversation
     -p, --print                 Stream non-interactively
         --ctl                   Run maintenance
         --demo                  Enter the matrix
@@ -63,6 +64,7 @@ type inputFlags struct {
 	Caps             string   `docopt:"--caps"`
 	Tools            []string `docopt:"--tool"`
 	Environments     []string `docopt:"--env"`
+	HasNoSession     bool     `docopt:"--no-session"`
 	IsPrinting       bool     `docopt:"--print"`
 	IsDemoing        bool     `docopt:"--demo"`
 	Usage            bool     `docopt:"--usage"`
@@ -81,18 +83,19 @@ type Input struct {
 }
 
 type Options struct {
-	Message        string
-	Session        string
-	SourceSession  string
-	Selection      model.Selection
-	Caps           caps.Set
-	WereCapsChosen bool
-	Tools          []string
-	Toolboxes      []string
-	Environments   []string
-	AddedFiles     []startup.InitialFile
-	Yolo           bool
-	IsPrinting     bool
+	Message               string
+	Session               string
+	SourceSession         string
+	Selection             model.Selection
+	Caps                  caps.Set
+	WereCapsChosen        bool
+	Tools                 []string
+	Toolboxes             []string
+	Environments          []string
+	AddedFiles            []startup.InitialFile
+	Yolo                  bool
+	IsPrinting            bool
+	IsPersistenceDisabled bool
 }
 
 func Bind() *Input {
@@ -196,14 +199,15 @@ func (self Input) Parse(modelCachePath string, defaults model.Defaults) (Options
 	}
 
 	options := Options{
-		Message:       strings.Join(self.Message, " "),
-		Session:       self.Session,
-		SourceSession: self.SourceSession,
-		Tools:         toolNames,
-		Toolboxes:     toolboxes,
-		Environments:  environments,
-		Yolo:          self.Yolo,
-		IsPrinting:    self.IsPrinting,
+		Message:               strings.Join(self.Message, " "),
+		Session:               self.Session,
+		SourceSession:         self.SourceSession,
+		Tools:                 toolNames,
+		Toolboxes:             toolboxes,
+		Environments:          environments,
+		Yolo:                  self.Yolo,
+		IsPrinting:            self.IsPrinting,
+		IsPersistenceDisabled: self.HasNoSession || len(self.Tools) > 0 || len(self.Environments) > 0,
 	}
 
 	if self.Model != "" {
@@ -246,6 +250,10 @@ func (self Input) Check(isPromptPiped bool) error {
 		)
 	}
 
+	if self.isResuming() && self.HasNoSession {
+		return errors.New("a conversation cannot be resumed with --no-session")
+	}
+
 	if self.IsDemoing {
 		if self.isResuming() || self.SourceSession != "" {
 			return errors.New("the simulation keeps nothing, so there is no session of its to resume")
@@ -284,9 +292,13 @@ func InheritedOptions(arguments []string, kind cycle.TransitionKind) []string {
 		return nil
 	}
 
+	var inheritedOptions []string
 	if slices.Contains(arguments, "--yolo") {
-		return []string{"--yolo"}
+		inheritedOptions = append(inheritedOptions, "--yolo")
+	}
+	if slices.Contains(arguments, "-n") || slices.Contains(arguments, "--no-session") {
+		inheritedOptions = append(inheritedOptions, "--no-session")
 	}
 
-	return nil
+	return inheritedOptions
 }

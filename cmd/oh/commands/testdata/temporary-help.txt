@@ -1,0 +1,20 @@
+Commands:
+  /! <command>
+  /conf
+  /copy {last-message|session-id|session-name|<target>}
+  /edit <target>
+  /info
+  /open <target>
+  /new [model]
+  /expose <port>
+  /grant {r|rx|rw|rxw} <path>
+  /grants
+  /revoke {<path>|<port>}
+  /jobs
+  /job {status|output|stop|discard} <name> | prune
+  /fork [model]
+
+Targets:
+  agents-file         config-dir          config-file
+  home-dir            scratch-dir         skills-dir
+  snippets-dir        system-prompt-file  workspace-dir

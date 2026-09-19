@@ -116,7 +116,15 @@ func requireWorkspace(storedSession *store.Session, workspace *work.Space) error
 	)
 }
 
-func OpenWriter(directory string, resumedSession *store.Session, meta store.Meta) (*store.Writer, error) {
+func OpenWriter(
+	directory string,
+	resumedSession *store.Session,
+	meta store.Meta,
+	isPersistenceDisabled bool,
+) (*store.Writer, error) {
+	if isPersistenceDisabled {
+		return store.CreateUnpersisted(directory, meta)
+	}
 	if resumedSession == nil {
 		return store.Create(directory, meta)
 	}

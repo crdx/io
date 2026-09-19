@@ -212,10 +212,12 @@ func summariseTargets(argumentNames []string, targetNames []string) string {
 func copyTargets(environment commandEnvironment, targets map[string]commandTarget) map[string]commandTarget {
 	copiedTargets := maps.Clone(targets)
 	copiedTargets["last-message"] = lastMessageTarget(environment.session.getLastMessage)
-	copiedTargets["session-chat"] = textFileTarget(
-		"Session chat",
-		filepath.Join(environment.session.directory, sessionTranscriptName),
-	)
+	if environment.session.directory != "" {
+		copiedTargets["session-chat"] = textFileTarget(
+			"Session chat",
+			filepath.Join(environment.session.directory, sessionTranscriptName),
+		)
+	}
 	copiedTargets["session-name"] = staticTarget(environment.session.name)
 	copiedTargets["session-id"] = staticTarget(environment.session.id)
 	return copiedTargets
@@ -248,15 +250,17 @@ func locationTargets(environment commandEnvironment) map[string]commandTarget {
 		"workspace-dir":      staticTarget(environment.workspace.GetDir()),
 		"scratch-dir":        staticTarget(environment.scratchDir),
 		"home-dir":           staticTarget(environment.homeDir),
-		"session-dir":        existingTarget("Session directory", environment.session.directory),
-		"session-log-file": existingTarget(
+	}
+	if environment.session.directory != "" {
+		targets["session-dir"] = existingTarget("Session directory", environment.session.directory)
+		targets["session-log-file"] = existingTarget(
 			"Session log",
 			filepath.Join(environment.session.directory, sessionJournalName),
-		),
-		"session-chat-file": existingTarget(
+		)
+		targets["session-chat-file"] = existingTarget(
 			"Session chat",
 			filepath.Join(environment.session.directory, sessionTranscriptName),
-		),
+		)
 	}
 
 	snippetsDirectory := filepath.Join(environment.configDir, "snippets")

@@ -9,6 +9,7 @@
 --list
 --login
 --model
+--no-session
 --print
 --resume
 --tool

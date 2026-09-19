@@ -78,7 +78,10 @@ import (
 	"crdx.org/io/cmd/oh/work"
 )
 
-const approvalLimit = time.Minute
+const (
+	approvalLimit                   = time.Minute
+	temporaryConversationNoticeText = "this conversation is temporary and cannot be resumed"
+)
 
 type approval struct {
 	label    string
@@ -465,6 +468,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		return "", err
 	}
+	if args.IsPersistenceDisabled {
+		_, _ = fmt.Fprintln(notices, style.Change(temporaryConversationNoticeText))
+	}
 	applyDefaultCaps(&args, settings)
 
 	if isSimulated {
@@ -630,29 +636,47 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		Yolo:         args.Yolo,
 	}
 
-	log, err := sessions.OpenWriter(sessionsDir, resumedSession, meta)
+	log, err := sessions.OpenWriter(sessionsDir, resumedSession, meta, args.IsPersistenceDisabled)
 	if err != nil {
 		return "", err
 	}
 	client.UseSession(log.ID())
+	defer func() { _ = log.Close() }()
 
+	var tmpDir string
+	if args.IsPersistenceDisabled {
+		tmpDir, err = sessions.PrepareEphemeralDirectory()
+	} else {
+		tmpDir, err = sessions.PrepareTemporaryDirectory(log.Name())
+	}
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		if !log.IsPersisted() {
+			_ = os.RemoveAll(tmpDir)
+		}
+	}()
+
+	sessionDirectory := filepath.Join(sessionsDir, log.Name())
+	conversationFilesDirectory := sessionDirectory
+	ensureSession := log.EnsurePersisted
+	if args.IsPersistenceDisabled {
+		sessionDirectory = ""
+		conversationFilesDirectory = tmpDir
+		ensureSession = func() error { return nil }
+	}
 	sessionInfo = cycle.Session{
 		Name:         log.Name(),
 		ID:           log.ID(),
-		Directory:    filepath.Join(sessionsDir, log.Name()),
+		Directory:    sessionDirectory,
 		WorkspaceDir: workspaceDir,
 		Provider:     selection.Provider,
 		Model:        selection.Model,
 		Effort:       selection.Effort,
 	}
-	defer func() { _ = log.Close() }()
 	hooks.EmitSessionStarting(ctx, cycle.SessionStarting{Session: sessionInfo})
 	client.ObserveHTTP(log.Observer())
-
-	tmpDir, err := sessions.PrepareTemporaryDirectory(log.Name())
-	if err != nil {
-		return "", err
-	}
 
 	if err := shell.PrepareHomeMappings(
 		workspace.GetDir(), homeDir, tmpDir, settings.Sandbox, mode.Current(),
@@ -665,17 +689,11 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	defer func() { _ = cacheRoot.Close() }()
 
-	dropKeeper, err := drops.Open(files, sessionInfo.Directory, log.EnsurePersisted)
+	dropKeeper, err := drops.Open(files, conversationFilesDirectory, ensureSession)
 	if err != nil {
 		return "", err
 	}
 	defer func() { _ = dropKeeper.Close() }()
-
-	defer func() {
-		if !log.IsPersisted() {
-			_ = os.RemoveAll(tmpDir)
-		}
-	}()
 
 	if isPromptPiped {
 		pipedPrompt, err := startup.ReadPipedPrompt(os.Stdin)
@@ -931,24 +949,25 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		systemPrompt = resumedSession.Meta.SystemPrompt
 	} else {
 		systemPrompt, _, err = prompt.Load(prompt.Config{
-			GlobalPath:     location.GetGlobalContextPath(),
-			Workspace:      workspace,
-			SessionName:    log.Name(),
-			SessionsDir:    sessionsDir,
-			SessionDir:     filepath.Join(sessionsDir, log.Name()),
-			ConfigFile:     location.GetConfigFile(),
-			TmpDir:         tmpDir,
-			HomeDir:        homeDir,
-			CurrentCaps:    args.Caps,
-			ExtraPaths:     settings.Sandbox,
-			DropsDirectory: dropKeeper.GetDirectory(),
-			Skills:         availableSkills,
-			OfferedTools:   toolset.Names(enabledTools),
-			Environment:    strings.Join(environmentPrompts, "\n\n"),
-			Conditions:     currentConditions,
-			JobsGranted:    jobManager != nil,
-			NetworkGranted: args.Caps.Has(caps.Network),
-			Yolo:           args.Yolo,
+			GlobalPath:              location.GetGlobalContextPath(),
+			Workspace:               workspace,
+			SessionName:             log.Name(),
+			SessionsDir:             sessionsDir,
+			SessionDir:              sessionInfo.Directory,
+			ConfigFile:              location.GetConfigFile(),
+			TmpDir:                  tmpDir,
+			IsConversationTemporary: args.IsPersistenceDisabled,
+			HomeDir:                 homeDir,
+			CurrentCaps:             args.Caps,
+			ExtraPaths:              settings.Sandbox,
+			DropsDirectory:          dropKeeper.GetDirectory(),
+			Skills:                  availableSkills,
+			OfferedTools:            toolset.Names(enabledTools),
+			Environment:             strings.Join(environmentPrompts, "\n\n"),
+			Conditions:              currentConditions,
+			JobsGranted:             jobManager != nil,
+			NetworkGranted:          args.Caps.Has(caps.Network),
+			Yolo:                    args.Yolo,
 		})
 		if err != nil {
 			return "", err
@@ -1107,7 +1126,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	if cellWidth, cellHeight, hasGraphics := graphics.Detect(keyboard, os.Stdout); hasGraphics {
 		app.display.pictures = pictures.Display{
-			SessionDirectory: sessionInfo.Directory,
+			SessionDirectory: conversationFilesDirectory,
 			ScratchDirectory: shadowedScratch(tmpDir, args.Yolo),
 			CellWidth:        cellWidth,
 			CellHeight:       cellHeight,
@@ -1115,7 +1134,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		}
 
 		app.agent.StorePicturesWith(func(picture tool.Image) *agent.Picture {
-			reference, err := pictures.Store(sessionInfo.Directory, log.EnsurePersisted, picture)
+			reference, err := pictures.Store(conversationFilesDirectory, ensureSession, picture)
 			if err != nil {
 				return nil
 			}

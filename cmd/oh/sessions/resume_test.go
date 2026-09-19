@@ -302,7 +302,7 @@ func TestARunningSessionIsRefused(t *testing.T) {
 	}
 
 	resumedSession := &store.Session{Name: writer.Name()}
-	if _, err := OpenWriter(directory, resumedSession, store.Meta{}); err == nil || !strings.Contains(err.Error(), "is running") {
+	if _, err := OpenWriter(directory, resumedSession, store.Meta{}, false); err == nil || !strings.Contains(err.Error(), "is running") {
 		t.Fatalf("expected the running session to be refused, got %v", err)
 	}
 

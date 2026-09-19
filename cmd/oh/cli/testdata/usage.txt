@@ -9,8 +9,9 @@ Options:
     -r, --resume [<session>]    Resume a session
     -m, --model [<model>]       Choose a model
     -c, --caps <flags>          Set capabilities
-    -t, --tool <tool>           Replace the toolbox (name or .toml)
-    -e, --env <env>             Replace the toolbox and prompt from a .toml
+    -t, --tool <tool>           Use a toolbox without saving (name or .toml)
+    -e, --env <env>             Use a toolbox and prompt without saving (.toml)
+    -n, --no-session            Do not save the conversation
     -p, --print                 Stream non-interactively
         --ctl                   Run maintenance
         --demo                  Enter the matrix

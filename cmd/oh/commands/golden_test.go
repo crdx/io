@@ -60,6 +60,39 @@ func TestGoldenCompletionMatchesGolden(t *testing.T) {
 	assertGolden(t, "completion.txt", output.String())
 }
 
+func TestGoldenTemporaryConversationCompletionMatchesGolden(t *testing.T) {
+	environment := fixtureEnvironment(t)
+	environment.session.directory = ""
+	commands := newCommandRegistryWithSnippets(t, environment, fixtureSnippets())
+
+	var output strings.Builder
+	for _, prefix := range []string{"/copy ", "/edit ", "/open "} {
+		_, _ = fmt.Fprintf(&output, "%s%s\n", prefix, strings.Join(completionCycle(t, commands, prefix), " → "))
+	}
+	assertGolden(t, "temporary-completion.txt", output.String())
+}
+
+func completionCycle(t *testing.T, commands slash.Registry, prefix string) []string {
+	t.Helper()
+
+	state := slash.Completion{}
+	current := prefix
+	var completed []string
+	seen := map[string]bool{}
+	for {
+		next, found := state.Next(commands, current)
+		if !found {
+			return completed
+		}
+		if seen[next] {
+			return completed
+		}
+		seen[next] = true
+		completed = append(completed, next)
+		current = next
+	}
+}
+
 func assertGolden(t *testing.T, name string, got string) {
 	t.Helper()
 
@@ -93,6 +126,7 @@ func fixtureEnvironment(t *testing.T) commandEnvironment {
 	return commandEnvironment{
 		configDir:     configDirectory,
 		pathGrants:    grants,
+		session:       commandSession{directory: "/sessions/tame-impala"},
 		hostToSandbox: ports,
 		jobs:          managedJobs,
 		getInfo: func() (string, error) {
@@ -329,6 +363,23 @@ func TestGoldenInfoMatchesGolden(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertGolden(t, "info.txt", context.notice+"\n")
+}
+
+func TestGoldenTemporaryConversationHelpMatchesGolden(t *testing.T) {
+	environment := fixtureEnvironment(t)
+	environment.session.directory = ""
+	commands := newCommandRegistryWithSnippets(t, environment, fixtureSnippets())
+	invocation, found := commands.Find("/help")
+	if !found {
+		t.Fatal("expected /help to be registered")
+	}
+
+	context := &helpContext{}
+	if err := invocation.Command.Run(context, invocation.Arguments); err != nil {
+		t.Fatal(err)
+	}
+	assertGolden(t, "temporary-help.txt", style.Plain(context.notice)+"\n")
+	assertGolden(t, "temporary-help.ansi", strutil.VisibleEscapes(context.notice)+"\n")
 }
 
 func TestGoldenHelpMatchesGolden(t *testing.T) {

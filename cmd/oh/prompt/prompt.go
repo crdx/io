@@ -78,33 +78,34 @@ var (
 )
 
 type harnessContextTemplateData struct {
-	WorkspaceDir        string
-	SessionName         string
-	SessionsDir         string
-	SessionDir          string
-	ConfigFile          string
-	GlobalPath          string
-	TmpDir              string
-	HomeDir             string
-	ExtraPaths          shell.Paths
-	DropsDirectory      string
-	ShellOffered        bool
-	TitleOffered        bool
-	NotifyOffered       bool
-	PathToolsOffered    bool
-	FilesystemReachable bool
-	HasEnvironment      bool
-	LookupOffered       bool
-	FetchOffered        bool
-	Conditions          conditions.Conditions
-	WorkspaceWritable   bool
-	IsRepository        bool
-	GitWritable         bool
-	ShellGranted        bool
-	LookupGranted       bool
-	JobsGranted         bool
-	NetworkGranted      bool
-	Yolo                bool
+	WorkspaceDir            string
+	SessionName             string
+	SessionsDir             string
+	SessionDir              string
+	ConfigFile              string
+	GlobalPath              string
+	TmpDir                  string
+	IsConversationTemporary bool
+	HomeDir                 string
+	ExtraPaths              shell.Paths
+	DropsDirectory          string
+	ShellOffered            bool
+	TitleOffered            bool
+	NotifyOffered           bool
+	PathToolsOffered        bool
+	FilesystemReachable     bool
+	HasEnvironment          bool
+	LookupOffered           bool
+	FetchOffered            bool
+	Conditions              conditions.Conditions
+	WorkspaceWritable       bool
+	IsRepository            bool
+	GitWritable             bool
+	ShellGranted            bool
+	LookupGranted           bool
+	JobsGranted             bool
+	NetworkGranted          bool
+	Yolo                    bool
 }
 
 func ProjectContextPaths(workspace *work.Space) []string {
@@ -121,24 +122,25 @@ type File struct {
 }
 
 type Config struct {
-	GlobalPath     string
-	Workspace      *work.Space
-	SessionName    string
-	SessionsDir    string
-	SessionDir     string
-	ConfigFile     string
-	TmpDir         string
-	HomeDir        string
-	CurrentCaps    caps.Set
-	ExtraPaths     shell.Paths
-	DropsDirectory string
-	Environment    string
-	OfferedTools   []string
-	Skills         []skill.Skill
-	Conditions     conditions.Conditions
-	JobsGranted    bool
-	NetworkGranted bool
-	Yolo           bool
+	GlobalPath              string
+	Workspace               *work.Space
+	SessionName             string
+	SessionsDir             string
+	SessionDir              string
+	ConfigFile              string
+	TmpDir                  string
+	IsConversationTemporary bool
+	HomeDir                 string
+	CurrentCaps             caps.Set
+	ExtraPaths              shell.Paths
+	DropsDirectory          string
+	Environment             string
+	OfferedTools            []string
+	Skills                  []skill.Skill
+	Conditions              conditions.Conditions
+	JobsGranted             bool
+	NetworkGranted          bool
+	Yolo                    bool
 }
 
 func Load(config Config) (string, []File, error) {
@@ -236,21 +238,22 @@ func globalContext(file *File) string {
 func harnessContext(config Config) string {
 	currentCaps := config.CurrentCaps
 	data := harnessContextTemplateData{
-		WorkspaceDir:     config.Workspace.GetDir(),
-		SessionName:      config.SessionName,
-		SessionsDir:      config.SessionsDir,
-		SessionDir:       config.SessionDir,
-		ConfigFile:       config.ConfigFile,
-		GlobalPath:       config.GlobalPath,
-		TmpDir:           config.TmpDir,
-		HomeDir:          config.HomeDir,
-		ExtraPaths:       config.ExtraPaths,
-		DropsDirectory:   config.DropsDirectory,
-		ShellOffered:     toolset.Offers(config.OfferedTools, shellToolName),
-		TitleOffered:     toolset.Offers(config.OfferedTools, titleToolName),
-		NotifyOffered:    toolset.Offers(config.OfferedTools, notifyToolName),
-		PathToolsOffered: OffersAnyPathTool(config.OfferedTools),
-		HasEnvironment:   config.Environment != "",
+		WorkspaceDir:            config.Workspace.GetDir(),
+		SessionName:             config.SessionName,
+		SessionsDir:             config.SessionsDir,
+		SessionDir:              config.SessionDir,
+		ConfigFile:              config.ConfigFile,
+		GlobalPath:              config.GlobalPath,
+		TmpDir:                  config.TmpDir,
+		IsConversationTemporary: config.IsConversationTemporary,
+		HomeDir:                 config.HomeDir,
+		ExtraPaths:              config.ExtraPaths,
+		DropsDirectory:          config.DropsDirectory,
+		ShellOffered:            toolset.Offers(config.OfferedTools, shellToolName),
+		TitleOffered:            toolset.Offers(config.OfferedTools, titleToolName),
+		NotifyOffered:           toolset.Offers(config.OfferedTools, notifyToolName),
+		PathToolsOffered:        OffersAnyPathTool(config.OfferedTools),
+		HasEnvironment:          config.Environment != "",
 		FilesystemReachable: OffersAnyPathTool(config.OfferedTools) ||
 			toolset.Offers(config.OfferedTools, shellToolName),
 		LookupOffered:     toolset.Offers(config.OfferedTools, lookupToolName),
@@ -341,16 +344,23 @@ func harnessSection(data harnessContextTemplateData) string {
 	lines := []string{"- \"oh\" is the harness you are running within"}
 
 	if data.FilesystemReachable {
+		if !data.IsConversationTemporary {
+			lines = append(
+				lines,
+				"- Each session dir is under "+data.SessionsDir+", named after the session",
+				"- This session's directory is "+data.SessionDir,
+				"- \"session.jsonl\" is the journal, the single source of truth, as JSONL",
+				"- \"meta.json\" is the listing entry: name, title, timestamps, and message count",
+				"- \"chat.md\" is the readable transcript of the conversation",
+				"- \"wire.http\" is the raw traffic between the harness and the model endpoint",
+			)
+		}
 		lines = append(lines,
-			"- Each session dir is under "+data.SessionsDir+", named after the session",
-			"- This session's directory is "+data.SessionDir,
-			"- \"session.jsonl\" is the journal, the single source of truth, as JSONL",
-			"- \"meta.json\" is the listing entry: name, title, timestamps, and message count",
-			"- \"chat.md\" is the readable transcript of the conversation",
-			"- \"wire.http\" is the raw traffic between the harness and the model endpoint",
 			"- The user's settings are in "+data.ConfigFile+", and their instructions in "+data.GlobalPath,
-			"- A session name said with no other context is a hint to read that session's files",
 		)
+		if !data.IsConversationTemporary {
+			lines = append(lines, "- A session name said with no other context is a hint to read that session's files")
+		}
 	}
 
 	return "# Harness\n\n" + strings.Join(lines, "\n") + "\n\n"
@@ -363,7 +373,11 @@ func scopeSection(data harnessContextTemplateData) string {
 		lines = append(lines, "- Your workspace is the current directory, "+data.WorkspaceDir)
 	}
 	if !data.HasEnvironment {
-		lines = append(lines, "- Your session is named "+data.SessionName)
+		if data.IsConversationTemporary {
+			lines = append(lines, "- Your conversation is named "+data.SessionName+" for this run")
+		} else {
+			lines = append(lines, "- Your session is named "+data.SessionName)
+		}
 	}
 
 	body := strings.Join(lines, "\n") + scopeRules(data)
@@ -701,24 +715,39 @@ func hostNetworkRules(isNetworkGranted bool, isInteractive bool) []string {
 }
 
 func scratchRules(data harnessContextTemplateData) string {
-	var lines []string
+	if data.IsConversationTemporary {
+		if data.Yolo {
+			return strings.Join([]string{
+				"- /tmp is the machine's own /tmp, shared with everything else running on it",
+				"- Your temporary scratch space is " + data.TmpDir + ", which you can read and write to",
+				"- It is removed when this conversation ends",
+				"- Give the user that path exactly as it is written here",
+			}, "\n")
+		}
+
+		return strings.Join([]string{
+			"- /tmp is your temporary scratch space, which you can read and write to",
+			"- It maps to " + data.TmpDir + " on the user's machine, so bear that in mind",
+			"- It is removed when this conversation ends",
+			"- Always translate /tmp paths to the user's equivalent path before giving it to them",
+			"\t- For example: /tmp/foo.png → " + filepath.Join(data.TmpDir, "foo.png"),
+		}, "\n")
+	}
 
 	if data.Yolo {
-		lines = []string{
+		return strings.Join([]string{
 			"- /tmp is the machine's own /tmp, shared with everything else running on it",
 			"- Your persistent scratch space is " + data.TmpDir + ", which you can always read and write to",
 			"- Give the user that path exactly as it is written here",
-		}
-	} else {
-		lines = []string{
-			"- /tmp is your persistent scratch space, which you can always read and write to",
-			"- It maps to " + data.TmpDir + " on the user's machine, so bear that in mind",
-			"- Always translate /tmp paths to the user's equivalent path before giving it to them",
-			"\t- For example: /tmp/foo.png → " + filepath.Join(data.TmpDir, "foo.png"),
-		}
+		}, "\n")
 	}
 
-	return strings.Join(lines, "\n")
+	return strings.Join([]string{
+		"- /tmp is your persistent scratch space, which you can always read and write to",
+		"- It maps to " + data.TmpDir + " on the user's machine, so bear that in mind",
+		"- Always translate /tmp paths to the user's equivalent path before giving it to them",
+		"\t- For example: /tmp/foo.png → " + filepath.Join(data.TmpDir, "foo.png"),
+	}, "\n")
 }
 
 func waitingForUserSection(data harnessContextTemplateData) string {

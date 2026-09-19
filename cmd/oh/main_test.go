@@ -2496,6 +2496,18 @@ func TestGoldenLongAuthorisationURLMatchesTheGolden(t *testing.T) {
 	})
 }
 
+func TestGoldenTemporaryConversationNoticeMatchesTheGolden(t *testing.T) {
+	stream := style.Change(temporaryConversationNoticeText) + "\n"
+	compareWithGolden(t, "temporary-conversation", ".ansi", map[string]func() string{
+		"warning": func() string { return stream },
+	})
+	compareWithGolden(t, "temporary-conversation", ".screen", map[string]func() string{
+		"warning": func() string {
+			return strings.Join(visibleScreen(t, stream, 80), "\n")
+		},
+	})
+}
+
 func TestGoldenCompletionProtocolMatchesTheGolden(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	cachePath := location.GetModelCachePath(os.Getenv(backend.EndpointVariable) != "")
@@ -3890,83 +3902,87 @@ func TestGoldenFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		".transcript",
 	})
 	for name, extensions := range map[string][]string{
-		"app-plain-resume":       {".jsonl", ".transcript"},
-		"app-plain-turn":         {".jsonl", ".transcript"},
-		"authorisation-url":      {".ansi", ".screen"},
-		"banner":                 {".ansi", ".screen"},
-		"clearing":               {".ansi", ".screen"},
-		"completion":             {".txt"},
-		"config-reload":          {".ansi", ".screen"},
-		"corrupt-session":        {".txt"},
-		"default-bar":            {".ansi", ".screen"},
-		"feedback":               {".ansi", ".screen", ".txt"},
-		"feedback-frame":         {".ansi", ".screen"},
-		"fork-message":           {".txt"},
-		"context":                {".prompt"},
-		"context-drops":          {".prompt"},
-		"context-jobs":           {".prompt"},
-		"context-network":        {".prompt"},
-		"context-network-print":  {".prompt"},
-		"context-print":          {".prompt"},
-		"context-file-tools":     {".prompt"},
-		"context-no-telling":     {".prompt"},
-		"context-no-file-tools":  {".prompt"},
-		"context-declared-only":  {".prompt"},
-		"context-environment":    {".prompt"},
-		"context-no-sockets":     {".prompt"},
-		"context-no-paths":       {".prompt"},
-		"context-path-kinds":     {".prompt"},
-		"context-repository":     {".prompt"},
-		"context-scratch-root":   {".prompt"},
-		"context-simulation":     {".prompt"},
-		"context-yolo":           {".prompt"},
-		"host-command":           {".ansi", ".screen"},
-		"inputblock":             {".ansi", ".screen"},
-		"legacy-alt-enter":       {".ansi", ".screen"},
-		"lifecycle":              {".ansi", ".screen"},
-		"line-resize":            {".screen"},
-		"short-terminal":         {".screen"},
-		"streaming-modes":        {".screen"},
-		"groupings":              {".screen"},
-		"reasonings":             {".ansi", ".screen"},
-		"mermaid-streaming":      {".screen"},
-		"message-marks":          {".screen"},
-		"mode-takeback":          {".ansi", ".screen"},
-		"model-arguments":        {".txt"},
-		"new-session":            {".txt"},
-		"ordinary-tab":           {".ansi", ".screen"},
-		"path-grant-lifecycle":   {".ansi", ".screen"},
-		"port-directions":        {".ansi", ".screen"},
-		"path-message":           {".ansi", ".screen"},
-		"user-path-links":        {".ansi", ".screen"},
-		"workspace-paths":        {".ansi", ".screen"},
-		"pending-mode-messages":  {".ansi", ".screen"},
-		"pending-notices":        {".ansi", ".screen"},
-		"paste":                  {".ansi", ".screen"},
-		"pictures":               {".ansi", ".screen"},
-		"picker-menu":            {".ansi", ".screen"},
-		"plain-input":            {".ansi", ".screen"},
-		"print-arguments":        {".txt"},
-		"queued-messages":        {".ansi", ".screen"},
-		"readline-bindings":      {".ansi", ".screen"},
-		"resume-arguments":       {".txt"},
-		"resume-model-arguments": {".txt"},
-		"resume-mode":            {".ansi"},
-		"resume-confinement":     {".ansi"},
-		"running":                {".ansi", ".screen"},
-		"schedule":               {".ansi", ".screen"},
-		"segments":               {".ansi", ".screen"},
-		"signal-restoration":     {".ansi"},
-		"special-links":          {".ansi", ".screen"},
-		"startup":                {".ansi", ".screen"},
-		"startup-local-config":   {".ansi", ".screen"},
-		"startup-sized":          {".ansi", ".screen"},
-		"startup-sized-output":   {".ansi", ".screen"},
-		"terminal-escape":        {".ansi", ".screen"},
-		"theme-reload":           {".ansi", ".screen"},
-		"usage":                  {".json"},
-		"usage-arguments":        {".txt"},
-		"vertical-movement":      {".ansi", ".screen"},
+		"app-plain-resume":        {".jsonl", ".transcript"},
+		"app-plain-turn":          {".jsonl", ".transcript"},
+		"authorisation-url":       {".ansi", ".screen"},
+		"banner":                  {".ansi", ".screen"},
+		"clearing":                {".ansi", ".screen"},
+		"completion":              {".txt"},
+		"config-reload":           {".ansi", ".screen"},
+		"corrupt-session":         {".txt"},
+		"default-bar":             {".ansi", ".screen"},
+		"feedback":                {".ansi", ".screen", ".txt"},
+		"feedback-frame":          {".ansi", ".screen"},
+		"fork-message":            {".txt"},
+		"context":                 {".prompt"},
+		"context-drops":           {".prompt"},
+		"context-jobs":            {".prompt"},
+		"context-network":         {".prompt"},
+		"context-network-print":   {".prompt"},
+		"context-print":           {".prompt"},
+		"context-file-tools":      {".prompt"},
+		"context-no-telling":      {".prompt"},
+		"context-no-file-tools":   {".prompt"},
+		"context-declared-only":   {".prompt"},
+		"context-environment":     {".prompt"},
+		"context-no-sockets":      {".prompt"},
+		"context-no-paths":        {".prompt"},
+		"context-path-kinds":      {".prompt"},
+		"context-repository":      {".prompt"},
+		"context-scratch-root":    {".prompt"},
+		"context-simulation":      {".prompt"},
+		"context-temporary":       {".prompt"},
+		"context-temporary-drops": {".prompt"},
+		"context-temporary-yolo":  {".prompt"},
+		"context-yolo":            {".prompt"},
+		"host-command":            {".ansi", ".screen"},
+		"inputblock":              {".ansi", ".screen"},
+		"legacy-alt-enter":        {".ansi", ".screen"},
+		"lifecycle":               {".ansi", ".screen"},
+		"line-resize":             {".screen"},
+		"short-terminal":          {".screen"},
+		"streaming-modes":         {".screen"},
+		"groupings":               {".screen"},
+		"reasonings":              {".ansi", ".screen"},
+		"mermaid-streaming":       {".screen"},
+		"message-marks":           {".screen"},
+		"mode-takeback":           {".ansi", ".screen"},
+		"model-arguments":         {".txt"},
+		"new-session":             {".txt"},
+		"ordinary-tab":            {".ansi", ".screen"},
+		"path-grant-lifecycle":    {".ansi", ".screen"},
+		"port-directions":         {".ansi", ".screen"},
+		"path-message":            {".ansi", ".screen"},
+		"user-path-links":         {".ansi", ".screen"},
+		"workspace-paths":         {".ansi", ".screen"},
+		"pending-mode-messages":   {".ansi", ".screen"},
+		"pending-notices":         {".ansi", ".screen"},
+		"paste":                   {".ansi", ".screen"},
+		"pictures":                {".ansi", ".screen"},
+		"picker-menu":             {".ansi", ".screen"},
+		"plain-input":             {".ansi", ".screen"},
+		"print-arguments":         {".txt"},
+		"queued-messages":         {".ansi", ".screen"},
+		"readline-bindings":       {".ansi", ".screen"},
+		"resume-arguments":        {".txt"},
+		"resume-model-arguments":  {".txt"},
+		"resume-mode":             {".ansi"},
+		"resume-confinement":      {".ansi"},
+		"running":                 {".ansi", ".screen"},
+		"schedule":                {".ansi", ".screen"},
+		"segments":                {".ansi", ".screen"},
+		"signal-restoration":      {".ansi"},
+		"special-links":           {".ansi", ".screen"},
+		"startup":                 {".ansi", ".screen"},
+		"startup-local-config":    {".ansi", ".screen"},
+		"startup-sized":           {".ansi", ".screen"},
+		"startup-sized-output":    {".ansi", ".screen"},
+		"temporary-conversation":  {".ansi", ".screen"},
+		"terminal-escape":         {".ansi", ".screen"},
+		"theme-reload":            {".ansi", ".screen"},
+		"usage":                   {".json"},
+		"usage-arguments":         {".txt"},
+		"vertical-movement":       {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)
 	}
@@ -5126,6 +5142,7 @@ var optionsThatOpenASession = []string{
 	"--caps",
 	"--tool",
 	"--env",
+	"--no-session",
 	"--print",
 	"--demo",
 	"--yolo",
@@ -6053,39 +6070,47 @@ func TestGoldenForkMessageMatchesGolden(t *testing.T) {
 }
 
 type promptGolden struct {
-	isYolo              bool
-	areJobsGiven        bool
-	hasClipboardDrops   bool
-	isNetworkGranted    bool
-	isPrinting          bool
-	offeredTools        []string
-	hasNoSockets        bool
-	isRepository        bool
-	readsTheScratchRoot bool
-	hasNoExtraPaths     bool
-	hasEveryPathKind    bool
-	environment         string
+	isYolo                  bool
+	areJobsGiven            bool
+	hasClipboardDrops       bool
+	isNetworkGranted        bool
+	isPrinting              bool
+	isConversationTemporary bool
+	offeredTools            []string
+	hasNoSockets            bool
+	isRepository            bool
+	readsTheScratchRoot     bool
+	hasNoExtraPaths         bool
+	hasEveryPathKind        bool
+	environment             string
 }
 
 func TestGoldenTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 	for name, shape := range map[string]promptGolden{
-		"context":               {},
-		"context-yolo":          {isYolo: true},
-		"context-jobs":          {areJobsGiven: true},
-		"context-drops":         {hasClipboardDrops: true},
-		"context-network":       {isNetworkGranted: true},
-		"context-network-print": {isNetworkGranted: true, isPrinting: true},
-		"context-print":         {isPrinting: true},
-		"context-file-tools":    {offeredTools: []string{"read", "ls", "grep"}},
-		"context-no-telling":    {offeredTools: []string{"read", "bash"}},
-		"context-no-file-tools": {offeredTools: []string{"bash"}},
-		"context-declared-only": {offeredTools: []string{"sysinfo"}, hasClipboardDrops: true},
-		"context-environment":   {offeredTools: []string{"sysinfo"}, environment: "You are the cook, and this kitchen is your world."},
-		"context-no-sockets":    {hasNoSockets: true},
-		"context-no-paths":      {hasNoExtraPaths: true},
-		"context-path-kinds":    {hasEveryPathKind: true},
-		"context-repository":    {isRepository: true},
-		"context-scratch-root":  {readsTheScratchRoot: true},
+		"context":                 {},
+		"context-yolo":            {isYolo: true},
+		"context-jobs":            {areJobsGiven: true},
+		"context-drops":           {hasClipboardDrops: true},
+		"context-network":         {isNetworkGranted: true},
+		"context-network-print":   {isNetworkGranted: true, isPrinting: true},
+		"context-print":           {isPrinting: true},
+		"context-temporary":       {isConversationTemporary: true},
+		"context-temporary-drops": {isConversationTemporary: true, hasClipboardDrops: true},
+		"context-temporary-yolo":  {isConversationTemporary: true, isYolo: true},
+		"context-file-tools":      {offeredTools: []string{"read", "ls", "grep"}},
+		"context-no-telling":      {offeredTools: []string{"read", "bash"}},
+		"context-no-file-tools":   {offeredTools: []string{"bash"}},
+		"context-declared-only":   {offeredTools: []string{"sysinfo"}, hasClipboardDrops: true},
+		"context-environment": {
+			offeredTools:            []string{"sysinfo"},
+			environment:             "You are the cook, and this kitchen is your world.",
+			isConversationTemporary: true,
+		},
+		"context-no-sockets":   {hasNoSockets: true},
+		"context-no-paths":     {hasNoExtraPaths: true},
+		"context-path-kinds":   {hasEveryPathKind: true},
+		"context-repository":   {isRepository: true},
+		"context-scratch-root": {readsTheScratchRoot: true},
 		"context-simulation": {
 			isYolo:       true,
 			offeredTools: []string{"read", "ls", "grep"},
@@ -6128,6 +6153,9 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 	dropsDirectory := ""
 	if shape.hasClipboardDrops {
 		dropsDirectory = "/state/sessions/tame-impala/drops"
+		if shape.isConversationTemporary {
+			dropsDirectory = "/temporary/oh-conversation/drops"
+		}
 	}
 
 	readPaths := []string{"/reference"}
@@ -6152,18 +6180,26 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 		currentCaps |= caps.Network
 	}
 
+	sessionDirectory := "/state/sessions/tame-impala"
+	temporaryDirectory := "/state/farm/tame-impala"
+	if shape.isConversationTemporary {
+		sessionDirectory = ""
+		temporaryDirectory = "/temporary/oh-conversation"
+	}
+
 	got, _, err := prompt.Load(prompt.Config{
-		GlobalPath:     globalPath,
-		Workspace:      workspace,
-		SessionName:    "tame-impala",
-		SessionsDir:    "/state/sessions",
-		SessionDir:     "/state/sessions/tame-impala",
-		ConfigFile:     "/config/config.toml",
-		TmpDir:         "/state/farm/tame-impala",
-		HomeDir:        "/state/home",
-		CurrentCaps:    currentCaps,
-		ExtraPaths:     extraPaths,
-		DropsDirectory: dropsDirectory,
+		GlobalPath:              globalPath,
+		Workspace:               workspace,
+		SessionName:             "tame-impala",
+		SessionsDir:             "/state/sessions",
+		SessionDir:              sessionDirectory,
+		ConfigFile:              "/config/config.toml",
+		TmpDir:                  temporaryDirectory,
+		IsConversationTemporary: shape.isConversationTemporary,
+		HomeDir:                 "/state/home",
+		CurrentCaps:             currentCaps,
+		ExtraPaths:              extraPaths,
+		DropsDirectory:          dropsDirectory,
 		Skills: []skill.Skill{{
 			Name:        "golden",
 			Description: "Exercise complete prompt assembly.",
@@ -18835,6 +18871,62 @@ func TestAConfigNamingAToolNobodyOffersSaysSo(t *testing.T) {
 	}
 }
 
+func TestNoSessionLeavesNoConversationToResume(t *testing.T) {
+	binary := buildTestBinary(t)
+	endpoint := sim.New(&sim.Scenario{Model: "fake", Turns: []sim.Turn{{Say: "Noted."}}})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	stateDirectory := t.TempDir()
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
+	writeDeclaredToolConfig(t, environment, "")
+
+	output := runTestBinary(
+		t, binary, reachableWorkspaceDir(t), environment,
+		"-p", "--yolo", "-m", "anthropic/fake", "--no-session", "hello",
+	)
+	if !strings.Contains(output, temporaryConversationNoticeText) {
+		t.Errorf("the temporary conversation was not reported: %q", output)
+	}
+	requests := endpoint.Requests()
+	if len(requests) == 0 {
+		t.Fatal("the endpoint saw no request")
+	}
+	for _, want := range []string{"temporary scratch space", "removed when this conversation ends"} {
+		if !strings.Contains(requests[0].Instructions, want) {
+			t.Errorf("the temporary scratch did not say %q: %q", want, requests[0].Instructions)
+		}
+	}
+	if strings.Contains(requests[0].Instructions, filepath.Join(stateDirectory, "org.crdx", "oh", "farm")) {
+		t.Errorf("the temporary scratch was placed in the durable farm: %q", requests[0].Instructions)
+	}
+	for _, unwanted := range []string{"This session's directory", "session.jsonl", "Your session is named"} {
+		if strings.Contains(requests[0].Instructions, unwanted) {
+			t.Errorf("the temporary conversation claims %q: %q", unwanted, requests[0].Instructions)
+		}
+	}
+	_, scratchTail, found := strings.Cut(requests[0].Instructions, "Your temporary scratch space is ")
+	if !found {
+		t.Fatal("the temporary scratch path was not disclosed")
+	}
+	scratchDirectory, _, found := strings.Cut(scratchTail, ",")
+	if !found {
+		t.Fatalf("the temporary scratch path did not end: %q", scratchTail)
+	}
+	if _, err := os.Stat(scratchDirectory); !os.IsNotExist(err) {
+		t.Errorf("temporary scratch still exists after exit: %s: %v", scratchDirectory, err)
+	}
+
+	storedSessions, err := store.List(filepath.Join(stateDirectory, "org.crdx", "oh", "sessions"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(storedSessions) != 0 {
+		t.Fatalf("got %d stored sessions, want none", len(storedSessions))
+	}
+}
+
 func TestAToolboxGivenOnTheCommandLineSuppliesTheToolbox(t *testing.T) {
 	binary := buildTestBinary(t)
 	script := declaredToolScript(t)
@@ -18898,112 +18990,130 @@ default = false
 		t.Errorf("the toolbox did not withhold lookup: %q", offered)
 	}
 
+	if !strings.Contains(output, temporaryConversationNoticeText) {
+		t.Errorf("the temporary conversation was not reported: %q", output)
+	}
+
 	storedSessions, err := store.List(filepath.Join(stateDirectory, "org.crdx", "oh", "sessions"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(storedSessions) != 1 {
-		t.Fatalf("got %d stored sessions", len(storedSessions))
-	}
-	if !slices.Contains(storedSessions[0].Meta.Toolboxes, toolboxPath) {
-		t.Errorf("the session did not record its toolbox: %q", storedSessions[0].Meta.Toolboxes)
+	if len(storedSessions) != 0 {
+		t.Fatalf("got %d stored sessions, want none", len(storedSessions))
 	}
 }
 
-func TestAResumedConversationReadsTheToolboxItWasGiven(t *testing.T) {
-	binary := buildTestBinary(t)
-	script := declaredToolScript(t)
-	toolboxPath := filepath.Join(t.TempDir(), "weather.toml")
-	contents := `[tools.weather]
-description = "report the weather for a city"
-command = ["` + script + `"]
-permission = "allow"
-parameters = [
-    { name = "city", kind = "string", description = "the city to report on" },
-]
-`
-	if err := os.WriteFile(toolboxPath, []byte(contents), 0o600); err != nil {
-		t.Fatal(err)
-	}
+func storeCustomConversation(
+	t *testing.T,
+	stateDirectory string,
+	workspaceDirectory string,
+	toolboxes []string,
+	environments []string,
+) string {
+	t.Helper()
 
-	endpoint := sim.New(&sim.Scenario{
-		Model: "fake",
-		Turns: []sim.Turn{{Say: "First."}, {Say: "Second."}},
+	writer, err := store.Create(filepath.Join(stateDirectory, "org.crdx", "oh", "sessions"), store.Meta{
+		Model:        "fake",
+		WorkspaceDir: workspaceDirectory,
+		Provider:     model.AnthropicProvider,
+		Effort:       "high",
+		SystemPrompt: "You are a test assistant.",
+		Tools:        []string{"weather"},
+		Toolboxes:    toolboxes,
+		Environments: environments,
+		Yolo:         true,
 	})
-	server := httptest.NewServer(endpoint)
-	t.Cleanup(server.Close)
-
-	address := endpoint.Addresses(server.URL)[sim.Messages]
-	stateDirectory := t.TempDir()
-	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
-	writeDeclaredToolConfig(t, environment, "")
-	workspaceDir := reachableWorkspaceDir(t)
-
-	runTestBinary(
-		t, binary, workspaceDir, environment,
-		"-p", "--yolo", "-m", "anthropic/fake", "-t", toolboxPath, "hello",
-	)
-
-	storedSessions, err := store.List(filepath.Join(stateDirectory, "org.crdx", "oh", "sessions"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(storedSessions) != 1 {
-		t.Fatalf("got %d stored sessions", len(storedSessions))
+	if err := writer.EnsurePersisted(); err != nil {
+		t.Fatal(err)
 	}
-
-	runTestBinary(t, binary, workspaceDir, environment, "-p", "-r", storedSessions[0].Name, "again")
-
-	requests := endpoint.Requests()
-	if len(requests) < 2 {
-		t.Fatalf("the endpoint saw %d requests", len(requests))
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
 	}
-	if !slices.Contains(requests[len(requests)-1].Tools, "weather") {
-		t.Errorf("the resumed conversation lost its toolbox: %q", requests[len(requests)-1].Tools)
-	}
+	return writer.Name()
 }
 
-func TestAToolboxThatHasGoneIsReportedRatherThanRefusedOnResume(t *testing.T) {
+func TestAStoredCustomConversationStillReadsItsDefinitionOnResume(t *testing.T) {
 	binary := buildTestBinary(t)
 	script := declaredToolScript(t)
-	toolboxPath := filepath.Join(t.TempDir(), "weather.toml")
-	contents := `[tools.weather]
+
+	for _, test := range []struct {
+		name          string
+		isEnvironment bool
+	}{
+		{name: "toolbox"},
+		{name: "environment", isEnvironment: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			definitionPath := filepath.Join(t.TempDir(), test.name+".toml")
+			prompt := ""
+			if test.isEnvironment {
+				prompt = "prompt = " + strconv.Quote("You are the cook.") + "\n\n"
+			}
+			contents := prompt + `[tools.weather]
 description = "report the weather for a city"
 command = ["` + script + `"]
 permission = "allow"
 `
-	if err := os.WriteFile(toolboxPath, []byte(contents), 0o600); err != nil {
+			if err := os.WriteFile(definitionPath, []byte(contents), 0o600); err != nil {
+				t.Fatal(err)
+			}
+
+			endpoint := sim.New(&sim.Scenario{Model: "fake", Turns: []sim.Turn{{Say: "Noted."}}})
+			server := httptest.NewServer(endpoint)
+			t.Cleanup(server.Close)
+
+			stateDirectory := t.TempDir()
+			workspaceDirectory := reachableWorkspaceDir(t)
+			var toolboxes, environments []string
+			if test.isEnvironment {
+				environments = []string{definitionPath}
+			} else {
+				toolboxes = []string{definitionPath}
+			}
+			sessionName := storeCustomConversation(
+				t, stateDirectory, workspaceDirectory, toolboxes, environments,
+			)
+			address := endpoint.Addresses(server.URL)[sim.Messages]
+			environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
+			writeDeclaredToolConfig(t, environment, "")
+
+			runTestBinary(t, binary, workspaceDirectory, environment, "-p", "-r", sessionName, "again")
+
+			requests := endpoint.Requests()
+			if len(requests) == 0 || !slices.Contains(requests[0].Tools, "weather") {
+				t.Errorf("the resumed conversation lost its %s: %v", test.name, requests)
+			}
+		})
+	}
+}
+
+func TestAStoredToolboxThatHasGoneIsReportedRatherThanRefusedOnResume(t *testing.T) {
+	binary := buildTestBinary(t)
+	toolboxPath := filepath.Join(t.TempDir(), "weather.toml")
+	if err := os.WriteFile(toolboxPath, []byte("[tools.weather]\ndescription = \"weather\"\ncommand = [\"true\"]\npermission = \"allow\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
-	endpoint := sim.New(&sim.Scenario{
-		Model: "fake",
-		Turns: []sim.Turn{{Say: "First."}, {Say: "Second."}},
-	})
+	endpoint := sim.New(&sim.Scenario{Model: "fake", Turns: []sim.Turn{{Say: "Noted."}}})
 	server := httptest.NewServer(endpoint)
 	t.Cleanup(server.Close)
 
-	address := endpoint.Addresses(server.URL)[sim.Messages]
 	stateDirectory := t.TempDir()
-	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
-	writeDeclaredToolConfig(t, environment, "")
-	workspaceDir := reachableWorkspaceDir(t)
-
-	runTestBinary(
-		t, binary, workspaceDir, environment,
-		"-p", "--yolo", "-m", "anthropic/fake", "-t", toolboxPath, "hello",
+	workspaceDirectory := reachableWorkspaceDir(t)
+	sessionName := storeCustomConversation(
+		t, stateDirectory, workspaceDirectory, []string{toolboxPath}, nil,
 	)
-
-	storedSessions, err := store.List(filepath.Join(stateDirectory, "org.crdx", "oh", "sessions"))
-	if err != nil {
-		t.Fatal(err)
-	}
 	if err := os.Remove(toolboxPath); err != nil {
 		t.Fatal(err)
 	}
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
+	writeDeclaredToolConfig(t, environment, "")
 
-	output := runTestBinary(t, binary, workspaceDir, environment, "-p", "-r", storedSessions[0].Name, "again")
-
+	output := runTestBinary(t, binary, workspaceDirectory, environment, "-p", "-r", sessionName, "again")
 	if !strings.Contains(output, "could no longer be read") {
 		t.Errorf("the missing toolbox was not reported: %q", output)
 	}
@@ -19131,7 +19241,8 @@ func TestAnEnvironmentSuppliesBothTheToolboxAndThePrompt(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	address := endpoint.Addresses(server.URL)[sim.Messages]
-	environment := append(testBinaryEnvironment(t, t.TempDir()), backend.EndpointVariable+"="+address)
+	stateDirectory := t.TempDir()
+	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
 	writeDeclaredToolConfig(t, environment, "")
 
 	output := runTestBinary(
@@ -19154,6 +19265,17 @@ func TestAnEnvironmentSuppliesBothTheToolboxAndThePrompt(t *testing.T) {
 	}
 	if !slices.Equal(offered, []string{"weather"}) {
 		t.Errorf("got %q, wanted the environment's toolbox alone", offered)
+	}
+	if !strings.Contains(output, temporaryConversationNoticeText) {
+		t.Errorf("the temporary conversation was not reported: %q", output)
+	}
+
+	storedSessions, err := store.List(filepath.Join(stateDirectory, "org.crdx", "oh", "sessions"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(storedSessions) != 0 {
+		t.Fatalf("got %d stored sessions, want none", len(storedSessions))
 	}
 }
 
@@ -19180,47 +19302,6 @@ func TestAToolboxCarryingAPromptSaysToPassItAsAnEnvironment(t *testing.T) {
 	}
 	if !strings.Contains(string(output), "pass it with -e rather than -t") {
 		t.Errorf("got %q", output)
-	}
-}
-
-func TestAnEnvironmentIsReadAgainWhenItsConversationResumes(t *testing.T) {
-	binary := buildTestBinary(t)
-	environmentPath := writeEnvironment(t, declaredToolScript(t), "You are the cook.")
-
-	endpoint := sim.New(&sim.Scenario{
-		Model: "fake",
-		Turns: []sim.Turn{{Say: "First."}, {Say: "Second."}},
-	})
-	server := httptest.NewServer(endpoint)
-	t.Cleanup(server.Close)
-
-	address := endpoint.Addresses(server.URL)[sim.Messages]
-	stateDirectory := t.TempDir()
-	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
-	writeDeclaredToolConfig(t, environment, "")
-	workspaceDir := reachableWorkspaceDir(t)
-
-	runTestBinary(
-		t, binary, workspaceDir, environment,
-		"-p", "--yolo", "-m", "anthropic/fake", "-e", environmentPath, "hello",
-	)
-
-	storedSessions, err := store.List(filepath.Join(stateDirectory, "org.crdx", "oh", "sessions"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(storedSessions) != 1 {
-		t.Fatalf("got %d stored sessions", len(storedSessions))
-	}
-	if !slices.Contains(storedSessions[0].Meta.Environments, environmentPath) {
-		t.Errorf("the session did not record its environment: %q", storedSessions[0].Meta.Environments)
-	}
-
-	runTestBinary(t, binary, workspaceDir, environment, "-p", "-r", storedSessions[0].Name, "again")
-
-	requests := endpoint.Requests()
-	if !slices.Contains(requests[len(requests)-1].Tools, "weather") {
-		t.Errorf("the resumed conversation lost its environment: %q", requests[len(requests)-1].Tools)
 	}
 }
 

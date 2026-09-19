@@ -251,6 +251,44 @@ func TestASessionNothingWasSaidInIsNeverWritten(t *testing.T) {
 	}
 }
 
+func TestAnUnpersistedSessionNeverWrites(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.CreateUnpersisted(directory, store.Meta{Model: "gpt-5.6-sol"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := log.SetMeta(store.Meta{Model: "gpt-5.6-sol", WorkspaceDir: "/workspace"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "hello"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := log.Item(json.RawMessage(`{"role":"user"}`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := log.CompleteTurn(session.TurnSummary{}); err != nil {
+		t.Fatal(err)
+	}
+	if err := log.EnsurePersisted(); err == nil {
+		t.Error("expected explicit persistence to be refused")
+	}
+	if log.IsPersisted() {
+		t.Error("expected the session to remain unpersisted")
+	}
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	entries, err := os.ReadDir(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 0 {
+		t.Errorf("expected nothing to have been written, got %v", entries)
+	}
+}
+
 func TestASessionMayBePersistedBeforeItsFirstMessageForAFile(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{Model: "gpt-5.6-sol"})

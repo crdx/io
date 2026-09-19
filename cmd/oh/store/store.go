@@ -88,8 +88,9 @@ type canonicalSession interface {
 }
 
 type Writer struct {
-	innerWriter canonicalWriter
-	writerMutex sync.Mutex
+	innerWriter           canonicalWriter
+	isPersistenceDisabled bool
+	writerMutex           sync.Mutex
 
 	eventBuffer []agent.Event
 	directory   string
@@ -124,6 +125,17 @@ func Create(directory string, meta Meta) (*Writer, error) {
 	}, nil
 }
 
+func CreateUnpersisted(directory string, meta Meta) (*Writer, error) {
+	writer, err := Create(directory, meta)
+	if err != nil {
+		return nil, err
+	}
+	writer.isPersistenceDisabled = true
+	writer.transcriptLoggingEnabled = false
+	writer.wireRecordingEnabled = false
+	return writer, nil
+}
+
 func Open(directory string, name string) (*Writer, error) {
 	innerWriter, err := session.Open(directory, name)
 	if err != nil {
@@ -150,6 +162,10 @@ func Open(directory string, name string) (*Writer, error) {
 }
 
 func (self *Writer) Event(event agent.Event) error {
+	if self.isPersistenceDisabled {
+		return nil
+	}
+
 	for _, releasedEvent := range self.release(event) {
 		if err := self.appendEvent(releasedEvent); err != nil {
 			return err
@@ -160,6 +176,10 @@ func (self *Writer) Event(event agent.Event) error {
 }
 
 func (self *Writer) Item(item json.RawMessage) error {
+	if self.isPersistenceDisabled {
+		return nil
+	}
+
 	self.writerMutex.Lock()
 	err := self.innerWriter.Item(item)
 	self.writerMutex.Unlock()
@@ -171,6 +191,10 @@ func (self *Writer) Item(item json.RawMessage) error {
 }
 
 func (self *Writer) CompleteTurn(summary session.TurnSummary) error {
+	if self.isPersistenceDisabled {
+		return nil
+	}
+
 	self.writerMutex.Lock()
 	defer self.writerMutex.Unlock()
 	return self.innerWriter.CompleteTurn(summary)
@@ -195,12 +219,20 @@ func (self *Writer) SetMeta(meta Meta) error {
 }
 
 func (self *Writer) IsPersisted() bool {
+	if self.isPersistenceDisabled {
+		return false
+	}
+
 	self.writerMutex.Lock()
 	defer self.writerMutex.Unlock()
 	return self.innerWriter.IsPersisted()
 }
 
 func (self *Writer) EnsurePersisted() error {
+	if self.isPersistenceDisabled {
+		return errors.New("session persistence is disabled")
+	}
+
 	self.writerMutex.Lock()
 	err := self.innerWriter.EnsurePersisted()
 	self.writerMutex.Unlock()

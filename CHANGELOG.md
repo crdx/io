@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Add temporary conversations with `-n`, `--tool`, and `--env`
 - Set the environment from an env .toml file with `-e`
 - Set the toolbox from a .toml file with `-t`
 - Add custom tool definitions

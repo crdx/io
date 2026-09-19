@@ -468,6 +468,33 @@ func TestTheScratchMappingIsWrittenInFull(t *testing.T) {
 	}
 }
 
+func TestATemporaryScratchIsNamedAndItsLifetimeDisclosed(t *testing.T) {
+	for _, isYolo := range []bool{false, true} {
+		got := harnessContext(Config{
+			Workspace:               work.At("/workspace"),
+			SessionName:             "session-id",
+			TmpDir:                  "/temporary/scratch",
+			IsConversationTemporary: true,
+			HomeDir:                 "/state/home",
+			CurrentCaps:             caps.Read,
+			ExtraPaths:              shell.Paths{},
+			OfferedTools:            []string{"read"},
+			Yolo:                    isYolo,
+		})
+
+		for _, want := range []string{"Your conversation is named session-id for this run", "temporary scratch space", "/temporary/scratch", "removed when this conversation ends"} {
+			if !strings.Contains(got, want) {
+				t.Errorf("yolo=%t: harness context does not contain %q: %q", isYolo, want, got)
+			}
+		}
+		for _, unwanted := range []string{"persistent scratch space", "This session's directory", "session.jsonl", "Your session is named"} {
+			if strings.Contains(got, unwanted) {
+				t.Errorf("yolo=%t: temporary conversation contains %q: %q", isYolo, unwanted, got)
+			}
+		}
+	}
+}
+
 func TestTheHarnessDisclosesTheShellHome(t *testing.T) {
 	got := harnessContext(Config{
 		Workspace:   work.At("/workspace"),

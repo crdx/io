@@ -7,6 +7,8 @@ import (
 	"crdx.org/io/cmd/oh/location"
 )
 
+const ephemeralDirectoryPrefix = "oh-"
+
 func PrepareTemporaryDirectory(name string) (string, error) {
 	temporaryDirectory := location.GetTmpDir(name)
 
@@ -15,4 +17,12 @@ func PrepareTemporaryDirectory(name string) (string, error) {
 	}
 
 	return temporaryDirectory, nil
+}
+
+func PrepareEphemeralDirectory() (string, error) {
+	directory, err := os.MkdirTemp("", ephemeralDirectoryPrefix)
+	if err != nil {
+		return "", fmt.Errorf("could not prepare the temporary scratch: %w", err)
+	}
+	return directory, nil
 }

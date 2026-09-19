@@ -1,0 +1,3 @@
+/copy /copy agents-file → /copy config-dir → /copy config-file → /copy home-dir → /copy last-message → /copy scratch-dir → /copy session-id → /copy session-name → /copy skills-dir → /copy snippets-dir → /copy system-prompt-file → /copy workspace-dir
+/edit /edit agents-file → /edit config-dir → /edit config-file → /edit home-dir → /edit scratch-dir → /edit skills-dir → /edit snippets-dir → /edit system-prompt-file → /edit workspace-dir
+/open /open agents-file → /open config-dir → /open config-file → /open home-dir → /open scratch-dir → /open skills-dir → /open snippets-dir → /open system-prompt-file → /open workspace-dir
