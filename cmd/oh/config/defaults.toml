@@ -44,12 +44,10 @@ lookup = "allow"
 [experimental]
 
 [model]
-round_robin = []
 effort = "high"
 fast = false
 
 [provider.ollama]
-host = ""
 
 [ports]
 hostname = ""

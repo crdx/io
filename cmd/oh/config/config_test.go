@@ -1665,3 +1665,32 @@ func TestAVersionFromANewerOhInAnOverrideIsIgnoredToo(t *testing.T) {
 		t.Fatalf("an override naming a newer version was refused: %v", err)
 	}
 }
+
+func TestTheBuiltInDefaultsAreThemselvesAConfigSomebodyMayWrite(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, []byte(defaultsTOML), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	written, err := Load(path)
+	if err != nil {
+		t.Fatalf("the built-in defaults are not a config anybody may write: %v", err)
+	}
+
+	built, err := Load("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(written.Ui, built.Ui) {
+		t.Errorf("got ui %+v, want %+v", written.Ui, built.Ui)
+	}
+	if !reflect.DeepEqual(written.Tool, built.Tool) {
+		t.Errorf("got tool %+v, want %+v", written.Tool, built.Tool)
+	}
+	if !reflect.DeepEqual(written.Permissions, built.Permissions) {
+		t.Errorf("got permissions %+v, want %+v", written.Permissions, built.Permissions)
+	}
+	if !reflect.DeepEqual(written.Model.GetDefaults(), built.Model.GetDefaults()) {
+		t.Errorf("got model %+v, want %+v", written.Model, built.Model)
+	}
+}
