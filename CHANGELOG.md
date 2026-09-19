@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Linkify the path-grants bar segment
 - Show model scratch paths as `<scratch>`
 - Linkify the session-name bar segment
 - Include line range in read tool hyperlinks

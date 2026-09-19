@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
@@ -107,7 +108,7 @@ func renderGrant(grant pathgrant.Grant, pathType string) string {
 	case full:
 	}
 
-	return renderAccess(grant.Access) + style.Subtle(":") + style.Normal(path)
+	return renderAccess(grant.Access) + style.Subtle(":") + link.RenderPath(style.Normal(path), grant.Path)
 }
 
 func renderAccess(access pathgrant.Access) string {

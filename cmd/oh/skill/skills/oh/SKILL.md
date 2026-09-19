@@ -135,7 +135,7 @@ The right side is drawn whole and the left is then fitted into what remains, so 
 | `jobs`               | a mark and name per job, a finished one lingering 30 seconds          | none                                        |
 | `local-time`         | the clock, its refresh following the format's finest field            | `format`, a Go layout, default `15:04`      |
 | `mode-toggle`        | the capability letters, lit where granted and dim where not           | none                                        |
-| `path-grants`        | each granted path with its access flags                               | `type`: `base`, `short`, or `full`          |
+| `path-grants`        | each granted path with its access flags, linked to the path it names  | `type`: `base`, `short`, or `full`          |
 | `scroll-overflow`    | how many input lines are hidden that way, and nothing where none are  | `direction`: `up` or `down`, and no default |
 | `session-emoji`      | the emoji drawn from the session name                                 | none                                        |
 | `session-name`       | the session name linked to its directory                              | `emoji`, `true` to append it                |

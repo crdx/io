@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
@@ -80,6 +81,14 @@ func TestTheShellLetterFollowsWhatEachGrantMayChange(t *testing.T) {
 				test.paint("x"),
 			)
 		}
+	}
+}
+
+func TestEachGrantLinksToTheWholePathItNames(t *testing.T) {
+	grants := []pathgrant.Grant{{Path: "/one/reference", Access: pathgrant.ReadAccess}}
+	got := buildSegment(t, &grants, "").Render(segment.Context{})
+	if want := link.RenderPath(style.Normal("reference"), "/one/reference"); !strings.Contains(got, want) {
+		t.Errorf("got %q, want the shortened name linked as %q", got, want)
 	}
 }
 

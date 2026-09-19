@@ -148,6 +148,14 @@ func Render(text string, roots Roots) string {
 	return output.String()
 }
 
+func PathURL(path string) string {
+	return linkURL(path, "", "")
+}
+
+func RenderPath(text string, path string) string {
+	return RenderURL(text, PathURL(path))
+}
+
 func RenderPathAtLine(text string, path string, roots Roots, line string) string {
 	target, exists := resolve(path, roots)
 	if !exists {

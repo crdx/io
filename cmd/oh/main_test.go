@@ -12272,6 +12272,7 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 	stream = strings.ReplaceAll(stream, referencePath, "/reference")
 	stream = strings.ReplaceAll(stream, missingPath, "/missing")
 	stream = strings.ReplaceAll(stream, homePath, "/user")
+	stream = strings.ReplaceAll(stream, manyGrantParent(), "/many")
 	return stream
 }
 
@@ -12295,10 +12296,14 @@ func stableGoldenPath(t *testing.T, label string, shouldExist bool) string {
 	return path
 }
 
+func manyGrantParent() string {
+	return fmt.Sprintf("/tmp/oh-many-grants-%010d", os.Getpid())
+}
+
 func stableManyGrantGoldenPaths(t *testing.T) []pathgrant.Grant {
 	t.Helper()
 
-	parent := fmt.Sprintf("/tmp/oh-many-grants-%010d", os.Getpid())
+	parent := manyGrantParent()
 	if err := os.RemoveAll(parent); err != nil {
 		t.Fatal(err)
 	}
