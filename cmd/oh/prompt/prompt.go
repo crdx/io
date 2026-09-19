@@ -25,6 +25,8 @@ const (
 	jobToolName    = "job"
 	lookupToolName = "lookup"
 	fetchToolName  = "fetch"
+	titleToolName  = "title"
+	notifyToolName = "notify"
 
 	clipboardDropsHeading = "# Clipboard Drops"
 	defaultGlobalContext  = "You are a helpful coding assistant."
@@ -47,6 +49,8 @@ var (
 		"homeWriteRule":            homeWriteRule,
 		"shellSandbox":             shellSandbox,
 		"sandboxHeader":            sandboxHeader,
+		"titleSection":             titleSection,
+		"notifySection":            notifySection,
 	}).Parse(hereduck.D(`
 		{{ sandboxHeader .Yolo .ShellOffered }}# Harness
 
@@ -90,7 +94,7 @@ var (
 		These states can change at any time. You will be told what changed when it does.
 		When a state blocks the work and no workflow below covers it, ask the user to change that state.
 
-		{{ waitingForUserSection . }}{{ readOnlyWorkspaceSection . }}
+		{{ titleSection . }}{{ notifySection . }}{{ waitingForUserSection . }}{{ readOnlyWorkspaceSection . }}
 	`)))
 )
 
@@ -106,6 +110,8 @@ type harnessContextTemplateData struct {
 	ExtraPaths        shell.Paths
 	DropsDirectory    string
 	ShellOffered      bool
+	TitleOffered      bool
+	NotifyOffered     bool
 	LookupOffered     bool
 	FetchOffered      bool
 	Conditions        conditions.Conditions
@@ -242,6 +248,8 @@ func harnessContext(config Config) string {
 		ExtraPaths:        config.ExtraPaths,
 		DropsDirectory:    config.DropsDirectory,
 		ShellOffered:      toolset.Offers(config.OfferedTools, shellToolName),
+		TitleOffered:      toolset.Offers(config.OfferedTools, titleToolName),
+		NotifyOffered:     toolset.Offers(config.OfferedTools, notifyToolName),
 		LookupOffered:     toolset.Offers(config.OfferedTools, lookupToolName),
 		FetchOffered:      toolset.Offers(config.OfferedTools, fetchToolName),
 		Conditions:        config.Conditions,
@@ -275,6 +283,33 @@ func WithDropsDirectory(systemPrompt string, dropsDirectory string) string {
 
 func dropsRule(dropsDirectory string) string {
 	return "Pasting a clipboard image with ctrl+v saves it under " + dropsDirectory + ", where path tools can read it."
+}
+
+func titleSection(data harnessContextTemplateData) string {
+	if !data.TitleOffered {
+		return ""
+	}
+
+	return "# Titles\n\n" + strings.Join([]string{
+		"- Use the title tool as soon as you can to title the conversation.",
+		"- Use a 3-word, hyphen-separated title following VERB–MODIFIER–NOUN pattern",
+		"- Keep its total length ≤ 30 characters.",
+		"- Do not go on a long task without setting a title first.",
+		"- Even a provisional title is fine; it can be updated whenever.",
+	}, "\n") + "\n\n"
+}
+
+func notifySection(data harnessContextTemplateData) string {
+	if !data.NotifyOffered {
+		return ""
+	}
+
+	return "# Notifications\n\n" + strings.Join([]string{
+		"- The notify tool alerts the user via a desktop notification.",
+		"- Use it to get the user's attention, or tell the user what work you've done.",
+		"- Ensure you call the tool *before* you output your response and end your turn.",
+		"- Do not send any for regular back-and-forth conversation where the user is clearly engaged.",
+	}, "\n") + "\n\n"
 }
 
 func scopeRules(data harnessContextTemplateData) string {

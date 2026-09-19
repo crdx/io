@@ -1029,3 +1029,50 @@ func TestAConfinedJobDocumentsItsNetworkDifferenceFromBash(t *testing.T) {
 		t.Errorf("harness context does not contain %q: %q", want, got)
 	}
 }
+
+func TestTitlesAndNotificationsFollowTheirOwnTools(t *testing.T) {
+	for name, test := range map[string]struct {
+		offeredTools []string
+		wanted       []string
+		unwanted     []string
+	}{
+		"both offered": {
+			offeredTools: []string{"title", "notify"},
+			wanted:       []string{"# Titles", "title tool", "# Notifications", "notify tool"},
+		},
+		"title alone": {
+			offeredTools: []string{"title"},
+			wanted:       []string{"# Titles", "title tool"},
+			unwanted:     []string{"# Notifications", "notify tool"},
+		},
+		"notify alone": {
+			offeredTools: []string{"notify"},
+			wanted:       []string{"# Notifications", "notify tool"},
+			unwanted:     []string{"# Titles", "title tool"},
+		},
+		"neither offered": {
+			offeredTools: []string{"sysinfo"},
+			unwanted:     []string{"# Titles", "title tool", "# Notifications", "notify tool"},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			got := harnessContext(Config{
+				Workspace:    work.At("/workspace"),
+				SessionName:  "session-id",
+				CurrentCaps:  caps.Read,
+				OfferedTools: test.offeredTools,
+			})
+
+			for _, want := range test.wanted {
+				if !strings.Contains(got, want) {
+					t.Errorf("harness context omits %q: %q", want, got)
+				}
+			}
+			for _, unwanted := range test.unwanted {
+				if strings.Contains(got, unwanted) {
+					t.Errorf("harness context names %q with no such tool offered: %q", unwanted, got)
+				}
+			}
+		})
+	}
+}
