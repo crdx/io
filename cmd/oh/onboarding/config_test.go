@@ -124,3 +124,41 @@ func TestConcurrentInitialModelsDoNotOverwriteEachOther(t *testing.T) {
 		t.Errorf("got model rotation %v", settings.Model.RoundRobin)
 	}
 }
+
+func TestSetInitialModelLooksPastAModelHeaderInsideASnippet(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	prompt := "x = \"\"\"\n[model]\nkeep me\n\"\"\"\n"
+	contents := fmt.Sprintf("version = %d\n\n[snippets]\n%s", config.Format, prompt)
+	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	written, err := setInitialModel(path, "anthropic/one@high")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !written {
+		t.Fatal("expected the initial model to be written")
+	}
+
+	settings, err := config.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := settings.Model.RoundRobin; len(got) != 1 || got[0] != "anthropic/one@high" {
+		t.Errorf("got round robin %q, want the model to have been written", got)
+	}
+	if got := settings.Snippets["x"].Prompt; !strings.Contains(got, "[model]\nkeep me") {
+		t.Errorf("got snippet %q, want it left alone", got)
+	}
+}
+
+func TestSetInitialModelFindsAHeaderAfterASnippetHasClosed(t *testing.T) {
+	body := "\n[snippets]\nx = '''\n[model]\n'''\ny = \"a \\\"quoted\\\" word\"\n\n[model]\n"
+	contents := fmt.Sprintf("version = %d\n%s", config.Format, body)
+	want := contents + "round_robin = [\"anthropic/two@high\"]\n"
+
+	if got := string(addInitialModel([]byte(contents), "anthropic/two@high")); got != want {
+		t.Errorf("got:\n%s\nwant:\n%s", got, want)
+	}
+}

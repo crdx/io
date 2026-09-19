@@ -6,9 +6,12 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"syscall"
+
+	"github.com/BurntSushi/toml"
 
 	"crdx.org/io/cmd/oh/config"
 )
@@ -47,21 +50,42 @@ func addInitialModel(contents []byte, selection string) []byte {
 		return fmt.Appendf(nil, "version = %d\n\n[model]\n%s", config.Format, setting)
 	}
 
-	lines := strings.SplitAfter(string(contents), "\n")
-	for i, line := range lines {
-		header, _, _ := strings.Cut(line, "#")
-		header = strings.TrimSpace(header)
-		if header == "[model]" || header == `["model"]` {
-			return []byte(strings.Join(lines[:i+1], "") + setting + strings.Join(lines[i+1:], ""))
+	text := string(contents)
+
+	separator := "\n"
+	if strings.HasSuffix(text, "\n") {
+		separator = ""
+	}
+	if candidate := text + separator + "\n[model]\n" + setting; isSelectionRead(candidate, selection) {
+		return []byte(candidate)
+	}
+
+	lines := strings.SplitAfter(text, "\n")
+	for i := range lines {
+		above := strings.Join(lines[:i+1], "")
+		if !strings.HasSuffix(above, "\n") {
+			above += "\n"
+		}
+		if candidate := above + setting + strings.Join(lines[i+1:], ""); isSelectionRead(candidate, selection) {
+			return []byte(candidate)
 		}
 	}
 
-	separator := "\n"
-	if strings.HasSuffix(string(contents), "\n") {
-		separator = ""
+	return contents
+}
+
+func isSelectionRead(candidate string, selection string) bool {
+	var document struct {
+		Model struct {
+			RoundRobin []string `toml:"round_robin"`
+		} `toml:"model"`
 	}
 
-	return fmt.Appendf(contents, "%s\n[model]\n%s", separator, setting)
+	if _, err := toml.Decode(candidate, &document); err != nil {
+		return false
+	}
+
+	return slices.Contains(document.Model.RoundRobin, selection)
 }
 
 func lockConfig(path string) (*os.File, error) {

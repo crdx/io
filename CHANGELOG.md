@@ -33,6 +33,7 @@
 - Draw feedback in an input frame box
 - List changed models after a startup refresh
 - Refuse invalid config files
+- Ensure post-onboarding config is valid
 
 ## `oh --ctl gc`
 
