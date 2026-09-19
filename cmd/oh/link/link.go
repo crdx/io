@@ -13,12 +13,16 @@ import (
 )
 
 const (
-	openPrefix = "\x1b]8;;"
-	terminator = "\x1b\\"
-	closeLink  = escape.HyperlinkClose
+	openPrefix   = "\x1b]8;;"
+	terminator   = "\x1b\\"
+	closeLink    = escape.HyperlinkClose
+	ScratchAlias = "<scratch>"
 )
 
-const pathExpression = `(?:~|\.{1,2})?/(?:[[:alnum:]_.@+%=-]+/)*[[:alnum:]_.@+%=-]+|[[:alnum:]_.@+%=-]+(?:/[[:alnum:]_.@+%=-]+)+|[[:alnum:]_@+%=-]+(?:\.[[:alnum:]_@+%=-]+)+|\.[[:alnum:]_@+%=-]+`
+const (
+	pathSegment    = `[[:alnum:]_.@+%=-]+`
+	pathExpression = ScratchAlias + `(?:/` + pathSegment + `)*|(?:~|\.{1,2})?/(?:` + pathSegment + `/)*` + pathSegment + `|` + pathSegment + `(?:/` + pathSegment + `)+|[[:alnum:]_@+%=-]+(?:\.[[:alnum:]_@+%=-]+)+|\.[[:alnum:]_@+%=-]+`
+)
 
 var (
 	pathPattern           = regexp.MustCompile(`(` + pathExpression + `)(?::([0-9]+)(?::([0-9]+))?)?`)
@@ -90,6 +94,19 @@ func (self Roots) underScratch(path string) (string, bool) {
 	}
 
 	return filepath.Join(self.Scratch, beneath), true
+}
+
+func (self Roots) underScratchAlias(path string) (string, bool) {
+	if self.Scratch == "" {
+		return "", false
+	}
+
+	rest, hasPrefix := strings.CutPrefix(path, ScratchAlias)
+	if !hasPrefix || rest != "" && !strings.HasPrefix(rest, "/") {
+		return "", false
+	}
+
+	return filepath.Join(self.Scratch, strings.TrimPrefix(rest, "/")), true
 }
 
 func Render(text string, roots Roots) string {
@@ -356,12 +373,16 @@ func namesSomething(path string) bool {
 }
 
 func resolve(path string, roots Roots) (string, bool) {
-	resolvedPath, err := pathutil.Expand(path)
-	if err != nil {
-		return "", false
+	resolvedPath, isScratchAlias := roots.underScratchAlias(path)
+	if !isScratchAlias {
+		var err error
+		resolvedPath, err = pathutil.Expand(path)
+		if err != nil {
+			return "", false
+		}
 	}
 
-	if scratchPath, isScratch := roots.underScratch(resolvedPath); isScratch {
+	if scratchPath, isScratch := roots.underScratch(resolvedPath); isScratch && !isScratchAlias {
 		resolvedPath = scratchPath
 	} else if !filepath.IsAbs(resolvedPath) {
 		if roots.Workspace == "" {
@@ -371,10 +392,11 @@ func resolve(path string, roots Roots) (string, bool) {
 		resolvedPath = filepath.Join(roots.Workspace, resolvedPath)
 	}
 
-	resolvedPath, err = filepath.Abs(resolvedPath)
+	absolutePath, err := filepath.Abs(resolvedPath)
 	if err != nil {
 		return "", false
 	}
+	resolvedPath = absolutePath
 
 	if _, err := os.Stat(resolvedPath); err != nil {
 		return "", false

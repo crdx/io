@@ -4,9 +4,36 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/tool"
 )
+
+func TestModelScratchAliassAreShownThroughTheirHostAlias(t *testing.T) {
+	label := Label{
+		Subject:   "/tmp/io/main.go",
+		Qualifier: "/tmp/io/detail.go",
+		Emphasis:  tool.Emphasis{Source: "/tmp/io/main.go"},
+		Continuation: []Label{{
+			Subject: "/tmp/io/continued.go",
+		}},
+	}.WithHostPathAliases(link.Roots{Scratch: "/state/farm/session"})
+
+	if label.Subject != "<scratch>/io/main.go" ||
+		label.Qualifier != "<scratch>/io/detail.go" ||
+		label.Emphasis.Source != "<scratch>/io/main.go" ||
+		label.Continuation[0].Subject != "<scratch>/io/continued.go" {
+		t.Errorf("got %#v, want every model scratch path shown through the host alias", label)
+	}
+}
+
+func TestHostTmpPathsRemainLiteralWithoutAMappedScratch(t *testing.T) {
+	label := Label{Subject: "/tmp/io/main.go"}.WithHostPathAliases(link.Roots{})
+
+	if label.Subject != "/tmp/io/main.go" {
+		t.Errorf("got %q, want the host path unchanged", label.Subject)
+	}
+}
 
 func TestAContinuedCallHasItsPathPrefixesShortened(t *testing.T) {
 	const workspaceDir = "/home/alice/project"

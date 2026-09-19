@@ -163,9 +163,10 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 			self.labels = map[string]call.Label{}
 		}
 
-		label := call.LabelFor(event, self.getTool, self.workspace)
+		roots := self.linkRoots()
+		label := call.LabelFor(event, self.getTool, self.workspace).WithHostPathAliases(roots)
 		if self.screen.IsTerminal() {
-			label.PathRoots = self.linkRoots()
+			label.PathRoots = roots
 		}
 		self.rows[event.ID] = self.toolBlock.Add(label, label.TimeLimit)
 		self.labels[event.ID] = label

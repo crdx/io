@@ -314,6 +314,22 @@ func stripEscapes(text string) string {
 	return plain.String()
 }
 
+func TestTheScratchAliasLinksToTheHostScratchAlias(t *testing.T) {
+	scratch := t.TempDir()
+	path := prepareFile(t, scratch, "io/cmd/oh/output/region.go")
+	text := ScratchAlias + "/io/cmd/oh/output/region.go"
+
+	got := Render("read "+text, Roots{Scratch: scratch})
+
+	address := linkAddress(t, got)
+	if address.Path != filepath.ToSlash(path) {
+		t.Errorf("linked %q, want %q", address.Path, path)
+	}
+	if Plain(got) != "read "+text {
+		t.Errorf("visible text is %q, want the compact scratch path", Plain(got))
+	}
+}
+
 func TestAPathUnderTheModelsOwnTmpLinksToTheScratchItMapsTo(t *testing.T) {
 	scratch := t.TempDir()
 	path := prepareFile(t, scratch, "zoom-on.png")

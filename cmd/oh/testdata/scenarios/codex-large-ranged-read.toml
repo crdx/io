@@ -11,7 +11,7 @@ prompt = "read lines two and three from the large file"
 
 [[first.response]]
 event = [
-    '''{"type":"response.output_item.done","item":{"type":"function_call","call_id":"call-1","name":"read","arguments":"{\"path\":\"large.txt\",\"offset\":2,\"limit\":2}"}}''',
+    '''{"type":"response.output_item.done","item":{"type":"function_call","call_id":"call-1","name":"read","arguments":"{\"path\":\"/tmp/io/cmd/oh/output/region.go\",\"offset\":2,\"limit\":2}"}}''',
     '''{"type":"response.completed"}''',
 ]
 

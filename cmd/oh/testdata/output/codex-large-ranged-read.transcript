@@ -17,7 +17,7 @@ read lines two and three from the large file
 ## Tool calls · +0s
 
 ```
-read: large.txt [ok, 2 lines, 25B, call-1]
+read: /tmp/io/cmd/oh/output/region.go [ok, 2 lines, 25B, call-1]
 ```
 
 ## Assistant · +0s

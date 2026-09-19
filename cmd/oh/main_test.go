@@ -13141,6 +13141,7 @@ type sessionGoldenScenario struct {
 	ResumeTurn            sessionGoldenTurn   `toml:"resume"`
 	CredentialsPath       string              `toml:"-"`
 	CredentialRecovery    func()              `toml:"-"`
+	ScratchDirectory      string              `toml:"-"`
 }
 
 func TestGoldenScenariosProduceCanonicalOutputs(t *testing.T) {
@@ -13181,6 +13182,9 @@ func readSessionGoldenScenario(t *testing.T, path string) sessionGoldenScenario 
 func (self sessionGoldenScenario) screen(writer io.Writer) *output.Screen {
 	screen := output.NewTerminalOfSize(writer, replayColumns, replayLines)
 	screen.SetGrouping(self.Grouping)
+	if self.ScratchDirectory != "" {
+		screen.LinkPathsUnder(link.Roots{Scratch: self.ScratchDirectory})
+	}
 
 	return screen
 }
@@ -13382,7 +13386,10 @@ func newSessionGoldenPorts(sessionName string, hostnameTemplate string) *portgra
 }
 
 func newSessionGoldenTools(
-	t *testing.T, specifications []sessionGoldenTool, ports *portgrant.HostToSandbox,
+	t *testing.T,
+	specifications []sessionGoldenTool,
+	ports *portgrant.HostToSandbox,
+	scratchDirectory string,
 ) []tool.Tool {
 	t.Helper()
 
@@ -13399,7 +13406,7 @@ func newSessionGoldenTools(
 		}
 
 		if specification.IsLargeRead {
-			tools = append(tools, newSessionGoldenLargeReadTool(t))
+			tools = append(tools, newSessionGoldenLargeReadTool(t, scratchDirectory))
 			continue
 		}
 
@@ -13482,16 +13489,20 @@ func newSessionGoldenTools(
 	return tools
 }
 
-func newSessionGoldenLargeReadTool(t *testing.T) tool.Tool {
+func newSessionGoldenLargeReadTool(t *testing.T, scratchDirectory string) tool.Tool {
 	t.Helper()
 
-	rootHandle, err := os.OpenRoot(t.TempDir())
+	rootHandle, err := os.OpenRoot(scratchDirectory)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = rootHandle.Close() })
 
-	openedFile, err := rootHandle.OpenFile("large.txt", os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
+	const name = "io/cmd/oh/output/region.go"
+	if err := os.MkdirAll(filepath.Join(scratchDirectory, filepath.Dir(name)), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	openedFile, err := rootHandle.OpenFile(name, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -13509,6 +13520,7 @@ func newSessionGoldenLargeReadTool(t *testing.T) tool.Tool {
 	}
 
 	root := file.New(rootHandle, func(string) error { return nil })
+	root.Mount(sandbox.TmpDir, root)
 	return read.New(root, file.NewSnapshots())
 }
 
@@ -13958,6 +13970,11 @@ func prepareSessionGoldenCredentials(t *testing.T, scenario *sessionGoldenScenar
 func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[string]string {
 	t.Helper()
 
+	if slices.ContainsFunc(scenario.Tools, func(specification sessionGoldenTool) bool {
+		return specification.IsLargeRead
+	}) {
+		scenario.ScratchDirectory = t.TempDir()
+	}
 	prepareSessionGoldenCredentials(t, &scenario)
 
 	responses := expandSessionGoldenResponses(
@@ -14008,7 +14025,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		sessionGoldenProviderFor(
 			t, scenario, server.URL, scenario.FirstTokenError, log.Name(),
 		),
-		newSessionGoldenTools(t, scenario.Tools, goldenPorts),
+		newSessionGoldenTools(t, scenario.Tools, goldenPorts, scenario.ScratchDirectory),
 	)
 	firstAssistant.TakeRetryWaitsAtOnce()
 	var firstScreenOutput bytes.Buffer
@@ -14080,7 +14097,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	resumedAssistant := agent.New(
 		storedSession.Meta.SystemPrompt,
 		sessionGoldenProviderFor(t, scenario, server.URL, "", sessionName),
-		newSessionGoldenTools(t, scenario.Tools, goldenPorts),
+		newSessionGoldenTools(t, scenario.Tools, goldenPorts, scenario.ScratchDirectory),
 	)
 	resumedAssistant.TakeRetryWaitsAtOnce()
 	if err := resumedAssistant.RestoreState(storedSession.Events); err != nil {
@@ -14215,6 +14232,9 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 
 	for extension, drawn := range outputs {
 		drawn = strings.ReplaceAll(drawn, sessionName, "brave-otter")
+		if scenario.ScratchDirectory != "" {
+			drawn = strings.ReplaceAll(drawn, scenario.ScratchDirectory, "/state/farm/brave-otter")
+		}
 		if scenario.CredentialsPath != "" {
 			pendingCredentialsPattern := regexp.MustCompile(regexp.QuoteMeta(scenario.CredentialsPath) + `\.[0-9]+`)
 			drawn = pendingCredentialsPattern.ReplaceAllString(drawn, "auth.json.pending")

@@ -6,10 +6,44 @@ import (
 	"strings"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/work"
+	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/tool"
 )
+
+func (self Label) WithHostPathAliases(roots link.Roots) Label {
+	self.Subject = hostPathPrefix(self.Subject, roots)
+	self.Qualifier = hostPathPrefix(self.Qualifier, roots)
+	self.Emphasis.Source = hostPathPrefix(self.Emphasis.Source, roots)
+	self.Continuation = slices.Clone(self.Continuation)
+	for i := range self.Continuation {
+		self.Continuation[i] = self.Continuation[i].WithHostPathAliases(roots)
+	}
+
+	return self
+}
+
+func hostPathPrefix(value string, roots link.Roots) string {
+	if roots.Scratch == "" {
+		return value
+	}
+
+	rest, hasPrefix := strings.CutPrefix(value, sandbox.TmpDir)
+	switch {
+	case !hasPrefix:
+		return value
+	case rest == "":
+		return link.ScratchAlias
+	case strings.HasPrefix(rest, string(filepath.Separator)):
+		return link.ScratchAlias + rest
+	case strings.HasPrefix(rest, " "):
+		return link.ScratchAlias + rest
+	default:
+		return value
+	}
+}
 
 func shortenPaths(rendering agent.FallbackRendering, workspace *work.Space) agent.FallbackRendering {
 	primary := shortenCallRendering(tool.CallRendering{

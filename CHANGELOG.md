@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Show model scratch paths as `<scratch>`
 - Linkify the session-name bar segment
 - Include line range in read tool hyperlinks
 - Limit background job name length and format

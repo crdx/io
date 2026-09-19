@@ -84,6 +84,36 @@ func TestAReadLinkIncludesItsRangeAndOpensAtTheFirstLine(t *testing.T) {
 	}
 }
 
+func TestAReadOfModelScratchShowsAndLinksTheHostScratchAlias(t *testing.T) {
+	scratch := t.TempDir()
+	path := filepath.Join(scratch, "io", "cmd", "oh", "output", "region.go")
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	roots := link.Roots{Scratch: scratch}
+	label := call.LabelFor(agent.Event{
+		Name: "read",
+		FallbackRendering: agent.FallbackRendering{
+			Subject: "/tmp/io/cmd/oh/output/region.go",
+			Note:    "100-214",
+		},
+	}, nil, nil).WithHostPathAliases(roots)
+	label.PathRoots = roots
+	rendered := label.Render()
+
+	if got := link.Plain(rendered); got != "read <scratch>/io/cmd/oh/output/region.go 100-214" {
+		t.Errorf("visible call is %q", got)
+	}
+	wantAddress := "file://" + filepath.ToSlash(path) + "#100"
+	if !strings.Contains(rendered, "\x1b]8;;"+wantAddress+"\x1b\\") {
+		t.Errorf("read URI does not target the host scratch path in %q", rendered)
+	}
+}
+
 func TestWhatQualifiesTheArgumentsIsCutFirst(t *testing.T) {
 	check(t, 21, "grep", "hello", "in intern…")
 	check(t, 12, "grep", "hello", "…")
