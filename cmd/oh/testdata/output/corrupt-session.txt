@@ -1,8 +1,8 @@
 === record split across lines ===
-session tame-impala: malformed journal line 4: unexpected end of JSON input
+✗ Session tame-impala: malformed journal line 4: unexpected end of JSON input
 
 === records joined on one line ===
-session tame-impala: malformed journal line 4: invalid character '{' after top-level value
+✗ Session tame-impala: malformed journal line 4: invalid character '{' after top-level value
 
 === terminated malformed record ===
-session tame-impala: malformed journal line 4: invalid character 'o' in literal null (expecting 'u')
+✗ Session tame-impala: malformed journal line 4: invalid character 'o' in literal null (expecting 'u')

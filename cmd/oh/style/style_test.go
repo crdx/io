@@ -1,6 +1,7 @@
 package style
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
@@ -12,6 +13,28 @@ func enableColor(t *testing.T) {
 	apply(true)
 
 	t.Cleanup(func() { apply(previous) })
+}
+
+func TestAnErrorIsMarkedCapitalisedAndIndented(t *testing.T) {
+	t.Cleanup(Init(&strings.Builder{}))
+
+	got := Error(errors.New("first failure\nsecond failure"))
+	want := "✗ First failure\n  Second failure"
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestAnErrorUsesTheFailureStyle(t *testing.T) {
+	enableColor(t)
+
+	got := Error(errors.New("failed"))
+	if Plain(got) != "✗ Failed" {
+		t.Errorf("got %q", got)
+	}
+	if got == Plain(got) {
+		t.Errorf("the error was not styled: %q", got)
+	}
 }
 
 func TestApplyingAThemeChangesExistingStyles(t *testing.T) {

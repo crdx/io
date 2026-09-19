@@ -66,7 +66,7 @@ func Run(arguments []string) int {
 	}
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, style.Error(err))
 		return 1
 	}
 

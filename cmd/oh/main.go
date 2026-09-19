@@ -180,7 +180,7 @@ func main() {
 			err = toolresult.Show(request.URL, request.ShouldPage)
 		}
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(os.Stderr, style.Error(err))
 			os.Exit(1)
 		}
 		return
@@ -196,11 +196,13 @@ func main() {
 
 	style.Init(os.Stdout)
 
-	hooks := cycle.NewHooks(func(err error) { fmt.Fprintln(os.Stderr, "session hook:", err) })
+	hooks := cycle.NewHooks(func(err error) {
+		fmt.Fprintln(os.Stderr, style.Error(fmt.Errorf("session hook: %w", err)))
+	})
 	transition := cycle.Transition{}
 	chosenSession, err := run(hooks, &transition)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, style.Error(err))
 		os.Exit(1)
 	}
 
@@ -220,7 +222,7 @@ func main() {
 		err = syscall.Exec(self, arguments, os.Environ()) //nolint:gosec // re-executing the binary itself
 	}
 
-	fmt.Fprintln(os.Stderr, "could not open the session:", err)
+	fmt.Fprintln(os.Stderr, style.Error(fmt.Errorf("could not open the session: %w", err)))
 	os.Exit(1)
 }
 

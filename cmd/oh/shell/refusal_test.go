@@ -5,13 +5,18 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+
+	"crdx.org/io/cmd/oh/style"
 )
 
 var updateGoldens = flag.Bool("update", false, "write what was refused back to the golden files")
 
 func TestGoldenTheRefusalOfAMachineThatCannotSandboxMatchesTheGolden(t *testing.T) {
-	drawn := sandboxRefusal(errors.New("landlock is not available on this kernel")).Error() + "\n"
+	t.Cleanup(style.Init(&strings.Builder{}))
+
+	drawn := style.Error(sandboxRefusal(errors.New("landlock is not available on this kernel"))) + "\n"
 
 	goldenPath := filepath.Join("testdata", "refusal.txt")
 	if *updateGoldens {

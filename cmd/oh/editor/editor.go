@@ -10,6 +10,8 @@ import (
 	"slices"
 	"strings"
 	"sync"
+
+	"crdx.org/io/cmd/oh/style"
 )
 
 type Command []string
@@ -141,6 +143,6 @@ func buildCommand(configuredCommand Command, paths []string) (*exec.Cmd, error) 
 
 func reportExit(command *exec.Cmd, errors io.Writer) {
 	if err := command.Wait(); err != nil {
-		_, _ = fmt.Fprintf(errors, "Editor exited: %v\n", err)
+		_, _ = fmt.Fprintln(errors, style.Error(fmt.Errorf("editor exited: %w", err)))
 	}
 }

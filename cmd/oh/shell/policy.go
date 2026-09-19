@@ -427,8 +427,9 @@ func sandboxRefusal(err error) error {
 	}
 
 	return fmt.Errorf(
-		"this machine cannot sandbox a command: %w\n"+
-			"pass --yolo to run commands with no sandbox around them at all",
+		"this machine cannot sandbox commands\n"+
+			"%w\n"+
+			"start a new session with --yolo to run commands directly on your machine",
 		err,
 	)
 }

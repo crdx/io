@@ -107,6 +107,7 @@ golden:
     generate_goldens \
         ./cmd/oh/cli \
         ./cmd/oh/commands \
+        ./cmd/oh/editor \
         ./cmd/oh/menu \
         ./cmd/oh/model \
         ./cmd/oh/model/picker \

@@ -2,6 +2,7 @@
 
 ## [N.N.N] - XXXX-XX-XX
 
+- Format command-line errors
 - Keep queued messages visible at all times
 - Tell the model how to use title and notify
 - Linkify the workspace-dir bar segment

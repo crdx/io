@@ -2,13 +2,18 @@ package editor
 
 import (
 	"bytes"
+	"flag"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
+
+	"crdx.org/io/cmd/oh/style"
 )
+
+var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
 func TestConfigurationCanReplaceItsEditorCommand(t *testing.T) {
 	initial := Command{"first-editor", "--wait"}
@@ -128,7 +133,9 @@ func TestOpenReportsAnEditorThatCannotStart(t *testing.T) {
 	}
 }
 
-func TestEditorExitFailureIsReported(t *testing.T) {
+func TestGoldenEditorExitFailureMatchesTheGolden(t *testing.T) {
+	t.Cleanup(style.Init(&strings.Builder{}))
+
 	command := exec.CommandContext(t.Context(), "sh", "-c", "exit 42")
 	if err := command.Start(); err != nil {
 		t.Fatal(err)
@@ -136,7 +143,23 @@ func TestEditorExitFailureIsReported(t *testing.T) {
 
 	var errors bytes.Buffer
 	reportExit(command, &errors)
-	if !strings.Contains(errors.String(), "exit status 42") {
-		t.Errorf("got error output %q", errors.String())
+
+	goldenPath := filepath.Join("testdata", "exit-failure.txt")
+	if *updateGoldens {
+		if err := os.MkdirAll(filepath.Dir(goldenPath), 0o700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(goldenPath, errors.Bytes(), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		return
+	}
+
+	want, err := os.ReadFile(goldenPath) //nolint:gosec // fixed testdata path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if errors.String() != string(want) {
+		t.Errorf("editor failure differs from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, &errors, want)
 	}
 }

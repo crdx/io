@@ -1,0 +1,1 @@
+✗ Editor exited: exit status 42

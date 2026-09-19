@@ -1395,7 +1395,7 @@ func (self *App) acceptTypedLines(history *edit.History, initialMessage string, 
 	}
 
 	if err := reader.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "could not read input:", err)
+		fmt.Fprintln(os.Stderr, style.Error(fmt.Errorf("could not read input: %w", err)))
 	}
 }
 

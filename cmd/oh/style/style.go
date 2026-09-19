@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/util/strutil"
 )
 
 type Style func(format any, args ...any) string
@@ -166,6 +167,18 @@ func (self Style) Join(parts ...string) string {
 
 func Width(text string) int {
 	return width.Of(text)
+}
+
+func Error(err error) string {
+	lines := strings.Split(err.Error(), "\n")
+	for i, line := range lines {
+		lines[i] = strutil.CapitaliseSentence(line)
+		if i > 0 {
+			lines[i] = "  " + lines[i]
+		}
+	}
+
+	return Failure("✗ " + strings.Join(lines, "\n"))
 }
 
 func Plain(text string) string {

@@ -1,2 +1,3 @@
-this machine cannot sandbox a command: landlock is not available on this kernel
-pass --yolo to run commands with no sandbox around them at all
+✗ This machine cannot sandbox commands
+  Landlock is not available on this kernel
+  Start a new session with --yolo to run commands directly on your machine
