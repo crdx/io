@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"maps"
 	"os"
@@ -17,6 +18,7 @@ import (
 	"golang.org/x/sys/unix"
 
 	"crdx.org/io/cmd/oh/segment"
+	"crdx.org/io/internal/util"
 )
 
 type snapshot struct {
@@ -25,9 +27,55 @@ type snapshot struct {
 	isMissing bool
 }
 
+const readableBytes = 256 << 10
+
 func readSnapshot(path string) snapshot {
-	data, err := os.ReadFile(path) //nolint:gosec // the path is the configured one
+	data, err := readWrittenFile(path)
 	return snapshot{data: data, failure: err, isMissing: errors.Is(err, fs.ErrNotExist)}
+}
+
+func readWrittenFile(path string) ([]byte, error) {
+	file, err := os.OpenFile(path, os.O_RDONLY|unix.O_NONBLOCK, 0) //nolint:gosec // the path is the configured one
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = file.Close() }()
+
+	info, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("expected normal file, not %s", namedFileKind(info.Mode()))
+	}
+
+	data, err := io.ReadAll(io.LimitReader(file, readableBytes+1))
+	if err != nil {
+		return nil, err
+	}
+	if len(data) > readableBytes {
+		return nil, fmt.Errorf(
+			"is larger than %s, which is more than a config is ever written by hand",
+			util.FormatBytes(readableBytes, 0),
+		)
+	}
+
+	return data, nil
+}
+
+func namedFileKind(mode fs.FileMode) string {
+	switch {
+	case mode.IsDir():
+		return "a directory"
+	case mode&fs.ModeNamedPipe != 0:
+		return "a named pipe"
+	case mode&fs.ModeSocket != 0:
+		return "a socket"
+	case mode&fs.ModeDevice != 0:
+		return "a device"
+	default:
+		return "not an ordinary file"
+	}
 }
 
 func (self snapshot) equal(other snapshot) bool {

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,8 +10,10 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/BurntSushi/toml"
+	"golang.org/x/sys/unix"
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/model"
@@ -1560,5 +1563,66 @@ func TestAPermissionNobodyOffersIsRefusedWithItsKey(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "permissions.lookup") {
 		t.Errorf("got %q, want it to name the setting", err)
+	}
+}
+
+func TestAConfigNobodyCouldHaveWrittenIsRefusedRatherThanParsed(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	body := append([]byte("version = 10\nx = "), bytes.Repeat([]byte("["), readableBytes)...)
+	if err := os.WriteFile(path, body, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil {
+		t.Fatal("a config larger than anybody writes was read")
+	}
+	if !strings.Contains(err.Error(), "256K") {
+		t.Errorf("got %q, want it to say how much a config may hold", err)
+	}
+}
+
+func TestAConfigOfTheLargestSizeSomebodyWritesIsStillRead(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	body := fmt.Appendf(nil, "version = %d\n[ui]\ncurrency = \"GBP\"\n", Format)
+	body = append(body, bytes.Repeat([]byte("# padding\n"), (readableBytes-len(body))/10)...)
+	if len(body) > readableBytes {
+		t.Fatalf("the fixture is %d bytes, which is over the limit", len(body))
+	}
+	if err := os.WriteFile(path, body, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.Ui.Currency != "GBP" {
+		t.Errorf("got currency %q", settings.Ui.Currency)
+	}
+}
+
+func TestAConfigThatIsNotAnOrdinaryFileIsRefusedWithoutWaiting(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := unix.Mkfifo(path, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	read := make(chan error, 1)
+	go func() {
+		_, err := Load(path)
+		read <- err
+	}()
+
+	select {
+	case err := <-read:
+		if err == nil {
+			t.Fatal("a named pipe was read as a config")
+		}
+		if !strings.Contains(err.Error(), "named pipe") {
+			t.Errorf("got %q, want it to say what the file is", err)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("reading a named pipe as a config never finished")
 	}
 }

@@ -32,6 +32,7 @@
 - Fence piped input when there is also a prompt
 - Draw feedback in an input frame box
 - List changed models after a startup refresh
+- Refuse invalid config files
 
 ## `oh --ctl gc`
 
